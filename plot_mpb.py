@@ -544,7 +544,7 @@ plt.setp(axz1.get_xticklabels(), visible=False)
 axz1.set_xlim(datetime(2016,3,16,18,10),datetime(2016,3,16,18,20))
 axz1.set_title('MAVEN MAG SWEA LPW SWIA 16 de marzo de 2016')
 
-axz2 = plt.subplot2grid((5,1),(1,0), sharex=ax1)
+axz2 = plt.subplot2grid((5,1),(1,0), sharex=axz1)
 axz2.xaxis.set_major_formatter(xfmt)
 plt.plot(tiempo_mag, MD[j_inicial:j_final,4])
 for xc in [t1,tiempo_mag[t2],tiempo_mag[t3],tiempo_mag[t4]]:
@@ -557,7 +557,7 @@ plt.setp(axz2.get_xticklabels(), visible=False)
 axz2.set_xlim(datetime(2016,3,16,18,10),datetime(2016,3,16,18,20))
 
 
-axz3 = plt.subplot2grid((5,1),(2,0), sharex=ax1)
+axz3 = plt.subplot2grid((5,1),(2,0), sharex=axz1)
 axz3.xaxis.set_major_formatter(xfmt)
 axz3.set_ylabel('Flujo de e- del SW \n (cm⁻² sr⁻¹ s⁻¹)')
 line, = axz3.semilogy(datenums_swea, flux_cut[:,0], linewidth=1, label = '{} eV'.format(int(E_flux[0])), picker=5)
@@ -574,7 +574,7 @@ axz3.grid()
 axz3.set_xlim(datetime(2016,3,16,18,10),datetime(2016,3,16,18,20))
 
 
-axz4 = plt.subplot2grid((5,1),(3,0), sharex=ax1)
+axz4 = plt.subplot2grid((5,1),(3,0), sharex=axz1)
 plt.semilogy(tiempo_lpw, e_density[ti_lpw:tf_lpw])
 for xc in [t1,tiempo_mag[t2],tiempo_mag[t3],tiempo_mag[t4]]:
     plt.axvline(x = xc, color = 'k', linewidth=1.5)
@@ -586,7 +586,7 @@ axz4.set_ylabel('Densidad total \n de e- (cm⁻³)')
 axz4.set_xlim(datetime(2016,3,16,18,10),datetime(2016,3,16,18,20))
 
 
-axz5 = plt.subplot2grid((5,1),(4,0), sharex=ax1)
+axz5 = plt.subplot2grid((5,1),(4,0), sharex=axz1)
 axz5.xaxis.set_major_formatter(xfmt)
 plt.plot(datenums_swia, density_cut)
 for xc in [t1,tiempo_mag[t2],tiempo_mag[t3],tiempo_mag[t4]]:
