@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib.mlab import normpdf
 from scipy.stats import norm
-import spacepy.pycdf as cdf
+import cdflib as cdf
 from funciones import find_nearest, unix_to_decimal, plot_select
 import datetime as dt
 import matplotlib.cm as cm
@@ -11,17 +11,13 @@ import matplotlib.dates as md
 
 # np.set_printoptions(precision=4)
 
-path = 'datos/marzo 2016/16/' #path a los datos
+path = '../datos/marzo 2016/16/' #path a los datos
 cdf_file = cdf.CDF(path + 'mvn_swe_l2_svyspec_20160316_v04_r01.cdf')
 
-diff_en_fluxes = cdf_file['diff_en_fluxes'] #este
-energy = cdf_file['energy'] #este
-time_unix = cdf_file['time_unix'] #tiempo unix
+flux = cdf_file.varget('diff_en_fluxes')
+energia = cdf_file.varget('energy')
+t_unix = cdf_file.varget('time_unix')
 
-#para convertir cualquiera de estos en array:
-t_unix = np.asarray(time_unix[...]) #no olvidarse los ...!
-energia = np.asarray(energy[...])
-flux = np.asarray(diff_en_fluxes[...])
 
 tu = unix_to_decimal(t_unix)
 ti = np.where(tu == find_nearest(tu, 17.9))[0][0]

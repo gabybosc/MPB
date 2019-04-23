@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib.widgets import Cursor, MultiCursor
 from matplotlib.mlab import normpdf
 from scipy.stats import norm
-import spacepy.pycdf as cdf
+import cdflib as cdf
 from datetime import datetime
 from funciones import find_nearest, deltaB, onpick1, unix_to_decimal, plot_select, set_axes_equal, datenum
 from funcion_flujo_energia_cdf import flujo_energia
@@ -20,7 +20,7 @@ np.set_printoptions(precision=4)
 # diaa = input('dia del año = ')
 dia = 16
 diaa = 76
-path = 'datos/marzo 2016/{}/'.format(dia) #path a los datos
+path = '../datos/marzo 2016/{}/'.format(dia) #path a los datos
 datos = np.loadtxt(path + 'mvn_mag_l2_20160{}ss1s_201603{}_v01_r01.sts'.format(diaa, dia), skiprows=148) #lee todo y me da todo
 n =2
 datos = datos[:-n, :] #borra las ultimas 2 filas, que es ya el dia siguiente (no sé si siempre)
@@ -91,7 +91,7 @@ for j in range(j_inicial, j_final):
 ########## SWEA
 t_flux, flux_cut, E_flux = flujo_energia(17.85, 18.4, cdf_swea) #t_flux es diferente, pues viene del cdf
 
-t_unix_e = np.asarray(cdf_swea['time_unix'][...])
+t_unix_e = cdf_swea.varget('time_unix')
 
 t_swea = unix_to_decimal(t_unix_e)
 inicio_e = np.where(t_swea == find_nearest(t_swea, 17.85))[0][0]
@@ -106,8 +106,8 @@ datenums_swea = md.date2num(dates_swea)
 
 
 ######## densidad SWIA
-t_unix = np.asarray(cdf_swia['time_unix'][...]) #no olvidarse los ...!
-density = np.asarray(cdf_swia['density'][...])
+t_unix = cdf_swia.varget('time_unix')
+density = cdf_swia.varget('density')
 
 t_swia = unix_to_decimal(t_unix)
 inicio = np.where(t_swia == find_nearest(t_swia, 17.85))[0][0]

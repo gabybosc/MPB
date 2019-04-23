@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.widgets import Cursor, MultiCursor
 from matplotlib.mlab import normpdf
 from scipy.stats import norm
-import spacepy.pycdf as cdf
+import cdflib as cdf
 from datetime import datetime
 from funciones import find_nearest, deltaB, onpick1
 from funcion_flujo_energia_cdf import flujo_energia
@@ -16,13 +16,12 @@ np.set_printoptions(precision=4)
 #DATOS DE PDS
 dia = 16#input("dia del mes = ")
 diaa = 76#input('dia del año = ')
-path = 'datos/marzo 2016/{}/'.format(dia) #path a los datos
+path = '../datos/marzo 2016/{}/'.format(dia) #path a los datos
 datos = np.loadtxt(path + 'mvn_mag_l2_20160{}ss1s_201603{}_v01_r01.sts'.format(diaa, dia), skiprows=148) #lee todo y me da todo
 n =2
 datos = datos[:-n, :] #borra las ultimas 2 filas, que es ya el dia siguiente (no sé si siempre)
 cdf_swea = cdf.CDF(path + 'mvn_swe_l2_svyspec_201603{}_v04_r01.cdf'.format(dia))
-cdf_swia = cdf.CDF(path + 'mvn_swi_l2_onboardsvymom_201603{}_v01_r01.cdf'.format(dia))
-cdf_lpw = cdf.CDF(path + 'mvn_lpw_l2_lpnt_201603{}_v03_r02.cdf'.format(dia))
+
 
 dia = datos[:,1]
 t = datos[:,6]  #el dia decimal

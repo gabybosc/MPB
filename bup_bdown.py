@@ -9,13 +9,10 @@ from funciones import hodograma, error, find_nearest, find_nearest_final, find_n
 
 np.set_printoptions(precision=4)
 
-path = 'datos/marzo 2016/16/' #path a los datos
+path = '../datos/marzo 2016/16/' #path a los datos
 datos = np.loadtxt(path + 'mvn_mag_l2_2016076ss1s_20160316_v01_r01.sts', skiprows=148) #lee todo y me da todo
-# path = 'datos/marzo_2016_hires/' #path a los datos
-# datos = np.loadtxt(path + 'mvn_mag_l2_2016076ss_20160316_v01_r01.sts', skiprows=148) #lee todo y me da todo
 n =2
 datos = datos[:-n, :] #borra las ultimas 2 filas, que es ya el dia siguiente (no sé si siempre)
-# cdf_swia = cdf.CDF(path + 'mvn_swi_l2_onboardsvymom_20160316_v01_r01.cdf')
 lpw = np.loadtxt(path + 'mvn_kp_insitu_20160316_v14_r03_orbita18h.csv') #son los datos entre las 18 y las 19h
 t_lpw = lpw[:,0] + lpw[:,1]/60 + lpw[:,2]/3600
 

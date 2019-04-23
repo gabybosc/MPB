@@ -3,25 +3,25 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib.mlab import normpdf
 from scipy.stats import norm
-import spacepy.pycdf as cdf
+import cdflib as cdf
 from funciones import find_nearest, unix_to_decimal, plot_select, set_axes_equal
 
 np.set_printoptions(precision=4)
 
 
 ###########DATOS
-path = 'datos/marzo 2016/16/'
+path = '../datos/marzo 2016/16/'
 cdf_swia = cdf.CDF(path + 'mvn_swi_l2_onboardsvymom_20160316_v01_r01.cdf')
 datos = np.loadtxt(path + 'mvn_mag_l2_2016076ss1s_20160316_v01_r01.sts', skiprows=148)
 n =2
 datos = datos[:-n, :]
 
-t_unix = np.asarray(cdf_swia['time_unix'][...]) #no olvidarse los ...!
-density = np.asarray(cdf_swia['density'][...])
-temperature = np.asarray(cdf_swia['temperature_mso'][...])
-vel_mso_xyz = np.asarray(cdf_swia['velocity_mso'][...])
+t_unix = cdf_swia.varget('time_unix')
+density = cdf_swia.varget('density') #cgs
+vel_mso_xyz = cdf_swia.varget('velocity_mso')
+temperature = cdf_swia.varget('temperature_mso')
 
-t_swia = unix_to_decimal(t_unix) 
+t_swia = unix_to_decimal(t_unix)
 inicio = np.where(t_swia == find_nearest(t_swia, 17.9))[0][0]
 fin = np.where(t_swia == find_nearest(t_swia, 18.4))[0][0]
 

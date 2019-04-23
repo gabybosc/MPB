@@ -4,26 +4,34 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.mlab import normpdf
 from scipy.stats import norm
-# import spacepy.pycdf as cdf
-from datetime import datetime
+from datetime import datetime, date
 from funciones import hodograma, error, find_nearest, find_nearest_final, find_nearest_inicial, deltaB, Mij, set_axes_equal,datenum
 # from funcion_flujo_energia_cdf import flujo_energia
+from urllib.request import urlopen, urlretrieve
+
+
+date_entry = input('Enter a date in YYYY-MM-DD format \n')
+year, month, day = map(int, date_entry.split('-'))
+date_orbit = date(year, month, day)
+
+year = date_orbit.strftime("%Y")
+month = date_orbit.strftime("%m")
+day = date_orbit.strftime("%d")
+doty = date_orbit.strftime("%j")
+
+swea = urlopen('https://pds-ppi.igpp.ucla.edu/ditdos/download?id=pds://PPI/maven.swea.calibrated/data/svy_spec/{0}/{1}/mvn_swe_l2_svyspec_{0}{1}{2}_v04_r01.cdf'.format(year, month, day))
+swia = urlopen('https://pds-ppi.igpp.ucla.edu/ditdos/download?id=pds://PPI/maven.swia.calibrated/data/onboard_svy_mom/{0}/{1}/mvn_swi_l2_onboardsvymom_{0}{1}{2}_v01_r01.cdf'.format(year, month, day))
+mag = urlopen('https://pds-ppi.igpp.ucla.edu/ditdos/download?id=pds://PPI/maven.mag.calibrated/data/ss/1sec/{0}/{1}/mvn_mag_l2_{0}{3}ss1s_{0}{1}{2}_v01_r01.sts'.format(year, month, day, doty))
+lpw = urlopen('https://pds-ppi.igpp.ucla.edu/ditdos/download?id=pds://PPI/maven.lpw.derived/data/lp-nt/{0}/{1}/mvn_lpw_l2_lpnt_{0}{1}{2}_v03_r02.cdf'.format(year, month, day))
 
 np.set_printoptions(precision=4)
 
-path = 'datos/marzo 2016/16/' #path a los datos
-datos = np.loadtxt(path + 'mvn_mag_l2_2016076ss1s_20160316_v01_r01.sts', skiprows=148) #lee todo y me da todo
-# path = 'datos/marzo_2016_hires/' #path a los datos
-# datos = np.loadtxt(path + 'mvn_mag_l2_2016076ss_20160316_v01_r01.sts', skiprows=148) #lee todo y me da todo
-n =2
-datos = datos[:-n, :] #borra las ultimas 2 filas, que es ya el dia siguiente (no sé si siempre)
-# cdf_swia = cdf.CDF(path + 'mvn_swi_l2_onboardsvymom_20160316_v01_r01.cdf')
 lpw = np.loadtxt(path + 'mvn_kp_insitu_20160316_v14_r03_orbita18h.csv') #son los datos entre las 18 y las 19h
 t_lpw = lpw[:,0] + lpw[:,1]/60 + lpw[:,2]/3600
 
 ti = 18.227
 tf = 18.235
-dia = datos[:,1]
+dia = mag[:,1]
 t = datos[:,6]  #el dia decimal
 t = (t - dia) * 24 #para que me de sobre la cantidad de horas
 

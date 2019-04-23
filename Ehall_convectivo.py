@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib.mlab import normpdf
 from scipy.stats import norm
-import spacepy.pycdf as cdf
+import cdflib as cdf
 import matplotlib.dates as md
 import datetime as dt
 from funciones import find_nearest, unix_to_decimal, plot_select, set_axes_equal
@@ -16,19 +16,15 @@ Este código calcula EHall a partir del E convectivo
 '''
 
 ###########DATOS
-path = 'datos/marzo 2016/16/'
+path = '../datos/marzo 2016/16/'
 cdf_swia = cdf.CDF(path + 'mvn_swi_l2_onboardsvymom_20160316_v01_r01.cdf')
 datos = np.loadtxt(path + 'mvn_mag_l2_2016076ss1s_20160316_v01_r01.sts', skiprows=148)
 n =2
 datos = datos[:-n, :]
 
-density = cdf_swia['density'] #cgs -  1/cm3
-time_unix = cdf_swia['time_unix'] #s
-v_mso_xyz = cdf_swia['velocity_mso'] #SI - km/s
-
-t_unix = np.asarray(time_unix[...]) #no olvidarse los ...!
-density = np.asarray(density[...]) #cgs
-v_mso_imported = np.asarray(v_mso_xyz[...]) #SI
+t_unix = cdf_swia.varget('time_unix')
+density = cdf_swia.varget('density') #cgs
+v_mso_imported = cdf_swia.varget('velocity_mso')
 
 t_swia = unix_to_decimal(t_unix)
 inicio = np.where(t_swia == find_nearest(t_swia, 17.9))[0][0]

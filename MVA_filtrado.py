@@ -4,14 +4,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.mlab import normpdf
 from scipy.stats import norm
-# import spacepy.pycdf as cdf
 from datetime import datetime
 from funciones import hodograma, error, find_nearest, find_nearest_final, find_nearest_inicial, deltaB, Mij, set_axes_equal,datenum
-# from funcion_flujo_energia_cdf import flujo_energia
 
 np.set_printoptions(precision=4)
 
-path = 'datos/marzo 2016/16/' #path a los datos
+path = '../datos/marzo 2016/16/' #path a los datos
 # datos = np.loadtxt(path + 'mvn_mag_l2_2016076ss1s_20160316_v01_r01.sts', skiprows=148) #lee todo y me da todo
 # path = 'datos/marzo_2016_hires/' #path a los datos
 datos = np.loadtxt(path + 'mag_hires_mso_16032016_17_19_filt.txt', skiprows=1) #datos filtrados

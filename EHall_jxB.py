@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib.mlab import normpdf
 from scipy.stats import norm
-import spacepy.pycdf as cdf
+import cdflib as cdf
 import matplotlib.dates as md
 import datetime as dt
 from funciones import find_nearest, unix_to_decimal, plot_select, set_axes_equal,find_nearest_final, find_nearest_inicial, Mij, datenum
@@ -14,7 +14,7 @@ Este código calcula EHall a partir del rotor del campo B: E ~ rotB x B, pero si
 '''
 
 ###########DATOS
-path = 'datos/marzo 2016/16/'
+path = '../datos/marzo 2016/16/'
 cdf_swia = cdf.CDF(path + 'mvn_swi_l2_onboardsvymom_20160316_v01_r01.cdf')
 lpw = np.loadtxt(path + 'mvn_kp_insitu_20160316_v14_r03_orbita18h.csv') #son los datos entre las 18 y las 19h
 datos = np.loadtxt(path + 'mvn_mag_l2_2016076ss1s_20160316_v01_r01.sts', skiprows=148)
@@ -23,9 +23,9 @@ datos = datos[:-n, :]
 
 t_lpw = lpw[:,0] + lpw[:,1]/60 + lpw[:,2]/3600
 
-t_unix = np.asarray(cdf_swia['time_unix'][...]) #no olvidarse los ...!
-density = np.asarray(cdf_swia['density'][...]) #cgs
-v_mso_imported = np.asarray(cdf_swia['velocity_mso'][...]) #SI
+t_unix = cdf_swia.varget('time_unix')
+density = cdf_swia.varget('density') #cgs
+v_mso_imported = cdf_swia.varget('velocity_mso') #SI
 
 t_swia = unix_to_decimal(t_unix)
 inicio_swia = np.where(t_swia == find_nearest(t_swia, 17.85))[0][0]
@@ -94,7 +94,7 @@ q_e = 1.6E-19 #carga electron #C
 
 E_Hall = np.cross(J_v * 1E-9, B[inicio_up:fin_down, :] * 1E-9) / (q_e * n_e) #V/m
 E_Hall_max = np.cross(J_v * 1E-9, B[inicio_down+38, :] * 1E-9) / (q_e * n_e) #V/m
-print('El campo de Hall max es {0:1.3g} V/m'.format(E_Hall_max))
+print('El campo de Hall max es {} V/m'.format(E_Hall_max))
 
 tiempo_mag = np.array([np.datetime64(datenum(2016, 3, 16, x)) for x in t_mag[inicio_up:fin_down]]) #datenum es una función mía
 t1 = np.where(t_mag[inicio_up:fin_down] == find_nearest(t_mag, 18.2193))[0][0]
