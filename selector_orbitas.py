@@ -1,10 +1,14 @@
 import numpy as np
+<<<<<<< HEAD
 from os import listdir
 import glob as glob
 from datetime import datetime, timedelta
 import scipy.signal as signal
 import pickle as pickle
 
+=======
+from datetime import datetime, date
+>>>>>>> 4b678d3167fa9a07105140d7415e1b9badd5a74a
 
 """
 Este código va a buscar entre todos los archivos que tenemos de MAG los lapsos en los cuales se cumplen:
@@ -12,6 +16,7 @@ SZA < 45º (o incluso <30º)
 Altitud entre 300 y 1300 km
 Z_MSO > 0 (si después se pueden volver a bajar los datos y hacer Z_pc > 0, mejor)
 
+<<<<<<< HEAD
 Nos interesa que se cumplan estas cosas en la MPB, entonces le voy a pedir que encuentre un cruce en cada día y analice estas tres condiciones
 Para esto, le voy a decir qeu encuentre el mayor pico en todo el módulo del campo, habiendolo filtrado antes, y analice las tres características en ese punto.
 Si se cumplen en una órbita, lo más seguro es que se cumplan en todas las del mismo día.
@@ -72,3 +77,24 @@ for i,j in enumerate(path): #loop en todos los archivos .sts para cada año. i m
         calendario_2014[3,i] = 1
 
 np.savetxt('tiempos.txt', np.transpose(calendario_2014), fmt='%10d' ,header= "       dia          SZA          altitud        Z_MSO", newline="\r\n")
+=======
+A su vez, va a guardar cada una de estas condiciones y ver cuántas veces por mes se repite
+
+tenemos datos desde 10/2014 hasta 02/2018
+"""
+#
+# date_entry = input('Enter a date in YYYY-MM-DD format \n')
+# year, month, day = map(int, date_entry.split('-'))
+# date_orbit = date(year, month, day)
+#
+# year = date_orbit.strftime("%Y")
+# month = date_orbit.strftime("%m")
+# day = date_orbit.strftime("%d")
+# doty = date_orbit.strftime("%j")
+
+# path = '~/../MAVEN/mag_1s/{0}/{1}/'.format(year, month)
+# mag = np.loadtxt(path + 'mvn_mag_l2_{0}{3}ss1s_{0}{1}{2}_v01_r01.sts'.format(year, month, day, doty), skiprows=148)
+
+path = '~/../MAVEN/mag_1s/2016/03/'
+mag = np.loadtxt(path + 'mvn_mag_l2_2016091ss1s_20160331_v01_r01.sts', skiprows=148)
+>>>>>>> 4b678d3167fa9a07105140d7415e1b9badd5a74a
