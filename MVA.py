@@ -11,7 +11,7 @@ from funciones import hodograma, error, find_nearest, find_nearest_final, find_n
 
 np.set_printoptions(precision=4)
 
-path = 'datos/marzo 2016/16/' #path a los datos
+path = '../datos/marzo_2016/16/' #path a los datos
 datos = np.loadtxt(path + 'mvn_mag_l2_2016076ss1s_20160316_v01_r01.sts', skiprows=148) #lee todo y me da todo
 # path = 'datos/marzo_2016_hires/' #path a los datos
 # datos = np.loadtxt(path + 'mvn_mag_l2_2016076ss_20160316_v01_r01.sts', skiprows=148) #lee todo y me da todo

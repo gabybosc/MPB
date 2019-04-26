@@ -17,18 +17,18 @@ Si se cumplen en una órbita, lo más seguro es que se cumplan en todas las del 
 
 El filtro es pasa bajo con ventana Butterworth y frecuencia de corte de 0.01 Hz de orden 3
 
-tenemos datos desde 10/2018 hasta 02/2018
+tenemos datos desde 10/2016 hasta 02/2016
 """
 
-path = glob.glob('../../../MAVEN/mag_1s/2018/*/*.sts')
+path = glob.glob('../../../MAVEN/mag_1s/2016/*/*.sts')
 cantidad_datos = len(path)
-calendario_2018 = np.zeros((4, cantidad_datos)) #la primera columna es el día del año, la segunda dice si cumple el SZA, la tercera la altitud y la cuarta el ZMSO
+calendario_2016 = np.zeros((4, cantidad_datos)) #la primera columna es el día del año, la segunda dice si cumple el SZA, la tercera la altitud y la cuarta el ZMSO
 
 
 for i,j in enumerate(path): #loop en todos los archivos .sts para cada año. i me da el índice en la lista, j me da el archivo
     mag = np.loadtxt(j, skiprows=160)
 
-    calendario_2018[0,i] = mag[1,1]
+    calendario_2016[0,i] = mag[1,1]
 
     posicion = np.zeros((len(mag[:,0]), 3))
     for k in range(11,14):
@@ -50,10 +50,13 @@ for i,j in enumerate(path): #loop en todos los archivos .sts para cada año. i m
     """
     Clasificación por SZA
     """
-    SZA = np.arccos(np.clip(np.dot(posicion[peaks[0]]/np.linalg.norm(posicion[peaks[0]]), [1,0,0]), -1.0, 1.0))* 180/np.pi
+    SZA = np.zeros(len(peaks[0]))
+
+    for j in range(len(peaks[0])):
+        SZA[j] = np.arccos(np.clip(np.dot(posicion[peaks[0][j]]/np.linalg.norm(posicion[peaks[0][j]]), [1,0,0]), -1.0, 1.0))* 180/np.pi
 
     if any(SZA < 45):
-        calendario_2018[1,i] = 1
+        calendario_2016[1,i] = 1
 
     """
     Clasificación por altitud
@@ -61,13 +64,32 @@ for i,j in enumerate(path): #loop en todos los archivos .sts para cada año. i m
     altitud = np.linalg.norm(posicion[peaks[0]], axis=1) - 3390
 
     if any(altitud < 1300) and any(altitud > 300):
-        calendario_2018[2,i] = 1
+        calendario_2016[2,i] = 1
 
     """
     Clasificación por Z_MSO
     """
     Z_MSO = posicion[peaks[0],2]
     if any(Z_MSO > 0):
-        calendario_2018[3,i] = 1
+        calendario_2016[3,i] = 1
 
-np.savetxt('tiempos_2018.txt', np.transpose(calendario_2018), fmt='%10d' ,header= "       dia          SZA          altitud        Z_MSO", newline="\r\n")
+np.savetxt('tiempos_2016.txt', np.transpose(calendario_2016), fmt='%10d' ,header= "       dia        SZA        altitud       Z_MSO", newline="\r\n")
+
+"""
+Ahora, una vez que tengo todo, vamos a ver qué días cumplen la condición.
+Si suma 3, es que cumple las tres cosas.
+"""
+
+clasific = np.sum(calendario_2016[1:,:], axis =0) #si suma 3, es un día que cumple todo.
+
+fechas_buenas = np.zeros(len(clasific))
+
+for i in range(len(clasific)):
+    if clasific[i] == 3:
+        fechas_buenas[i] = calendario_2016[0,i]
+
+#para que me de un array ordenado y sin ceros:
+fechas_buenas.sort()
+fechas_buenas = np.trim_zeros(fechas_buenas)
+
+np.savetxt('fechas_buenas_2016.txt', fechas_buenas, fmt='%10d' ,header= "Las fechas de 2016 en las cuales se cumple todo", newline="\r\n")

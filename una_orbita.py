@@ -17,11 +17,11 @@ de 0.01 Hz de orden 3 a fin de atenuar las variaciones del campo de frecuencias 
 tenemos datos desde 10/2014 hasta 02/2018
 """
 
-path = glob.glob('../../../MAVEN/mag_1s/2014/*/*.sts')
-cantidad_datos = len(path)
-calendario_2014 = np.zeros(cantidad_datos)
+# path = glob.glob('../../../MAVEN/mag_1s/2016/*/*.sts')
+# cantidad_datos = len(path)
+# calendario_2014 = np.zeros(cantidad_datos)
 
-mag = np.loadtxt('../../../MAVEN/mag_1s/2014/10/mvn_mag_l2_2014283ss1s_20141010_v01_r01.sts', skiprows=148)
+mag = np.loadtxt('../../../MAVEN/mag_1s/2016/03/mvn_mag_l2_2016076ss1s_20160316_v01_r01.sts', skiprows=148)
 
 mag[:,1]
 
@@ -42,9 +42,15 @@ for j in range(11,14):
 """
 Clasificación por SZA, es el que menos varía. Si el SZA medio es < 45, probablemente todos los SZA lo sean.
 """
-SZA = np.zeros(len(posicion))
-for j in range(len(posicion)):
-    SZA[j] = np.arccos(np.clip(np.dot(posicion[j]/np.linalg.norm(posicion[j]), [1,0,0]), -1.0, 1.0)) * 180/np.pi
+B_norm = np.linalg.norm(B, axis=1)
 
-if np.mean(SZA) < 45:
-    calendario_SZA_2014 = 1
+b,a = signal.butter(3,0.01,btype='lowpass')
+filtered = signal.filtfilt(b, a, B_norm)
+peaks = signal.find_peaks(filtered, 40)
+
+SZA = np.zeros(len(peaks[0]))
+
+for j in range(len(peaks[0])):
+    SZA[j] = np.arccos(np.clip(np.dot(posicion[peaks[0][j]]/np.linalg.norm(posicion[peaks[0][j]]), [1,0,0]), -1.0, 1.0))* 180/np.pi
+
+altitud = np.linalg.norm(posicion[peaks[0]], axis=1) - 3390
