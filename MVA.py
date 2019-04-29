@@ -11,18 +11,17 @@ from funciones import hodograma, error, find_nearest, find_nearest_final, find_n
 
 np.set_printoptions(precision=4)
 
-path = '../datos/marzo_2016/16/' #path a los datos
-datos = np.loadtxt(path + 'mvn_mag_l2_2016076ss1s_20160316_v01_r01.sts', skiprows=148) #lee todo y me da todo
+path = '../../../MAVEN/mag_1s/2016/03/' #path a los datos
+datos = np.loadtxt(path + 'mvn_mag_l2_2016085ss1s_20160325_v01_r01.sts', skiprows=148) #lee todo y me da todo
 # path = 'datos/marzo_2016_hires/' #path a los datos
 # datos = np.loadtxt(path + 'mvn_mag_l2_2016076ss_20160316_v01_r01.sts', skiprows=148) #lee todo y me da todo
 n =2
 datos = datos[:-n, :] #borra las ultimas 2 filas, que es ya el dia siguiente (no sé si siempre)
-# cdf_swia = cdf.CDF(path + 'mvn_swi_l2_onboardsvymom_20160316_v01_r01.cdf')
-lpw = np.loadtxt(path + 'mvn_kp_insitu_20160316_v14_r03_orbita18h.csv') #son los datos entre las 18 y las 19h
-t_lpw = lpw[:,0] + lpw[:,1]/60 + lpw[:,2]/3600
+# lpw = np.loadtxt(path + 'mvn_kp_insitu_20160316_v14_r03_orbita18h.csv') #son los datos entre las 18 y las 19h
+# t_lpw = lpw[:,0] + lpw[:,1]/60 + lpw[:,2]/3600
 
-ti = 18.227
-tf = 18.235
+ti = 22.3408
+tf = 22.4055
 dia = datos[:,1]
 t = datos[:,6]  #el dia decimal
 t = (t - dia) * 24 #para que me de sobre la cantidad de horas
@@ -309,19 +308,19 @@ print('La fuerza de lorentz del MVA es {} V/m, su magnitud es {}'.format(fuerza_
 print('La fuerza de lorentz del ajuste es {} V/m, su magnitud es {}'.format(fuerza_ajuste, np.linalg.norm(fuerza_ajuste)))
 
 
-e_density = lpw[:,3]
-ti_lpw = np.where(t_lpw == find_nearest(t_lpw, ti))[0][0]
-tf_lpw = np.where(t_lpw == find_nearest(t_lpw, tf))[0][0]
-n_e = np.nanmean(e_density[ti_lpw:tf_lpw]) #hace el mean ignorando los nans #cm⁻³
-n_e = n_e * 1E6 #m⁻³
-# n_e = 1E7
-q_e = 1.6E-19 #carga electron #C
-
-E_Hall = np.cross(J_v * 1E-9, B[inicio_down, :] * 1E-9) / (q_e * n_e) #V/m
-print('El campo de Hall del MVA es {} mV/m, su magnitud es {}'.format(E_Hall*1E3, np.linalg.norm(E_Hall)*1E3))
-
-E_Hall_ajuste = np.cross(J_v_ajuste * 1E-9, B[inicio_down, :] * 1E-9) / (q_e * n_e) #V/m
-print('El campo de Hall del ajuste es {} mV/m, su magnitud es {}'.format(E_Hall_ajuste*1E3, np.linalg.norm(E_Hall_ajuste)*1E3))
+# e_density = lpw[:,3]
+# ti_lpw = np.where(t_lpw == find_nearest(t_lpw, ti))[0][0]
+# tf_lpw = np.where(t_lpw == find_nearest(t_lpw, tf))[0][0]
+# n_e = np.nanmean(e_density[ti_lpw:tf_lpw]) #hace el mean ignorando los nans #cm⁻³
+# n_e = n_e * 1E6 #m⁻³
+# # n_e = 1E7
+# q_e = 1.6E-19 #carga electron #C
+#
+# E_Hall = np.cross(J_v * 1E-9, B[inicio_down, :] * 1E-9) / (q_e * n_e) #V/m
+# print('El campo de Hall del MVA es {} mV/m, su magnitud es {}'.format(E_Hall*1E3, np.linalg.norm(E_Hall)*1E3))
+#
+# E_Hall_ajuste = np.cross(J_v_ajuste * 1E-9, B[inicio_down, :] * 1E-9) / (q_e * n_e) #V/m
+# print('El campo de Hall del ajuste es {} mV/m, su magnitud es {}'.format(E_Hall_ajuste*1E3, np.linalg.norm(E_Hall_ajuste)*1E3))
 
 
 fig2 = plt.figure()

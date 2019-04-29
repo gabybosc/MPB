@@ -119,7 +119,7 @@ ax.set_aspect('equal', adjustable='datalim')
 ax.set_xlabel(r'$X_{MSO}$')
 ax.set_ylabel(r'$Y_{MSO}$')
 
-fig1, ax1 = plt.subplots() # note we must use plt.subplots, not plt.subplot
+fig1, ax1 = plt.subplots() 
 ax1.add_artist(marte1)
 
 ax1.plot(x_nave[t_orb:x_final], z_nave[t_orb:x_final])
@@ -128,7 +128,7 @@ ax1.set_aspect('equal', adjustable='datalim')
 ax1.set_xlabel(r'$X_{MSO}$')
 ax1.set_ylabel(r'$Z_{MSO}$')
 
-fig2, ax2 = plt.subplots() # note we must use plt.subplots, not plt.subplot
+fig2, ax2 = plt.subplots()
 ax2.add_artist(marte2)
 
 ax2.plot(y_nave[t_orb:x_final], z_nave[t_orb:x_final])

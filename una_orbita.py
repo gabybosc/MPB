@@ -21,7 +21,7 @@ tenemos datos desde 10/2014 hasta 02/2018
 # cantidad_datos = len(path)
 # calendario_2014 = np.zeros(cantidad_datos)
 
-mag = np.loadtxt('../../../MAVEN/mag_1s/2016/03/mvn_mag_l2_2016076ss1s_20160316_v01_r01.sts', skiprows=148)
+mag = np.loadtxt('../../../MAVEN/mag_1s/2016/03/mvn_mag_l2_2016085ss1s_20160325_v01_r01.sts', skiprows=148)
 
 mag[:,1]
 
@@ -47,10 +47,18 @@ B_norm = np.linalg.norm(B, axis=1)
 b,a = signal.butter(3,0.01,btype='lowpass')
 filtered = signal.filtfilt(b, a, B_norm)
 peaks = signal.find_peaks(filtered, 40)
+mpb = peaks[0]-500
 
-SZA = np.zeros(len(peaks[0]))
+SZA = np.zeros(len(mpb))
 
-for j in range(len(peaks[0])):
-    SZA[j] = np.arccos(np.clip(np.dot(posicion[peaks[0][j]]/np.linalg.norm(posicion[peaks[0][j]]), [1,0,0]), -1.0, 1.0))* 180/np.pi
+for j in range(len(mpb)):
+    SZA[j] = np.arccos(np.clip(np.dot(posicion[mpb[j]]/np.linalg.norm(posicion[mpb[j]]), [1,0,0]), -1.0, 1.0))* 180/np.pi
 
-altitud = np.linalg.norm(posicion[peaks[0]], axis=1) - 3390
+altitud = np.linalg.norm(posicion[mpb], axis=1) - 3390
+
+plt.figure(0)
+plt.plot(filtered)
+
+plt.figure(1)
+plt.plot(SZA)
+plt.show()

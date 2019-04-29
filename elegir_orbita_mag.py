@@ -17,12 +17,9 @@ np.set_printoptions(precision=4)
 dia = input("dia del mes = ")
 diaa = input('dia del año = ')
 path = '../../../MAVEN/mag_1s/2016/03/'.format(dia) #path a los datos
-datos = np.loadtxt(path + 'mvn_mag_l2_2016{}ss1s_201603{}_v01_r01.sts'.format(diaa, dia), skiprows=148) #lee todo y me da todo
+datos = np.loadtxt(path + 'mvn_mag_l2_20160{}ss1s_201603{}_v01_r01.sts'.format(diaa, dia), skiprows=148) #lee todo y me da todo
 n =2
 datos = datos[:-n, :] #borra las ultimas 2 filas, que es ya el dia siguiente (no sé si siempre)
-cdf_swea = cdf.CDF(path + 'mvn_swe_l2_svyspec_201603{}_v04_r01.cdf'.format(dia))
-cdf_swia = cdf.CDF(path + 'mvn_swi_l2_onboardsvymom_201603{}_v01_r01.cdf'.format(dia))
-cdf_lpw = cdf.CDF(path + 'mvn_lpw_l2_lpnt_201603{}_v03_r02.cdf'.format(dia))
 
 dia = datos[:,1]
 t = datos[:,6]  #el dia decimal
@@ -101,7 +98,6 @@ theta_cut = theta[j_inicial+12:j_final+12]
 phi_cut = phi[j_inicial+12:j_final+12]
 
 t_plot = t[j_inicial+12:j_final+12]
-t_flux, flux_cut, E_flux = flujo_energia(t1, t2, cdf_swea) #t_flux es diferente, pues viene del cdf
 
 index = np.array((year, dia[0], orbit_number))
 
@@ -120,6 +116,7 @@ while not happy:
         ax1.set_ylabel(r'|$\Delta B$|/ B')
         ax1.grid()
         ax1.legend()
+
         ax2 = plt.subplot2grid((3,3),(1,0), sharex=ax1,sharey = ax1)
         plt.plot(t_plot, B_perp[:,0], label='x')
         plt.plot(t_plot, B_perp[:,1], label='y')
@@ -128,6 +125,7 @@ while not happy:
         ax2.set_ylabel(r'$\Delta B \perp$/ B')
         ax2.grid()
         ax2.legend()
+
         ax3 = plt.subplot2grid((3,3),(0,1), sharex=ax1)
         plt.plot(t[j_inicial + 12: j_final +12], MD[j_inicial:j_final,4])
         ax3.grid()
@@ -148,6 +146,7 @@ while not happy:
         ax6.plot(t_plot, theta_cut, linewidth=0.5)
         plt.setp(ax6.get_xticklabels(), visible=False)
         ax6.grid()
+
         ax7 = plt.subplot2grid((3,3),(1,2), sharex=ax1)
         plt.plot(t_plot, phi_cut, linewidth=0.5)
         # plt.setp(ax7.get_xticklabels(), visible=False)
@@ -155,17 +154,7 @@ while not happy:
         ax7.grid()
         ax7.set_xlabel('Tiempo (h)')
 
-        ax5 = plt.subplot2grid((3,3),(1,1), rowspan=2, sharex=ax1)
-        ax5.set_ylabel('Flujo (cm⁻² sr⁻¹ s⁻¹)', picker=True)#, bbox=dict(facecolor='red'))
-        line, = ax5.semilogy(t_flux, flux_cut[:,0], linewidth=1, label = '{0:1.4g} eV'.format(E_flux[0]), picker=5)
-        fig.canvas.mpl_connect('pick_event', onpick1)
-        for j in range(1, len(flux_cut[0,:])):
-            ax5.semilogy(t_flux, flux_cut[:,j], linewidth=1, label = '{0:1.4g} eV'.format(E_flux[j]))
-        ax5.legend(loc='lower right', bbox_to_anchor=(1.5, 0))
-        ax5.set_xlabel('Tiempo (hdec)')
-        ax5.grid()
-
-        multi = MultiCursor(fig.canvas, (ax1, ax2,ax3,ax4,ax5,ax6,ax7), color='black', lw=0.5)
+        multi = MultiCursor(fig.canvas, (ax1, ax2,ax3,ax4,ax6,ax7), color='black', lw=0.5)
 
         zoom_ok = False
         print('\nSpacebar when ready to click:\n')
