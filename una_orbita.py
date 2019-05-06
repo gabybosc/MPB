@@ -19,23 +19,6 @@ Se fija dónde es que coincide la posicion de MAVEN con el fit de vignes y mira 
 
 tenemos datos desde 10/2014 hasta 02/2018
 """
-
-# Ajuste de Vignes:
-x0 = 0.78
-e = 0.9
-L = 0.96
-
-theta = np.linspace(0, 3*np.pi/4, 1000)
-phi = np.linspace(0, np.pi, 1000)
-THETA, PHI = np.meshgrid(theta, phi)
-
-r = L / (1 + e * np.cos(theta))
-
-X = x0 + r * np.cos(theta)
-Y = r * np.sin(theta) * np.cos(phi)
-Z = r * np.sin(theta) * np.sin(phi)
-
-R = np.transpose(np.array([X,Y,Z]))
 # mag = np.loadtxt('../../../MAVEN/mag_1s/2016/03/mvn_mag_l2_2016085ss1s_20160325_v01_r01.sts', skiprows=148) #en la compu del iafe
 mag = np.loadtxt('../../datos/MAG_1s/mvn_mag_l2_2016092ss1s_20160401_v01_r01.sts', skiprows=148) #en mi compu
 
@@ -43,27 +26,52 @@ B = np.zeros((len(mag[:,0]), 3))
 for j in range(7,10):
     B[:,j-7] = mag[:, j]
 
-B_norm = np.linalg.norm(B, axis=1)
+    B_norm = np.linalg.norm(B, axis=1)
 
-posicion = np.zeros((len(mag[:,0]), 3))
-for j in range(11,14):
-    posicion[:,j-11] = mag[:, j]
+    posicion = np.zeros((len(mag[:,0]), 3))
+    for j in range(11,14):
+        posicion[:,j-11] = mag[:, j]
 
-orbita = posicion / 3390 #radios marcianos
+        orbita = posicion / 3390 #radios marcianos
+
+una_vuelta = len(orbita)/5
+
+# Ajuste de Vignes:
+x0 = 0.78
+e = 0.9
+L = 0.96
+
+theta = np.linspace(0, 3*np.pi/4, 100)
+phi = np.linspace(0, np.pi, 100)
+THETA, PHI = np.meshgrid(theta, phi)
+
+r = L / (1 + e * np.cos(theta))
+
+X = x0 + r * np.cos(THETA)
+Y = r * np.sin(THETA) * np.cos(PHI)
+Z = r * np.sin(THETA) * np.sin(PHI)
+
+R = np.transpose(np.array([X.flatten(),Y.flatten(),Z.flatten()]))
 #quiero encontrar cuándo la órbita cruza a la superficie dada por (X,Y,Z)
+resta = np.zeros((len(R), 3))
 
-idx = np.zeros(len(orbita))
-for i in range(len(orbita)):
-    idx[i] = (np.abs(orbita[i,:]-R)).argmin()
 
-# b,a = signal.butter(3,0.01,btype='lowpass')
-# filtered = signal.filtfilt(b, a, B_norm)
-# peaks = signal.find_peaks(filtered, 40)
-# min = peaks[0][0]-2000
-# max = peaks[0][0]+2000
-# rango = posicion[min:max]
-#
-# find_nearest(rango, np.transpose(R))
+"""
+Son dos loops: el loop en i barre toda la superficie y la resta para cada punto de la órbita. El loop en j agarra esa resta y ve dónde es que es mínima (busca el máximo acercamiento entre la órbita y la superficie). Luego, guarda el mínimo para cada punto de la órbita. Finalmente, busca el mínimo de mínimos.
+Hace esto cada 100 puntos porque si no tarda mucho.
+"""
+
+idx_min = np.zeros(int(una_vuelta/100))
+max_acercamiento = np.zeros(int(una_vuelta/100))
+for j in range(int(una_vuelta)-100):
+    if j%100 == 0: #hace la cuenta cada 100 pasos.
+        for i in range(len(R)):
+            resta[i, :] = np.abs(orbita[j,:] - R[i,:])
+        A = np.linalg.norm(resta, axis=1)
+        idx_min[int(j/100)] = np.argmin(A)
+        max_acercamiento[int(j/100)] = A[int(idx_min[int(j/100)])]
+minimo = np.argmin(max_acercamiento)
+print(max_acercamiento[minimo])
 
 # fig = plt.figure()
 # ax = fig.add_subplot(1,1,1, projection='3d')
@@ -72,7 +80,7 @@ for i in range(len(orbita)):
 # ax.set_zlabel(r'$Z_{MSO} (R_m)$')
 # ax.set_aspect('equal')
 # # ax.plot(orbita[:,0], orbita[:,1], orbita[:,2], color='C2', label='Órbita')
-# ax.plot(orbita[:,0], orbita[:,1], orbita[:,2], color='C2', label='Órbita')
+# ax.plot(orbita[8900:9100,0], orbita[8900:9100,1], orbita[8900:9100,2], color='C2', label='Órbita')
 # plot = ax.plot_surface(
 #     X, Y, Z, rstride=4, cstride=4, alpha=0.5, edgecolor='none', cmap=plt.get_cmap('Blues_r'))
 # u, v = np.mgrid[0:2*np.pi:20j, 0:np.pi:10j]
@@ -85,23 +93,13 @@ for i in range(len(orbita)):
 """
 Clasificación por SZA, es el que menos varía. Si el SZA medio es < 45, probablemente todos los SZA lo sean.
 """
-# B_norm = np.linalg.norm(B, axis=1)
-#
-# b,a = signal.butter(3,0.01,btype='lowpass')
-# filtered = signal.filtfilt(b, a, B_norm)
-# peaks = signal.find_peaks(filtered, 40)
-# mpb = peaks[0]-500
-#
-# SZA = np.zeros(len(mpb))
-#
-# for j in range(len(mpb)):
-#     SZA[j] = np.arccos(np.clip(np.dot(posicion[mpb[j]]/np.linalg.norm(posicion[mpb[j]]), [1,0,0]), -1.0, 1.0))* 180/np.pi
-#
-# altitud = np.linalg.norm(posicion[mpb], axis=1) - 3390
-#
-# plt.figure(0)
-# plt.plot(filtered)
-#
-# plt.figure(1)
-# plt.plot(SZA)
-# plt.show()
+
+idx = minimo * 100
+SZA = np.arccos(np.clip(np.dot(posicion[int(idx)]/np.linalg.norm(posicion[int(idx)]), [1,0,0]), -1.0, 1.0))* 180/np.pi
+
+altitud = np.linalg.norm(posicion[int(idx), :]) - 3390
+
+Z_MSO = posicion[int(idx), 2]
+
+if Z_MSO > 0:
+    print('Tiene SZA = {0:1.3g}, altitud = {1:1.3g} y Z_MSO > 0'.format(SZA, altitud))
