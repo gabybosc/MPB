@@ -52,9 +52,6 @@ Y = r * np.sin(THETA) * np.cos(PHI)
 Z = r * np.sin(THETA) * np.sin(PHI)
 
 R = np.transpose(np.array([X.flatten(),Y.flatten(),Z.flatten()]))
-#quiero encontrar cuándo la órbita cruza a la superficie dada por (X,Y,Z)
-resta = np.zeros((len(R), 3))
-
 
 """
 Son dos loops: el loop en i barre toda la superficie y la resta para cada punto de la órbita. El loop en j agarra esa resta y ve dónde es que es mínima (busca el máximo acercamiento entre la órbita y la superficie). Luego, guarda el mínimo para cada punto de la órbita. Finalmente, busca el mínimo de mínimos.
@@ -62,7 +59,7 @@ Hace esto cada 100 puntos porque si no tarda mucho.
 
 Necesito que haga la resta sólo para Z positivo, si no, puede crear cruces ficticios en el sur (si la posicion de maven en el sur se parece a la posición de la MPB en el norte también lo cuenta, ya que tomo la norma)
 """
-
+resta = np.zeros((len(R),3))
 idx_min = np.zeros(int(una_vuelta/100))
 max_acercamiento = np.zeros(int(una_vuelta/100))
 X_MSO = posicion[int(una_vuelta*2):int(una_vuelta*3), 0]

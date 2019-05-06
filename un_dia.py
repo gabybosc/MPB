@@ -52,10 +52,7 @@ Y = r * np.sin(THETA) * np.cos(PHI)
 Z = r * np.sin(THETA) * np.sin(PHI)
 
 R = np.transpose(np.array([X.flatten(),Y.flatten(),Z.flatten()]))
-#quiero encontrar cuándo la órbita cruza a la superficie dada por (X,Y,Z)
-resta = np.zeros((len(R), 3))
-
-
+resta = np.zeros((len(R),3))
 """
 Son dos loops: el loop en i barre toda la superficie y la resta para cada punto de la órbita. El loop en j agarra esa resta y ve dónde es que es mínima (busca el máximo acercamiento entre la órbita y la superficie). Luego, guarda el mínimo para cada punto de la órbita. Finalmente, busca el mínimo de mínimos.
 Hace esto cada 100 puntos porque si no tarda mucho.
