@@ -5,7 +5,7 @@ from matplotlib.widgets import Cursor, MultiCursor
 from matplotlib.mlab import normpdf
 from scipy.stats import norm
 import spacepy.pycdf as cdf
-from datetime import datetime
+from datetime import datetime, date
 from funciones import find_nearest, deltaB, onpick1
 from funcion_flujo_energia_cdf import flujo_energia
 import time

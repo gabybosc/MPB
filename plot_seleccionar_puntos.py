@@ -4,30 +4,42 @@ import matplotlib.pyplot as plt
 from matplotlib.widgets import Cursor, MultiCursor
 from matplotlib.mlab import normpdf
 from scipy.stats import norm
-import spacepy.pycdf as cdf
-from datetime import datetime
-from funciones import find_nearest, deltaB, onpick1
+import cdflib as cdf
+import datetime as dt
+from funciones import find_nearest, deltaB, onpick1, unix_to_decimal
 from funcion_flujo_energia_cdf import flujo_energia
 import time
 import matplotlib.cm as cm
 
 np.set_printoptions(precision=4)
 
-#DATOS DE PDS
-dia = input("dia del mes = ")
-diaa = input('dia del año = ')
-path = '../../../MAVEN/mag_1s/2016/03/'.format(dia) #path a los datos
-datos = np.loadtxt(path + 'mvn_mag_l2_2016{}ss1s_201603{}_v01_r01.sts'.format(diaa, dia), skiprows=148) #lee todo y me da todo
-n =2
-datos = datos[:-n, :] #borra las ultimas 2 filas, que es ya el dia siguiente (no sé si siempre)
-cdf_swea = cdf.CDF(path + 'mvn_swe_l2_svyspec_201603{}_v04_r01.cdf'.format(dia))
-cdf_swia = cdf.CDF(path + 'mvn_swi_l2_onboardsvymom_201603{}_v01_r01.cdf'.format(dia))
-cdf_lpw = cdf.CDF(path + 'mvn_lpw_l2_lpnt_201603{}_v03_r02.cdf'.format(dia))
+# #si tengo la fecha en dia-mes-año
+# date_entry = input('Enter a date in YYYY-MM-DD format \n')
+# year, month, day = map(int, date_entry.split('-'))
+# date_orbit = dt.date(year, month, day)
 
-dia = datos[:,1]
-t = datos[:,6]  #el dia decimal
+#si tengo la fecha en dia del año
+date_entry = input('Enter a date in YYYY-DDD format \n')
+year, doty = map(int, date_entry.split('-'))
+date_orbit = dt.datetime(year, 1, 1) + dt.timedelta(doty - 1) #para convertir el doty en date
+
+year = date_orbit.strftime("%Y")
+month = date_orbit.strftime("%m")
+day = date_orbit.strftime("%d")
+doty = date_orbit.strftime("%j")
+
+# path = '../../../MAVEN/mag_1s/2016/03/' #path a los datos desde la desktop
+path = '../../datos/' #path a los datos desde la laptop
+mag = np.loadtxt(path + 'MAG_1s/mvn_mag_l2_{0}{3}ss1s_{0}{1}{2}_v01_r01.sts'.format(year, month, day, doty), skiprows=148) #datos MAG 1s (para plotear no quiero los datos pesados)
+n =2
+mag = mag[:-n, :] #borra las ultimas 2 filas, que es ya el dia siguiente (no sé si siempre)
+swea = cdf.CDF(path + 'mvn_swe_l2_svyspec_{0}{1}{2}_v04_r01.cdf'.format(year, month, day, doty))
+swia = cdf.CDF(path + 'mvn_swi_l2_onboardsvymom_{0}{1}{2}_v01_r01.cdf'.format(year, month, day, doty))
+lpw = cdf.CDF(path + 'mvn_lpw_l2_lpnt_{0}{1}{2}_v03_r02.cdf'.format(year, month, day, doty))
+
+dia = mag[:,1]
+t = mag[:,6]  #el dia decimal
 t = (t - dia) * 24 #hdec
-year = datos[0,0]
 
 M = np.size(t) #el numero de datos
 
@@ -39,12 +51,12 @@ for i in range(M-1):
 #el campo
 B = np.zeros((M, 3))
 for i in range(7,10):
-    B[:,i-7] = datos[:, i]
+    B[:,i-7] = mag[:, i]
 
 #la posición(x,y,z)
 posicion = np.zeros((M, 3))
 for i in range(11,14):
-    posicion[:,i-11] = datos[:, i]
+    posicion[:,i-11] = mag[:, i]
 
 #la matriz diaria:
 MD = np.zeros((M, 9))
@@ -65,7 +77,7 @@ plt.show()
 
 ti = float(input("Tiempo inicial = "))
 tf = float(input("Tiempo final = "))
-orbit_number = float(input('Número de órbita = '))
+# orbit_number = float(input('Número de órbita = '))
 if tf < ti:
     print('El tiempo inicial no puede ser mayor al final')
     ti = float(input("Tiempo inicial = "))
@@ -101,9 +113,11 @@ theta_cut = theta[j_inicial+12:j_final+12]
 phi_cut = phi[j_inicial+12:j_final+12]
 
 t_plot = t[j_inicial+12:j_final+12]
-t_flux, flux_cut, E_flux = flujo_energia(t1, t2, cdf_swea) #t_flux es diferente, pues viene del cdf
 
-index = np.array((year, dia[0], orbit_number))
+
+t_flux, flux_cut, E_flux = flujo_energia(t1, t2, swea) #t_flux es diferente, pues viene del cdf
+
+index = np.array((year, dia[0]))#, orbit_number))
 
 happy = False
 while not happy:
@@ -179,7 +193,7 @@ while not happy:
 
     print('Happy? Keyboard click for yes, mouse click for no.')
     happy = plt.waitforbuttonpress()
-with open('tiempos.txt','ab') as f:
+with open('t1t2t3t4.txt','ab') as f:
      np.savetxt(f, [outs], fmt='%5g', delimiter=',')
 
 

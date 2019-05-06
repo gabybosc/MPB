@@ -22,6 +22,7 @@ def axisEqual3D(ax):
     for ctr, dim in zip(centers, 'xyz'):
         getattr(ax, 'set_{}lim'.format(dim))(ctr - r, ctr + r)
 
+
 def deltat():
     global x1
     global x2
@@ -155,7 +156,6 @@ def set_axes_equal(ax):
     '''Make axes of 3D plot have equal scale so that spheres appear as spheres,
     cubes as cubes, etc..  This is one possible solution to Matplotlib's
     ax.set_aspect('equal') and ax.axis('equal') not working for 3D.
-
     Input
       ax: a matplotlib axis, e.g., as output from plt.gca().
     '''

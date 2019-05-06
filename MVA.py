@@ -4,26 +4,47 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.mlab import normpdf
 from scipy.stats import norm
-# import spacepy.pycdf as cdf
-from datetime import datetime
+import datetime as dt
+import scipy.signal as signal
 from funciones import hodograma, error, find_nearest, find_nearest_final, find_nearest_inicial, deltaB, Mij, set_axes_equal,datenum
-# from funcion_flujo_energia_cdf import flujo_energia
+
+"""
+Este script pide como user input una fecha (puede ser o fecha dd-mm-aaaa o dia_del_año-año) y los cuatro tiempos t1 t2 t3 t4.
+Eventualmente podría simplemente encontrar todos los cruces que quiero y decirle que lea directamente de algún lugar eso.
+Antes de correr este programa hay que haber usado plot_seleccionar_puntos, para tener los cuatro tiempos elegidos.
+Toma los datos de alta resolución y les aplica un filtro pasabajos con ventana Butterworth con frecuencia de corte de 0.1 Hz de orden 3.
+A los datos filtrados les aplica el MVA.
+Nos devuelve los lambdas, el cociente de lambdas, el omega, los autovectores y la normal.
+Nos da el valor medio de B, de la altitud y el SZA.
+Devuelve el ancho de la MPB y la corriente que pasa. Calcula también la fuerza de lorentz y el campo de hall.
+Grafica el hodograma, el ajuste de vignes, y la comparación de las normales obtenidas por los distintos métodos.
+"""
+
 
 np.set_printoptions(precision=4)
 
-path = '../../../MAVEN/mag_1s/2016/03/' #path a los datos
-datos = np.loadtxt(path + 'mvn_mag_l2_2016085ss1s_20160325_v01_r01.sts', skiprows=148) #lee todo y me da todo
-# path = 'datos/marzo_2016_hires/' #path a los datos
-# datos = np.loadtxt(path + 'mvn_mag_l2_2016076ss_20160316_v01_r01.sts', skiprows=148) #lee todo y me da todo
-n =2
-datos = datos[:-n, :] #borra las ultimas 2 filas, que es ya el dia siguiente (no sé si siempre)
-# lpw = np.loadtxt(path + 'mvn_kp_insitu_20160316_v14_r03_orbita18h.csv') #son los datos entre las 18 y las 19h
-# t_lpw = lpw[:,0] + lpw[:,1]/60 + lpw[:,2]/3600
+# #si tengo la fecha en dia-mes-año
+# date_entry = input('Enter a date in YYYY-MM-DD format \n')
+# year, month, day = map(int, date_entry.split('-'))
+# date_orbit = dt.date(year, month, day)
 
-ti = 22.3408
-tf = 22.4055
-dia = datos[:,1]
-t = datos[:,6]  #el dia decimal
+#si tengo la fecha en dia del año
+date_entry = input('Enter a date in YYYY-DDD format \n')
+year, doty = map(int, date_entry.split('-'))
+date_orbit = dt.datetime(year, 1, 1) + dt.timedelta(doty - 1) #para convertir el doty en date
+
+year = date_orbit.strftime("%Y")
+month = date_orbit.strftime("%m")
+day = date_orbit.strftime("%d")
+doty = date_orbit.strftime("%j")
+
+# path = '../../../MAVEN/mag_1s/2016/03/' #path a los datos desde la desktop
+path = '../../datos/' #path a los datos desde la laptop
+mag = np.loadtxt(path + 'MAG_1s/mvn_mag_l2_{0}{3}ss1s_{0}{1}{2}_v01_r01.sts'.format(year, month, day, doty), skiprows=148) #datos MAG 1s (para plotear no quiero los datos pesados)
+lpw = cdf.CDF(path + 'mvn_lpw_l2_lpnt_{0}{1}{2}_v03_r02.cdf'.format(year, month, day, doty))
+
+dia = mag[:,1]
+t = mag[:,6]  #el dia decimal
 t = (t - dia) * 24 #para que me de sobre la cantidad de horas
 
 M = np.size(t) #el numero de datos
@@ -36,12 +57,12 @@ for i in range(M-1):
 #el campo
 B = np.zeros((M, 3))
 for i in range(7,10):
-    B[:,i-7] = datos[:, i]
+    B[:,i-7] = mag[:, i]
 
 #la posición(x,y,z)
 posicion = np.zeros((M, 3))
 for i in range(11,14):
-    posicion[:,i-11] = datos[:, i]
+    posicion[:,i-11] = mag[:, i]
 
 #la matriz diaria:
 MD = np.zeros((M, 9))
@@ -54,23 +75,34 @@ for i in range(5,8):
 MD[:, 8] = np.linalg.norm(posicion, axis=1) - 3390 #altitud en km
 
 #si quiero elegir entre ciertas horas:
-t1 = find_nearest_inicial(t, ti)
-t2 = find_nearest_final(t, tf)
-inicio = np.where(t == t1)[0][0]
-fin = np.where(t == t2)[0][0]
 
-t_1 = np.where(t == find_nearest(t,18.2167))[0][0]
-t_2 = np.where(t == find_nearest(t,18.2204))[0][0]
-t_3 = np.where(t == find_nearest(t,18.235))[0][0]
-t_4 = np.where(t == find_nearest(t,18.2476))[0][0]
+t1 = float(input("t1 = "))
+t2 = float(input("t2 = "))
+t3 = float(input("t3 = "))
+t4 = float(input("t4 = "))
 
+inicio = np.where(t == find_nearest_inicial(t, t2))[0][0]
+fin = np.where(t == find_nearest_final(t, t3))[0][0]
+
+t_1 = np.where(t == find_nearest(t,t1))[0][0]
+t_2 = np.where(t == find_nearest(t,t2))[0][0]
+t_3 = np.where(t == find_nearest(t,t3))[0][0]
+t_4 = np.where(t == find_nearest(t,t4))[0][0]
 
 
 #################
+#Filtramos los cantidad_datos
+b,a = signal.butter(3,0.1,btype='lowpass')
+Bx_filtrado = signal.filtfilt(b, a, B[:,0])
+By_filtrado = signal.filtfilt(b, a, B[:,1])
+Bz_filtrado = signal.filtfilt(b, a, B[:,2])
+B_filtrado = np.linalg.norm(np.array([Bx_filtrado, By_filtrado, Bz_filtrado]), axis=0) #es el axis 0 porque no está traspuesta
+
+
 #ahora empieza el MVA con los datos que elegí
 MD_cut = MD[inicio : fin+1, :]
 M_cut = np.size(MD_cut[:,0])
-B_cut = B[inicio:fin+1, :]
+B_cut = np.transpose(np.array([Bx_filtrado[inicio:fin+1], By_filtrado[inicio:fin+1], Bz_filtrado[inicio:fin+1]]))
 
 M_ij = Mij(B_cut)
 # np.savetxt('outs/matriz_%d'%dia[0], M_ij) #guarda la matriz de cada dia
@@ -98,18 +130,18 @@ B1 = np.dot(B_cut, x1)
 B2 = np.dot(B_cut, x2)
 B3 = np.dot(B_cut, x3)
 
-hodograma(B1, B2, B3, 'nT', 'MAVEN MAG MVA 18:13:33 - 18:14:06 UTC')
+hodograma(B1, B2, B3, 'nT', 'MAVEN MAG MVA ')
 
 #el error
 phi, delta_B3 = error(lamb, B_cut, M_cut, x, dia)
-print('Matriz de incerteza angular (grados): \n{}'.format(phi  *  57.2958))
+print('Matriz de incerteza angular (grados): \n{}'.format(phi  *  180 / np.pi))
 print('<B3> = {0:1.3g} +- {1:1.3g} nT'.format(np.mean(B3),delta_B3))
 
 
 if phi[2,1] > phi[2,0]:
-    print('El error phi32 = {0:1.3g}º es mayor a phi31 = {1:1.3g}º'.format(phi[2,1]*57.2958, phi[2,0]*57.2958))
+    print('El error phi32 = {0:1.3g}º es mayor a phi31 = {1:1.3g}º'.format(phi[2,1]*57.2958, phi[2,0]*180 / np.pi))
 else:
-    print('El error phi31 = {0:1.3g}º es mayor a phi32 = {1:1.3g}º'.format(phi[2,0]*57.2958, phi[2,1]*57.2958))
+    print('El error phi31 = {0:1.3g}º es mayor a phi32 = {1:1.3g}º'.format(phi[2,0]*57.2958, phi[2,1]*180 / np.pi))
 #quiero ver si el error más grande es phi31 o phi32
 
 #el B medio
@@ -120,7 +152,7 @@ print('El valor medio de la altitud = {0:1.3g} km'.format(np.mean(MD_cut[:,8])))
 
 # x3 = np.array([ 0.9182, -0.3183,  0.2357])
 ###############
-orbita = posicion[np.where(t == find_nearest_inicial(t, 17.6))[0][0] : np.where(t == find_nearest_final(t, 19))[0][0], :] / 3390 #radios marcianos
+orbita = posicion[np.where(t == find_nearest_inicial(t, t1-1))[0][0] : np.where(t == find_nearest_final(t, t4+1))[0][0], :] / 3390 #radios marcianos
 
 # usamos vignes et al:
 x0 = 0.78
@@ -135,7 +167,7 @@ THETA, PHI = np.meshgrid(theta, phi)
 r = L / (1 + e * np.cos(THETA))
 
 ####dibujamos el punto por el que pasa la nave:
-t_nave = find_nearest(t,18.2303) #las 18:13:49, es el tiempo en el meio de la hoja de corriente
+t_nave = find_nearest(t,(t2+t3)/2) #el tiempo en el medio de la hoja de corriente
 index = np.where(t == t_nave)[0][0]
 R = posicion[index,:] / 3390 #la posicion de la nave en RM
 
@@ -227,8 +259,8 @@ v_para = np.dot(v_media, norm_vignes) * norm_vignes
 #deltat = np.loadtxt('tiempos.txt', delimiter=',', usecols = (3,4,5,6))
 # deltat = deltat[-1] #si estoy de acuerdo con usar la última seleccion de puntos que hice
 
-deltat_14 = (18.2476 - 18.2167) * 3600
-deltat_23 = (18.2204 - 18.235) * 3600
+deltat_14 = (t4 - t1) * 3600
+deltat_23 = (t3 - t2) * 3600
 
 x_14 = v_para * deltat_14 #en km# u, v = np.mgrid[0:2*np.pi:20j, 0:np.pi:10j]
 x_23 = v_para * deltat_23
@@ -268,12 +300,12 @@ ax1.legend()
 set_axes_equal(ax1)
 
 #########
-inicio_up = np.where(t == find_nearest_inicial(t, 18.20))[0][0] #las 18:12:00
-fin_up = np.where(t == find_nearest_final(t, 18.2167))[0][0] #las 18:13:00
+inicio_up = np.where(t == find_nearest_inicial(t, t1-0.015))[0][0] #las 18:12:00
+fin_up = np.where(t == find_nearest_final(t, t1))[0][0] #las 18:13:00
 B_upstream = np.mean(B[inicio_up:fin_up, :], axis=0) #nT
 
-inicio_down = np.where(t == find_nearest_inicial(t, 18.2476))[0][0] #las 18:14:51
-fin_down = np.where(t == find_nearest_final(t, 18.2645))[0][0] #las 18:15:52
+inicio_down = np.where(t == find_nearest_inicial(t, t4))[0][0] #las 18:14:51
+fin_down = np.where(t == find_nearest_final(t, t4+0.015))[0][0] #las 18:15:52
 B_downstream = np.mean(B[inicio_down:fin_down,:], axis=0) #nT
 
 print('B upstream es {} nT y su módulo es {}'.format(B_upstream, np.linalg.norm(B_upstream)))
@@ -308,19 +340,19 @@ print('La fuerza de lorentz del MVA es {} V/m, su magnitud es {}'.format(fuerza_
 print('La fuerza de lorentz del ajuste es {} V/m, su magnitud es {}'.format(fuerza_ajuste, np.linalg.norm(fuerza_ajuste)))
 
 
-# e_density = lpw[:,3]
-# ti_lpw = np.where(t_lpw == find_nearest(t_lpw, ti))[0][0]
-# tf_lpw = np.where(t_lpw == find_nearest(t_lpw, tf))[0][0]
-# n_e = np.nanmean(e_density[ti_lpw:tf_lpw]) #hace el mean ignorando los nans #cm⁻³
-# n_e = n_e * 1E6 #m⁻³
-# # n_e = 1E7
-# q_e = 1.6E-19 #carga electron #C
-#
-# E_Hall = np.cross(J_v * 1E-9, B[inicio_down, :] * 1E-9) / (q_e * n_e) #V/m
-# print('El campo de Hall del MVA es {} mV/m, su magnitud es {}'.format(E_Hall*1E3, np.linalg.norm(E_Hall)*1E3))
-#
-# E_Hall_ajuste = np.cross(J_v_ajuste * 1E-9, B[inicio_down, :] * 1E-9) / (q_e * n_e) #V/m
-# print('El campo de Hall del ajuste es {} mV/m, su magnitud es {}'.format(E_Hall_ajuste*1E3, np.linalg.norm(E_Hall_ajuste)*1E3))
+e_density = lpw[:,3]
+ti_lpw = np.where(t_lpw == find_nearest(t_lpw, ti))[0][0]
+tf_lpw = np.where(t_lpw == find_nearest(t_lpw, tf))[0][0]
+n_e = np.nanmean(e_density[ti_lpw:tf_lpw]) #hace el mean ignorando los nans #cm⁻³
+n_e = n_e * 1E6 #m⁻³
+# n_e = 1E7
+q_e = 1.6E-19 #carga electron #C
+
+E_Hall = np.cross(J_v * 1E-9, B[inicio_down, :] * 1E-9) / (q_e * n_e) #V/m
+print('El campo de Hall del MVA es {} mV/m, su magnitud es {}'.format(E_Hall*1E3, np.linalg.norm(E_Hall)*1E3))
+
+E_Hall_ajuste = np.cross(J_v_ajuste * 1E-9, B[inicio_down, :] * 1E-9) / (q_e * n_e) #V/m
+print('El campo de Hall del ajuste es {} mV/m, su magnitud es {}'.format(E_Hall_ajuste*1E3, np.linalg.norm(E_Hall_ajuste)*1E3))
 
 
 fig2 = plt.figure()

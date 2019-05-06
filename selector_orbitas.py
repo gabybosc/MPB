@@ -3,6 +3,7 @@ from os import listdir
 import glob as glob
 from datetime import datetime, timedelta
 import scipy.signal as signal
+from funciones import find_nearest
 
 
 """
@@ -11,11 +12,8 @@ SZA < 45º (o incluso <30º)
 Altitud entre 300 y 1300 km
 Z_MSO > 0 (si después se pueden volver a bajar los datos y hacer Z_pc > 0, mejor)
 
-Nos interesa que se cumplan estas cosas en la MPB, entonces le voy a pedir que encuentre un cruce en cada día y analice estas tres condiciones
-Para esto, le voy a decir qeu encuentre el mayor pico en todo el módulo del campo, habiendolo filtrado antes, y analice las tres características en ese punto.
-Si se cumplen en una órbita, lo más seguro es que se cumplan en todas las del mismo día.
-
-El filtro es pasa bajo con ventana Butterworth y frecuencia de corte de 0.01 Hz de orden 3
+Voy a hacer el fit de vignes para la MPB y ver si cuando cruza el fit cada día se cumplen estas tres cosas.
+También le voy a pedir que me diga la hora a la cual pasa.
 
 tenemos datos desde 10/2018 hasta 02/2018
 """
@@ -25,6 +23,18 @@ cantidad_datos = len(path)
 calendario_2018 = np.zeros((4, cantidad_datos)) #la primera columna es el día del año, la segunda dice si cumple el SZA, la tercera la altitud y la cuarta el ZMSO
 
 
+# Ajuste de Vignes:
+x0 = 0.78
+e = 0.9
+L = 0.96
+
+theta = np.linspace(0, np.pi *3/4, 100)
+phi = np.linspace(0, 2 * np.pi, 100)
+THETA, PHI = np.meshgrid(theta, phi)
+
+r = L / (1 + e * np.cos(THETA))
+
+#Importamos los datos y vemos uno por uno qué pasa.
 for i,j in enumerate(path): #loop en todos los archivos .sts para cada año. i me da el índice en la lista, j me da el archivo
     mag = np.loadtxt(j, skiprows=160)
 
@@ -38,6 +48,7 @@ for i,j in enumerate(path): #loop en todos los archivos .sts para cada año. i m
     for k in range(7,10):
         B[:,k-7] = mag[:, k]
 
+    cruce_MPB = np.where(posicion == find_nearest(posicion, r))
     """
     Filtra los datos del campo y busca los picos mayores a 40 nT
     """
