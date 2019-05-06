@@ -7,7 +7,7 @@ import scipy.signal as signal
 from funciones import find_nearest, set_axes_equal
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
-
+plt.ion()
 
 """
 Este código va a buscar entre todos los archivos que tenemos de MAG los lapsos en los cuales se cumplen:
@@ -32,9 +32,9 @@ for j in range(7,10):
     for j in range(11,14):
         posicion[:,j-11] = mag[:, j]
 
-        orbita = posicion / 3390 #radios marcianos
+        orbitas = posicion / 3390 #radios marcianos
 
-una_vuelta = len(orbita)/5
+una_vuelta = int(len(orbitas)/5)
 
 # Ajuste de Vignes:
 x0 = 0.78
@@ -59,35 +59,40 @@ resta = np.zeros((len(R), 3))
 """
 Son dos loops: el loop en i barre toda la superficie y la resta para cada punto de la órbita. El loop en j agarra esa resta y ve dónde es que es mínima (busca el máximo acercamiento entre la órbita y la superficie). Luego, guarda el mínimo para cada punto de la órbita. Finalmente, busca el mínimo de mínimos.
 Hace esto cada 100 puntos porque si no tarda mucho.
+
+Necesito que haga la resta sólo para Z positivo, si no, puede crear cruces ficticios en el sur (si la posicion de maven en el sur se parece a la posición de la MPB en el norte también lo cuenta, ya que tomo la norma)
 """
 
 idx_min = np.zeros(int(una_vuelta/100))
 max_acercamiento = np.zeros(int(una_vuelta/100))
-for j in range(int(una_vuelta)-100):
-    if j%100 == 0: #hace la cuenta cada 100 pasos.
+X_MSO = posicion[int(una_vuelta*2):int(una_vuelta*3), 0]
+Z_MSO = posicion[int(una_vuelta*2):int(una_vuelta*3),2]
+orbita = posicion[int(una_vuelta*2):int(una_vuelta*3),:] /3390
+for j in range(una_vuelta-100):
+    if j%100 == 0 and Z_MSO[j] >0 and X_MSO[j]>0: #hace la cuenta cada 100 pasos.
         for i in range(len(R)):
             resta[i, :] = np.abs(orbita[j,:] - R[i,:])
         A = np.linalg.norm(resta, axis=1)
         idx_min[int(j/100)] = np.argmin(A)
         max_acercamiento[int(j/100)] = A[int(idx_min[int(j/100)])]
-minimo = np.argmin(max_acercamiento)
+minimo = np.where( max_acercamiento==np.min(max_acercamiento[np.nonzero(max_acercamiento)]))[0][0]
 print(max_acercamiento[minimo])
 
-# fig = plt.figure()
-# ax = fig.add_subplot(1,1,1, projection='3d')
-# ax.set_xlabel(r'$X_{MSO} (R_m)$')
-# ax.set_ylabel(r'$Y_{MSO} (R_m)$')
-# ax.set_zlabel(r'$Z_{MSO} (R_m)$')
-# ax.set_aspect('equal')
-# # ax.plot(orbita[:,0], orbita[:,1], orbita[:,2], color='C2', label='Órbita')
-# ax.plot(orbita[8900:9100,0], orbita[8900:9100,1], orbita[8900:9100,2], color='C2', label='Órbita')
-# plot = ax.plot_surface(
-#     X, Y, Z, rstride=4, cstride=4, alpha=0.5, edgecolor='none', cmap=plt.get_cmap('Blues_r'))
-# u, v = np.mgrid[0:2*np.pi:20j, 0:np.pi:10j]
-# ax.plot_wireframe(np.cos(u)*np.sin(v), np.sin(u)*np.sin(v), np.cos(v), color="r", linewidth=0.5)
-# ax.legend()
-# set_axes_equal(ax) #para que tenga forma de esfera la esfera
-# plt.show(block=False)
+fig = plt.figure()
+ax = fig.add_subplot(1,1,1, projection='3d')
+ax.set_xlabel(r'$X_{MSO} (R_m)$')
+ax.set_ylabel(r'$Y_{MSO} (R_m)$')
+ax.set_zlabel(r'$Z_{MSO} (R_m)$')
+ax.set_aspect('equal')
+# ax.plot(orbita[:,0], orbita[:,1], orbita[:,2], color='C2', label='Órbita')
+ax.plot(orbita[:,0], orbita[:,1], orbita[:,2], color='C2', label='Órbita')
+ax.scatter(orbita[minimo*100, 0],orbita[minimo*100, 1],orbita[minimo*100, 2])
+plot = ax.plot_surface(
+    X, Y, Z, rstride=4, cstride=4, alpha=0.5, edgecolor='none', cmap=plt.get_cmap('Blues_r'))
+u, v = np.mgrid[0:2*np.pi:20j, 0:np.pi:10j]
+ax.plot_wireframe(np.cos(u)*np.sin(v), np.sin(u)*np.sin(v), np.cos(v), color="r", linewidth=0.5)
+ax.legend()
+set_axes_equal(ax) #para que tenga forma de esfera la esfera
 
 
 """
