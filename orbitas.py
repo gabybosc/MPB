@@ -18,13 +18,14 @@ Z_MSO > 0 (si después se pueden volver a bajar los datos y hacer Z_pc > 0, mejo
 
 Se fija dónde es que coincide la posicion de MAVEN con el fit de vignes y mira estas condiciones en ese punto.
 
-tenemos datos desde 10/2014 hasta 02/2016
+tenemos datos desde 10/2014 hasta 02/2018
 """
 
 # path = glob.glob('../../../MAVEN/mag_1s/2016/*/*.sts')
 path =  glob.glob('../../datos/MAG_1s/*.sts')
 cantidad_datos = len(path)
-calendario_2016 = np.zeros((5 * cantidad_datos, 5)) #la primera columna es el día del año, la segunda es el número de orbita, la tercera dice si cumple el SZA, la cuarta la altitud y la quinta el ZMSO
+year = 2016
+calendario = np.zeros((5 * cantidad_datos, 5)) #la primera columna es el día del año, la segunda es el número de orbita, la tercera dice si cumple el SZA, la cuarta la altitud y la quinta el ZMSO
 
 
 # Ajuste de Vignes:
@@ -70,8 +71,8 @@ for i,j in enumerate(path):
     paso = 50
 
     for indice, l in enumerate(orbitas):
-        calendario_2016[i*5+indice,0] = mag[1,1]
-        calendario_2016[i*5+indice,1] = indice+1
+        calendario[i*5+indice,0] = mag[1,1]
+        calendario[i*5+indice,1] = indice+1
         pos = l * 3390
         X_MSO = pos[:, 0]
         Z_MSO = pos[:, 2]
@@ -95,7 +96,7 @@ for i,j in enumerate(path):
         SZA = np.arccos(np.clip(np.dot(pos[int(idx)]/np.linalg.norm(pos[int(idx)]), [1,0,0]), -1.0, 1.0))* 180/np.pi
         # print(j, indice, SZA)
         if SZA < 30:
-            calendario_2016[i*5+indice,2] = 1
+            calendario[i*5+indice,2] = 1
 
         """
         Clasificación por altitud
@@ -103,41 +104,40 @@ for i,j in enumerate(path):
         altitud = np.linalg.norm(pos[int(idx),:]) - 3390
 
         if altitud < 1300 and altitud > 300:
-            calendario_2016[i*5+indice,3] = 1
+            calendario[i*5+indice,3] = 1
 
         """
         Clasificación por Z_MSO
         """
         Z_MSO = pos[int(idx),2]
         if Z_MSO > 0:
-            calendario_2016[i*5+indice,4] = 1
+            calendario[i*5+indice,4] = 1
 
 
-np.savetxt('tiempos_2016.txt', sorted(calendario_2016, key=lambda x: x[0]), fmt='%10d' ,header= "Día        Órbita        SZA        altitud       Z_MSO", newline="\r\n")
+np.savetxt('tiempos_{}.txt'.format(year), sorted(calendario, key=lambda x: x[0]), fmt='%10d' ,header= "Día        Órbita        SZA        altitud       Z_MSO", newline="\r\n")
 
-clasific = np.sum(calendario_2016[:,2:], axis =1) #si suma 3, es un día que cumple todo.
+clasific = np.sum(calendario[:,2:], axis =1) #si suma 3, es un día que cumple todo.
 
 fechas_buenas = np.zeros((len(clasific), 2))
 
 for i in range(len(clasific)):
     if clasific[i] == 3:
-        fechas_buenas[i,0] = calendario_2016[i,0]
-        fechas_buenas[i,1] = calendario_2016[i,1]
+        fechas_buenas[i,0] = calendario[i,0]
+        fechas_buenas[i,1] = calendario[i,1]
 
 #para que me de un array ordenado y sin ceros:
 fechas_buenas_trim = fechas_buenas[~np.all(fechas_buenas == 0, axis=1)]
 
-np.savetxt('fechas_buenas_2016.txt', sorted(fechas_buenas_trim, key=lambda x: x[0]), fmt='%10d' ,header= "Las fechas de 2016 en las cuales se cumple todo", newline="\r\n")
-#
-# year = 2016
-# doy = fechas_buenas_trim[:,0]
-# month = np.zeros(len(doy))
-# for d in range(len(doy)):
-#     date_orbit = dt.datetime(year, 1, 1) + dt.timedelta(doy[d] - 1) #para convertir el doy en date
-#     month[d] = date_orbit.strftime("%m")
-#
-# plt.hist(month, 12, range=(1,13))
-# plt.xlim(left = 1, right=13)
-# plt.xlabel('Mes')
-# plt.ylabel('Cantidad de órbitas')
-# plt.title('Cantidad mensual de órbitas que cumplen las tres condiciones en 2016')
+np.savetxt('fechas_buenas_{}.txt'.format(year), sorted(fechas_buenas_trim, key=lambda x: x[0]), fmt='%10d' ,header= "Las fechas de {} en las cuales se cumple todo".format(year), newline="\r\n")
+
+doy = np.loadtxt('fechas_buenas_{}.txt'.format(year), skiprows=1)[:,0]
+month = np.zeros(len(doy))
+for d in range(len(doy)):
+    date_orbit = dt.datetime(year, 1, 1) + dt.timedelta(doy[d] - 1) #para convertir el doy en date
+    month[d] = date_orbit.strftime("%m")
+
+plt.hist(month, 12, range=(1,13))
+plt.xlim(left = 1, right=13)
+plt.xlabel('Mes')
+plt.ylabel('Cantidad de órbitas')
+plt.title('Cantidad mensual de órbitas que cumplen las tres condiciones en {}'.format(year))

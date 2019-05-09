@@ -20,14 +20,9 @@ Se fija dónde es que coincide la posicion de MAVEN con el fit de vignes y mira 
 tenemos datos desde 10/2014 hasta 02/2018
 """
 
-<<<<<<< HEAD
 
 path = glob.glob('../../datos/MAG_1s/*.sts')
 # path = glob.glob('../../../MAVEN/mag_1s/2018/*/*.sts')
-=======
-# path = glob.glob('../../../MAVEN/mag_1s/2018/*/*.sts')
-path =  glob.glob('../../datos/MAG_1s/*.sts')
->>>>>>> febfa62505138bd20329cd1099a3a71781125ab2
 cantidad_datos = len(path)
 calendario_2018 = np.zeros((5, cantidad_datos)) #la primera columna es el día del año, la segunda es el número de orbita, la tercera dice si cumple el SZA, la cuarta la altitud y la quinta el ZMSO
 
