@@ -19,8 +19,13 @@ Se fija dónde es que coincide la posicion de MAVEN con el fit de vignes y mira 
 
 tenemos datos desde 10/2014 hasta 02/2018
 """
+
+
 # mag = np.loadtxt('../../../MAVEN/mag_1s/2016/03/mvn_mag_l2_2016085ss1s_20160325_v01_r01.sts', skiprows=148) #en la compu del iafe
-mag = np.loadtxt('../../datos/MAG_1s/mvn_mag_l2_2016092ss1s_20160401_v01_r01.sts', skiprows=148) #en mi compu
+mag = np.loadtxt('../../datos/MAG_1s/mvn_mag_l2_2016076ss1s_20160316_v01_r01.sts', skiprows=148) #en mi compu
+
+
+calendario_2016 = np.zeros((5,5)) #la primera columna es el día del año, la segunda es el número de orbita, la tercera dice si cumple el SZA, la
 
 B = np.zeros((len(mag[:,0]), 3))
 for j in range(7,10):
@@ -60,50 +65,57 @@ Hace esto cada 100 puntos porque si no tarda mucho.
 Necesito que haga la resta sólo en Z positivo, porque si no, crea cruces ficticios en el sur.
 """
 orbitas = [orbita[:una_vuelta], orbita[una_vuelta:una_vuelta*2], orbita[una_vuelta*2:una_vuelta*3], orbita[una_vuelta*3:una_vuelta*4], orbita[una_vuelta*4:]]
-for l in orbitas:
+paso  = 50
+for n,l in enumerate(orbitas):
+    calendario_2016[0,n] = mag[1,1]
+    calendario_2016[1,n] = n+1
     pos = l * 3390
     X_MSO = pos[:, 0]
     Z_MSO = pos[:, 2]
-    idx_min = np.zeros(int(una_vuelta/100))
-    max_acercamiento = np.zeros(int(una_vuelta/100))
+    idx_min = np.zeros(int(una_vuelta/paso))
+    max_acercamiento = np.zeros(int(una_vuelta/paso))
     minimo = 0
-    for j in range(int(una_vuelta)-100):
-        if j%100 == 0 and Z_MSO[j] > 0 and X_MSO[j] > 0:
+    for j in range(int(una_vuelta)-paso):
+        if j%paso == 0 and Z_MSO[j] > 0 and X_MSO[j] > 0:
             for i in range(len(R)):
                 resta[i, :] = l[j,:] - R[i,:]
             A = np.linalg.norm(resta, axis=1)
-            idx_min[int(j/100)] = np.argmin(A)
-            max_acercamiento[int(j/100)] = A[int(idx_min[int(j/100)])]
+            idx_min[int(j/paso)] = np.argmin(A)
+            max_acercamiento[int(j/paso)] = A[int(idx_min[int(j/paso)])]
     minimo = np.where( max_acercamiento==np.min(max_acercamiento[np.nonzero(max_acercamiento)]))[0][0] #busca el minimo que no sea cero
     # print(minimo, max_acercamiento[minimo])
     # print(Z_MSO[minimo*100], X_MSO[minimo*100])
 
-    # fig = plt.figure()
-    # ax = fig.add_subplot(1,1,1, projection='3d')
-    # ax.set_xlabel(r'$X_{MSO} (R_m)$')
-    # ax.set_ylabel(r'$Y_{MSO} (R_m)$')
-    # ax.set_zlabel(r'$Z_{MSO} (R_m)$')
-    # ax.set_aspect('equal')
-    # ax.plot(l[:,0], l[:,1], l[:,2], color='C2', label='Órbita')
-    # ax.scatter(l[minimo*100,0],l[minimo*100,1],l[minimo*100,2])
-    # plot = ax.plot_surface(
-    #     X, Y, Z, rstride=4, cstride=4, alpha=0.5, edgecolor='none', cmap=plt.get_cmap('Blues_r'))
-    # u, v = np.mgrid[0:2*np.pi:20j, 0:np.pi:10j]
-    # ax.plot_wireframe(np.cos(u)*np.sin(v), np.sin(u)*np.sin(v), np.cos(v), color="r", linewidth=0.5)
-    # ax.legend()
-    # set_axes_equal(ax) #para que tenga forma de esfera la esfera
-    # plt.show(block=False)
+    fig = plt.figure()
+    ax = fig.add_subplot(1,1,1, projection='3d')
+    ax.set_xlabel(r'$X_{MSO} (R_m)$')
+    ax.set_ylabel(r'$Y_{MSO} (R_m)$')
+    ax.set_zlabel(r'$Z_{MSO} (R_m)$')
+    ax.set_aspect('equal')
+    ax.plot(l[:,0], l[:,1], l[:,2], color='C2', label='Órbita')
+    ax.scatter(l[minimo*paso,0],l[minimo*paso,1],l[minimo*paso,2])
+    plot = ax.plot_surface(
+        X, Y, Z, rstride=4, cstride=4, alpha=0.5, edgecolor='none', cmap=plt.get_cmap('Blues_r'))
+    u, v = np.mgrid[0:2*np.pi:20j, 0:np.pi:10j]
+    ax.plot_wireframe(np.cos(u)*np.sin(v), np.sin(u)*np.sin(v), np.cos(v), color="r", linewidth=0.5)
+    ax.legend()
+    set_axes_equal(ax) #para que tenga forma de esfera la esfera
+    plt.show(block=False)
 
 
     """
     Clasificación.
     """
 
-    idx = minimo * 100
+    idx = minimo * paso
     SZA = np.arccos(np.clip(np.dot(pos[int(idx)]/np.linalg.norm(pos[int(idx)]), [1,0,0]), -1.0, 1.0))* 180/np.pi
     altitud = np.linalg.norm(pos[int(idx), :]) - 3390
     Z_MSO_cruce = pos[int(idx),2]
+    if SZA < 30:
+        calendario_2016[2,n] = 1
+    if altitud < 1300 and altitud > 300:
+        calendario_2016[3,n] = 1
+    if Z_MSO_cruce > 0:
+        calendario_2016[4,n] = 1
 
-    print('Tiene SZA = {0:1.3g}, altitud = {1:1.3g} y Z_MSO = {2:1.3g}'.format(SZA, altitud, Z_MSO_cruce))
-    # # if Z_MSO > 0:
-    #     print('Tiene SZA = {0:1.3g}, altitud = {1:1.3g} y Z_MSO > 0'.format(SZA, altitud))
+np.savetxt('prueba.txt', np.transpose(calendario_2016), fmt='%10d' ,header= "Día        Órbita        SZA        altitud       Z_MSO", newline="\r\n")

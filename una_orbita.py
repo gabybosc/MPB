@@ -20,7 +20,7 @@ Se fija dónde es que coincide la posicion de MAVEN con el fit de vignes y mira 
 tenemos datos desde 10/2014 hasta 02/2018
 """
 # mag = np.loadtxt('../../../MAVEN/mag_1s/2016/03/mvn_mag_l2_2016085ss1s_20160325_v01_r01.sts', skiprows=148) #en la compu del iafe
-mag = np.loadtxt('../../datos/MAG_1s/mvn_mag_l2_2016092ss1s_20160401_v01_r01.sts', skiprows=148) #en mi compu
+mag = np.loadtxt('../../datos/MAG_1s/mvn_mag_l2_2016076ss1s_20160316_v01_r01.sts', skiprows=148) #en mi compu
 
 B = np.zeros((len(mag[:,0]), 3))
 for j in range(7,10):
@@ -34,6 +34,14 @@ for j in range(7,10):
 
         orbitas = posicion / 3390 #radios marcianos
 
+"""
+Dividimos las órbitas entre apoapsis consecutivos - altitud aprox 6000km
+No sé todavía si usar el find_peaks o si derivar y buscar dónde es cero.
+"""
+# derivada = np.gradient(np.linalg.norm(posicion, axis=1)-3390)
+# find_nearest(derivada, 0)
+# np.argmin(derivada)
+# apoapsis = np.where(derivada == 0)
 una_vuelta = int(len(orbitas)/5)
 
 # Ajuste de Vignes:
@@ -66,7 +74,8 @@ X_MSO = posicion[int(una_vuelta*2):int(una_vuelta*3), 0]
 Z_MSO = posicion[int(una_vuelta*2):int(una_vuelta*3),2]
 orbita = posicion[int(una_vuelta*2):int(una_vuelta*3),:] /3390
 for j in range(una_vuelta-100):
-    if j%100 == 0 and Z_MSO[j] >0 and X_MSO[j]>0: #hace la cuenta cada 100 pasos.
+    if j%100 == 0 and Z_MSO[j] >0 and X_MSO[j]>0:
+        print(j) #hace la cuenta cada 100 pasos.
         for i in range(len(R)):
             resta[i, :] = np.abs(orbita[j,:] - R[i,:])
         A = np.linalg.norm(resta, axis=1)

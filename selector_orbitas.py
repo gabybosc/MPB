@@ -18,7 +18,9 @@ También le voy a pedir que me diga la hora a la cual pasa.
 tenemos datos desde 10/2018 hasta 02/2018
 """
 
-path = glob.glob('../../../MAVEN/mag_1s/2018/*/*.sts')
+
+path = glob.glob('../../datos/MAG_1s/*.sts')
+# path = glob.glob('../../../MAVEN/mag_1s/2018/*/*.sts')
 cantidad_datos = len(path)
 calendario_2018 = np.zeros((4, cantidad_datos)) #la primera columna es el día del año, la segunda dice si cumple el SZA, la tercera la altitud y la cuarta el ZMSO
 
