@@ -21,7 +21,7 @@ Se fija dónde es que coincide la posicion de MAVEN con el fit de vignes y mira 
 tenemos datos desde 10/2014 hasta 02/2018
 """
 
-year = 2017
+year = 2015
 path = glob.glob('../../../MAVEN/mag_1s/{}/*/*.sts'.format(year))
 # path =  glob.glob('../../datos/MAG_1s/*.sts')
 cantidad_datos = len(path)
