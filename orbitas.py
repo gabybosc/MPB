@@ -86,32 +86,37 @@ for i,j in enumerate(path):
                 A = np.linalg.norm(resta, axis=1)
                 idx_min[int(k/paso)] = np.argmin(A)
                 max_acercamiento[int(k/paso)] = A[int(idx_min[int(k/paso)])]
-        minimo = np.where( max_acercamiento==np.min(max_acercamiento[np.nonzero(max_acercamiento)]))[0][0] #busca el minimo que no sea cero
+        if sum(max_acercamiento) == 0: #si es cero, va a fallar todo el script, así que digo que esa órbita es mala y listo
+            calendario_2016[i*5+indice,2] = 0
+            calendario_2016[i*5+indice, 3] = 0
+            calendario_2016[i*5+indice,4] = 0
+        else:
+            minimo = np.where( max_acercamiento==np.min(max_acercamiento[np.nonzero(max_acercamiento)]))[0][0] #busca el minimo que no sea cero
 
-        """
-        Clasificación por SZA
-        """
-        idx = minimo * paso
+            """
+            Clasificación por SZA despues poner entre 30 y 60 y luego 60 y 90
+            """
+            idx = minimo * paso
 
-        SZA = np.arccos(np.clip(np.dot(pos[int(idx)]/np.linalg.norm(pos[int(idx)]), [1,0,0]), -1.0, 1.0))* 180/np.pi
-        # print(j, indice, SZA)
-        if SZA < 30:
-            calendario[i*5+indice,2] = 1
+            SZA = np.arccos(np.clip(np.dot(pos[int(idx)]/np.linalg.norm(pos[int(idx)]), [1,0,0]), -1.0, 1.0))* 180/np.pi
+            # print(j, indice, SZA)
+            if SZA < 30:
+                calendario[i*5+indice,2] = 1
 
-        """
-        Clasificación por altitud
-        """
-        altitud = np.linalg.norm(pos[int(idx),:]) - 3390
+            """
+            Clasificación por altitud
+            """
+            altitud = np.linalg.norm(pos[int(idx),:]) - 3390
 
-        if altitud < 1300 and altitud > 300:
-            calendario[i*5+indice,3] = 1
+            if altitud < 1300 and altitud > 300:
+                calendario[i*5+indice,3] = 1
 
-        """
-        Clasificación por Z_MSO
-        """
-        Z_MSO = pos[int(idx),2]
-        if Z_MSO > 0:
-            calendario[i*5+indice,4] = 1
+            """
+            Clasificación por Z_MSO
+            """
+            Z_MSO = pos[int(idx),2]
+            if Z_MSO > 0:
+                calendario[i*5+indice,4] = 1
 
 
 np.savetxt('tiempos_{}.txt'.format(year), sorted(calendario, key=lambda x: x[0]), fmt='%10d' ,header= "Día        Órbita        SZA        altitud       Z_MSO", newline="\r\n")
