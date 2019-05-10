@@ -87,9 +87,9 @@ for i,j in enumerate(path):
                 idx_min[int(k/paso)] = np.argmin(A)
                 max_acercamiento[int(k/paso)] = A[int(idx_min[int(k/paso)])]
         if sum(max_acercamiento) == 0: #si es cero, va a fallar todo el script, así que digo que esa órbita es mala y listo
-            calendario_2016[i*5+indice,2] = 0
-            calendario_2016[i*5+indice, 3] = 0
-            calendario_2016[i*5+indice,4] = 0
+            calendario[i*5+indice,2] = 0
+            calendario[i*5+indice, 3] = 0
+            calendario[i*5+indice,4] = 0
         else:
             minimo = np.where( max_acercamiento==np.min(max_acercamiento[np.nonzero(max_acercamiento)]))[0][0] #busca el minimo que no sea cero
 
