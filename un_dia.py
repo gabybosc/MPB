@@ -23,7 +23,7 @@ tenemos datos desde 10/2014 hasta 02/2018
 
 # mag = np.loadtxt('../../../MAVEN/mag_1s/2016/03/mvn_mag_l2_2016085ss1s_20160325_v01_r01.sts', skiprows=148) #en la compu del iafe
 # mag = np.loadtxt('../../datos/MAG_1s/mvn_mag_l2_2016076ss1s_20160316_v01_r01.sts', skiprows=148) #en mi compu
-mag = np.loadtxt('../../datos/eliminados/mvn_mag_l2_2016285ss1s_20161011_v01_r01.sts', skiprows=148) #en mi compu
+mag = np.loadtxt('../../datos/MAG_1s/mvn_mag_l2_2016198ss1s_20160716_v01_r01.sts', skiprows=160) #en mi compu
 
 calendario_2016 = np.zeros((5,5)) #la primera columna es el día del año, la segunda es el número de orbita, la tercera dice si cumple el SZA, la
 
@@ -75,8 +75,8 @@ for n,l in enumerate(orbitas):
     idx_min = np.zeros(int(una_vuelta/paso))
     max_acercamiento = np.zeros(int(una_vuelta/paso))
     minimo = 0
-    for j in range(int(una_vuelta)-paso):
-        if j%paso == 0 and Z_MSO[j] > 0 and X_MSO[j] > 0:
+    for j in range(0,int(una_vuelta)-paso, paso):
+        if Z_MSO[j] > 0 and X_MSO[j] > 0:
             for i in range(len(R)):
                 resta[i, :] = l[j,:] - R[i,:]
             A = np.linalg.norm(resta, axis=1)
@@ -89,24 +89,24 @@ for n,l in enumerate(orbitas):
 
     else:
         minimo = np.where( max_acercamiento==np.min(max_acercamiento[np.nonzero(max_acercamiento)]))[0][0] #busca el minimo que no sea cero
-        # print(minimo, max_acercamiento[minimo])
-        # print(Z_MSO[minimo*100], X_MSO[minimo*100])
+        print(minimo, max_acercamiento[minimo])
+        print(Z_MSO[minimo*100], X_MSO[minimo*100])
 
-        # fig = plt.figure()
-        # ax = fig.add_subplot(1,1,1, projection='3d')
-        # ax.set_xlabel(r'$X_{MSO} (R_m)$')
-        # ax.set_ylabel(r'$Y_{MSO} (R_m)$')
-        # ax.set_zlabel(r'$Z_{MSO} (R_m)$')
-        # ax.set_aspect('equal')
-        # ax.plot(l[:,0], l[:,1], l[:,2], color='C2', label='Órbita')
-        # ax.scatter(l[minimo*paso,0],l[minimo*paso,1],l[minimo*paso,2])
-        # plot = ax.plot_surface(
-        #     X, Y, Z, rstride=4, cstride=4, alpha=0.5, edgecolor='none', cmap=plt.get_cmap('Blues_r'))
-        # u, v = np.mgrid[0:2*np.pi:20j, 0:np.pi:10j]
-        # ax.plot_wireframe(np.cos(u)*np.sin(v), np.sin(u)*np.sin(v), np.cos(v), color="r", linewidth=0.5)
-        # ax.legend()
-        # set_axes_equal(ax) #para que tenga forma de esfera la esfera
-        # plt.show(block=False)
+        fig = plt.figure()
+        ax = fig.add_subplot(1,1,1, projection='3d')
+        ax.set_xlabel(r'$X_{MSO} (R_m)$')
+        ax.set_ylabel(r'$Y_{MSO} (R_m)$')
+        ax.set_zlabel(r'$Z_{MSO} (R_m)$')
+        ax.set_aspect('equal')
+        ax.plot(l[:,0], l[:,1], l[:,2], color='C2', label='Órbita')
+        ax.scatter(l[minimo*paso,0],l[minimo*paso,1],l[minimo*paso,2])
+        plot = ax.plot_surface(
+            X, Y, Z, rstride=4, cstride=4, alpha=0.5, edgecolor='none', cmap=plt.get_cmap('Blues_r'))
+        u, v = np.mgrid[0:2*np.pi:20j, 0:np.pi:10j]
+        ax.plot_wireframe(np.cos(u)*np.sin(v), np.sin(u)*np.sin(v), np.cos(v), color="r", linewidth=0.5)
+        ax.legend()
+        set_axes_equal(ax) #para que tenga forma de esfera la esfera
+        plt.show(block=False)
 
 
         """

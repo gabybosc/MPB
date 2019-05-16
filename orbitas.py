@@ -12,7 +12,7 @@ plt.ion()
 
 """
 Este código va a buscar entre todos los archivos que tenemos de MAG los lapsos en los cuales se cumplen:
-SZA < 45º (o incluso <30º)
+SZA < 30º
 Altitud entre 300 y 1300 km
 Z_MSO > 0 (si después se pueden volver a bajar los datos y hacer Z_pc > 0, mejor)
 
@@ -21,7 +21,7 @@ Se fija dónde es que coincide la posicion de MAVEN con el fit de vignes y mira 
 tenemos datos desde 10/2014 hasta 02/2018
 """
 
-year = 2015
+year = 2016
 # path = glob.glob('../../../MAVEN/mag_1s/{}/*/*.sts'.format(year)) #en desktop
 path =  glob.glob('../../datos/MAG_1s/*.sts') #en laptop
 cantidad_datos = len(path)
@@ -63,12 +63,12 @@ for i,j in enumerate(path):
 
     """
     Son dos loops: el loop en i barre toda la superficie y la resta para cada punto de la órbita. El loop en j agarra esa resta y ve dónde es que es mínima (busca el máximo acercamiento entre la órbita y la superficie). Luego, guarda el mínimo para cada punto de la órbita. Finalmente, busca el mínimo de mínimos.
-    Hace esto cada 100 puntos y sólo donde Z y X MSO son positivas, total es donde está mi cruce. (esto además me disminuye los falsos positivos)
+    Hace esto cada 500 puntos y sólo donde Z y X MSO son positivas, total es donde está mi cruce. (esto además me disminuye los falsos positivos)
 
     """
     orbitas = [orbita[:una_vuelta], orbita[una_vuelta:una_vuelta*2], orbita[una_vuelta*2:una_vuelta*3], orbita[una_vuelta*3:una_vuelta*4], orbita[una_vuelta*4:]]
     resta = np.zeros((len(R),3))
-    paso = 50
+    paso = 50 #se traduce en 150km si se mueve a 3km/s
 
     for indice, l in enumerate(orbitas):
         calendario[i*5+indice,0] = mag[1,1]
@@ -79,8 +79,8 @@ for i,j in enumerate(path):
         idx_min = np.zeros(int(una_vuelta/paso))
         max_acercamiento = np.zeros(int(una_vuelta/paso))
         minimo = 0
-        for k in range(int(una_vuelta)-100):
-            if k%paso == 0 and Z_MSO[k] > 0 and X_MSO[k] > 0:
+        for k in range(0,int(una_vuelta)-100, paso):
+            if Z_MSO[k] > 0 and X_MSO[k] > 0:
                 for m in range(len(R)):
                     resta[m, :] = l[k,:] - R[m,:]
                 A = np.linalg.norm(resta, axis=1)
@@ -109,7 +109,7 @@ for i,j in enumerate(path):
             SZA = np.arccos(np.clip(np.dot(pos[int(idx)]/np.linalg.norm(pos[int(idx)]), [1,0,0]), -1.0, 1.0))* 180/np.pi
             # print(j, indice, SZA)
             if SZA < 30:
-                calendario[i*5+indice,2] = 1
+                calendario[i*5+indice,3] = 1
             elif SZA > 60:
                 calendario[i*5+indice, 4] = 1
             else:
@@ -125,7 +125,7 @@ for i,j in enumerate(path):
 
 np.savetxt('tiempos_{}.txt'.format(year), sorted(calendario, key=lambda x: x[0]), fmt='%10d' ,header= "Día        Órbita        Altitud        SZA < 30     SZA entre 30 y 60    SZA > 60", newline="\r\n")
 
-clasific_30 = np.sum(calendario[:,2:3], axis =1) #si suma 2, tiene SZA menor a 30.
+clasific_30 = calendario[:,2] + calendario[:,3] #si suma 2, tiene SZA menor a 30.
 clasific_60 = calendario[:,2] + calendario[:,4]#si suma 2, tiene SZA entre 30 y 60.
 clasific_90 = calendario[:,2] + calendario[:,5] #si suma 2, tiene SZA mayor a 90.
 
