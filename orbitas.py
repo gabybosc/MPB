@@ -93,34 +93,34 @@ for i,j in enumerate(path):
         else:
             minimo = np.where( max_acercamiento==np.min(max_acercamiento[np.nonzero(max_acercamiento)]))[0][0] #busca el minimo que no sea cero
 
-            idx = minimo * paso
-            """
-            Clasificación por altitud (debería cumplirse siempre, pero aparentemente no pasa)
-            """
-            altitud = np.linalg.norm(pos[int(idx),:]) - 3390
+        idx = minimo * paso
+        """
+        Clasificación por altitud (debería cumplirse siempre, pero aparentemente no pasa)
+        """
+        altitud = np.linalg.norm(pos[int(idx),:]) - 3390
 
-            if altitud < 1300 and altitud > 300:
-                calendario[i*5+indice,2] = 1
+        if altitud < 1300 and altitud > 300:
+            calendario[i*5+indice,2] = 1
 
-            """
-            Clasificación por SZA despues poner entre 30 y 60 y luego 60 y 90
-            """
+        """
+        Clasificación por SZA despues poner entre 30 y 60 y luego 60 y 90
+        """
 
-            SZA = np.arccos(np.clip(np.dot(pos[int(idx)]/np.linalg.norm(pos[int(idx)]), [1,0,0]), -1.0, 1.0))* 180/np.pi
-            # print(j, indice, SZA)
-            if SZA < 30:
-                calendario[i*5+indice,3] = 1
-            elif SZA > 60:
-                calendario[i*5+indice, 4] = 1
-            else:
-                calendario[i*5+indice, 5] = 1
+        SZA = np.arccos(np.clip(np.dot(pos[int(idx)]/np.linalg.norm(pos[int(idx)]), [1,0,0]), -1.0, 1.0))* 180/np.pi
+        # print(j, indice, SZA)
+        if SZA < 30:
+            calendario[i*5+indice,3] = 1
+        elif SZA > 60:
+            calendario[i*5+indice, 4] = 1
+        else:
+            calendario[i*5+indice, 5] = 1
 
-            """
-            Clasificación por Z_MSO (ya se cumple porque lo pedí en el if)
-            Z_MSO = pos[int(idx),2]
-            if Z_MSO > 0:
-                calendario[i*5+indice,4] = 1
-            """
+        """
+        Clasificación por Z_MSO (ya se cumple porque lo pedí en el if)
+        Z_MSO = pos[int(idx),2]
+        if Z_MSO > 0:
+            calendario[i*5+indice,4] = 1
+        """
 
 
 np.savetxt('tiempos_{}.txt'.format(year), sorted(calendario, key=lambda x: x[0]), fmt='%10d' ,header= "Día        Órbita        Altitud        SZA < 30     SZA entre 30 y 60    SZA > 60", newline="\r\n")
