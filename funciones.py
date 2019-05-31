@@ -41,7 +41,7 @@ def deltaB(B):
         #y ahora necesito el valor abs de perp
         abs_deltaB_perp = np.abs(deltaB_perp) / np.linalg.norm(B_medio)
 
-        return(abs_deltaB_para, abs_deltaB_perp)
+    return(abs_deltaB_para, abs_deltaB_perp)
 
 def error(lamb, B, M, x, dia):
     phi = np.zeros((3,3))

@@ -1,20 +1,17 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import pandas as pd
-from matplotlib.mlab import normpdf
 from scipy.stats import norm
 import cdflib as cdf
 from funciones import find_nearest, unix_to_decimal, plot_select
 import datetime as dt
-import matplotlib.cm as cm
 import matplotlib.dates as md
-
+plt.ion()
 # np.set_printoptions(precision=4)
 
 path = '../../datos/SWEA/' #path a los datos
-cdf_file = cdf.CDF(path + 'mvn_swe_l2_svyspec_20160402_v04_r01.cdf')
+cdf_file = cdf.CDF(path + 'mvn_swe_l2_svyspec_20160316_v04_r01.cdf')
 
-flux = cdf_file.varget('diff_en_fluxes')
+flux_all = cdf_file.varget('diff_en_fluxes')
 energia = cdf_file.varget('energy')
 t_unix = cdf_file.varget('time_unix')
 
@@ -22,7 +19,7 @@ tu = unix_to_decimal(t_unix)
 ti = np.where(tu == find_nearest(tu, 17.9))[0][0]
 tf = np.where(tu == find_nearest(tu, 18.4))[0][0]
 t = tu[ti:tf]
-flux = flux[ti:tf]
+flux = flux_all[ti:tf]
 
 #elijo la energia mas baja
 Ei = find_nearest(energia, 20)
@@ -76,12 +73,15 @@ plt.xticks( rotation=25 )
 ax = plt.gca()
 xfmt = md.DateFormatter('%H:%M:%S')
 ax.xaxis.set_major_formatter(xfmt)
-for j in range(len(flux_cut[0,:])):
-    plt.semilogy(datenums, flux_cut[:,j], label = E[j])
-for xc in [md.date2num(dt.datetime.utcfromtimestamp(t1)),md.date2num(dt.datetime.utcfromtimestamp(t2)),md.date2num(dt.datetime.utcfromtimestamp(t3)),md.date2num(dt.datetime.utcfromtimestamp(t4))]:
-    plt.axvline(x = xc, color = 'black', linewidth=0.5)
+# for j in range(len(flux_cut[0,:])):
+#     plt.semilogy(datenums, flux_cut[:,j], label = E[j])
+# for xc in [md.date2num(dt.datetime.utcfromtimestamp(t1)),md.date2num(dt.datetime.utcfromtimestamp(t2)),md.date2num(dt.datetime.utcfromtimestamp(t3)),md.date2num(dt.datetime.utcfromtimestamp(t4))]:
+#     plt.axvline(x = xc, color = 'black', linewidth=0.5)
+plt.pcolor(np.transpose(np.log(flux)), cmap='magma')
+plt.colorbar()
 plt.legend()
 plt.grid()
 plt.xlabel('Tiempo')
 plt.ylabel('Flujo de electrones (cm⁻² sr⁻¹ s⁻¹)')
-plt.show()
+
+fig = plt.figure()
