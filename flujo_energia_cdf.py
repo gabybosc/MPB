@@ -67,21 +67,28 @@ timestamps = np.linspace(t_inicial, t_final, n)
 dates = [dt.datetime.utcfromtimestamp(ts) for ts in timestamps] #me lo da en UTC
 datenums = md.date2num(dates)
 
+log_flux = np.log(flux)
+log_flux[log_flux<-1000] = None# np.min(log_flux[log_flux>-1000])
+
 plt.figure()
 plt.subplots_adjust(bottom=0.2)
 plt.xticks( rotation=25 )
 ax = plt.gca()
 xfmt = md.DateFormatter('%H:%M:%S')
 ax.xaxis.set_major_formatter(xfmt)
-# for j in range(len(flux_cut[0,:])):
-#     plt.semilogy(datenums, flux_cut[:,j], label = E[j])
-# for xc in [md.date2num(dt.datetime.utcfromtimestamp(t1)),md.date2num(dt.datetime.utcfromtimestamp(t2)),md.date2num(dt.datetime.utcfromtimestamp(t3)),md.date2num(dt.datetime.utcfromtimestamp(t4))]:
-#     plt.axvline(x = xc, color = 'black', linewidth=0.5)
-plt.pcolor(np.transpose(np.log(flux)), cmap='magma')
+plt.imshow(np.transpose(log_flux), aspect = 'auto',origin = 'lower', extent=(datenums[0], datenums[-1],  energia[-1], energia[0]), cmap='inferno')
 plt.colorbar()
-plt.legend()
-plt.grid()
 plt.xlabel('Tiempo')
 plt.ylabel('Flujo de electrones (cm⁻² sr⁻¹ s⁻¹)')
 
-fig = plt.figure()
+plt.figure()
+plt.xticks( rotation=25 )
+plt.imshow(np.transpose(np.log(flux_cut)), aspect = 'auto',origin = 'lower', extent=(datenums[0], datenums[-1], 10, 300), cmap='inferno')
+for j in range(len(flux_cut[0,:])):
+    plt.semilogy(datenums, flux_cut[:,j], label = E[j])
+plt.colorbar()
+ax1 = plt.gca()
+ax1.xaxis.set_major_formatter(xfmt)
+
+
+# fig = plt.figure()

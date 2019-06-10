@@ -1,6 +1,7 @@
 from __future__ import print_function
 from datetime import datetime
 import numpy as np
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib.widgets import RectangleSelector
@@ -21,7 +22,6 @@ def axisEqual3D(ax):
     r = maxsize/2
     for ctr, dim in zip(centers, 'xyz'):
         getattr(ax, 'set_{}lim'.format(dim))(ctr - r, ctr + r)
-
 
 def deltat():
     global x1
@@ -103,6 +103,24 @@ def line_select_callback(eclick, erelease):
     x2, y2 = erelease.xdata, erelease.ydata
     print("(%3.2f, %3.2f) --> (%3.2f, %3.2f)" % (x1, y1, x2, y2))
     # t1, t2 = x1, x2
+
+
+def make_colormap(vmin, vmax, *args):
+    """
+    args = list of colors, in order from vmin to vmax
+    """
+    colors_map_default = ['black', 'darkblue', 'mediumseagreen', 'green', 'red', 'orange', 'yellow']
+
+    if not args:
+        args = colors_map_default
+
+    norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
+    bins = np.linspace(vmin, vmax, len(args))
+
+    colors = [[norm(bins[i]), args[i]] for i in range(len(args))]
+    colormap = mpl.colors.LinearSegmentedColormap.from_list("", colors)
+
+    return colormap
 
 def Mij(B):
     Mij = np.zeros((3,3))
