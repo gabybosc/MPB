@@ -9,15 +9,15 @@ plt.ion()
 # np.set_printoptions(precision=4)
 
 path = '../../datos/SWEA/' #path a los datos
-cdf_file = cdf.CDF(path + 'mvn_swe_l2_svyspec_20160316_v04_r01.cdf')
+cdf_file = cdf.CDF(path + 'mvn_swe_l2_svyspec_20160401_v04_r01.cdf')
 
 flux_all = cdf_file.varget('diff_en_fluxes')
 energia = cdf_file.varget('energy')
 t_unix = cdf_file.varget('time_unix')
 
 tu = unix_to_decimal(t_unix)
-ti = np.where(tu == find_nearest(tu, 17.9))[0][0]
-tf = np.where(tu == find_nearest(tu, 18.4))[0][0]
+ti = np.where(tu == find_nearest(tu, 1))[0][0]
+tf = np.where(tu == find_nearest(tu, 21))[0][0]
 t = tu[ti:tf]
 flux = flux_all[ti:tf]
 
@@ -67,7 +67,7 @@ timestamps = np.linspace(t_inicial, t_final, n)
 dates = [dt.datetime.utcfromtimestamp(ts) for ts in timestamps] #me lo da en UTC
 datenums = md.date2num(dates)
 
-log_flux = np.log(flux)
+log_flux = np.flip(np.log(flux), axis=1)
 log_flux[log_flux<-1000] = None# np.min(log_flux[log_flux>-1000])
 
 plt.figure()
@@ -76,19 +76,21 @@ plt.xticks( rotation=25 )
 ax = plt.gca()
 xfmt = md.DateFormatter('%H:%M:%S')
 ax.xaxis.set_major_formatter(xfmt)
-plt.imshow(np.transpose(log_flux), aspect = 'auto',origin = 'lower', extent=(datenums[0], datenums[-1],  energia[-1], energia[0]), cmap='inferno')
+plt.imshow(np.transpose(log_flux), aspect = 'auto',origin = 'lower', extent=(datenums[0], datenums[-1],  energia[-1], energia[0]), cmap='magma')
 plt.colorbar()
 plt.xlabel('Tiempo')
-plt.ylabel('Flujo de electrones (cm⁻² sr⁻¹ s⁻¹)')
+plt.ylabel('Energía (eV)')
+plt.title('Flujo diferencial de energía de electrones (cm⁻² sr⁻¹ s⁻¹)')
 
-plt.figure()
-plt.xticks( rotation=25 )
-plt.imshow(np.transpose(np.log(flux_cut)), aspect = 'auto',origin = 'lower', extent=(datenums[0], datenums[-1], 10, 300), cmap='inferno')
-for j in range(len(flux_cut[0,:])):
-    plt.semilogy(datenums, flux_cut[:,j], label = E[j])
-plt.colorbar()
-ax1 = plt.gca()
-ax1.xaxis.set_major_formatter(xfmt)
+
+# plt.figure()
+# plt.xticks( rotation=25 )
+# plt.imshow(np.transpose(np.log(flux_cut)), aspect = 'auto',origin = 'lower', extent=(datenums[0], datenums[-1], 10, 300), cmap='inferno')
+# for j in range(len(flux_cut[0,:])):
+#     plt.semilogy(datenums, flux_cut[:,j], label = E[j])
+# plt.colorbar()
+# ax1 = plt.gca()
+# ax1.xaxis.set_major_formatter(xfmt)
 
 
 # fig = plt.figure()

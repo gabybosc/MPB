@@ -12,7 +12,6 @@ import matplotlib.dates as md
 # np.set_printoptions(precision=4)
 def flujo_energia(t1, t2, cdf_file):
 
-
     # np.set_printoptions(precision=4)
 
     path = '../../datos/SWEA/' #path a los datos
