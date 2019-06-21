@@ -55,11 +55,6 @@ for j in range(len(fechas)):
 
     M = np.size(t) #el numero de datos
 
-    #tengo que asegurarme de que no haya agujeros en mis datos
-    for i in range(M-1):
-        if t[i+1] - t[i] > 24 * 1.5e-5: #1.1e-5 es 1s, le doy un poco más
-            print('salto en la linea {} de {} segundos'.format(i+144, (t[i+1] - t[i]) / (24*1.1e-5)))
-
     #el campo
     B = np.zeros((M, 3))
     for i in range(7,10):
@@ -116,7 +111,6 @@ for j in range(len(fechas)):
     #lambda2/lambda3
     print('lambda1 = {0:1.3g} \nlambda2 = {1:1.3g} \nlambda3 = {2:1.3g}'.format(lamb[0], lamb[1], lamb[2]))
     print('lambda2/lambda3 = {0:1.3g}'.format(lamb[1]/lamb[2]))
-    print('La normal es = {}'.format(x3))
     #las proyecciones
     B1 = np.dot(B_cut, x1)
     B2 = np.dot(B_cut, x2)
@@ -124,20 +118,4 @@ for j in range(len(fechas)):
 
     hodograma(B1, B2, B3, 'nT', f'MAVEN MAG MVA fecha {doy}-{year}')
 
-    #el error
-    phi, delta_B3 = error(lamb, B_cut, M_cut, x, dia)
-    print('Matriz de incerteza angular (grados): \n{}'.format(phi  *  180 / np.pi))
-    print('<B3> = {0:1.3g} +- {1:1.3g} nT'.format(np.mean(B3),delta_B3))
-
-
-    if phi[2,1] > phi[2,0]:
-        print('El error phi32 = {0:1.3g}º es mayor a phi31 = {1:1.3g}º'.format(phi[2,1]*57.2958, phi[2,0]*180 / np.pi))
-    else:
-        print('El error phi31 = {0:1.3g}º es mayor a phi32 = {1:1.3g}º'.format(phi[2,0]*57.2958, phi[2,1]*180 / np.pi))
-    #quiero ver si el error más grande es phi31 o phi32
-
-    #el B medio
-    B_medio_vectorial = np.mean(B_cut, axis=0)
-    print('El valor medio de B = {0:1.3g} nT'.format(np.linalg.norm(B_medio_vectorial)))#np.mean(B_cut, 0))) para que me de los tres valores medios
-    print('|B3|/B_medio = ', np.abs(np.mean(B3)/np.linalg.norm(B_medio_vectorial)))
-    print('El valor medio de la altitud = {0:1.3g} km'.format(np.mean(MD_cut[:,8])))
+plt.show()

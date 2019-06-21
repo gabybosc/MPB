@@ -14,6 +14,9 @@ import matplotlib.cm as cm
 
 """
 Le paso un día entero y elijo la órbita y luego elijo los tiempos t1t2t3t4, que va a guardar en un archivo aparte.
+Para elegir, tengo ploteadas:
+cociente de deltaB, módulo de B, BxByBz, el flujo diff de electrones de SWEA.
+Quiero agregar: la densidad de protonces de swia, la densidad de electrones de LPW.
 """
 
 
@@ -25,7 +28,8 @@ np.set_printoptions(precision=4)
 # date_orbit = dt.date(year, month, day)
 
 #si tengo la fecha en dia del año
-date_entry = input('Enter a date in YYYY-DDD format \n')
+# date_entry = input('Enter a date in YYYY-DDD format \n')\
+date_entry = '2016-096'
 year, doty = map(int, date_entry.split('-'))
 date_orbit = dt.datetime(year, 1, 1) + dt.timedelta(doty - 1) #para convertir el doty en date
 
@@ -81,8 +85,10 @@ plt.ylabel('|B|')
 plt.title('Orbitas')
 plt.show()
 
-ti = float(input("Tiempo inicial = "))
-tf = float(input("Tiempo final = "))
+# ti = float(input("Tiempo inicial = "))
+# tf = float(input("Tiempo final = "))
+ti = 5
+tf = 6
 # orbit_number = float(input('Número de órbita = '))
 while tf < ti:
     print('El tiempo inicial no puede ser mayor al final')
@@ -120,7 +126,7 @@ phi_cut = phi[j_inicial+12:j_final+12]
 
 t_plot = t[j_inicial+12:j_final+12]
 
-####ahora el plot del flujo de swea
+###############################################################################################SWEA
 flux_all = swea.varget('diff_en_fluxes')
 energia = swea.varget('energy')
 t_unix = swea.varget('time_unix')
@@ -131,18 +137,39 @@ tf_swea = np.where(tu == find_nearest(tu, tf))[0][0]
 t_swea = tu[ti_swea:tf_swea]
 flux = flux_all[ti_swea:tf_swea]
 
-n = len(flux)
-t_inicial = t_unix[ti_swea]
-t_final = t_unix[tf_swea]
-timestamps = np.linspace(t_inicial, t_final, n)
-dates = [dt.datetime.utcfromtimestamp(ts) for ts in timestamps] #me lo da en UTC
-datenums = md.date2num(dates)
-
 log_flux = np.flip(np.log(flux), axis=1)
 log_flux[log_flux<-1000] = None# np.min(log_flux[log_flux>-1000])
 
+###############################################################################################SWIA
+t_unix = swia.varget('time_unix')
+density = swia.varget('density')
+
+t_swia = unix_to_decimal(t_unix)
+inicio_swia = np.where(t_swia == find_nearest(t_swia, ti))[0][0]
+fin_swia = np.where(t_swia == find_nearest(t_swia, tf))[0][0]
+
+density_cut = density[inicio_swia:fin_swia]
+
+############################################################################################### LPW
+t_unix = lpw.varget('time_unix')
+e_density = lpw.varget('data')[:,3]
+
+t_lpw = unix_to_decimal(t_unix)
+inicio_lpw = np.where(t_lpw == find_nearest(t_lpw, ti))[0][0]
+fin_lpw = np.where(t_lpw == find_nearest(t_lpw, tf))[0][0]
+
+
+
 index = np.array((int(year), dia[0]))#, orbit_number))
 
+
+
+# with open('t1t2t3t4.txt','a') as file:
+#     for k in outs:
+#         file.write('{0:1.7g}\t'.format(k))
+#     file.write('\n')
+
+plt.show(block=False)
 happy = False
 while not happy:
     val = []
@@ -152,7 +179,7 @@ while not happy:
         fig.subplots_adjust(top = 0.95, bottom = 0.1, left = 0.05,right=0.95, hspace = 0.005, wspace=0.15)
         plt.title('Spacebar when ready to click:')
 
-        ax1 = plt.subplot2grid((3,3),(0,0))#421
+        ax1 = plt.subplot2grid((3,2),(0,0))
         plt.plot(t_plot, B_para, linewidth=1, label=r'|$\Delta B \parallel$| / B')
         plt.plot(t_plot, B_perp_norm, '-.', linewidth=1, label=r'|$\Delta B \perp$| / B')
         plt.setp(ax1.get_xticklabels(), visible=False)
@@ -160,76 +187,58 @@ while not happy:
         ax1.grid()
         ax1.legend()
 
-        ax2 = plt.subplot2grid((3,3),(1,0), sharex=ax1,sharey = ax1)
-        plt.plot(t_plot, B_perp[:,0], label='x')
-        plt.plot(t_plot, B_perp[:,1], label='y')
-        plt.plot(t_plot, B_perp[:,2], label='z')
-        plt.setp(ax2.get_xticklabels(), visible=False)
-        ax2.set_ylabel(r'$\Delta B \perp$/ B')
-        ax2.grid()
-        ax2.legend()
-
-        ax3 = plt.subplot2grid((3,3),(0,1), sharex=ax1)
-        plt.plot(t[j_inicial + 12: j_final +12], MD[j_inicial:j_final,4])
-        ax3.grid()
-        ax3.set_ylabel('|B| (nT)')
-        plt.setp(ax3.get_xticklabels(), visible=False)
-
-        ax4 = plt.subplot2grid((3,3),(2,0), sharex=ax1)
+        ax4 = plt.subplot2grid((3,2),(1,0), sharex=ax1)
         ax4.plot(t[j_inicial+12:j_final+12], B[j_inicial:j_final,1], label='By')
         ax4.plot(t[j_inicial+12:j_final+12], B[j_inicial:j_final,0], label='Bx')
         ax4.plot(t[j_inicial + 12: j_final +12], B[j_inicial:j_final,2], label='Bz')
         ax4.set_ylabel('Bx, By, Bz (nT)')
         ax4.legend()
-        ax4.set_xlabel('Tiempo (hdec)')
         ax4.grid()
 
-        ax6 = plt.subplot2grid((3,3),(0,2), sharex=ax1)
-        ax6.set_ylabel(r'$\Theta (º)$')#, bbox=dict(facecolor='red'))
-        ax6.plot(t_plot, theta_cut, linewidth=0.5)
-        plt.setp(ax6.get_xticklabels(), visible=False)
-        ax6.grid()
-        ax7 = plt.subplot2grid((3,3),(1,2), sharex=ax1)
-        plt.plot(t_plot, phi_cut, linewidth=0.5)
-        # plt.setp(ax7.get_xticklabels(), visible=False)
-        ax7.set_ylabel(r'$\phi (º)$')
-        ax7.grid()
-        ax7.set_xlabel('Tiempo (h)')
+        ax3 = plt.subplot2grid((3,2),(2,0), sharex=ax1)
+        plt.plot(t[j_inicial + 12: j_final +12], MD[j_inicial:j_final,4])
+        ax3.grid()
+        ax3.set_ylabel('|B| (nT)')
+        ax3.set_xlabel('Tiempo (hdec)')
 
-        # ax5 = plt.subplot2grid((3,3),(1,1), rowspan=2, sharex=ax1)
-        # ax5.set_ylabel('Flujo (cm⁻² sr⁻¹ s⁻¹)', picker=True)#, bbox=dict(facecolor='red'))
-        # line, = ax5.semilogy(t_flux, flux_cut[:,0], linewidth=1, label = '{0:1.4g} eV'.format(E_flux[0]), picker=5)
-        # fig.canvas.mpl_connect('pick_event', onpick1)
-        # for j in range(1, len(flux_cut[0,:])):
-        #     ax5.semilogy(t_flux, flux_cut[:,j], linewidth=1, label = '{0:1.4g} eV'.format(E_flux[j]))
-        # ax5.legend(loc='lower right', bbox_to_anchor=(1.5, 0))
-        # ax5.set_xlabel('Tiempo (hdec)')
-        # ax5.grid()
-
-        ax5 = plt.subplot2grid((3,3),(1,1), rowspan=2, sharex=ax1)
+        ax5 = plt.subplot2grid((3,2),(0,1), sharex=ax1)
         ax5.imshow(np.transpose(log_flux), aspect = 'auto',origin = 'lower', extent=(t_plot[0], t_plot[-1],  energia[-1], energia[0]), cmap='inferno')
         ax5.set_ylabel('Energia', picker=True)#, bbox=dict(facecolor='red'))
-        ax5.set_xlabel('Tiempo (hdec)')
         ax5.grid()
+        plt.setp(ax5.get_xticklabels(), visible=False)
+
+        ax7 = plt.subplot2grid((3,2),(1,1), sharex=ax1)
+        plt.plot(t_swia[inicio_swia:fin_swia], density_cut)
+        plt.setp(ax7.get_xticklabels(), visible=False)
+        ax7.set_ylabel('Densidad de p+ \n del SW (cm⁻³)')
+        ax7.grid()
+
+        ax6 = plt.subplot2grid((3,2),(2,1), sharex=ax1)
+        plt.semilogy(t_lpw[inicio_lpw:fin_lpw], e_density[inicio_lpw:fin_lpw])
+        plt.setp(ax4.get_xticklabels(), visible=False)
+        ax6.grid()
+        ax6.set_ylabel('Densidad total \n de e- (cm⁻³)')
+        ax6.set_xlabel('Tiempo (hdec)')
+
         fig.canvas.mpl_connect('pick_event', onpick1)
-        multi = MultiCursor(fig.canvas, (ax1, ax2,ax3,ax4,ax5,ax6,ax7), color='black', lw=0.5)
+        multi = MultiCursor(fig.canvas, (ax1, ax3,ax4,ax5,ax6,ax7), color='black', lw=1)
 
         zoom_ok = False
         print('\nSpacebar when ready to click:\n')
         while not zoom_ok:
-            zoom_ok = plt.waitforbuttonpress()
+            zoom_ok = plt.waitforbuttonpress(-1)
         print('Click to select MPB: ')
         val = np.asarray(plt.ginput(4))[:,0]
         print('Selected values: ', val)
         outs = np.concatenate((index, val))
-        # outs = sorted(outs[3:7])
+        outs = sorted(outs[3:7])
 
     print('Happy? Keyboard click for yes, mouse click for no.')
     happy = plt.waitforbuttonpress()
 
-with open('t1t2t3t4.txt','a') as file:
-    for k in outs:
-        file.write('{0:1.5g}\t'.format(k))
-    file.write('\n')
+# with open('t1t2t3t4.txt','a') as file:
+#     for k in outs:
+#         file.write('{0:1.7g}\t'.format(k))
+#     file.write('\n')
 
 plt.show(block=False)

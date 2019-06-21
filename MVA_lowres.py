@@ -7,7 +7,7 @@ from matplotlib.mlab import normpdf
 from scipy.stats import norm
 import datetime as dt
 import scipy.signal as signal
-from funciones import hodograma, error, find_nearest, find_nearest_final, find_nearest_inicial, deltaB, Mij, set_axes_equal,datenum
+from funciones import hodograma, error, find_nearest, find_nearest_final, find_nearest_inicial, deltaB, Mij, set_axes_equal,datenum, unix_to_decimal
 
 """
 Para datos de MAg de baja resolución

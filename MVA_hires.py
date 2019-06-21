@@ -5,16 +5,17 @@ import matplotlib.pyplot as plt
 from matplotlib.mlab import normpdf
 from scipy.stats import norm
 import datetime as dt
+import cdflib as cdf
 import scipy.signal as signal
-from funciones import hodograma, error, find_nearest, find_nearest_final, find_nearest_inicial, deltaB, Mij, set_axes_equal,datenum
+from funciones import hodograma, error, find_nearest, find_nearest_final, find_nearest_inicial, deltaB, Mij, set_axes_equal,datenum, unix_to_decimal
 
 """
 DEBUGGEAR MIRANDO EL LOWRES
 
-Para datos de mag de alta resolución
+Para datos de mag de alta resolución. Para que tarde menos en cargar, skipea las primeras t1*32*3600 rows, lo malo de eso es que a veces no alcanza con esos datos.
 
 Este script pide como user input una fecha (puede ser o fecha dd-mm-aaaa o dia_del_año-año) y los cuatro tiempos t1 t2 t3 t4.
-Eventualmente podría simplemente encontrar todos los cruces que quiero y decirle que lea directamente de algún lugar eso.
+Eventualmente podría simplemente encontrar todos los cruces que quiero y decirle que lea directamente de algún lugar eso. (es lo que hace MVA_automatico)
 Antes de correr este programa hay que haber usado plot_seleccionar_puntos, para tener los cuatro tiempos elegidos.
 Toma los datos de alta resolución y les aplica un filtro pasabajos con ventana Butterworth con frecuencia de corte de 0.1 Hz de orden 3.
 A los datos filtrados les aplica el MVA.
@@ -34,18 +35,34 @@ np.set_printoptions(precision=4)
 
 #si tengo la fecha en dia del año
 date_entry = input('Enter a date in YYYY-DDD format \n')
-year, doty = map(int, date_entry.split('-'))
-date_orbit = dt.datetime(year, 1, 1) + dt.timedelta(doty - 1) #para convertir el doty en date
+
+t1 = float(input("t1 = "))
+t2 = float(input("t2 = "))
+while t2 < t1:
+    print('t2 no puede ser menor a t1. \n')
+    t2 = float(input('t2 = '))
+t3 = float(input("t3 = "))
+while t3 < t2:
+    print('t3 no puede ser menor a t2. \n')
+    t3 = float(input('t3 = '))
+t4 = float(input("t4 = "))
+while t4 < t3:
+    print('t4 no puede ser menor a t3. \n')
+    t4 = float(input('t4 = '))
+
+year, doy = map(int, date_entry.split('-'))
+date_orbit = dt.datetime(year, 1, 1) + dt.timedelta(doy - 1) #para convertir el doty en date
 
 year = date_orbit.strftime("%Y")
 month = date_orbit.strftime("%m")
 day = date_orbit.strftime("%d")
-doty = date_orbit.strftime("%j")
+doy = date_orbit.strftime("%j")
 
 # path = '../../../MAVEN/mag_1s/2016/03/' #path a los datos desde la desktop
 path = '../../datos/' #path a los datos desde la laptop
-mag = np.loadtxt(path + 'MAG_1s/mvn_mag_l2_{0}{3}ss1s_{0}{1}{2}_v01_r01.sts'.format(year, month, day, doty), skiprows=148) #datos MAG 1s (para plotear no quiero los datos pesados)
-lpw = cdf.CDF(path + 'mvn_lpw_l2_lpnt_{0}{1}{2}_v03_r02.cdf'.format(year, month, day, doty))
+n = int(t1*32*3600 - 1000)
+mag = np.loadtxt(path + f'MAG_hires/mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts', skiprows=n) #skipea las filas anteriores a la hora que quiero medir para hacer más rápido
+lpw = cdf.CDF(path + f'LPW/mvn_lpw_l2_lpnt_{year}{month}{day}_v03_r02.cdf')
 
 dia = mag[:,1]
 t = mag[:,6]  #el dia decimal
@@ -78,12 +95,6 @@ for i in range(5,8):
     MD[:,i] = posicion[:,i-5]/3390 #en radios marcianos
 MD[:, 8] = np.linalg.norm(posicion, axis=1) - 3390 #altitud en km
 
-#si quiero elegir entre ciertas horas:
-
-t1 = float(input("t1 = "))
-t2 = float(input("t2 = "))
-t3 = float(input("t3 = "))
-t4 = float(input("t4 = "))
 
 inicio = np.where(t == find_nearest_inicial(t, t2))[0][0]
 fin = np.where(t == find_nearest_final(t, t3))[0][0]
@@ -304,12 +315,12 @@ ax1.legend()
 set_axes_equal(ax1)
 
 #########
-inicio_up = np.where(t == find_nearest_inicial(t, t1-0.015))[0][0] #las 18:12:00
-fin_up = np.where(t == find_nearest_final(t, t1))[0][0] #las 18:13:00
+inicio_up = np.where(t == find_nearest_inicial(t, t1-0.015))[0][0]
+fin_up = np.where(t == find_nearest_final(t, t1))[0][0]
 B_upstream = np.mean(B[inicio_up:fin_up, :], axis=0) #nT
 
-inicio_down = np.where(t == find_nearest_inicial(t, t4))[0][0] #las 18:14:51
-fin_down = np.where(t == find_nearest_final(t, t4+0.015))[0][0] #las 18:15:52
+inicio_down = np.where(t == find_nearest_inicial(t, t4))[0][0]
+fin_down = np.where(t == find_nearest_final(t, t4+0.015))[0][0]
 B_downstream = np.mean(B[inicio_down:fin_down,:], axis=0) #nT
 
 print('B upstream es {} nT y su módulo es {}'.format(B_upstream, np.linalg.norm(B_upstream)))
@@ -344,9 +355,11 @@ print('La fuerza de lorentz del MVA es {} V/m, su magnitud es {}'.format(fuerza_
 print('La fuerza de lorentz del ajuste es {} V/m, su magnitud es {}'.format(fuerza_ajuste, np.linalg.norm(fuerza_ajuste)))
 
 
-e_density = lpw[:,3]
-ti_lpw = np.where(t_lpw == find_nearest(t_lpw, ti))[0][0]
-tf_lpw = np.where(t_lpw == find_nearest(t_lpw, tf))[0][0]
+e_density = lpw.varget('data')[:,3]
+t_unix = lpw.varget('time_unix')
+t_lpw = unix_to_decimal(t_unix)
+ti_lpw = np.where(t_lpw == find_nearest(t_lpw, t2))[0][0]
+tf_lpw = np.where(t_lpw == find_nearest(t_lpw, t3))[0][0]
 n_e = np.nanmean(e_density[ti_lpw:tf_lpw]) #hace el mean ignorando los nans #cm⁻³
 n_e = n_e * 1E6 #m⁻³
 # n_e = 1E7
