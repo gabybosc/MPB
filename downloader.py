@@ -30,20 +30,20 @@ for j in range(len(fechas)):
 
     swia = f'https://pds-ppi.igpp.ucla.edu/ditdos/download?id=pds://PPI/maven.swia.calibrated/data/onboard_svy_mom/{year}/{month}/mvn_swi_l2_onboardsvymom_{year}{month}{day}_v01_r01.cdf'
 
-    with urllib.request.urlopen(mag_hires) as response, open(f'../../datos/MAG_hires/mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts', 'wb') as out_file:
-        shutil.copyfileobj(response, out_file)
-    print(f'mag dia {doy} listo')
+    # with urllib.request.urlopen(mag_hires) as response, open(f'../../datos/MAG_hires/mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts', 'wb') as out_file:
+    #     shutil.copyfileobj(response, out_file)
+    # print(f'mag dia {doy} listo')
 
     with urllib.request.urlopen(swea) as response, open(f'../../datos/SWEA/mvn_swe_l2_svyspec_{year}{month}{day}_v04_r01.cdf', 'wb') as out_file:
         shutil.copyfileobj(response, out_file)
     print(f'swea dia {doy} listo')
 
-    with urllib.request.urlopen(swia) as response, open(f'../../datos/SWIA/mvn_swi_l2_onboardsvymom_{year}{month}{day}_v01_r01.cdf', 'wb') as out_file:
-        shutil.copyfileobj(response, out_file)
-    print(f'swia dia {doy} listo')
-
-    with urllib.request.urlopen(lpw) as response, open(f'../../datos/LPW/mvn_lpw_l2_lpnt_{year}{month}{day}_v03_r02.cdf', 'wb') as out_file:
-        shutil.copyfileobj(response, out_file)
-    print(f'lpw dia {doy} listo')
+    # with urllib.request.urlopen(swia) as response, open(f'../../datos/SWIA/mvn_swi_l2_onboardsvymom_{year}{month}{day}_v01_r01.cdf', 'wb') as out_file:
+    #     shutil.copyfileobj(response, out_file)
+    # print(f'swia dia {doy} listo')
+    #
+    # with urllib.request.urlopen(lpw) as response, open(f'../../datos/LPW/mvn_lpw_l2_lpnt_{year}{month}{day}_v03_r02.cdf', 'wb') as out_file:
+    #     shutil.copyfileobj(response, out_file)
+    # print(f'lpw dia {doy} listo')
 
     print(f'voy {int(j/len(fechas)*100)}%')

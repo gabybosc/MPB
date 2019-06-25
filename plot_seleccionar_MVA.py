@@ -1,9 +1,9 @@
-from __future__ import print_function
+# from __future__ import print_function
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Cursor, MultiCursor
-from matplotlib.mlab import normpdf
-from scipy.stats import norm
+# from matplotlib.mlab import normpdf
+# from scipy.stats import norm
 import cdflib as cdf
 import datetime as dt
 from funciones import find_nearest, deltaB, onpick1, unix_to_decimal
@@ -11,13 +11,13 @@ from funcion_flujo_energia_cdf import flujo_energia
 import time
 import matplotlib.dates as md
 import matplotlib.cm as cm
+import os as os
 
 """
 Le paso un día entero y elijo la órbita y luego elijo los tiempos t1t2t3t4, que va a guardar en un archivo aparte.
-Para elegir, tengo ploteadas:
-cociente de deltaB, módulo de B, BxByBz, el flujo diff de electrones de SWEA.
-Quiero agregar: la densidad de protonces de swia, la densidad de electrones de LPW.
+Para eso, grafica |B|, BxByBz, swea, swia y lpw.
 """
+#se fija que los datos no estén vacíos antes de cargarlos (para ahorrarme el error)
 
 
 np.set_printoptions(precision=4)
@@ -28,24 +28,25 @@ np.set_printoptions(precision=4)
 # date_orbit = dt.date(year, month, day)
 
 #si tengo la fecha en dia del año
-# date_entry = input('Enter a date in YYYY-DDD format \n')\
-date_entry = '2016-096'
-year, doty = map(int, date_entry.split('-'))
-date_orbit = dt.datetime(year, 1, 1) + dt.timedelta(doty - 1) #para convertir el doty en date
+date_entry = input('Enter a date in YYYY-DDD format \n')\
+# date_entry = '2016-066'
+year, doy = map(int, date_entry.split('-'))
+date_orbit = dt.datetime(year, 1, 1) + dt.timedelta(doy - 1) #para convertir el doty en date
 
 year = date_orbit.strftime("%Y")
 month = date_orbit.strftime("%m")
 day = date_orbit.strftime("%d")
-doty = date_orbit.strftime("%j")
+doy = date_orbit.strftime("%j")
 
 # path = '../../../MAVEN/mag_1s/2016/03/' #path a los datos desde la desktop
 path = '../../datos/' #path a los datos desde la laptop
-mag = np.loadtxt(path + 'MAG_1s/subsolares/mvn_mag_l2_{0}{3}ss1s_{0}{1}{2}_v01_r01.sts'.format(year, month, day, doty), skiprows=148) #datos MAG 1s (para plotear no quiero los datos pesados)
-n =2
-mag = mag[:-n, :] #borra las ultimas 2 filas, que es ya el dia siguiente (no sé si siempre)
-swea = cdf.CDF(path + 'SWEA/mvn_swe_l2_svyspec_{0}{1}{2}_v04_r01.cdf'.format(year, month, day, doty))
-swia = cdf.CDF(path + 'SWIA/mvn_swi_l2_onboardsvymom_{0}{1}{2}_v01_r01.cdf'.format(year, month, day, doty))
-lpw = cdf.CDF(path + 'LPW/mvn_lpw_l2_lpnt_{0}{1}{2}_v03_r02.cdf'.format(year, month, day, doty))
+file_size = os.path.getsize(path +  f'MAG_1s/subsolares/mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts')
+if file_size > 12000000:
+    mag = np.loadtxt(path + f'MAG_1s/subsolares/mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts', skiprows=148) #datos MAG 1s (para plotear no quiero los datos pesados)
+    n =2
+    mag = mag[:-n, :] #borra las ultimas 2 filas, que es ya el dia siguiente (no sé si siempre)
+else:
+    print('no hay datos de MAG')
 
 dia = mag[:,1]
 t = mag[:,6]  #el dia decimal
@@ -85,10 +86,10 @@ plt.ylabel('|B|')
 plt.title('Orbitas')
 plt.show()
 
-# ti = float(input("Tiempo inicial = "))
-# tf = float(input("Tiempo final = "))
-ti = 5
-tf = 6
+ti = float(input("Tiempo inicial = "))
+tf = float(input("Tiempo final = "))
+# ti = 5
+# tf = 6
 # orbit_number = float(input('Número de órbita = '))
 while tf < ti:
     print('El tiempo inicial no puede ser mayor al final')
@@ -127,36 +128,55 @@ phi_cut = phi[j_inicial+12:j_final+12]
 t_plot = t[j_inicial+12:j_final+12]
 
 ###############################################################################################SWEA
-flux_all = swea.varget('diff_en_fluxes')
-energia = swea.varget('energy')
-t_unix = swea.varget('time_unix')
+file_size_swea = os.path.getsize(path +  f'SWEA/mvn_swe_l2_svyspec_{year}{month}{day}_v04_r01.cdf')
+if file_size_swea > 23000000:
+    swea = cdf.CDF(path + f'SWEA/mvn_swe_l2_svyspec_{year}{month}{day}_v04_r01.cdf')
 
-tu = unix_to_decimal(t_unix)
-ti_swea = np.where(tu == find_nearest(tu, ti))[0][0]
-tf_swea = np.where(tu == find_nearest(tu, tf))[0][0]
-t_swea = tu[ti_swea:tf_swea]
-flux = flux_all[ti_swea:tf_swea]
+    flux_all = swea.varget('diff_en_fluxes')
+    energia = swea.varget('energy')
+    t_unix = swea.varget('time_unix')
 
-log_flux = np.flip(np.log(flux), axis=1)
-log_flux[log_flux<-1000] = None# np.min(log_flux[log_flux>-1000])
+    tu = unix_to_decimal(t_unix)
+    ti_swea = np.where(tu == find_nearest(tu, ti))[0][0]
+    tf_swea = np.where(tu == find_nearest(tu, tf))[0][0]
+    t_swea = tu[ti_swea:tf_swea]
+    flux = flux_all[ti_swea:tf_swea]
+
+    log_flux = np.flip(np.log(flux), axis=1)
+    log_flux[log_flux<-1000] = None# np.min(log_flux[log_flux>-1000])
+else:
+    print('no hay datos de SWEA')
 
 ###############################################################################################SWIA
-t_unix = swia.varget('time_unix')
-density = swia.varget('density')
+file_size_swia = os.path.getsize(path +f'SWIA/mvn_swi_l2_onboardsvymom_{year}{month}{day}_v01_r01.cdf')
+if file_size_swia > 2300000:
+    swia = cdf.CDF(path + f'SWIA/mvn_swi_l2_onboardsvymom_{year}{month}{day}_v01_r01.cdf')
 
-t_swia = unix_to_decimal(t_unix)
-inicio_swia = np.where(t_swia == find_nearest(t_swia, ti))[0][0]
-fin_swia = np.where(t_swia == find_nearest(t_swia, tf))[0][0]
+    t_unix = swia.varget('time_unix')
+    density = swia.varget('density')
 
-density_cut = density[inicio_swia:fin_swia]
+    t_swia = unix_to_decimal(t_unix)
+    inicio_swia = np.where(t_swia == find_nearest(t_swia, ti))[0][0]
+    fin_swia = np.where(t_swia == find_nearest(t_swia, tf))[0][0]
+
+    density_cut = density[inicio_swia:fin_swia]
+else:
+    print('no hay datos de SWIA')
 
 ############################################################################################### LPW
-t_unix = lpw.varget('time_unix')
-e_density = lpw.varget('data')[:,3]
+file_size_lpw = os.path.getsize(path +  f'LPW/mvn_lpw_l2_lpnt_{year}{month}{day}_v03_r02.cdf')
+if file_size_lpw > 3000000:
+    lpw = cdf.CDF(path + f'LPW/mvn_lpw_l2_lpnt_{year}{month}{day}_v03_r02.cdf')
 
-t_lpw = unix_to_decimal(t_unix)
-inicio_lpw = np.where(t_lpw == find_nearest(t_lpw, ti))[0][0]
-fin_lpw = np.where(t_lpw == find_nearest(t_lpw, tf))[0][0]
+    t_unix = lpw.varget('time_unix')
+    e_density = lpw.varget('data')[:,3]
+
+    t_lpw = unix_to_decimal(t_unix)
+    inicio_lpw = np.where(t_lpw == find_nearest(t_lpw, ti))[0][0]
+    fin_lpw = np.where(t_lpw == find_nearest(t_lpw, tf))[0][0]
+
+else:
+    print('no hay datos de LPW')
 
 
 
@@ -191,6 +211,7 @@ while not happy:
         ax4.plot(t[j_inicial+12:j_final+12], B[j_inicial:j_final,1], label='By')
         ax4.plot(t[j_inicial+12:j_final+12], B[j_inicial:j_final,0], label='Bx')
         ax4.plot(t[j_inicial + 12: j_final +12], B[j_inicial:j_final,2], label='Bz')
+        plt.setp(ax4.get_xticklabels(), visible=False)
         ax4.set_ylabel('Bx, By, Bz (nT)')
         ax4.legend()
         ax4.grid()
@@ -202,23 +223,25 @@ while not happy:
         ax3.set_xlabel('Tiempo (hdec)')
 
         ax5 = plt.subplot2grid((3,2),(0,1), sharex=ax1)
-        ax5.imshow(np.transpose(log_flux), aspect = 'auto',origin = 'lower', extent=(t_plot[0], t_plot[-1],  energia[-1], energia[0]), cmap='inferno')
         ax5.set_ylabel('Energia', picker=True)#, bbox=dict(facecolor='red'))
-        ax5.grid()
         plt.setp(ax5.get_xticklabels(), visible=False)
+        if file_size_swea > 23000000:
+            ax5.imshow(np.transpose(log_flux), aspect = 'auto',origin = 'lower', extent=(t_plot[0], t_plot[-1],  energia[-1], energia[0]), cmap='inferno')
+            ax5.grid()
 
         ax7 = plt.subplot2grid((3,2),(1,1), sharex=ax1)
-        plt.plot(t_swia[inicio_swia:fin_swia], density_cut)
         plt.setp(ax7.get_xticklabels(), visible=False)
         ax7.set_ylabel('Densidad de p+ \n del SW (cm⁻³)')
-        ax7.grid()
+        if file_size_swia > 2300000:
+            plt.plot(t_swia[inicio_swia:fin_swia], density_cut)
+            ax7.grid()
 
         ax6 = plt.subplot2grid((3,2),(2,1), sharex=ax1)
-        plt.semilogy(t_lpw[inicio_lpw:fin_lpw], e_density[inicio_lpw:fin_lpw])
-        plt.setp(ax4.get_xticklabels(), visible=False)
-        ax6.grid()
         ax6.set_ylabel('Densidad total \n de e- (cm⁻³)')
         ax6.set_xlabel('Tiempo (hdec)')
+        if file_size_lpw > 3000000:
+            plt.semilogy(t_lpw[inicio_lpw:fin_lpw], e_density[inicio_lpw:fin_lpw])
+            ax6.grid()
 
         fig.canvas.mpl_connect('pick_event', onpick1)
         multi = MultiCursor(fig.canvas, (ax1, ax3,ax4,ax5,ax6,ax7), color='black', lw=1)
