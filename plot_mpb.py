@@ -15,7 +15,7 @@ import matplotlib.cm as cm
 
 np.set_printoptions(precision=4)
 
-"""
+"""  
 CORREGIR PARA QUE USE CDFLIB
 
 Este script plotea mag, swea, swia y lpw en la región de interés y de nuevo en una región zoomeada
