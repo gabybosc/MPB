@@ -74,10 +74,10 @@ MD = np.zeros((M, 9))
 MD[:, 0] = t
 for i in range(1,4):
     MD[:, i] = B[:,i-1]
-MD[:,4] = np.sqrt(B[:,0]**2 + B[:,1]**2 + B[:,2]**2)#el modulo de B
+MD[:,4] = np.linalg.norm(B, axis = 1)
 for i in range(5,8):
     MD[:,i] = posicion[:,i-5]/3390 #en radios marcianos
-MD[:, 8] = np.sqrt(posicion[:,0]**2 + posicion[:,1]**2 + posicion[:,2]**2) - 3390 #altitud en km
+MD[:, 8] = np.linalg.norm(posicion, axis=1) - 3390 #altitud en km
 
 #Si quiero elegir manualmente la orbita:
 plt.plot(t, MD[:,4])
@@ -88,9 +88,7 @@ plt.show()
 
 ti = float(input("Tiempo inicial = "))
 tf = float(input("Tiempo final = "))
-# ti = 5
-# tf = 6
-# orbit_number = float(input('Número de órbita = '))
+
 while tf < ti:
     print('El tiempo inicial no puede ser mayor al final')
     ti = float(input("Tiempo inicial = "))
@@ -180,16 +178,9 @@ else:
 
 
 
-index = np.array((int(year), dia[0]))#, orbit_number))
+index = np.array((int(year), dia[0]))
 
 
-
-# with open('t1t2t3t4.txt','a') as file:
-#     for k in outs:
-#         file.write('{0:1.7g}\t'.format(k))
-#     file.write('\n')
-
-plt.show(block=False)
 happy = False
 while not happy:
     val = []

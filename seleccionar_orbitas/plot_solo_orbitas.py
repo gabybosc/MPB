@@ -17,7 +17,8 @@ np.set_printoptions(precision=4)
 
 # path = '../../../MAVEN/mag_1s/2016/03/' #path a los datos
 # path = '../../datos/MAG_1s/'
-path = glob.glob('../../datos/MAG_1s/subsolares/*.sts')
+year = input('Year\n')
+path = glob.glob(f'../../datos/MAG_1s/{year}/*.sts')
 
 for i,j in enumerate(path): #loop en todos los archivos .sts para cada año. i me da el índice en la lista, j me da el archivo
     # datos = np.loadtxt(path + f'mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts', skiprows=148) #lee todo y me da todo
@@ -62,7 +63,7 @@ for i,j in enumerate(path): #loop en todos los archivos .sts para cada año. i m
     plt.plot(t, MD[:,4])
     plt.xlabel('t (hdec)')
     plt.ylabel('|B|')
-    plt.ylim([-1, 50])
+    plt.ylim([-1, 80])
     plt.title(f'Orbitas del dia {dia[0]}')
 
 plt.show()

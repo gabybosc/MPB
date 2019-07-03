@@ -34,21 +34,25 @@ np.set_printoptions(precision=4)
 # date_orbit = dt.date(year, month, day)
 
 #si tengo la fecha en dia del año
-date_entry = input('Enter a date in YYYY-DDD format \n')
+date_entry = '2016-076'#input('Enter a date in YYYY-DDD format \n')
+t1 = 18.260
+t2 = 18.265
+t3 = 18.275
+t4 = 18.280
 
-t1 = float(input("t1 = "))
-t2 = float(input("t2 = "))
-while t2 < t1:
-    print('t2 no puede ser menor a t1. \n')
-    t2 = float(input('t2 = '))
-t3 = float(input("t3 = "))
-while t3 < t2:
-    print('t3 no puede ser menor a t2. \n')
-    t3 = float(input('t3 = '))
-t4 = float(input("t4 = "))
-while t4 < t3:
-    print('t4 no puede ser menor a t3. \n')
-    t4 = float(input('t4 = '))
+# t1 = float(input("t1 = "))
+# t2 = float(input("t2 = "))
+# while t2 < t1:
+#     print('t2 no puede ser menor a t1. \n')
+#     t2 = float(input('t2 = '))
+# t3 = float(input("t3 = "))
+# while t3 < t2:
+#     print('t3 no puede ser menor a t2. \n')
+#     t3 = float(input('t3 = '))
+# t4 = float(input("t4 = "))
+# while t4 < t3:
+#     print('t4 no puede ser menor a t3. \n')
+#     t4 = float(input('t4 = '))
 
 year, doy = map(int, date_entry.split('-'))
 date_orbit = dt.datetime(year, 1, 1) + dt.timedelta(doy - 1) #para convertir el doty en date
@@ -61,7 +65,7 @@ doy = date_orbit.strftime("%j")
 # path = '../../../MAVEN/mag_1s/2016/03/' #path a los datos desde la desktop
 path = '../../datos/' #path a los datos desde la laptop
 n = int(t1*32*3600 - 1000)
-mag = np.loadtxt(path + f'MAG_hires/mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts', skiprows=n) #skipea las filas anteriores a la hora que quiero medir para hacer más rápido
+mag = np.genfromtxt(path + f'MAG_hires/mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts', skip_header=n, skip_footer=1000) #skipea las filas anteriores a la hora que quiero medir para hacer más rápido
 lpw = cdf.CDF(path + f'LPW/mvn_lpw_l2_lpnt_{year}{month}{day}_v03_r02.cdf')
 
 dia = mag[:,1]
