@@ -5,18 +5,25 @@ El problema es que no puede asegurarse de que existan los archivos antes porque 
 
 import urllib.request
 import shutil
+import os as os
 import numpy as np
 import datetime as dt
 
+np.set_printoptions(precision=4)
+
 year = input('Year\n')
-fechas = np.loadtxt(f'outputs/fechas_buenas_{year}.txt', skiprows = 1)
-lista = []
-for j in range(len(fechas)):
-    lista = np.append(lista, int(fechas[j, 0]))
+# fechas = np.loadtxt(f'outputs/fechas_buenas_{year}.txt', skiprows = 1)
+# lista = []
+# for j in range(len(fechas)):
+#     lista = np.append(lista, int(fechas[j, 0]))
+#
+# lista = set(lista) #me saca los repetidos
 
-lista = set(lista) #me saca los repetidos
+directory = f'../../../../../media/gabybosc/datos/MAG_1s/{year}/'
+if not os.path.exists(directory):
+    os.makedirs(directory)
 
-for doy in lista:
+for doy in range(0,366):
     date_orbit = dt.datetime(int(year), 1, 1) + dt.timedelta(int(doy) - 1) #para convertir el doty en date
 
     year = date_orbit.strftime("%Y")
@@ -26,6 +33,6 @@ for doy in lista:
 
     mag_1s = f'https://pds-ppi.igpp.ucla.edu/ditdos/download?id=pds://PPI/maven.mag.calibrated/data/ss/1sec/{year}/{month}/mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts'
 
-    with urllib.request.urlopen(mag_1s) as response, open(f'../../datos/MAG_1s/{year}/mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts', 'wb') as out_file:
+    with urllib.request.urlopen(mag_1s) as response, open(directory + f'mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts', 'wb') as out_file:
         shutil.copyfileobj(response, out_file)
-    print(f'mag dia {doy} listo')
+    print(f'{int(doy) * 100/366:.2f}%')
