@@ -26,7 +26,7 @@ if not os.path.exists(directory):
 for doy in range(0,366):
     date_orbit = dt.datetime(int(year), 1, 1) + dt.timedelta(int(doy) - 1) #para convertir el doty en date
 
-    year = date_orbit.strftime("%Y")
+    #no puedo pasarle así year (más allá de que sería redundante) porque flashea y se me va al año anterior.
     month = date_orbit.strftime("%m")
     day = date_orbit.strftime("%d")
     doy = date_orbit.strftime("%j")
