@@ -3,43 +3,42 @@ import matplotlib.pyplot as plt
 from matplotlib.widgets import Cursor, MultiCursor
 from matplotlib.mlab import normpdf
 from scipy.stats import norm
-import spacepy.pycdf as cdf
+import cdflib as cdf
 from datetime import datetime
 from funciones import find_nearest, deltaB, onpick1, unix_to_decimal, plot_select, set_axes_equal, datenum
 from funcion_flujo_energia_cdf import flujo_energia
 import matplotlib.dates as md
 import datetime as dt
-import time
-from datetime import datetime
 import matplotlib.cm as cm
 
 np.set_printoptions(precision=4)
 
-"""  
+"""
 CORREGIR PARA QUE USE CDFLIB
+CORREGIR EL PLOT DE SWEA
 
 Este script plotea mag, swea, swia y lpw en la región de interés y de nuevo en una región zoomeada
 Es como la figura pricipal en mi tesis.
 
-Hay que corregir el SWEA para que sea un imshow. Ver plot_seleccionar_MVA.py
 """
 
 
 
 #DATOS DE PDS
-# dia = input("dia del mes = ")
-# diaa = input('dia del año = ')
-dia = 16
-diaa = 76
-path = 'datos/marzo 2016/{}/'.format(dia) #path a los datos
-datos = np.loadtxt(path + 'mvn_mag_l2_20160{}ss1s_201603{}_v01_r01.sts'.format(diaa, dia), skiprows=148) #lee todo y me da todo
+# day = input("dia del mes = ")
+# doy = input('dia del año = ')
+day = 16
+doy = '076'
+path = f'datos/marzo 2016/{day}/'
+datos = np.loadtxt(path + f'mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts', skiprows=148) #lee todo y me da todo
 n =2
 datos = datos[:-n, :] #borra las ultimas 2 filas, que es ya el dia siguiente (no sé si siempre)
-cdf_swea = cdf.CDF(path + 'mvn_swe_l2_svyspec_201603{}_v04_r01.cdf'.format(dia))
-cdf_swia = cdf.CDF(path + 'mvn_swi_l2_onboardsvymom_201603{}_v01_r01.cdf'.format(dia))
-lpw = np.loadtxt(path + 'mvn_kp_insitu_20160316_v14_r03.tab') #son los datos entre las 18 y las 19h
 
-t_lpw = lpw[:,0] + lpw[:,1]/60 + lpw[:,2]/3600
+swea = cdf.CDF(path + f'SWEA/mvn_swe_l2_svyspec_{year}{month}{day}_v04_r01.cdf')
+swia = cdf.CDF(path + f'mvn_swi_l2_onboardsvymom_{year}{month}{day}_v01_r01.cdf')
+lpw = cdf.CDF(path + f'LPW/mvn_lpw_l2_lpnt_{year}{month}{day}_v03_r02.cdf')
+
+
 
 dia = datos[:,1]
 t = datos[:,6]  #el dia decimal
@@ -100,9 +99,10 @@ for j in range(j_inicial, j_final):
 
 
 ########## SWEA
-t_flux, flux_cut, E_flux = flujo_energia(17.85, 18.4, cdf_swea) #t_flux es diferente, pues viene del cdf
+flux_all = swea.varget('diff_en_fluxes')
+energia = swea.varget('energy')
 
-t_unix_e = np.asarray(cdf_swea['time_unix'][...])
+t_unix_e = swea.varget('time_unix')
 
 t_swea = unix_to_decimal(t_unix_e)
 inicio_e = np.where(t_swea == find_nearest(t_swea, 17.85))[0][0]
@@ -117,8 +117,8 @@ datenums_swea = md.date2num(dates_swea)
 
 
 ######## densidad SWIA
-t_unix = np.asarray(cdf_swia['time_unix'][...]) #no olvidarse los ...!
-density = np.asarray(cdf_swia['density'][...])
+t_unix = swia.varget('time_unix')
+density = swia.varget('density')
 
 t_swia = unix_to_decimal(t_unix)
 inicio = np.where(t_swia == find_nearest(t_swia, 17.85))[0][0]
@@ -134,7 +134,10 @@ dates_swia = [dt.datetime.utcfromtimestamp(ts) for ts in timestamps_swia] #me lo
 datenums_swia = md.date2num(dates_swia)
 
 ####### densidad electrones
-e_density = lpw[:,3]
+t_unix_lpw = lpw.varget('time_unix')
+e_density = lpw.varget('density')
+t_lpw = unix_to_decimal(t_unix_lpw)
+
 ti_lpw = np.where(t_lpw == find_nearest(t_lpw, 17.85))[0][0]
 tf_lpw = np.where(t_lpw == find_nearest(t_lpw, 18.4))[0][0]
 
@@ -192,20 +195,16 @@ plt.ylabel('|B| (nT)')
 plt.setp(ax2.get_xticklabels(), visible=False)
 
 ax3 = plt.subplot2grid((5,1),(2,0), sharex=ax1)
-ax3.xaxis.set_major_formatter(xfmt)
-ax3.set_ylabel('Flujo de e- del SW \n (cm⁻² sr⁻¹ s⁻¹)')
-line, = ax3.semilogy(datenums_swea, flux_cut[:,0], linewidth=1, label = '{} eV'.format(int(E_flux[0])), picker=5)
-for j in range(1, len(flux_cut[0,:])):
-    ax3.semilogy(datenums_swea, flux_cut[:,j], linewidth=1, label = '{} eV'.format(int(E_flux[j])))
-    ax3.legend(loc='lower right', bbox_to_anchor=(1.5, 0))
+ax3.set_ylabel('Energia')#, bbox=dict(facecolor='red'))
+plt.setp(ax3.get_xticklabels(), visible=False)
+ax3.imshow(np.transpose(log_flux), aspect = 'auto',origin = 'lower', extent=(t_plot[0], t_plot[-1],  energia[-1], energia[0]), cmap='inferno')
+ax3.grid()
 # for xc in [t1,tiempo_mag[t2],tiempo_mag[t3],tiempo_mag[t4]]:
 #     plt.axvline(x = xc, color = 'k', linewidth=1)
 # plt.axvline(x = tiempo_mag[t_bs], color = 'm', linewidth=1)
-ax3.axvspan(xmin = tiempo_mag[t_bs], xmax = t1, facecolor = 'r', alpha = 0.2)
-ax3.axvspan(xmin = tiempo_mag[t4], xmax = datetime(2016,3,16,18,19,13), facecolor = 'yellow', alpha = 0.2)
+# ax3.axvspan(xmin = tiempo_mag[t_bs], xmax = t1, facecolor = 'r', alpha = 0.2)
+# ax3.axvspan(xmin = tiempo_mag[t4], xmax = datetime(2016,3,16,18,19,13), facecolor = 'yellow', alpha = 0.2)
 # ax3.legend(fontsize='small', loc='left')
-plt.setp(ax3.get_xticklabels(), visible=False)
-ax3.grid()
 
 ax4 = plt.subplot2grid((5,1),(3,0), sharex=ax1)
 plt.semilogy(tiempo_lpw, e_density[ti_lpw:tf_lpw])

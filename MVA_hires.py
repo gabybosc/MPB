@@ -7,7 +7,8 @@ from scipy.stats import norm
 import datetime as dt
 import cdflib as cdf
 import scipy.signal as signal
-from funciones import hodograma, error, find_nearest, find_nearest_final, find_nearest_inicial, deltaB, Mij, set_axes_equal,datenum, unix_to_decimal
+from funciones import error, find_nearest, find_nearest_final, find_nearest_inicial, deltaB, Mij, datenum, unix_to_decimal
+from funciones_plot import hodograma, set_axes_equal
 
 """
 DEBUGGEAR MIRANDO EL LOWRES
@@ -152,7 +153,7 @@ B3 = np.dot(B_cut, x3)
 hodograma(B1, B2, B3, 'nT', 'MAVEN MAG MVA')
 
 #el error
-phi, delta_B3 = error(lamb, B_cut, M_cut, x, dia)
+phi, delta_B3 = error(lamb, B_cut, M_cut, x)
 print('Matriz de incerteza angular (grados): \n{}'.format(phi  *  180 / np.pi))
 print('<B3> = {0:1.3g} +- {1:1.3g} nT'.format(np.mean(B3),delta_B3))
 

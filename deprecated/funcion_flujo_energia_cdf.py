@@ -4,7 +4,8 @@ import pandas as pd
 from matplotlib.mlab import normpdf
 from scipy.stats import norm
 import cdflib as cdf
-from funciones import find_nearest, unix_to_decimal, plot_select
+from funciones import find_nearest, unix_to_decimal
+from funciones_plot import plot_select
 import datetime as dt
 import matplotlib.cm as cm
 import matplotlib.dates as md

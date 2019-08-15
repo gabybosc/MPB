@@ -5,9 +5,14 @@ Plotea los archivos que devuelve escalas_lambda.py
 import matplotlib.pyplot as plt
 import numpy as np
 import datetime as dt
-from funciones import find_nearest
+from funciones import find_nearest, array_datenums
+from funciones_plot import imshow_UTC, plot_datetime
+import matplotlib.dates as md
+plt.ion()
 
-date_entry = input('Enter a date in YYYY-DDD format \n')\
+
+date_entry = input('Enter a date in YYYY-DDD format \n')
+hora = input('Hora de la orbita \n')
 # date_entry = '2016-066'
 year, doy = map(int, date_entry.split('-'))
 date_orbit = dt.datetime(year, 1, 1) + dt.timedelta(doy - 1) #para convertir el doty en date
@@ -19,7 +24,7 @@ doy = date_orbit.strftime("%j")
 
 # path = '../../../MAVEN/mag_1s/2016/03/' #path a los datos desde la desktop
 path = '../../datos/' #path a los datos desde la laptop
-datos = np.loadtxt(f'outputs/cociente_lambdas_{doy}.txt', skiprows = 1)
+datos = np.loadtxt(f'outputs/cociente_lambdas_d{doy}_t{hora}.txt', skiprows = 1)
 
 periodo_ciclotron = datos[1:,0]
 tiempo_central = datos[1:,1]
@@ -50,26 +55,24 @@ B_norm = np.linalg.norm(B, axis = 1)
 B_cut = B_norm[inicio:fin]
 t_cut = t[inicio:fin]
 
-plt.figure()
-plt.imshow(cociente,aspect = 'auto',origin = 'lower', extent=(tiempo_central[0], tiempo_central[-1], escalas[0], escalas[-1]), cmap='inferno', vmax=30)
-plt.plot(tiempo_central, periodo_ciclotron / 3600)
-plt.colorbar()
-plt.xlabel('Tiempo en el que está centrado (hdec)')
-plt.ylabel('Diámetro (hdec)')
-plt.title('Heatmap del cociente de lambdas en distintas escalas temporales')
+inicio_MVA = np.where(t == find_nearest(t, tiempo_central[0]))[0][0]
+fin_MVA = np.where(t == find_nearest(t, tiempo_central[-1]))[0][0]
+B_MVA = B_norm[inicio_MVA:fin_MVA]
+t_MVA = t[inicio_MVA:fin_MVA]
 
 plt.figure()
-plt.plot(t_cut, B_cut)
-plt.xlabel('t (hdec)')
-plt.ylabel('|B|')
-plt.grid()
-plt.title('MAG hires')
+imshow_UTC(year, month, day, tiempo_central, cociente, escalas, 'inferno')
+plot_datetime(year, month, day,t_MVA, B_MVA, 'cyan', '-', 1, 0.5)
 plt.show(block= False)
+plt.title('Heatmap del cociente de lambdas en distintas escalas temporales \n y el campo magnético superpuesto')
+plt.xlabel('Tiempo en el que está centrado (hh:mm:ss)')
+plt.ylabel('Radio (s) \n |B| (nT)')
 
+plt.figure()
+plot_datetime(year, month, day,t_cut, B_cut, 'red', '-', 1, 1)
+plt.ylabel('|B| (nT)')
+plt.xlabel('Tiempo UTC (hh:mm:ss)')
 
 """
-pasar todoa  segundos
-ver si es radio o diametro
-poner el modulo de B arriba o superpuesto
 pensar criterio para la escala maxima
 """

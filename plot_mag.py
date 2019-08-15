@@ -3,6 +3,10 @@ import matplotlib.pyplot as plt
 import datetime as dt
 from funciones import find_nearest
 
+"""
+Plotea sólo los datos de MAG de alta resolución
+"""
+
 np.set_printoptions(precision=4)
 
 date_entry = input('Enter a date in YYYY-DDD format \n')\

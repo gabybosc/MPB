@@ -1,13 +1,10 @@
-from mpl_toolkits.mplot3d import Axes3D
-from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.mlab import normpdf
 from scipy.stats import norm
-# import spacepy.pycdf as cdf
 from datetime import datetime
-from funciones import hodograma, error, find_nearest, find_nearest_final, find_nearest_inicial, deltaB, Mij, set_axes_equal,datenum
-# from funcion_flujo_energia_cdf import flujo_energia
+from funciones import hodograma, error, find_nearest, find_nearest_final, find_nearest_inicial, deltaB, Mij,datenum
+from funciones_plot import hodograma, set_axes_equal
 
 np.set_printoptions(precision=4)
 
@@ -82,7 +79,7 @@ B2 = np.dot(B_cut, x2)
 B3 = np.dot(B_cut, x3)
 
 #el error
-phi, delta_B3 = error(lamb, B_cut, M_cut, x, dia)
+phi, delta_B3 = error(lamb, B_cut, M_cut, x)
 # print('Matriz de incerteza angular (grados): \n{}'.format(phi  *  57.2958))
 print('<B3> = {0:1.3g} +- {1:1.3g} nT'.format(np.mean(B3),delta_B3))
 

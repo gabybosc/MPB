@@ -1,13 +1,12 @@
-from mpl_toolkits.mplot3d import Axes3D
-from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 import numpy as np
 import matplotlib.pyplot as plt
 import cdflib as cdf
 from matplotlib.mlab import normpdf
 from scipy.stats import norm
 import datetime as dt
-import scipy.signal as signal
-from funciones import hodograma, error, find_nearest, find_nearest_final, find_nearest_inicial, deltaB, Mij, set_axes_equal,datenum, unix_to_decimal
+from funciones import error, find_nearest, find_nearest_final, find_nearest_inicial, deltaB, Mij, datenum, unix_to_decimal
+from funciones_MVA import ajuste_conico
+from funciones_plot import hodograma, set_axes_equal
 
 """
 Para datos de MAg de baja resolución
@@ -32,7 +31,8 @@ np.set_printoptions(precision=4)
 # date_orbit = dt.date(year, month, day)
 
 #si tengo la fecha en dia del año
-date_entry = input('Enter a date in YYYY-DDD format \n')
+# date_entry = input('Enter a date in YYYY-DDD format \n')
+date_entry = '2016-076'
 year, doty = map(int, date_entry.split('-'))
 date_orbit = dt.datetime(year, 1, 1) + dt.timedelta(doty - 1) #para convertir el doty en date
 
@@ -43,7 +43,7 @@ doty = date_orbit.strftime("%j")
 
 # path = '../../../MAVEN/mag_1s/2016/03/' #path a los datos desde la desktop
 path = '../../datos/' #path a los datos desde la laptop
-mag = np.loadtxt(path + 'MAG_1s/subsolares/mvn_mag_l2_{0}{3}ss1s_{0}{1}{2}_v01_r01.sts'.format(year, month, day, doty), skiprows=148) #datos MAG 1s (para plotear no quiero los datos pesados)
+mag = np.loadtxt(path + 'MAG_1s/2016/mvn_mag_l2_{0}{3}ss1s_{0}{1}{2}_v01_r01.sts'.format(year, month, day, doty), skiprows=148) #datos MAG 1s (para plotear no quiero los datos pesados)
 lpw = cdf.CDF(path + f'LPW/mvn_lpw_l2_lpnt_{year}{month}{day}_v03_r02.cdf')
 #para ver las varaibles del cdf:
 # lpw.cdf_info()
@@ -81,10 +81,14 @@ MD[:, 8] = np.linalg.norm(posicion, axis=1) - 3390 #altitud en km
 
 #si quiero elegir entre ciertas horas:
 
-t1 = float(input("t1 = "))
-t2 = float(input("t2 = "))
-t3 = float(input("t3 = "))
-t4 = float(input("t4 = "))
+# t1 = float(input("t1 = "))
+# t2 = float(input("t2 = "))
+# t3 = float(input("t3 = "))
+# t4 = float(input("t4 = "))
+t1 = 18.2167
+t2 = 18.2204
+t3 = 18.235
+t4 = 18.2476
 
 inicio = np.where(t == find_nearest_inicial(t, t2))[0][0]
 fin = np.where(t == find_nearest_final(t, t3))[0][0]
@@ -131,7 +135,7 @@ B3 = np.dot(B_cut, x3)
 hodograma(B1, B2, B3, 'nT', 'MAVEN MAG MVA ')
 
 #el error
-phi, delta_B3 = error(lamb, B_cut, M_cut, x, dia)
+phi, delta_B3 = error(lamb, B_cut, M_cut, x)
 print('Matriz de incerteza angular (grados): \n{}'.format(phi  *  180 / np.pi))
 print('<B3> = {0:1.3g} +- {1:1.3g} nT'.format(np.mean(B3),delta_B3))
 
@@ -152,60 +156,43 @@ print('El valor medio de la altitud = {0:1.3g} km'.format(np.mean(MD_cut[:,8])))
 ###############
 orbita = posicion[np.where(t == find_nearest_inicial(t, t1-1))[0][0] : np.where(t == find_nearest_final(t, t4+1))[0][0], :] / 3390 #radios marcianos
 
-# usamos vignes et al:
-x0 = 0.78
-e = 0.9
-L = 0.96
-
-#ec conica
-theta = np.linspace(0, np.pi *3/4, 100)
-phi = np.linspace(0, 2 * np.pi, 100)
-THETA, PHI = np.meshgrid(theta, phi)
-
-r = L / (1 + e * np.cos(THETA))
 
 ####dibujamos el punto por el que pasa la nave:
 t_nave = find_nearest(t,(t2+t3)/2) #el tiempo en el medio de la hoja de corriente
 index = np.where(t == t_nave)[0][0]
-R = posicion[index,:] / 3390 #la posicion de la nave en RM
+x0 = 0.78
+e = 0.9
+norm_vignes, X1, Y1, Z1 = ajuste_conico(posicion, index, orbita, x3)
 
-
-####### Calculo mi propia elipse que pase por el punto.
-r0 = R - np.array([x0,0,0])
-theta0 = np.arccos(r0[0] / np.linalg.norm(r0))
-
-L0 = np.linalg.norm(r0) * (1 + e * np.cos(theta0))
-r1 = L0 / (1 + e * np.cos(THETA))
-
-
-fig = plt.figure()
-ax = fig.add_subplot(1,1,1, projection='3d')
-ax.set_xlabel(r'$X_{MSO} (R_m)$')
-ax.set_ylabel(r'$Y_{MSO} (R_m)$')
-ax.set_zlabel(r'$Z_{MSO} (R_m)$')
-ax.set_aspect('equal')
-ax.plot(orbita[:,0], orbita[:,1], orbita[:,2], color='green', label='Órbita')
-ax.scatter(R[0], R[1], R[2], label='MAVEN', color='k', s=40)#, marker='x')
-X1 = x0 + r1 * np.cos(THETA)
-Y1 = r1 * np.sin(THETA) * np.cos(PHI)
-Z1 = r1 * np.sin(THETA) * np.sin(PHI)
-plot = ax.plot_surface(
-    X1, Y1, Z1, rstride=4, cstride=4, alpha=0.5, edgecolor='none', cmap=plt.get_cmap('Blues_r'))
-asc = L0 / (1 - e**2)  #semieje mayor
-bsc = np.sqrt(asc*L0)
-csc = e*asc - x0 #donde está centrada. Hay que ver el signo
-
-norm_vignes = np.array([(R[0]+csc)*2 / asc**2, R[1]*2 / (bsc)**2, R[2]*2 / (bsc)**2]) #la normal de vignes
-norm_vignes = norm_vignes/np.linalg.norm(norm_vignes) #normalizado
-ax.quiver(R[0], R[1], R[2], norm_vignes[0], norm_vignes[1], norm_vignes[2], color='b',length=0.5, label='Normal del ajuste') #asi se plotea un vector
-ax.quiver(R[0], R[1], R[2], x3[0], x3[1], x3[2], color='k',length=0.5, label='Normal del MVA')
-# normal_boot = np.array([0.9183, 0.3186, 0.2351])
-# ax.quiver(R[0], R[1], R[2], normal_boot[0], normal_boot[1], normal_boot[2], color='m',length=0.5, label='Normal del bootstrap')
-
-u, v = np.mgrid[0:2*np.pi:20j, 0:np.pi:10j]
-ax.plot_wireframe(np.cos(u)*np.sin(v), np.sin(u)*np.sin(v), np.cos(v), color="r", linewidth=0.5)
-ax.legend()
-set_axes_equal(ax) #para que tenga forma de esfera la esfera
+#
+# fig = plt.figure()
+# ax = fig.add_subplot(1,1,1, projection='3d')
+# ax.set_xlabel(r'$X_{MSO} (R_m)$')
+# ax.set_ylabel(r'$Y_{MSO} (R_m)$')
+# ax.set_zlabel(r'$Z_{MSO} (R_m)$')
+# ax.set_aspect('equal')
+# ax.plot(orbita[:,0], orbita[:,1], orbita[:,2], color='green', label='Órbita')
+# ax.scatter(R[0], R[1], R[2], label='MAVEN', color='k', s=40)#, marker='x')
+# X1 = x0 + r1 * np.cos(THETA)
+# Y1 = r1 * np.sin(THETA) * np.cos(PHI)
+# Z1 = r1 * np.sin(THETA) * np.sin(PHI)
+# plot = ax.plot_surface(
+#     X1, Y1, Z1, rstride=4, cstride=4, alpha=0.5, edgecolor='none', cmap=plt.get_cmap('Blues_r'))
+# asc = L0 / (1 - e**2)  #semieje mayor
+# bsc = np.sqrt(asc*L0)
+# csc = e*asc - x0 #donde está centrada. Hay que ver el signo
+#
+# norm_vignes = np.array([(R[0]+csc)*2 / asc**2, R[1]*2 / (bsc)**2, R[2]*2 / (bsc)**2]) #la normal de vignes
+# norm_vignes = norm_vignes/np.linalg.norm(norm_vignes) #normalizado
+# ax.quiver(R[0], R[1], R[2], norm_vignes[0], norm_vignes[1], norm_vignes[2], color='b',length=0.5, label='Normal del ajuste') #asi se plotea un vector
+# ax.quiver(R[0], R[1], R[2], x3[0], x3[1], x3[2], color='k',length=0.5, label='Normal del MVA')
+# # normal_boot = np.array([0.9183, 0.3186, 0.2351])
+# # ax.quiver(R[0], R[1], R[2], normal_boot[0], normal_boot[1], normal_boot[2], color='m',length=0.5, label='Normal del bootstrap')
+#
+# u, v = np.mgrid[0:2*np.pi:20j, 0:np.pi:10j]
+# ax.plot_wireframe(np.cos(u)*np.sin(v), np.sin(u)*np.sin(v), np.cos(v), color="r", linewidth=0.5)
+# ax.legend()
+# set_axes_equal(ax) #para que tenga forma de esfera la esfera
 # plt.show()
 
 print('la normal del ajuste es {}'.format(norm_vignes))
@@ -278,24 +265,24 @@ for i in [t_1,t_2,t_3,t_4]:
     altitud = MD[i, 8]
     print('El tiempo = {2:1.6g} tiene SZA = {0:1.3g}º y altitud = {1:1.3g} km '.format(sza * 180/np.pi, altitud, t[i]))
 
-fig1 = plt.figure()
-ax1 = fig1.add_subplot(1,1,1, projection='3d')
-ax1.set_xlabel('x mso')
-ax1.set_ylabel('y mso')
-ax1.set_zlabel('z mso')
-ax1.set_aspect('equal')
-plot = ax1.plot_surface(
-    X1, Y1, Z1, rstride=4, cstride=4, cmap=plt.get_cmap('Blues_r'), alpha=0.5)
-# ax1.scatter(R[0], R[1], R[2])
-ax1.plot(orbita[6000:11000,0], orbita[6000:11000,1], orbita[6000:11000,2])
-# ax1.plot_wireframe(np.cos(u)*np.sin(v), np.sin(u)*np.sin(v), np.cos(v), color="r", linewidth=0.5)
-ax1.quiver(R[0], R[1], R[2], norm_vignes[0], norm_vignes[1], norm_vignes[2], color='g',length=0.5, label='fit normal') #asi se plotea un vector
-ax1.quiver(R[0], R[1], R[2], v_media[0], v_media[1], v_media[2], color='b',length=0.5, label='velocity') #asi se plotea un vector
-ax1.quiver(R[0], R[1], R[2], x3[0], x3[1], x3[2], color='k',length=0.5, label='MVA normal')
-ax1.quiver(R[0], R[1], R[2], v_para[0], v_para[1], v_para[2], color='r',length=0.5, label='v parallel') #asi se plotea un vector
-ax1.quiver(R[0], R[1], R[2], v_para_MVA[0], v_para_MVA[1], v_para_MVA[2], color='m',length=0.5, label='v parallel MVA') #asi se plotea un vector
-ax1.legend()
-set_axes_equal(ax1)
+# fig1 = plt.figure()
+# ax1 = fig1.add_subplot(1,1,1, projection='3d')
+# ax1.set_xlabel('x mso')
+# ax1.set_ylabel('y mso')
+# ax1.set_zlabel('z mso')
+# ax1.set_aspect('equal')
+# plot = ax1.plot_surface(
+#     X1, Y1, Z1, rstride=4, cstride=4, cmap=plt.get_cmap('Blues_r'), alpha=0.5)
+# # ax1.scatter(R[0], R[1], R[2])
+# ax1.plot(orbita[6000:11000,0], orbita[6000:11000,1], orbita[6000:11000,2])
+# # ax1.plot_wireframe(np.cos(u)*np.sin(v), np.sin(u)*np.sin(v), np.cos(v), color="r", linewidth=0.5)
+# ax1.quiver(R[0], R[1], R[2], norm_vignes[0], norm_vignes[1], norm_vignes[2], color='g',length=0.5, label='fit normal') #asi se plotea un vector
+# ax1.quiver(R[0], R[1], R[2], v_media[0], v_media[1], v_media[2], color='b',length=0.5, label='velocity') #asi se plotea un vector
+# ax1.quiver(R[0], R[1], R[2], x3[0], x3[1], x3[2], color='k',length=0.5, label='MVA normal')
+# ax1.quiver(R[0], R[1], R[2], v_para[0], v_para[1], v_para[2], color='r',length=0.5, label='v parallel') #asi se plotea un vector
+# ax1.quiver(R[0], R[1], R[2], v_para_MVA[0], v_para_MVA[1], v_para_MVA[2], color='m',length=0.5, label='v parallel MVA') #asi se plotea un vector
+# ax1.legend()
+# set_axes_equal(ax1)
 
 #########
 inicio_up = np.where(t == find_nearest_inicial(t, t1-0.015))[0][0] #las 18:12:00
@@ -356,25 +343,25 @@ E_Hall_ajuste = np.cross(J_v_ajuste * 1E-9, B[inicio_down, :] * 1E-9) / (q_e * n
 print('El campo de Hall del ajuste es {} mV/m, su magnitud es {}'.format(E_Hall_ajuste*1E3, np.linalg.norm(E_Hall_ajuste)*1E3))
 
 
-fig2 = plt.figure()
-ax2 = fig2.add_subplot(1,1,1, projection='3d')
-ax2.set_xlabel(r'$X_{MSO} (R_M)$')
-ax2.set_xlim(left=2, right=0)
-ax2.set_ylabel(r'$Y_{MSO} (R_M)$')
-ax2.set_zlabel(r'$Z_{MSO} (R_M)$')
-ax2.set_aspect('equal')
-ax2.scatter(R[0], R[1], R[2])
-plot = ax2.plot_surface(
-    X1, Y1, Z1, rstride=4, cstride=4, alpha=0.5, cmap=plt.get_cmap('Blues_r'))
-u, v = np.mgrid[0:2*np.pi:20j, 0:np.pi:10j]
-ax2.plot_wireframe(np.cos(u)*np.sin(v), np.sin(u)*np.sin(v), np.cos(v), color="r", linewidth=0.5)
-ax2.quiver(R[0], R[1], R[2], J_v[0], J_v[1], J_v[2], color='r',length=1E-3, label='Corriente en volumen')
-ax2.quiver(R[0], R[1], R[2], B_upstream[0], B_upstream[1], B_upstream[2], color='b',length=1E-2, label='B upstream')
-ax2.quiver(R[0], R[1], R[2], B_downstream[0], B_downstream[1], B_downstream[2], color='g',length=1E-2, label='B downstream')
-ax2.quiver(R[0], R[1], R[2], fuerza_mva[0], fuerza_mva[1],fuerza_mva[2], color='m',length=2E13, label='Fuerza MVA')
-ax2.quiver(R[0], R[1], R[2], x3[0], x3[1], x3[2], color='k',length=0.5, label='Normal del MVA', linewidths=0.5)
-set_axes_equal(ax2)
-ax2.legend(loc='upper right',bbox_to_anchor=(1.1, 1.05))
+# fig2 = plt.figure()
+# ax2 = fig2.add_subplot(1,1,1, projection='3d')
+# ax2.set_xlabel(r'$X_{MSO} (R_M)$')
+# ax2.set_xlim(left=2, right=0)
+# ax2.set_ylabel(r'$Y_{MSO} (R_M)$')
+# ax2.set_zlabel(r'$Z_{MSO} (R_M)$')
+# ax2.set_aspect('equal')
+# ax2.scatter(R[0], R[1], R[2])
+# plot = ax2.plot_surface(
+#     X1, Y1, Z1, rstride=4, cstride=4, alpha=0.5, cmap=plt.get_cmap('Blues_r'))
+# u, v = np.mgrid[0:2*np.pi:20j, 0:np.pi:10j]
+# ax2.plot_wireframe(np.cos(u)*np.sin(v), np.sin(u)*np.sin(v), np.cos(v), color="r", linewidth=0.5)
+# ax2.quiver(R[0], R[1], R[2], J_v[0], J_v[1], J_v[2], color='r',length=1E-3, label='Corriente en volumen')
+# ax2.quiver(R[0], R[1], R[2], B_upstream[0], B_upstream[1], B_upstream[2], color='b',length=1E-2, label='B upstream')
+# ax2.quiver(R[0], R[1], R[2], B_downstream[0], B_downstream[1], B_downstream[2], color='g',length=1E-2, label='B downstream')
+# ax2.quiver(R[0], R[1], R[2], fuerza_mva[0], fuerza_mva[1],fuerza_mva[2], color='m',length=2E13, label='Fuerza MVA')
+# ax2.quiver(R[0], R[1], R[2], x3[0], x3[1], x3[2], color='k',length=0.5, label='Normal del MVA', linewidths=0.5)
+# set_axes_equal(ax2)
+# ax2.legend(loc='upper right',bbox_to_anchor=(1.1, 1.05))
 
 # plt.figure()
 # plt.plot(t[inicio_up:fin_down], fuerza_mva)

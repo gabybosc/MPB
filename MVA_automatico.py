@@ -1,13 +1,9 @@
-from mpl_toolkits.mplot3d import Axes3D
-from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 import numpy as np
 import matplotlib.pyplot as plt
 import cdflib as cdf
-from matplotlib.mlab import normpdf
-from scipy.stats import norm
 import datetime as dt
-import scipy.signal as signal
-from funciones import hodograma, error, find_nearest, find_nearest_final, find_nearest_inicial, deltaB, Mij, set_axes_equal,datenum, unix_to_decimal
+from funciones import find_nearest, find_nearest_final, find_nearest_inicial, Mij, datenum, unix_to_decimal
+from funciones_plot import hodograma
 
 """
 Para datos de Mag de baja resolución.

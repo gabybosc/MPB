@@ -1,17 +1,17 @@
-# from __future__ import print_function
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Cursor, MultiCursor
-# from matplotlib.mlab import normpdf
-# from scipy.stats import norm
+from matplotlib.colors import LogNorm
 import cdflib as cdf
 import datetime as dt
-from funciones import find_nearest, deltaB, onpick1, unix_to_decimal
-from funcion_flujo_energia_cdf import flujo_energia
+from funciones import find_nearest, deltaB, unix_to_decimal, unix_to_timestamp
+from funciones_plot import onpick1
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 import time
 import matplotlib.dates as md
 import matplotlib.cm as cm
 import os as os
+
 
 """
 Le paso un día entero y elijo la órbita y luego elijo los tiempos t1t2t3t4, que va a guardar en un archivo aparte.
@@ -28,8 +28,8 @@ np.set_printoptions(precision=4)
 # date_orbit = dt.date(year, month, day)
 
 #si tengo la fecha en dia del año
-date_entry = input('Enter a date in YYYY-DDD format \n')\
-# date_entry = '2016-066'
+# date_entry = input('Enter a date in YYYY-DDD format \n')\
+date_entry = '2016-076'
 year, doy = map(int, date_entry.split('-'))
 date_orbit = dt.datetime(year, 1, 1) + dt.timedelta(doy - 1) #para convertir el doty en date
 
@@ -40,9 +40,9 @@ doy = date_orbit.strftime("%j")
 
 # path = '../../../MAVEN/mag_1s/2016/03/' #path a los datos desde la desktop
 path = '../../datos/' #path a los datos desde la laptop
-file_size = os.path.getsize(path +  f'MAG_1s/subsolares/mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts')
+file_size = os.path.getsize(path +  f'MAG_1s/2016/mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts')
 if file_size > 12000000:
-    mag = np.loadtxt(path + f'MAG_1s/subsolares/mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts', skiprows=148) #datos MAG 1s (para plotear no quiero los datos pesados)
+    mag = np.loadtxt(path + f'MAG_1s/2016/mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts', skiprows=148) #datos MAG 1s (para plotear no quiero los datos pesados)
     n =2
     mag = mag[:-n, :] #borra las ultimas 2 filas, que es ya el dia siguiente (no sé si siempre)
 else:
@@ -80,14 +80,14 @@ for i in range(5,8):
 MD[:, 8] = np.linalg.norm(posicion, axis=1) - 3390 #altitud en km
 
 #Si quiero elegir manualmente la orbita:
-plt.plot(t, MD[:,4])
-plt.xlabel('t (hdec)')
-plt.ylabel('|B|')
-plt.title('Orbitas')
-plt.show()
+# plt.plot(t, MD[:,4])
+# plt.xlabel('t (hdec)')
+# plt.ylabel('|B|')
+# plt.title('Orbitas')
+# plt.show()
 
-ti = float(input("Tiempo inicial = "))
-tf = float(input("Tiempo final = "))
+ti = 17.85#float(input("Tiempo inicial = "))
+tf = 18.5#float(input("Tiempo final = "))
 
 while tf < ti:
     print('El tiempo inicial no puede ser mayor al final')
@@ -127,7 +127,7 @@ t_plot = t[j_inicial+12:j_final+12]
 
 ###############################################################################################SWEA
 file_size_swea = os.path.getsize(path +  f'SWEA/mvn_swe_l2_svyspec_{year}{month}{day}_v04_r01.cdf')
-if file_size_swea > 23000000:
+if file_size_swea > 10000000:
     swea = cdf.CDF(path + f'SWEA/mvn_swe_l2_svyspec_{year}{month}{day}_v04_r01.cdf')
 
     flux_all = swea.varget('diff_en_fluxes')
@@ -139,9 +139,9 @@ if file_size_swea > 23000000:
     tf_swea = np.where(tu == find_nearest(tu, tf))[0][0]
     t_swea = tu[ti_swea:tf_swea]
     flux = flux_all[ti_swea:tf_swea]
+    flux_plot = np.transpose(flux)[::-1]
 
-    log_flux = np.flip(np.log(flux), axis=1)
-    log_flux[log_flux<-1000] = None# np.min(log_flux[log_flux>-1000])
+
 else:
     print('no hay datos de SWEA')
 
@@ -186,7 +186,7 @@ while not happy:
     val = []
     while len(val) < 4:
         plt.clf()#clear figure
-        fig = plt.figure(1)#Lo bueno de esta forma es que puedo hacer que solo algunos compartan eje
+        fig = plt.figure(1, constrained_layout=True)#Lo bueno de esta forma es que puedo hacer que solo algunos compartan eje
         fig.subplots_adjust(top = 0.95, bottom = 0.1, left = 0.05,right=0.95, hspace = 0.005, wspace=0.15)
         plt.title('Spacebar when ready to click:')
 
@@ -216,9 +216,13 @@ while not happy:
         ax5 = plt.subplot2grid((3,2),(0,1), sharex=ax1)
         ax5.set_ylabel('Energia', picker=True)#, bbox=dict(facecolor='red'))
         plt.setp(ax5.get_xticklabels(), visible=False)
-        if file_size_swea > 23000000:
-            ax5.imshow(np.transpose(log_flux), aspect = 'auto',origin = 'lower', extent=(t_plot[0], t_plot[-1],  energia[-1], energia[0]), cmap='inferno')
-            ax5.grid()
+        if file_size_swea > 10000000:
+            im = plt.imshow(flux_plot, aspect = 'auto',origin = 'lower', extent=(t_swea[0], t_swea[-1],  energia[-1], energia[0]), cmap='inferno', norm=LogNorm(vmin=1E4, vmax=1E9))
+            divider = make_axes_locatable(ax5)
+            cax = divider.append_axes("top", size="7%", pad="1%")
+            cb = plt.colorbar(im, cax=cax, orientation="horizontal")
+            cax.xaxis.set_ticks_position("top")
+
 
         ax7 = plt.subplot2grid((3,2),(1,1), sharex=ax1)
         plt.setp(ax7.get_xticklabels(), visible=False)
@@ -251,8 +255,8 @@ while not happy:
     happy = plt.waitforbuttonpress()
 
 # with open('t1t2t3t4.txt','a') as file:
-#     for k in outs:
-#         file.write('{0:1.7g}\t'.format(k))
-#     file.write('\n')
+    for k in outs:
+        file.write('{0:1.7g}\t'.format(k))
+    file.write('\n')
 
 plt.show(block=False)

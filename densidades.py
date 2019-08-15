@@ -1,13 +1,16 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import pandas as pd
 from matplotlib.mlab import normpdf
 from scipy.stats import norm
 import spacepy.pycdf as cdf
-from funciones import find_nearest, unix_to_decimal, plot_select, set_axes_equal
+from funciones import find_nearest, unix_to_decimal
 
 np.set_printoptions(precision=4)
 
+"""
+debuggear
+cambiar para que use cdflib
+"""
 
 ###########DATOS
 path = 'datos/marzo 2016/16/'
@@ -21,7 +24,7 @@ density = np.asarray(cdf_swia['density'][...])
 temperature = np.asarray(cdf_swia['temperature_mso'][...])
 vel_mso_xyz = np.asarray(cdf_swia['velocity_mso'][...])
 
-t_swia = unix_to_decimal(t_unix) 
+t_swia = unix_to_decimal(t_unix)
 inicio = np.where(t_swia == find_nearest(t_swia, 17.9))[0][0]
 fin = np.where(t_swia == find_nearest(t_swia, 18.4))[0][0]
 
@@ -44,7 +47,8 @@ for i in range(11,14):
 
 
 #quiero diezmar el tiempo y el campo para que sean los mismos que tiene swia
-idx = np.empty(449)
+#no sé por qué lo hice así y no con slice, ver. 
+idx = np.zeros(449)
 for i in range(449):
     idx[i] = np.where(t_sts_raw == find_nearest(t_sts_raw, t_swia_cut[i]))[0][0]
 idx = idx.astype(int)

@@ -1,12 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import pandas as pd
-from matplotlib.mlab import normpdf
 from scipy.stats import norm
-import spacepy.pycdf as cdf
 import matplotlib.dates as md
 import datetime as dt
-from funciones import find_nearest, unix_to_decimal, plot_select, set_axes_equal
+from funciones import find_nearest, unix_to_decimal
 from datetime import datetime
 
 np.set_printoptions(precision=4)

@@ -1,6 +1,6 @@
 # Las fechas de 2016 en las cuales se cumple todo
 # Día del año   #Órbita del día
-        66          4 mmmm
+        66          4 mmmm nope
         68          2 yup
         69          4 yup
         70          2 yup
@@ -9,16 +9,15 @@
         74          4 mmmm
         75          4 yup
         75          5 yup
-        ##hasta acá no tienen SWEA
         78          2 yup
         78          3 yup
-        79          5 nice YESSS
-	      79          6 nice
+        79          5 nice
+	79	    6 nice
         80          5 mmmm
         83          3 mm
         86          2 yup
         86          3 yup
-        87          1 yup nice
+        87          1 yup
         87          2 yup
         89          3 mm
         89          5	 yups
@@ -27,9 +26,9 @@
         91          3 yup
         91          5 mm
         92          1 yup
-        92          2	yup nice
+        92          2	yup
         92          3	yup
-        96          2 yup
         96          4 yup
         96          5 yup
-        96          6 yup
+	96	    6 yup
+

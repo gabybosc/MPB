@@ -1,13 +1,8 @@
 import numpy as np
 from os import listdir
 import glob as glob
-from datetime import datetime, timedelta
-import matplotlib.pyplot as plt
-import scipy.signal as signal
-from funciones import find_nearest, set_axes_equal
-from mpl_toolkits.mplot3d import Axes3D
-from mpl_toolkits.mplot3d.art3d import Poly3DCollection
-plt.ion()
+from funciones import find_nearest
+
 
 """
 Este código va a buscar entre todos los archivos que tenemos de MAG los lapsos en los cuales se cumplen:
@@ -20,11 +15,11 @@ Se fija dónde es que coincide la posicion de MAVEN con el fit de vignes y mira 
 tenemos datos desde 10/2014 hasta 02/2018
 """
 
-
-path = glob.glob('../../datos/MAG_1s/*.sts')
+year = 2017
+path = glob.glob(f'../../datos/MAG_1s/{year}/*.sts')
 # path = glob.glob('../../../MAVEN/mag_1s/2018/*/*.sts')
 cantidad_datos = len(path)
-calendario_2018 = np.zeros((5, cantidad_datos)) #la primera columna es el día del año, la segunda es el número de orbita, la tercera dice si cumple el SZA, la cuarta la altitud y la quinta el ZMSO
+calendario_2017 = np.zeros((5, cantidad_datos)) #la primera columna es el día del año, la segunda es el número de orbita, la tercera dice si cumple el SZA, la cuarta la altitud y la quinta el ZMSO
 
 
 # Ajuste de Vignes:
@@ -44,11 +39,16 @@ Z = r * np.sin(THETA) * np.sin(PHI)
 
 R = np.transpose(np.array([X.flatten(),Y.flatten(),Z.flatten()]))
 
+with open(f'tiempos_{year}_SZA60.txt','a') as file:
+    file.write(f'dia SZA altitud Z_MSO\n')
+
+
 #Importamos los datos y vemos uno por uno qué pasa.
 for i,j in enumerate(path): #loop en todos los archivos .sts para cada año. i me da el índice en la lista, j me da el archivo
+    print(f'{i * 100 / len(path):.3g}%\n')
     mag = np.loadtxt(j, skiprows=160)
 
-    calendario_2018[0,i] = mag[1,1]
+    calendario_2017[0,i] = mag[1,1]
 
     posicion = np.zeros((len(mag[:,0]), 3))
     for k in range(11,14):
@@ -83,7 +83,7 @@ for i,j in enumerate(path): #loop en todos los archivos .sts para cada año. i m
                 idx_min[int(k/100)] = np.argmin(A)
                 max_acercamiento[int(k/100)] = A[int(idx_min[int(k/100)])]
         minimo = np.where( max_acercamiento==np.min(max_acercamiento[np.nonzero(max_acercamiento)]))[0][0] #busca el minimo que no sea cero
-        calendario_2018[1,i] = indice+1
+        calendario_2017[1,i] = indice+1
 
         """
         Clasificación por SZA
@@ -92,8 +92,8 @@ for i,j in enumerate(path): #loop en todos los archivos .sts para cada año. i m
 
         SZA = np.arccos(np.clip(np.dot(pos[int(idx)]/np.linalg.norm(posicion[int(idx)]), [1,0,0]), -1.0, 1.0))* 180/np.pi
 
-        if SZA < 30:
-            calendario_2018[2,i] = 1
+        if SZA > 60:
+            calendario_2017[2,i] = 1
 
         """
         Clasificación por altitud
@@ -101,16 +101,20 @@ for i,j in enumerate(path): #loop en todos los archivos .sts para cada año. i m
         altitud = np.linalg.norm(pos[int(idx),:]) - 3390
 
         if altitud < 1300 and altitud > 300:
-            calendario_2018[3,i] = 1
+            calendario_2017[3,i] = 1
 
         """
         Clasificación por Z_MSO
         """
         Z_MSO = pos[int(idx),2]
         if Z_MSO > 0:
-            calendario_2018[4,i] = 1
+            calendario_2017[4,i] = 1
 
-np.savetxt('tiempos_2018.txt', np.transpose(calendario_2018), fmt='%10d' ,header= "       dia        SZA        altitud       Z_MSO", newline="\r\n")
+        with open(f'tiempos_{year}_SZA60.txt','a') as file:
+            [file.write(f'{cosa}\t') for cosa in calendario_2017[:,i]]
+            file.write('\n')
+
+# np.savetxt(f'tiempos_{year}_SZA60.txt', np.transpose(calendario_2017), fmt='%10d' ,header= "       dia        SZA        altitud       Z_MSO", newline="\r\n")
 
     # SZA = np.arccos(np.clip(np.dot(pos[int(idx)]/np.linalg.norm(pos[int(idx)]), [1,0,0]), -1.0, 1.0))* 180/np.pi
     # altitud = np.linalg.norm(pos[int(idx), :]) - 3390
