@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import datetime as dt
 
-fechas = np.loadtxt('outputs/t1t2t3t4.txt')
+fechas = np.loadtxt('../t1t2t3t4.txt')
 for i in range(len(fechas)):
 # for i in range(1):
     year = int(fechas[i,0])
@@ -20,7 +20,7 @@ for i in range(len(fechas)):
     month = date_orbit.strftime("%m")
     day = date_orbit.strftime("%d")
 
-    fig = pickle.load(open(f'outputs/MPB_y{year}_d{doy}_t{int(t1)}.pkl','rb'))
+    fig = pickle.load(open(f'figs_MPB/MPB_y{year}_d{doy}_t{int(t1)}.pkl','rb'))
     ax_master = fig.axes[0]
     for ax in fig.axes:
         if ax is not ax_master:

@@ -1,23 +1,19 @@
-from mpl_toolkits.mplot3d import Axes3D
-from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 import numpy as np
 import matplotlib.pyplot as plt
+import cdflib as cdf
 from matplotlib.mlab import normpdf
 from scipy.stats import norm
 import datetime as dt
-import cdflib as cdf
-import scipy.signal as signal
 from funciones import error, find_nearest, find_nearest_final, find_nearest_inicial, deltaB, Mij, datenum, unix_to_decimal
+from funciones_MVA import ajuste_conico, plot_velocidades, plot_FLorentz
 from funciones_plot import hodograma, set_axes_equal
 from sys import exit
 
 """
-DEBUGGEAR MIRANDO EL LOWRES
-
-Para datos de mag de alta resolución. Para que tarde menos en cargar, skipea las primeras t1*32*3600 rows, lo malo de eso es que a veces no alcanza con esos datos.
+Para datos de MAg de baja resolución
 
 Este script pide como user input una fecha (puede ser o fecha dd-mm-aaaa o dia_del_año-año) y los cuatro tiempos t1 t2 t3 t4.
-Eventualmente podría simplemente encontrar todos los cruces que quiero y decirle que lea directamente de algún lugar eso. (es lo que hace MVA_automatico)
+Eventualmente podría simplemente encontrar todos los cruces que quiero y decirle que lea directamente de algún lugar eso.
 Antes de correr este programa hay que haber usado plot_seleccionar_puntos, para tener los cuatro tiempos elegidos.
 Toma los datos de alta resolución y les aplica un filtro pasabajos con ventana Butterworth con frecuencia de corte de 0.1 Hz de orden 3.
 A los datos filtrados les aplica el MVA.
@@ -36,39 +32,22 @@ np.set_printoptions(precision=4)
 # date_orbit = dt.date(year, month, day)
 
 #si tengo la fecha en dia del año
-date_entry = '2016-076'#input('Enter a date in YYYY-DDD format \n')
-t1 = 18.2167
-t2 = 18.2204
-t3 = 18.235
-t4 = 18.2476
-
-# t1 = float(input("t1 = "))
-# t2 = float(input("t2 = "))
-# while t2 < t1:
-#     print('t2 no puede ser menor a t1. \n')
-#     t2 = float(input('t2 = '))
-# t3 = float(input("t3 = "))
-# while t3 < t2:
-#     print('t3 no puede ser menor a t2. \n')
-#     t3 = float(input('t3 = '))
-# t4 = float(input("t4 = "))
-# while t4 < t3:
-#     print('t4 no puede ser menor a t3. \n')
-#     t4 = float(input('t4 = '))
-
-year, doy = map(int, date_entry.split('-'))
-date_orbit = dt.datetime(year, 1, 1) + dt.timedelta(doy - 1) #para convertir el doty en date
+# date_entry = input('Enter a date in YYYY-DDD format \n')
+date_entry = '2016-076'
+year, doty = map(int, date_entry.split('-'))
+date_orbit = dt.datetime(year, 1, 1) + dt.timedelta(doty - 1) #para convertir el doty en date
 
 year = date_orbit.strftime("%Y")
 month = date_orbit.strftime("%m")
 day = date_orbit.strftime("%d")
-doy = date_orbit.strftime("%j")
+doty = date_orbit.strftime("%j")
 
 # path = '../../../MAVEN/mag_1s/2016/03/' #path a los datos desde la desktop
 path = '../../datos/' #path a los datos desde la laptop
-n = int(t1*32*3600 - 1000)
-mag = np.genfromtxt(path + f'MAG_hires/mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts', skip_header=n, skip_footer=1000) #skipea las filas anteriores a la hora que quiero medir para hacer más rápido
+mag = np.loadtxt(path + 'MAG_1s/2016/mvn_mag_l2_{0}{3}ss1s_{0}{1}{2}_v01_r01.sts'.format(year, month, day, doty), skiprows=148) #datos MAG 1s (para plotear no quiero los datos pesados)
 lpw = cdf.CDF(path + f'LPW/mvn_lpw_l2_lpnt_{year}{month}{day}_v03_r02.cdf')
+#para ver las varaibles del cdf:
+# lpw.cdf_info()
 
 dia = mag[:,1]
 t = mag[:,6]  #el dia decimal
@@ -101,6 +80,16 @@ for i in range(5,8):
     MD[:,i] = posicion[:,i-5]/3390 #en radios marcianos
 MD[:, 8] = np.linalg.norm(posicion, axis=1) - 3390 #altitud en km
 
+#si quiero elegir entre ciertas horas:
+
+# t1 = float(input("t1 = "))
+# t2 = float(input("t2 = "))
+# t3 = float(input("t3 = "))
+# t4 = float(input("t4 = "))
+t1 = 18.2167
+t2 = 18.2204
+t3 = 18.235
+t4 = 18.2476
 
 inicio = np.where(t == find_nearest_inicial(t, t2))[0][0]
 fin = np.where(t == find_nearest_final(t, t3))[0][0]
@@ -112,20 +101,14 @@ t_4 = np.where(t == find_nearest(t,t4))[0][0]
 
 
 #################
-#Filtramos los cantidad_datos
-b,a = signal.butter(3,0.01,btype='lowpass')
-Bx_filtrado = signal.filtfilt(b, a, B[:,0])
-By_filtrado = signal.filtfilt(b, a, B[:,1])
-Bz_filtrado = signal.filtfilt(b, a, B[:,2])
-B_filtrado = np.linalg.norm(np.array([Bx_filtrado, By_filtrado, Bz_filtrado]), axis=0) #es el axis 0 porque no está traspuesta
-
 
 #ahora empieza el MVA con los datos que elegí
 MD_cut = MD[inicio : fin+1, :]
 M_cut = np.size(MD_cut[:,0])
-B_cut = np.transpose(np.array([Bx_filtrado[inicio:fin+1], By_filtrado[inicio:fin+1], Bz_filtrado[inicio:fin+1]]))
+B_cut = B[inicio:fin+1, :]
 
 M_ij = Mij(B_cut)
+# np.savetxt('outs/matriz_%d'%dia[0], M_ij) #guarda la matriz de cada dia
 
 #ahora quiero los autovectores y autovalores
 [lamb, x] = np.linalg.eigh(M_ij) #uso eigh porque es simetrica
@@ -140,7 +123,6 @@ x2 = x[:,1]
 x3 = x[:,2]
 if x3[0] < 0: #si la normal aputna para adentro me la da vuelta
     x3 = - x3
-#chequear que cross(x1,x2) = x3
 if any(np.cross(x1,x2) - x3) > 0.01:
     print('Cambio el signo de x1 para que los av formen terna derecha')
     x1 = -x1
@@ -148,13 +130,15 @@ if any(np.cross(x1,x2) - x3) > 0.01:
 #lambda2/lambda3
 print('lambda1 = {0:1.3g} \nlambda2 = {1:1.3g} \nlambda3 = {2:1.3g}'.format(lamb[0], lamb[1], lamb[2]))
 print('lambda2/lambda3 = {0:1.3g}'.format(lamb[1]/lamb[2]))
-print(f'La normal es = {x3}')
+print('La normal es = {}'.format(x3))
 #las proyecciones
 B1 = np.dot(B_cut, x1)
 B2 = np.dot(B_cut, x2)
 B3 = np.dot(B_cut, x3)
 
-hodograma(B1, B2, B3, 'nT', 'MAVEN MAG MVA')
+
+
+hodograma(B1, B2, B3, 'nT', 'MAVEN MAG MVA ')
 
 #el error
 phi, delta_B3 = error(lamb, B_cut, M_cut, x)
@@ -182,10 +166,10 @@ t_nave = find_nearest(t,(t2+t3)/2) #el tiempo en el medio de la hoja de corrient
 index = np.where(t == t_nave)[0][0]
 x0 = 0.78
 e = 0.9
-norm_vignes, X1, Y1, Z1 = ajuste_conico(posicion, index, orbita, x3)
+norm_vignes, X1, Y1, Z1, R = ajuste_conico(posicion, index, orbita, x3)
 
 
-print('la normal del ajuste es {}'.format(norm_vignes))
+print(f'La normal del ajuste es {norm_vignes}')
 print('El valor medio de B a lo largo de la normal del ajuste es = {0:1.3g} nT'.format(np.mean(np.dot(B_cut, norm_vignes))))#np.mean(B_cut, 0))) para que me de los tres valores medios
 print('|B3_ajuste|/B_medio = ', np.abs(np.mean(np.dot(B_cut, norm_vignes))/np.mean(B_cut)))
 
@@ -194,7 +178,7 @@ print('|B3_ajuste|/B_medio = ', np.abs(np.mean(np.dot(B_cut, norm_vignes))/np.me
 angulo_mva = np.arccos(np.clip(np.dot(norm_vignes, x3), -1.0, 1.0)) #el clip hace que si por algun motivo el dot me da >1 (i.e. 1,00002), me lo convierte en 1
 print('El ángulo entre la normal del ajuste y la del MVA = {0:1.3g}º'.format(angulo_mva * 180/np.pi))
 
-angulo_boot = np.arccos(np.clip(np.dot(np.array([0.9162, 0.3068, 0.2577]), x3), -1.0, 1.0)) #el clip hace que si por algun motivo el dot me da >1 (i.e. 1,00002), me lo convierte en 1
+angulo_boot = np.arccos(np.clip(np.dot(np.array([0.9162, 0.3068, 0.2577]), x3), -1.0, 1.0))
 print('El ángulo entre la normal del bootstrap y la del MVA = {0:1.3g}º'.format(angulo_boot * 180/np.pi))
 
 
@@ -255,32 +239,16 @@ for i in [t_1,t_2,t_3,t_4]:
     altitud = MD[i, 8]
     print('El tiempo = {2:1.6g} tiene SZA = {0:1.3g}º y altitud = {1:1.3g} km '.format(sza * 180/np.pi, altitud, t[i]))
 
-fig1 = plt.figure()
-ax1 = fig1.add_subplot(1,1,1, projection='3d')
-ax1.set_xlabel('x mso')
-ax1.set_ylabel('y mso')
-ax1.set_zlabel('z mso')
-ax1.set_aspect('equal')
-plot = ax1.plot_surface(
-    X1, Y1, Z1, rstride=4, cstride=4, cmap=plt.get_cmap('Blues_r'), alpha=0.5)
-# ax1.scatter(R[0], R[1], R[2])
-ax1.plot(orbita[6000:11000,0], orbita[6000:11000,1], orbita[6000:11000,2])
-# ax1.plot_wireframe(np.cos(u)*np.sin(v), np.sin(u)*np.sin(v), np.cos(v), color="r", linewidth=0.5)
-ax1.quiver(R[0], R[1], R[2], norm_vignes[0], norm_vignes[1], norm_vignes[2], color='g',length=0.5, label='fit normal') #asi se plotea un vector
-ax1.quiver(R[0], R[1], R[2], v_media[0], v_media[1], v_media[2], color='b',length=0.5, label='velocity') #asi se plotea un vector
-ax1.quiver(R[0], R[1], R[2], x3[0], x3[1], x3[2], color='k',length=0.5, label='MVA normal')
-ax1.quiver(R[0], R[1], R[2], v_para[0], v_para[1], v_para[2], color='r',length=0.5, label='v parallel') #asi se plotea un vector
-ax1.quiver(R[0], R[1], R[2], v_para_MVA[0], v_para_MVA[1], v_para_MVA[2], color='m',length=0.5, label='v parallel MVA') #asi se plotea un vector
-ax1.legend()
-set_axes_equal(ax1)
+plot_velocidades(X1, Y1, Z1, R, norm_vignes, x3, v_media, v_para, v_para_MVA)
+
 
 #########
-inicio_up = np.where(t == find_nearest_inicial(t, t1-0.015))[0][0]
-fin_up = np.where(t == find_nearest_final(t, t1))[0][0]
+inicio_up = np.where(t == find_nearest_inicial(t, t1-0.015))[0][0] #las 18:12:00
+fin_up = np.where(t == find_nearest_final(t, t1))[0][0] #las 18:13:00
 B_upstream = np.mean(B[inicio_up:fin_up, :], axis=0) #nT
 
-inicio_down = np.where(t == find_nearest_inicial(t, t4))[0][0]
-fin_down = np.where(t == find_nearest_final(t, t4+0.015))[0][0]
+inicio_down = np.where(t == find_nearest_inicial(t, t4))[0][0] #las 18:14:51
+fin_down = np.where(t == find_nearest_final(t, t4+0.015))[0][0] #las 18:15:52
 B_downstream = np.mean(B[inicio_down:fin_down,:], axis=0) #nT
 
 print('B upstream es {} nT y su módulo es {}'.format(B_upstream, np.linalg.norm(B_upstream)))
@@ -315,6 +283,7 @@ print('La fuerza de lorentz del MVA es {} V/m, su magnitud es {}'.format(fuerza_
 print('La fuerza de lorentz del ajuste es {} V/m, su magnitud es {}'.format(fuerza_ajuste, np.linalg.norm(fuerza_ajuste)))
 
 
+
 e_density = lpw.varget('data')[:,3]
 t_unix = lpw.varget('time_unix')
 t_lpw = unix_to_decimal(t_unix)
@@ -332,32 +301,15 @@ E_Hall_ajuste = np.cross(J_v_ajuste * 1E-9, B[inicio_down, :] * 1E-9) / (q_e * n
 print('El campo de Hall del ajuste es {} mV/m, su magnitud es {}'.format(E_Hall_ajuste*1E3, np.linalg.norm(E_Hall_ajuste)*1E3))
 
 
-fig2 = plt.figure()
-ax2 = fig2.add_subplot(1,1,1, projection='3d')
-ax2.set_xlabel(r'$X_{MSO} (R_M)$')
-ax2.set_xlim(left=2, right=0)
-ax2.set_ylabel(r'$Y_{MSO} (R_M)$')
-ax2.set_zlabel(r'$Z_{MSO} (R_M)$')
-ax2.set_aspect('equal')
-ax2.scatter(R[0], R[1], R[2])
-plot = ax2.plot_surface(
-    X1, Y1, Z1, rstride=4, cstride=4, alpha=0.5, cmap=plt.get_cmap('Blues_r'))
-u, v = np.mgrid[0:2*np.pi:20j, 0:np.pi:10j]
-ax2.plot_wireframe(np.cos(u)*np.sin(v), np.sin(u)*np.sin(v), np.cos(v), color="r", linewidth=0.5)
-ax2.quiver(R[0], R[1], R[2], J_v[0], J_v[1], J_v[2], color='r',length=1E-3, label='Corriente en volumen')
-ax2.quiver(R[0], R[1], R[2], B_upstream[0], B_upstream[1], B_upstream[2], color='b',length=1E-2, label='B upstream')
-ax2.quiver(R[0], R[1], R[2], B_downstream[0], B_downstream[1], B_downstream[2], color='g',length=1E-2, label='B downstream')
-ax2.quiver(R[0], R[1], R[2], fuerza_mva[0], fuerza_mva[1],fuerza_mva[2], color='m',length=2E13, label='Fuerza MVA')
-ax2.quiver(R[0], R[1], R[2], x3[0], x3[1], x3[2], color='k',length=0.5, label='Normal del MVA', linewidths=0.5)
-set_axes_equal(ax2)
-ax2.legend(loc='upper right',bbox_to_anchor=(1.1, 1.05))
+plot_FLorentz(X1, Y1, Z1, R, J_v, B_upstream, B_downstream, fuerza_mva, x3)
 
-# plt.figure()
-# plt.plot(t[inicio_up:fin_down], fuerza_mva)
-# plt.plot(t[inicio_up:fin_down], fuerza_ajuste)
-# plt.legend(['Fx', 'Fy', 'Fz'])
-# plt.xlabel('Tiempo')
-# plt.ylabel('Fuerza (N/m^3)')
+plt.figure()
+plt.plot(t[inicio_up:fin_down], fuerza_mva)
+plt.plot(t[inicio_up:fin_down], fuerza_ajuste)
+plt.legend(['Fx', 'Fy', 'Fz'])
+plt.xlabel('Tiempo')
+plt.ylabel('Fuerza (N/m^3)')
+
 plt.show(block=False) #para que siga andando aunque no lo haya cerrado
 
 # #bootstrap error

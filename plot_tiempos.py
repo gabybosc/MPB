@@ -230,5 +230,5 @@ for i in range(len(fechas)):
 
 
     plt.show(block=False)
-    plt.savefig(f'outputs/MPB_y{year}_d{doy}_t{int(t1)}.png', dpi=200)
-    pickle.dump(fig, open(f'outputs/MPB_y{year}_d{doy}_t{int(t1)}.pkl', 'wb'))
+    plt.savefig(f'outputs/figs_MPB/MPB_y{year}_d{doy}_t{int(t1)}.png', dpi=200)
+    pickle.dump(fig, open(f'outputs/figs_MPB/MPB_y{year}_d{doy}_t{int(t1)}.pkl', 'wb'))
