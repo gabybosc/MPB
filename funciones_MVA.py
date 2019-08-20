@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from funciones_plot import set_axes_equal
+from funciones import Mij, error
 from scipy.stats import norm
 from matplotlib.mlab import normpdf
 
@@ -52,7 +53,39 @@ def ajuste_conico(posicion, index, orbita, x3, x0 = 0.78, e = 0.9, L = 0.96):
     ax.legend()
     set_axes_equal(ax)
 
-    return(norm_vignes, X1, Y1, Z1, R)
+    return(norm_vignes, X1, Y1, Z1, R, L0)
+
+def bootstrap(N, B_cut, M_cut):
+    out = np.zeros(N)
+    out_phi = np.zeros((N, 2))
+    normal_ran = np.zeros((N, 3))
+    for a in range(N):
+        index = np.random.choice(B_cut.shape[0], M_cut, replace=True) #elije M índices de B, puede repetir (replace = True)
+        B_random = B_cut[index,:] #me da un B hecho a partir de estos índices random
+
+        Mij_random = Mij(B_random)
+
+        [lamb_ran, x_ran] = np.linalg.eigh(Mij_random) #uso eigh porque es simetrica
+        idx_ran = lamb_ran.argsort()[::-1]
+        lamb_ran = lamb_ran[idx_ran]
+        x_ran = x_ran[:,idx_ran]
+        #ojo que a veces me da las columnas en vez de las filas como autovectores: el av x1 = x[:,0]
+        x3_ran = x_ran[:,2]
+        if x3_ran[0] < 0:
+            x3_ran = - x3_ran
+        normal_ran[a, :] = x3_ran
+
+        B3_ran = np.dot(B_random, x3_ran)
+        phi, delta_B3 = error(lamb_ran, B_random, M_cut, x_ran)
+        out[a] = np.mean(B3_ran)
+        out_phi[a,0] = phi[2,0]
+        out_phi[a,1] = phi[2,1]
+
+    normal = np.mean(normal_ran, axis=0)
+    normal = normal/np.linalg.norm(normal)
+
+    return(normal, phi, delta_B3, out, out_phi)
+
 
 def plot_velocidades(X1, Y1, Z1, R, norm_vignes, x3, v_media, v_para, v_para_MVA):
     fig1 = plt.figure()

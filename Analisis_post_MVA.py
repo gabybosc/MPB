@@ -21,7 +21,7 @@ from MVA_lowres import *
 
 #########
 #buscamos el ángulo entre las normales
-angulo_mva = np.arccos(np.clip(np.dot(norm_vignes, x3), -1.0, 1.0)) #el clip hace que si por algun motivo el dot me da >1 (i.e. 1,00002), me lo convierte en 1
+angulo_mva = np.arccos(np.clip(np.dot(normal_fit, x3), -1.0, 1.0)) #el clip hace que si por algun motivo el dot me da >1 (i.e. 1,00002), me lo convierte en 1
 angulo_boot = np.arccos(np.clip(np.dot(normal_boot, x3), -1.0, 1.0))  #Es importante que los vectoers estén normalizados!
 
 print('El ángulo entre la normal del ajuste y la del MVA = {0:1.3g}º'.format(angulo_mva * 180/np.pi))
@@ -46,7 +46,7 @@ print('La velocidad media de la nave a través de la MPB es = {0:1.3g} km/s'.for
 
 #ahora quiero ver si la nave atraviesa perpendicularmente a la MPB
 v_media_norm = v_media/np.linalg.norm(v_media) #la normalizo por cuestion de  cuentas nomas
-angulo_v_ajuste = np.arccos(np.clip(np.dot(norm_vignes, v_media_norm), -1.0, 1.0))  #Es importante que los vectoers estén normalizados!
+angulo_v_ajuste = np.arccos(np.clip(np.dot(normal_fit, v_media_norm), -1.0, 1.0))  #Es importante que los vectoers estén normalizados!
 angulo_v_mva = np.arccos(np.clip(np.dot(x3, v_media_norm), -1.0, 1.0))  #Es importante que los vectoers estén normalizados!
 angulo_v_boot = np.arccos(np.clip(np.dot(normal_boot, v_media_norm), -1.0, 1.0))  #Es importante que los vectoers estén normalizados!
 print('El ángulo entre la velocidad y la normal del ajuste es = {0:1.3g}º'.format(angulo_v_ajuste * 180/np.pi))
@@ -54,7 +54,7 @@ print('El ángulo entre la velocidad y la normal del MVA es = {0:1.3g}º'.format
 print('El ángulo entre la velocidad y la normal del bootstrap es = {0:1.3g}º'.format(angulo_v_boot * 180/np.pi))
 
 B_intermedio = B_medio_vectorial/np.linalg.norm(B_medio_vectorial) #la normalizo por cuestion de  cuentas nomas
-angulo_B_ajuste = np.arccos(np.clip(np.dot(norm_vignes, B_intermedio), -1.0, 1.0))  #Es importante que los vectoers estén normalizados!
+angulo_B_ajuste = np.arccos(np.clip(np.dot(normal_fit, B_intermedio), -1.0, 1.0))  #Es importante que los vectoers estén normalizados!
 angulo_B_mva = np.arccos(np.clip(np.dot(x3, B_intermedio), -1.0, 1.0))  #Es importante que los vectoers estén normalizados!
 angulo_B_boot = np.arccos(np.clip(np.dot(normal_boot, B_intermedio), -1.0, 1.0))  #Es importante que los vectoers estén normalizados!
 print('El ángulo entre el campo B y la normal del ajuste es = {0:1.3g}º'.format(angulo_B_ajuste * 180/np.pi))
@@ -64,7 +64,7 @@ print('El ángulo entre el campo B y la normal del bootstrap es = {0:1.3g}º'.fo
 # ######
 # ##Espesor de la MPB
 # #ahora veamos v_para
-# v_para = np.dot(v_media, norm_vignes) * norm_vignes
+# v_para = np.dot(v_media, normal_fit) * normal_fit
 # deltat_14 = (t4 - t1) * 3600
 # deltat_23 = (t3 - t2) * 3600
 # x_14_fit = v_para * deltat_14 #en km# u, v = np.mgrid[0:2*np.pi:20j, 0:np.pi:10j]
@@ -90,7 +90,7 @@ print('El ángulo entre el campo B y la normal del bootstrap es = {0:1.3g}º'.fo
 #
 #
 #
-# plot_velocidades(X1, Y1, Z1, R, norm_vignes, x3, v_media, v_para, v_para_MVA)
+# plot_velocidades(X1, Y1, Z1, R, normal_fit, x3, v_media, v_para, v_para_MVA)
 #
 #
 # #########
@@ -121,7 +121,7 @@ print('El ángulo entre el campo B y la normal del bootstrap es = {0:1.3g}º'.fo
 # print('La corriente en volumen con la normal del MVA es Jv = {0:1.3g} nA/m², |Jv| = {0:1.3g} nA/m²'.format(J_v, np.linalg.norm(J_v)))
 #
 #
-# J_s_ajuste = np.cross(norm_vignes, (B_upstream-B_downstream)) / mu #nA/m
+# J_s_ajuste = np.cross(normal_fit, (B_upstream-B_downstream)) / mu #nA/m
 # ancho_mpb_ajuste = np.linalg.norm(x_23_fit) #considero que es el tiempo corto a lo largo de la normal del ajuste
 # J_v_ajuste = J_s_ajuste / (1000*ancho_mpb) #nA/m²
 # print('La corriente superficial con la normal del ajuste es Js = {0:1.3g} mA/m, |Js| = {0:1.3g} mA/m'.format(J_s_ajuste *1E-6, np.linalg.norm(J_s_ajuste)*1E-6))

@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 import cdflib as cdf
 from scipy.stats import norm
 import datetime as dt
-from funciones import error, find_nearest, find_nearest_final, find_nearest_inicial, deltaB, Mij, datenum, unix_to_decimal
-from funciones_MVA import ajuste_conico, plot_velocidades, plot_FLorentz, plot_bootstrap
+from funciones import error, find_nearest, find_nearest_final, find_nearest_inicial, deltaB, Mij, next_available_row, datenum, unix_to_decimal
+from funciones_MVA import ajuste_conico, plot_velocidades, plot_FLorentz, plot_bootstrap, bootstrap
 from funciones_plot import hodograma, set_axes_equal
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
@@ -145,8 +145,8 @@ SZA = np.arccos(np.clip(np.dot(posicion_cut[0,:]/np.linalg.norm(posicion_cut[0,:
 
 print('El valor medio de la altitud = {0:1.3g} km'.format(np.mean(MD_cut[:,8])))
 print(f'El SZA es {SZA:1.3g}')
-B_norm_medio = np.mean(np.linalg.norm(B_cut))
-print('El valor medio de |B| es = {0:1.3g} nT'.format(B_norm_medio))
+B_norm_medio = np.linalg.norm(B_medio_vectorial)
+print('El módulo del campo medio es |<B>| = {0:1.3g} nT'.format(B_norm_medio))
 
 # hodograma(B1, B2, B3, 'nT', 'MAVEN MAG MVA ')
 
@@ -161,52 +161,31 @@ t_nave = find_nearest(t,(t2+t3)/2) #el tiempo en el medio de la hoja de corrient
 index = np.where(t == t_nave)[0][0]
 x0 = 0.78
 e = 0.9
-norm_vignes, X1, Y1, Z1, R = ajuste_conico(posicion, index, orbita, x3)
+normal_fit, X1, Y1, Z1, R, L0 = ajuste_conico(posicion, index, orbita, x3)
 
+B3_fit = np.dot(B_cut, normal_fit)
 
-
-#######
-out = np.zeros(1000)
-out_phi = np.zeros((1000, 2))
-normal_ran = np.zeros((1000, 3))
-for a in range(1000):
-    index = np.random.choice(B_cut.shape[0], M_cut, replace=True) #elije M índices de B, puede repetir (replace = True)
-    B_random = B_cut[index,:] #me da un B hecho a partir de estos índices random
-
-    Mij_random = Mij(B_random)
-
-    [lamb_ran, x_ran] = np.linalg.eigh(Mij_random) #uso eigh porque es simetrica
-    idx_ran = lamb_ran.argsort()[::-1]
-    lamb_ran = lamb_ran[idx_ran]
-    x_ran = x_ran[:,idx_ran]
-    #ojo que a veces me da las columnas en vez de las filas como autovectores: el av x1 = x[:,0]
-    x3_ran = x_ran[:,2]
-    if x3_ran[0] < 0:
-        x3_ran = - x3_ran
-    normal_ran[a, :] = x3_ran
-
-    B3_ran = np.dot(B_random, x3_ran)
-    phi, delta_B3 = error(lamb_ran, B_random, M_cut, x_ran)
-    out[a] = np.mean(B3_ran)
-    out_phi[a,0] = phi[2,0]
-    out_phi[a,1] = phi[2,1]
-
-normal_boot = np.mean(normal_ran, axis=0)
-normal_boot = normal_boot/np.linalg.norm(normal_boot)
+#############
+##Bootstrap
+N_boot = 1000
+normal_boot, phi_boot, delta_B3_boot, out, out_phi = bootstrap(N_boot, B_cut, M_cut)
 
 muB, sigmaB, mu31, sigma31, mu32, sigma32 = plot_bootstrap(out, out_phi)
 
+B3_boot = np.dot(B_cut, normal_boot)
+
+
 print(f'La normal del MVA es = {x3}')
 print(f'La normal de bootstrap es {normal_boot}')
-print(f'La normal del ajuste es {norm_vignes}')
+print(f'La normal del ajuste es {normal_fit}')
 
 print('El valor medio de B a lo largo de la normal del MVA es B3 = {0:1.3g} nT'.format(np.mean(B3)))
-print('El valor medio de B a lo largo de la normal del bootstrap es = {0:1.3g} nT'.format(np.mean(np.dot(B_cut, normal_boot))))
-print('El valor medio de B a lo largo de la normal del ajuste es = {0:1.3g} nT'.format(np.mean(np.dot(B_cut, norm_vignes))))
+print('El valor medio de B a lo largo de la normal del bootstrap es = {0:1.3g} nT'.format(np.mean(B3_boot)))
+print('El valor medio de B a lo largo de la normal del ajuste es = {0:1.3g} nT'.format(np.mean(B3_fit)))
 
-print('|B3|/B_medio = ', np.abs(np.mean(B3)/np.mean(B_cut)))
-print('|B3_boot|/B_medio = ', np.abs(np.mean(np.dot(B_cut, normal_boot))/np.mean(B_cut)))
-print('|B3_ajuste|/B_medio = ', np.abs(np.mean(np.dot(B_cut, norm_vignes))/np.mean(B_cut)))
+print('|B3|/B_medio = ', np.abs(np.mean(B3)/B_norm_medio))
+print('|B3_boot|/B_medio = ', np.abs(np.mean(B3_boot)/B_norm_medio))
+print('|B3_ajuste|/B_medio = ', np.abs(np.mean(B3_fit)/B_norm_medio))
 
 print('Matriz de incerteza angular (grados): \n{}'.format(phi  *  180 / np.pi))
 print('<B3> = {0:1.3g} +- {1:1.3g} nT'.format(np.mean(B3),delta_B3))
@@ -214,46 +193,114 @@ print('<B3> = {0:1.3g} +- {1:1.3g} nT'.format(np.mean(B3),delta_B3))
 
 if phi[2,1] > phi[2,0]:
     print('El error phi32 = {0:1.3g}º es mayor a phi31 = {1:1.3g}º'.format(phi[2,1]*57.2958, phi[2,0]*180 / np.pi))
+    error_normal = phi[2,1]*57.2958
 else:
     print('El error phi31 = {0:1.3g}º es mayor a phi32 = {1:1.3g}º'.format(phi[2,0]*57.2958, phi[2,1]*180 / np.pi))
+    error_normal = phi[2,0]*57.2958
     #quiero ver si el error más grande es phi31 o phi32
 
 print('mu_boot = {0:1.3g} nT, std_boot={1:1.3g} nT'.format(muB, sigmaB))
 print('mean_phi31 = {0:1.3g}º, std_phi31={1:1.3g}º'.format(mu31, sigma31))
 print('mean_phi32 = {0:1.3g}º, std_phi32={1:1.3g}º'.format(mu32, sigma32))
+if sigma31 > sigma32:
+    error_boot = sigma31
+else:
+    error_boot = sigma32
+
 
 #############
 #ahora guardo todo en una spreadsheet
 scope = ["https://spreadsheets.google.com/feeds","https://www.googleapis.com/auth/spreadsheets","https://www.googleapis.com/auth/drive.file","https://www.googleapis.com/auth/drive"]
 
-creds = ServiceAccountCredentials.from_json_keyfile_name("google_api_MPB.json", scope)
+creds = ServiceAccountCredentials.from_json_keyfile_name("mpb_api.json", scope)
 
 client = gspread.authorize(creds)
 
-sheet = client.open("MPB").sheet1
+hoja_parametros = client.open("MPB").worksheet('Parametros')
+hoja_mva = client.open("MPB").worksheet('MVA')
+hoja_boot = client.open("MPB").worksheet('Bootstrap')
+hoja_fit = client.open("MPB").worksheet('Ajuste')
 
-def next_available_row(sheet):
-    str_list = list(filter(None, sheet.col_values(1)))
-    return str(len(str_list)+1)
+fecha_sheet = hoja_mva.col_values(1)
+hora_sheet = hoja_mva.col_values(2)
 
-nr = next_available_row(sheet)
+#si ya está esa fecha en la spreadsheet, la sobreescribe. Si no, usa la siguiente línea vacía
+if date_entry in fecha_sheet and str(int(t1)) in hora_sheet:
+    A = [a for a, fechas in enumerate(fecha_sheet) if fechas == date_entry]
+    B = [b for b, horas in enumerate(hora_sheet) if horas == str(int(t1))]
+    idx = list(set(A).intersection(B))[0]
+    nr = idx+1
+else:
+    nr = next_available_row(hoja_mva)
 
-cell_times = sheet.range(f'D{nr}:G{nr}')
-cell_lambda = sheet.range(f'H{nr}:J{nr}')
-cell_av = sheet.range(f'K{nr}:S{nr}')
+#######updatºla hoja de los parámetros
+hoja_parametros.update_acell(f'A{nr}', f'{date_entry}')
+hoja_parametros.update_acell(f'B{nr}', f'{int(t1)}')
+hoja_parametros.update_acell(f'D{nr}', f'{SZA:.3g}')
+hoja_parametros.update_acell(f'E{nr}', f'{int(altitud)}')
+hoja_parametros.update_acell(f'J{nr}', f'{round(B_norm_medio,2)}')
 
+cell_B = hoja_parametros.range(f'G{nr}:I{nr}')
+for i,cell in enumerate(cell_B):
+    cell.value = round(B_medio_vectorial[i],2)
+hoja_parametros.update_cells(cell_B)
+
+
+########update la hoja de MVA
+hoja_mva.update_acell(f'A{nr}', f'{date_entry}')
+hoja_mva.update_acell(f'B{nr}', f'{int(t1)}')
+hoja_mva.update_acell(f'K{nr}', f'{lamb[1]/lamb[2]:.3g}')
+hoja_mva.update_acell(f'U{nr}', f'{error_normal:.3g}')
+hoja_mva.update_acell(f'V{nr}', f'{round(np.mean(B3),2)}')
+hoja_mva.update_acell(f'W{nr}', f'{round(delta_B3,2)}')
+hoja_mva.update_acell(f'X{nr}', f'{abs(round(np.mean(B3)/B_norm_medio,2))}')
+
+
+
+cell_times = hoja_mva.range(f'D{nr}:G{nr}')
 for i,cell in enumerate(cell_times):
     cell.value = tiempos[i]
+hoja_mva.update_cells(cell_times)
 
+cell_lambda = hoja_mva.range(f'H{nr}:J{nr}')
 for i,cell in enumerate(cell_lambda):
-    cell.value = lamb[i]
+    cell.value = round(lamb[i],2)
+hoja_mva.update_cells(cell_lambda)
 
+cell_av = hoja_mva.range(f'L{nr}:T{nr}')
 for i,cell in enumerate(cell_av):
-    cell.value = av[i]
+    cell.value = round(av[i],2)
+hoja_mva.update_cells(cell_av)
 
 
-sheet.update_acell(f'A{nr}', f'{doy}-{year}')
-sheet.update_acell(f'B{nr}', f'{int(t1)}')
-sheet.update_cells(cell_times)
-sheet.update_cells(cell_lambda)
-sheet.update_cells(cell_av)
+########update la hoja de bootstrap
+hoja_boot.update_acell(f'A{nr}', f'{date_entry}')
+hoja_boot.update_acell(f'B{nr}', f'{int(t1)}')
+hoja_boot.update_acell(f'D{nr}', f'{M_cut}')
+hoja_boot.update_acell(f'E{nr}', f'{N_boot}')
+
+cell_normal = hoja_boot.range(f'F{nr}:H{nr}')
+for i,cell in enumerate(cell_normal):
+    cell.value = round(normal_boot[i],2)
+hoja_boot.update_cells(cell_normal)
+
+hoja_boot.update_acell(f'I{nr}', f'{error_boot:.3g}')
+hoja_boot.update_acell(f'J{nr}', f'{round(np.mean(B3_boot),2)}')
+hoja_boot.update_acell(f'K{nr}', f'{round(sigmaB,2)}')
+hoja_boot.update_acell(f'L{nr}', f'{abs(round(np.mean(B3_boot)/B_norm_medio,2))}')
+
+########update la hoja del ajuste
+hoja_fit.update_acell(f'A{nr}', f'{date_entry}')
+hoja_fit.update_acell(f'B{nr}', f'{int(t1)}')
+hoja_fit.update_acell(f'D{nr}', f'{L0}')
+hoja_fit.update_acell(f'E{nr}', f'{e}')
+hoja_fit.update_acell(f'F{nr}', f'{x0}')
+
+cell_normal = hoja_fit.range(f'G{nr}:I{nr}')
+for i,cell in enumerate(cell_normal):
+    cell.value = round(normal_fit[i],2)
+hoja_fit.update_cells(cell_normal)
+
+
+hoja_fit.update_acell(f'K{nr}', f'{round(np.mean(B3_fit),2)}')
+hoja_fit.update_acell(f'L{nr}', f'{abs(round(np.mean(B3_fit)/B_norm_medio,2))}')

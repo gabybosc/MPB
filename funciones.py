@@ -59,6 +59,10 @@ def Mij(B):
             Mij[i,j] = np.mean(B[:,i] * B[:,j]) - np.mean(B[:,i]) * np.mean(B[:,j])
     return Mij
 
+def next_available_row(sheet):
+    str_list = list(filter(None, sheet.col_values(1)))
+    return str(len(str_list)+1)
+
 def rms(x):
     rms = np.sqrt(np.vdot(x, x)/x.size)
     return rms
