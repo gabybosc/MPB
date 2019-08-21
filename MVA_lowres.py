@@ -39,6 +39,16 @@ year = date_orbit.strftime("%Y")
 month = date_orbit.strftime("%m")
 day = date_orbit.strftime("%d")
 doy = date_orbit.strftime("%j")
+#si quiero elegir entre ciertas horas:
+
+# t1 = float(input("t1 = "))
+# t2 = float(input("t2 = "))
+# t3 = float(input("t3 = "))
+# t4 = float(input("t4 = "))
+t1 = 18.2167
+t2 = 18.2204
+t3 = 18.235
+t4 = 18.2476
 
 # path = '../../../MAVEN/mag_1s/2016/03/' #path a los datos desde la desktop
 path = '../../datos/' #path a los datos desde la laptop
@@ -78,16 +88,6 @@ for i in range(5,8):
     MD[:,i] = posicion[:,i-5]/3390 #en radios marcianos
 MD[:, 8] = np.linalg.norm(posicion, axis=1) - 3390 #altitud en km
 
-#si quiero elegir entre ciertas horas:
-
-# t1 = float(input("t1 = "))
-# t2 = float(input("t2 = "))
-# t3 = float(input("t3 = "))
-# t4 = float(input("t4 = "))
-t1 = 18.2167
-t2 = 18.2204
-t3 = 18.235
-t4 = 18.2476
 
 inicio = np.where(t == find_nearest_inicial(t, t2))[0][0]
 fin = np.where(t == find_nearest_final(t, t3))[0][0]
@@ -107,7 +107,7 @@ B_cut = B[inicio:fin+1, :]
 posicion_cut = posicion[inicio:fin+1,:]
 
 M_ij = Mij(B_cut)
-# np.savetxt('outs/matriz_%d'%dia[0], M_ij) #guarda la matriz de cada dia
+
 
 #ahora quiero los autovectores y autovalores
 [lamb, x] = np.linalg.eigh(M_ij) #uso eigh porque es simetrica
@@ -129,9 +129,6 @@ if any(np.cross(x1,x2) - x3) > 0.01:
     print('Cambio el signo de x1 para que los av formen terna derecha')
     x1 = -x1
 
-#lambda2/lambda3
-print('lambda1 = {0:1.3g} \nlambda2 = {1:1.3g} \nlambda3 = {2:1.3g}'.format(lamb[0], lamb[1], lamb[2]))
-print('lambda2/lambda3 = {0:1.3g}'.format(lamb[1]/lamb[2]))
 #las proyecciones
 B1 = np.dot(B_cut, x1)
 B2 = np.dot(B_cut, x2)
@@ -143,10 +140,7 @@ B_medio_vectorial = np.mean(B_cut, axis=0)
 altitud = np.mean(MD_cut[:,8])
 SZA = np.arccos(np.clip(np.dot(posicion_cut[0,:]/np.linalg.norm(posicion_cut[0,:]), [1,0,0]), -1.0, 1.0))* 180/np.pi
 
-print('El valor medio de la altitud = {0:1.3g} km'.format(np.mean(MD_cut[:,8])))
-print(f'El SZA es {SZA:1.3g}')
 B_norm_medio = np.linalg.norm(B_medio_vectorial)
-print('El módulo del campo medio es |<B>| = {0:1.3g} nT'.format(B_norm_medio))
 
 # hodograma(B1, B2, B3, 'nT', 'MAVEN MAG MVA ')
 
@@ -174,34 +168,14 @@ muB, sigmaB, mu31, sigma31, mu32, sigma32 = plot_bootstrap(out, out_phi)
 
 B3_boot = np.dot(B_cut, normal_boot)
 
-
-print(f'La normal del MVA es = {x3}')
-print(f'La normal de bootstrap es {normal_boot}')
-print(f'La normal del ajuste es {normal_fit}')
-
-print('El valor medio de B a lo largo de la normal del MVA es B3 = {0:1.3g} nT'.format(np.mean(B3)))
-print('El valor medio de B a lo largo de la normal del bootstrap es = {0:1.3g} nT'.format(np.mean(B3_boot)))
-print('El valor medio de B a lo largo de la normal del ajuste es = {0:1.3g} nT'.format(np.mean(B3_fit)))
-
-print('|B3|/B_medio = ', np.abs(np.mean(B3)/B_norm_medio))
-print('|B3_boot|/B_medio = ', np.abs(np.mean(B3_boot)/B_norm_medio))
-print('|B3_ajuste|/B_medio = ', np.abs(np.mean(B3_fit)/B_norm_medio))
-
-print('Matriz de incerteza angular (grados): \n{}'.format(phi  *  180 / np.pi))
-print('<B3> = {0:1.3g} +- {1:1.3g} nT'.format(np.mean(B3),delta_B3))
-
-
+##########
+#Errores
 if phi[2,1] > phi[2,0]:
-    print('El error phi32 = {0:1.3g}º es mayor a phi31 = {1:1.3g}º'.format(phi[2,1]*57.2958, phi[2,0]*180 / np.pi))
     error_normal = phi[2,1]*57.2958
 else:
-    print('El error phi31 = {0:1.3g}º es mayor a phi32 = {1:1.3g}º'.format(phi[2,0]*57.2958, phi[2,1]*180 / np.pi))
     error_normal = phi[2,0]*57.2958
     #quiero ver si el error más grande es phi31 o phi32
 
-print('mu_boot = {0:1.3g} nT, std_boot={1:1.3g} nT'.format(muB, sigmaB))
-print('mean_phi31 = {0:1.3g}º, std_phi31={1:1.3g}º'.format(mu31, sigma31))
-print('mean_phi32 = {0:1.3g}º, std_phi32={1:1.3g}º'.format(mu32, sigma32))
 if sigma31 > sigma32:
     error_boot = sigma31
 else:
@@ -226,9 +200,9 @@ hora_sheet = hoja_mva.col_values(2)
 
 #si ya está esa fecha en la spreadsheet, la sobreescribe. Si no, usa la siguiente línea vacía
 if date_entry in fecha_sheet and str(int(t1)) in hora_sheet:
-    A = [a for a, fechas in enumerate(fecha_sheet) if fechas == date_entry]
-    B = [b for b, horas in enumerate(hora_sheet) if horas == str(int(t1))]
-    idx = list(set(A).intersection(B))[0]
+    listaA = [a for a, fechas in enumerate(fecha_sheet) if fechas == date_entry]
+    listaB = [b for b, horas in enumerate(hora_sheet) if horas == str(int(t1))]
+    idx = list(set(listaA).intersection(listaB))[0]
     nr = idx+1
 else:
     nr = next_available_row(hoja_mva)
@@ -269,7 +243,7 @@ hoja_mva.update_cells(cell_lambda)
 
 cell_av = hoja_mva.range(f'L{nr}:T{nr}')
 for i,cell in enumerate(cell_av):
-    cell.value = round(av[i],2)
+    cell.value = round(av[i],3)
 hoja_mva.update_cells(cell_av)
 
 
@@ -281,7 +255,7 @@ hoja_boot.update_acell(f'E{nr}', f'{N_boot}')
 
 cell_normal = hoja_boot.range(f'F{nr}:H{nr}')
 for i,cell in enumerate(cell_normal):
-    cell.value = round(normal_boot[i],2)
+    cell.value = round(normal_boot[i],3)
 hoja_boot.update_cells(cell_normal)
 
 hoja_boot.update_acell(f'I{nr}', f'{error_boot:.3g}')
@@ -298,7 +272,7 @@ hoja_fit.update_acell(f'F{nr}', f'{x0}')
 
 cell_normal = hoja_fit.range(f'G{nr}:I{nr}')
 for i,cell in enumerate(cell_normal):
-    cell.value = round(normal_fit[i],2)
+    cell.value = round(normal_fit[i],3)
 hoja_fit.update_cells(cell_normal)
 
 
