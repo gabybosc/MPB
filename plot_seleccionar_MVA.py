@@ -28,8 +28,8 @@ np.set_printoptions(precision=4)
 # date_orbit = dt.date(year, month, day)
 
 #si tengo la fecha en dia del año
-# date_entry = input('Enter a date in YYYY-DDD format \n')\
-date_entry = '2016-076'
+date_entry = input('Enter a date in YYYY-DDD format \n')\
+# date_entry = '2016-076'
 year, doy = map(int, date_entry.split('-'))
 date_orbit = dt.datetime(year, 1, 1) + dt.timedelta(doy - 1) #para convertir el doty en date
 
@@ -80,14 +80,14 @@ for i in range(5,8):
 MD[:, 8] = np.linalg.norm(posicion, axis=1) - 3390 #altitud en km
 
 #Si quiero elegir manualmente la orbita:
-# plt.plot(t, MD[:,4])
-# plt.xlabel('t (hdec)')
-# plt.ylabel('|B|')
-# plt.title('Orbitas')
-# plt.show()
+plt.plot(t, MD[:,4])
+plt.xlabel('t (hdec)')
+plt.ylabel('|B|')
+plt.title('Orbitas')
+plt.show()
 
-ti = 17.85#float(input("Tiempo inicial = "))
-tf = 18.5#float(input("Tiempo final = "))
+ti = float(input("Tiempo inicial = "))
+tf = float(input("Tiempo final = "))
 
 while tf < ti:
     print('El tiempo inicial no puede ser mayor al final')
@@ -254,7 +254,7 @@ while not happy:
     print('Happy? Keyboard click for yes, mouse click for no.')
     happy = plt.waitforbuttonpress()
 
-# with open('t1t2t3t4.txt','a') as file:
+with open('t1t2t3t4.txt','a') as file:
     for k in outs:
         file.write('{0:1.7g}\t'.format(k))
     file.write('\n')

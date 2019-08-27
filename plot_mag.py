@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import datetime as dt
 from funciones import find_nearest
+from funciones_plot import plot_datetime
 
 """
 Plotea sólo los datos de MAG de alta resolución
@@ -49,5 +50,13 @@ plt.figure()
 plt.plot(t_cut, B_cut)
 plt.xlabel('t (hdec)')
 plt.ylabel('|B|')
-plt.title('MAG hires')
+plt.title('MAG hires hdec')
+
+plt.figure()
+plot_datetime(year, month, day, t_cut, B_cut)
+# plt.plot(t_cut, B_cut)
+plt.xlabel('t (UTC)')
+plt.ylabel('|B|')
+plt.title('MAG hires UTC')
+
 plt.show(block= False)

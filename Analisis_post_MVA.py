@@ -1,23 +1,48 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import cdflib as cdf
+import scipy.signal as signal
+import datetime as dt
+import pdb
 from matplotlib.mlab import normpdf
 from scipy.stats import norm
-import datetime as dt
-from funciones import error, find_nearest, find_nearest_final, find_nearest_inicial, deltaB, Mij, datenum, unix_to_decimal
-from funciones_MVA import ajuste_conico, plot_velocidades, plot_FLorentz
+from funciones import error, find_nearest, find_nearest_final, find_nearest_inicial, deltaB, Mij, next_available_row, datenum, unix_to_decimal
+from funciones_MVA import ajuste_conico, plot_velocidades, plot_FLorentz, plot_bootstrap, bootstrap
 from funciones_plot import hodograma, set_axes_equal
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 
 """
-Toma las normales y lo que devuelva MVA.py (tanto hires como lowres) y ahce un análisis con esto.
+Hace el MVA
 calcula el ángulo entre normales
 calcula el ancho de la mpb
 calcula la corriente
 """
-###corremos el MVA e importamos las variables que quiero (las normales)
-import MVA_hires
-from MVA_hires import *
+from MVA_hires import MVA
 
+
+date_entry = input('Enter a date in YYYY-DDD format \n')
+year, doy = map(int, date_entry.split('-'))
+date_orbit = dt.datetime(year, 1, 1) + dt.timedelta(doy - 1)
+
+year = date_orbit.strftime("%Y")
+month = date_orbit.strftime("%m")
+day = date_orbit.strftime("%d")
+doy = date_orbit.strftime("%j")
+
+ti_MVA = float(input("t_incial = "))
+tf_MVA = float(input("t_final = "))
+while tf_MVA < ti_MVA:
+    print('t final no puede ser menor a t inicial. \n')
+    ti_MVA = float(input('t_inicial = '))
+    tf_MVA = float(input("t_final = "))
+
+path = '../../datos/' #path a los datos desde la laptop
+mag = np.genfromtxt(path + f'MAG_hires/mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts', skip_header=1000, skip_footer=1000)
+swia = cdf.CDF(path + f'mvn_swi_l2_onboardsvymom_{year}{month}{day}_v01_r01.cdf')
+lpw = cdf.CDF(path + f'LPW/mvn_lpw_l2_lpnt_{year}{month}{day}_v03_r02.cdf')
+
+x3, normal_boot, normal_fit, t, B, posicion, inicio, fin, B_cut, t1, t2, t3, t4,B_medio_vectorial, nr = MVA(date_entry, ti_MVA, tf_MVA, mag)
 
 #########
 #buscamos el ángulo entre las normales
@@ -71,6 +96,9 @@ x_14_boot = v_para_boot * deltat_14 #en km
 x_23_boot = v_para_boot * deltat_23
 
 # plot_velocidades(X1, Y1, Z1, R, normal_fit, x3, v_media, v_para, v_para_MVA)
+
+###########
+#giroradio
 
 
 #########
@@ -132,7 +160,7 @@ E_Hall_boot = np.cross(J_v_boot * 1E-9, B[inicio_down, :] * 1E-9) / (q_e * n_e) 
 # plt.xlabel('Tiempo')
 # plt.ylabel('Fuerza (N/m^3)')
 #
-# plt.show(block=False) #para que siga andando aunque no lo haya cerrado
+plt.show(block=False)
 
 
 ############
@@ -158,20 +186,20 @@ if n_e == 1E7:
 ##########
 #Parámetros
 
-hoja_parametros.update_acell(f'F{nr}', f'{omega*180/np.pi:.3g}')
-hoja_parametros.update_acell(f'N{nr}', f'{np.linalg.norm(v_media):.3g}')
+hoja_parametros.update_acell(f'Z{nr}', f'{omega*180/np.pi:.3g}')
+hoja_parametros.update_acell(f'S{nr}', f'{np.linalg.norm(v_media):.3g}')
 
-cell_vel = hoja_parametros.range(f'K{nr}:M{nr}')
+cell_vel = hoja_parametros.range(f'P{nr}:R{nr}')
 for i,cell in enumerate(cell_vel):
     cell.value = round(v_media[i],2)
 hoja_parametros.update_cells(cell_vel)
 
-cell_Bup = hoja_parametros.range(f'O{nr}:Q{nr}')
+cell_Bup = hoja_parametros.range(f'T{nr}:V{nr}')
 for i,cell in enumerate(cell_Bup):
     cell.value = round(B_upstream[i],2)
 hoja_parametros.update_cells(cell_Bup)
 
-cell_Bdown = hoja_parametros.range(f'R{nr}:T{nr}')
+cell_Bdown = hoja_parametros.range(f'W{nr}:Y{nr}')
 for i,cell in enumerate(cell_Bdown):
     cell.value = round(B_downstream[i],2)
 hoja_parametros.update_cells(cell_Bdown)
@@ -179,29 +207,29 @@ hoja_parametros.update_cells(cell_Bdown)
 
 #La hoja del MVA
 
-hoja_mva.update_acell(f'Y{nr}', f'{angulo_v_mva * 180/np.pi:.3g}')
-hoja_mva.update_acell(f'Z{nr}', f'{angulo_B_mva * 180/np.pi:.3g}')
-hoja_mva.update_acell(f'AA{nr}', f'{np.linalg.norm(x_23_MVA):.3g}')
-hoja_mva.update_acell(f'AB{nr}', f'{np.linalg.norm(x_14_MVA):.3g}')
-# hoja_mva.update_acell(f'AC{nr}', f'{:.3g}')
-# hoja_mva.update_acell(f'AD{nr}', f'{:.3g}')
+hoja_mva.update_acell(f'W{nr}', f'{angulo_v_mva * 180/np.pi:.3g}')
+hoja_mva.update_acell(f'X{nr}', f'{angulo_B_mva * 180/np.pi:.3g}')
+hoja_mva.update_acell(f'Y{nr}', f'{np.linalg.norm(x_23_MVA):.3g}')
+hoja_mva.update_acell(f'Z{nr}', f'{np.linalg.norm(x_14_MVA):.3g}')
+# hoja_mva.update_acell(f'AA{nr}', f'{:.3g}')
+# hoja_mva.update_acell(f'AB{nr}', f'{:.3g}')
 
-hoja_mva.update_acell(f'AH{nr}', f'{np.linalg.norm(J_s_MVA)*1E-6:.3g}')
-hoja_mva.update_acell(f'AL{nr}', f'{np.linalg.norm(J_v_MVA):.3g}')
-hoja_mva.update_acell(f'AM{nr}', f'{np.linalg.norm(fuerza_mva):.3g}')
-hoja_mva.update_acell(f'AQ{nr}', f'{np.linalg.norm(E_Hall)*1E3:.3g}') #mV/m
+hoja_mva.update_acell(f'AF{nr}', f'{np.linalg.norm(J_s_MVA)*1E-6:.3g}')
+hoja_mva.update_acell(f'AJ{nr}', f'{np.linalg.norm(J_v_MVA):.3g}')
+hoja_mva.update_acell(f'AK{nr}', f'{np.linalg.norm(fuerza_mva):.3g}')
+hoja_mva.update_acell(f'AO{nr}', f'{np.linalg.norm(E_Hall)*1E3:.3g}') #mV/m
 
-cell_Js = hoja_mva.range(f'AE{nr}:AG{nr}')
+cell_Js = hoja_mva.range(f'AC{nr}:AE{nr}')
 for i,cell in enumerate(cell_Js):
     cell.value = round(J_s_MVA[i] * 1E-6,3)
 hoja_mva.update_cells(cell_Js)
 
-cell_Jv = hoja_mva.range(f'AI{nr}:AK{nr}')
+cell_Jv = hoja_mva.range(f'AG{nr}:AI{nr}')
 for i,cell in enumerate(cell_Jv):
     cell.value = round(J_v_MVA[i],3)
 hoja_mva.update_cells(cell_Jv)
 
-cell_EH = hoja_mva.range(f'AN{nr}:AP{nr}')
+cell_EH = hoja_mva.range(f'AL{nr}:AN{nr}')
 for i,cell in enumerate(cell_EH):
     cell.value = round(E_Hall[i]*1E3,3)
 hoja_mva.update_cells(cell_EH)

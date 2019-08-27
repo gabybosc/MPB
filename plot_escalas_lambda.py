@@ -22,6 +22,12 @@ month = date_orbit.strftime("%m")
 day = date_orbit.strftime("%d")
 doy = date_orbit.strftime("%j")
 
+tiempos_txt = np.loadtxt('outputs/t1t2t3t4.txt')
+for i in range(len(tiempos_txt)):
+    if int(year) == int(tiempos_txt[i,0]) and int(doy) == int(tiempos_txt[i,1]) and int(hora) == int(tiempos_txt[i,2]):
+        tiempos = [tiempos_txt[i,2], tiempos_txt[i,3],tiempos_txt[i,4], tiempos_txt[i,5]]
+timestamps = array_datenums(year, month, day, tiempos)#lo convierto a datenum
+
 # path = '../../../MAVEN/mag_1s/2016/03/' #path a los datos desde la desktop
 path = '../../datos/' #path a los datos desde la laptop
 datos = np.loadtxt(f'outputs/cociente_lambdas_d{doy}_t{hora}.txt', skiprows = 1)
@@ -60,10 +66,12 @@ fin_MVA = np.where(t == find_nearest(t, tiempo_central[-1]))[0][0]
 B_MVA = B_norm[inicio_MVA:fin_MVA]
 t_MVA = t[inicio_MVA:fin_MVA]
 
+
 plt.figure()
 imshow_UTC(year, month, day, tiempo_central, cociente, escalas, 'inferno')
-plot_datetime(year, month, day,t_MVA, B_MVA, 'cyan', '-', 1, 0.5)
-plt.show(block= False)
+# plot_datetime(year, month, day,t_MVA, B_MVA, 'cyan', '-', 1, 0.5) #no sé por qué se superpone mal, tiene mal los tiempos.
+for tt in timestamps:
+    plt.axvline(x = tt, color = 'g')
 plt.title('Heatmap del cociente de lambdas en distintas escalas temporales \n y el campo magnético superpuesto')
 plt.xlabel('Tiempo en el que está centrado (hh:mm:ss)')
 plt.ylabel('Radio (s) \n |B| (nT)')

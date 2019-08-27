@@ -21,7 +21,7 @@ np.set_printoptions(precision=4)
 # date_orbit = dt.date(year, month, day)
 
 #si tengo la fecha en dia del año
-fechas = np.loadtxt('t1t2t3t4.txt')
+fechas = np.loadtxt('outputs/t1t2t3t4.txt')
 for j in range(len(fechas)):
     year = int(fechas[j,0])
     doy = int(fechas[j,1])
@@ -40,7 +40,7 @@ for j in range(len(fechas)):
 
     # path = '../../../MAVEN/mag_1s/2016/03/' #path a los datos desde la desktop
     path = '../../datos/' #path a los datos desde la laptop
-    mag = np.loadtxt(path + f'MAG_1s/subsolares/mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts', skiprows=148)
+    mag = np.loadtxt(path + f'MAG_1s/2016/mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts', skiprows=148)
     lpw = cdf.CDF(path + f'LPW/mvn_lpw_l2_lpnt_{year}{month}{day}_v03_r02.cdf')
     #para ver las varaibles del cdf:
     # lpw.cdf_info()
