@@ -9,7 +9,7 @@ import datetime as dt
 import time as time
 from funciones import find_nearest, Mij
 
-dates = np.loadtxt('outputs/t1t2t3t4.txt')
+# dates = np.loadtxt('outputs/t1t2t3t4.txt')
 
 # for l in range(len(dates)):
 
@@ -20,7 +20,9 @@ dates = np.loadtxt('outputs/t1t2t3t4.txt')
 # hora = int(ti)
 
 date_entry = input('Enter a date in YYYY-DDD format \n')
-# date_entry = '2016-076'
+hora = input('Hora\n')
+
+
 year, doy = map(int, date_entry.split('-'))
 
 date_orbit = dt.datetime(year, 1, 1) + dt.timedelta(doy - 1) #para convertir el doty en date
@@ -30,15 +32,20 @@ month = date_orbit.strftime("%m")
 day = date_orbit.strftime("%d")
 doy = date_orbit.strftime("%j")
 
-ti = float(input('Tiempo inicial del barrido\n'))
-tf = float(input('Tiempo final del barrido\n'))
+tiempos_txt = np.loadtxt('outputs/t1t2t3t4.txt')
+for i in range(len(tiempos_txt)):
+    if int(year) == int(tiempos_txt[i,0]) and int(doy) == int(tiempos_txt[i,1]) and int(hora) == int(tiempos_txt[i,2]):
+        tiempos = [tiempos_txt[i,2], tiempos_txt[i,3],tiempos_txt[i,4], tiempos_txt[i,5]]
 
-n = int(ti*32*3600)
-nn = int(tf*32 * 3600)
+# ti = float(input('Tiempo inicial del barrido\n'))
+# tf = float(input('Tiempo final del barrido\n'))
+ti = tiempos[0]
+tf = tiempos[3]
 
 path = '../../datos/' #path a los datos desde la laptop
-mag = np.loadtxt(path + f'MAG_hires/mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts', skiprows=n, usecols=(0,1,2,3,4,5,6,7,8,9,10))
-# mag = np.genfromtxt(path + f'MAG_hires/mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts', skip_header=n, skip_footer=nn)
+ni = int(ti*32*3600)
+nf = int((24-tf)*32*3600)
+mag = np.genfromtxt(path + f'MAG_hires/mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts', skip_header=ni, skip_footer=nf)
 
 
 tiempo_central = np.zeros(int((tf-ti)*3600)) #la cantidad de segundos entre tf y ti
@@ -113,11 +120,11 @@ matriz[1:,0] = periodo_diezmado
 matriz[1:,1] = tiempo_central
 matriz[1:,2:] = cociente
 
-# with open(f'outputs/cociente_lambdas_d{doy}_t{hora}.txt','w') as file:
-with open(f'outputs/cociente_lambdas_salida_d{doy}_t{hora}.txt','w') as file:
+with open(f'outputs/cociente_lambdas_d{doy}_t{hora}.txt','w') as file:
+# with open(f'outputs/cociente_lambdas_salida_d{doy}_t{hora}.txt','w') as file:
     file.write('La primera columna es el período de ciclotron, la primera fila son las escalas, la segunda columna es el tiempo central.\n')
     for i in range(len(matriz[:,0])):
         for j in range(len(matriz[0,:])):
             file.write(f'{matriz[i,j]}\t')
         file.write('\n')
-print(f'{l / len(dates) * 100}%')
+# print(f'{l / len(dates) * 100}%')

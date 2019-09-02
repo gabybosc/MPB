@@ -4,7 +4,7 @@ from matplotlib.widgets import Cursor, MultiCursor
 from matplotlib.colors import LogNorm
 import cdflib as cdf
 import datetime as dt
-from funciones import find_nearest, deltaB, unix_to_decimal, unix_to_timestamp
+from funciones import find_nearest, deltaB, unix_to_decimal, unix_to_timestamp, Bpara_Bperp
 from funciones_plot import onpick1
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import time
@@ -64,20 +64,12 @@ B = np.zeros((M, 3))
 for i in range(7,10):
     B[:,i-7] = mag[:, i]
 
-#la posición(x,y,z)
-posicion = np.zeros((M, 3))
-for i in range(11,14):
-    posicion[:,i-11] = mag[:, i]
-
 #la matriz diaria:
-MD = np.zeros((M, 9))
+MD = np.zeros((M, 5))
 MD[:, 0] = t
 for i in range(1,4):
     MD[:, i] = B[:,i-1]
 MD[:,4] = np.linalg.norm(B, axis = 1)
-for i in range(5,8):
-    MD[:,i] = posicion[:,i-5]/3390 #en radios marcianos
-MD[:, 8] = np.linalg.norm(posicion, axis=1) - 3390 #altitud en km
 
 #Si quiero elegir manualmente la orbita:
 plt.plot(t, MD[:,4])
@@ -94,35 +86,27 @@ while tf < ti:
     ti = float(input("Tiempo inicial = "))
     tf = float(input("Tiempo final = "))
 
+
+ni = int(ti*32*3600)
+nf = int((24-tf)*32*3600)
+mag = np.genfromtxt(path + f'MAG_hires/mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts', skip_header=ni, skip_footer=nf)
+
+t = mag[:,6]  #el dia decimal
+dia = mag[:,1]
+t = (t - dia) * 24 #hdec
+M = np.size(t) #el numero de datos
+
+B = np.zeros((M, 3))
+for i in range(7,10):
+    B[:,i-7] = mag[:, i]
+
+Bnorm = np.linalg.norm(B, axis = 1)
+
+
+
 t1 = find_nearest(t, ti)
 t2 = find_nearest(t, tf)
-j_inicial = np.where(t == t1)[0][0]
-j_final =  np.where(t == t2)[0][0]
-
-#el deltaB es una norma. Corresponde al t del medio del intervalo.
-#Lo hago en ventanas de 60s, moviendose de a 1s.
-B_para = np.zeros(j_final - j_inicial)
-B_perp = np.zeros((j_final - j_inicial, 3))
-B_perp_norm = np.zeros(j_final - j_inicial)
-for j in range(j_inicial, j_final):
-    Mi = j
-    Mf = j + 25
-    M_delta = 25
-    B_delta = B[Mi:Mf]
-    t_delta = t[Mi:Mf]
-    #hasta aca importa los datos
-    #ahora quiero que haga el delta para cada j
-    deltaB_para, deltaB_perp = deltaB(B_delta)
-    # pero quiero que lo guarde en otro B. Va a corresponder al t de la mtiad del intervalo
-    B_para[j-j_inicial] = deltaB_para[12]
-    B_perp[j-j_inicial, :] = deltaB_perp[12, :]
-    B_perp_norm[j-j_inicial] = np.linalg.norm(deltaB_perp[12,:])
-
-theta = np.arccos(B[:,2]/MD[:,4]) * 57.2958#cos(theta) = Bz/|B|
-phi = np.arctan2(B[:,0], B[:,1])* 57.2958#tg(phi) = By/Bx
-theta_cut = theta[j_inicial+12:j_final+12]
-phi_cut = phi[j_inicial+12:j_final+12]
-
+B_para, B_perp_norm, j_inicial, j_final = Bpara_Bperp(B, t, ti, tf)
 t_plot = t[j_inicial+12:j_final+12]
 
 ###############################################################################################SWEA
@@ -208,7 +192,7 @@ while not happy:
         ax4.grid()
 
         ax3 = plt.subplot2grid((3,2),(2,0), sharex=ax1)
-        plt.plot(t[j_inicial + 12: j_final +12], MD[j_inicial:j_final,4])
+        plt.plot(t[j_inicial + 12: j_final +12], Bnorm[j_inicial:j_final])
         ax3.grid()
         ax3.set_ylabel('|B| (nT)')
         ax3.set_xlabel('Tiempo (hdec)')
@@ -249,12 +233,13 @@ while not happy:
         val = np.asarray(plt.ginput(4))[:,0]
         print('Selected values: ', val)
         outs = np.concatenate((index, val))
-        outs = sorted(outs[3:7])
+        outs = sorted(outs[2:6])
 
     print('Happy? Keyboard click for yes, mouse click for no.')
     happy = plt.waitforbuttonpress()
 
-with open('t1t2t3t4.txt','a') as file:
+with open('outputs/t1t2t3t4.txt','a') as file:
+    file.write(f'{year}\t{doy}\t')
     for k in outs:
         file.write('{0:1.7g}\t'.format(k))
     file.write('\n')

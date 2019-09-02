@@ -5,7 +5,7 @@ from matplotlib.mlab import normpdf
 from scipy.stats import norm
 import cdflib as cdf
 from datetime import datetime
-from funciones import find_nearest, deltaB, onpick1, unix_to_decimal, plot_select, set_axes_equal, datenum
+from funciones import find_nearest, deltaB, onpick1, unix_to_decimal, plot_select, set_axes_equal, datenum, Bpara_Bperp
 from funcion_flujo_energia_cdf import flujo_energia
 import matplotlib.dates as md
 import datetime as dt
@@ -75,27 +75,8 @@ MD[:, 8] = np.sqrt(posicion[:,0]**2 + posicion[:,1]**2 + posicion[:,2]**2) - 339
 
 t1 = find_nearest(t, 17.85)
 t2 = find_nearest(t, 18.4)
-j_inicial = np.where(t == t1)[0][0]
-j_final =  np.where(t == t2)[0][0]
 
-#el deltaB es una norma. Corresponde al t del medio del intervalo.
-#Lo hago en ventanas de 60s, moviendose de a 1s.
-B_para = np.empty(j_final - j_inicial)
-B_perp = np.empty((j_final - j_inicial, 3))
-B_perp_norm = np.empty(j_final - j_inicial)
-for j in range(j_inicial, j_final):
-    Mi = j
-    Mf = j + 25
-    M_delta = 25
-    B_delta = B[Mi:Mf]
-    t_delta = t[Mi:Mf]
-    #hasta aca importa los datos
-    #ahora quiero que haga el delta para cada j
-    deltaB_para, deltaB_perp = deltaB(B_delta)
-    # pero quiero que lo guarde en otro B. Va a corresponder al t de la mtiad del intervalo
-    B_para[j-j_inicial] = deltaB_para[12]
-    B_perp[j-j_inicial, :] = deltaB_perp[12, :]
-    B_perp_norm[j-j_inicial] = np.linalg.norm(deltaB_perp[12,:])
+t_plot, B_para, B_perp_norm = Bpara_Bperp(B, t, ti, tf)
 
 
 ########## SWEA

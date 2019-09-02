@@ -11,6 +11,8 @@ from matplotlib.image import AxesImage
 import datetime as dt
 import calendar
 from funciones import array_datenums
+from pandas.plotting import register_matplotlib_converters
+register_matplotlib_converters()
 
 def axisEqual3D(ax):
     extents = np.array([getattr(ax, 'get_{}lim'.format(dim))() for dim in 'xyz'])

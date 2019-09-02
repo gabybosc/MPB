@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 import cdflib as cdf
 import datetime as dt
-from funciones import find_nearest, deltaB, unix_to_decimal, unix_to_timestamp
+from funciones import find_nearest, deltaB, unix_to_decimal, unix_to_timestamp, Bpara_Bperp
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import time
 import matplotlib.dates as md
@@ -22,7 +22,9 @@ Guarda las figuras como png y como pickle (para poder reabrirlas con python y qu
 np.set_printoptions(precision=4)
 
 fechas = np.loadtxt('outputs/t1t2t3t4.txt')
-for i in range(len(fechas)):
+# for i in range(len(fechas)):
+for j in range(1):
+    i = 11
     year = int(fechas[i,0])
     doy = int(fechas[i, 1])
     t1 = fechas[i,2]
@@ -72,34 +74,7 @@ for i in range(len(fechas)):
     ti = t1 - 0.15
     tf = t4 + 0.15
 
-    j_inicial = np.where(t == find_nearest(t, ti))[0][0]
-    j_final =  np.where(t == find_nearest(t, tf))[0][0]
-
-    #el deltaB es una norma. Corresponde al t del medio del intervalo.
-    #Lo hago en ventanas de 60s, moviendose de a 1s.
-    B_para = np.zeros(j_final - j_inicial)
-    B_perp = np.zeros((j_final - j_inicial, 3))
-    B_perp_norm = np.zeros(j_final - j_inicial)
-    for j in range(j_inicial, j_final):
-        Mi = j
-        Mf = j + 25
-        M_delta = 25
-        B_delta = B[Mi:Mf]
-        t_delta = t[Mi:Mf]
-        #hasta aca importa los datos
-        #ahora quiero que haga el delta para cada j
-        deltaB_para, deltaB_perp = deltaB(B_delta)
-        # pero quiero que lo guarde en otro B. Va a corresponder al t de la mtiad del intervalo
-        B_para[j-j_inicial] = deltaB_para[12]
-        B_perp[j-j_inicial, :] = deltaB_perp[12, :]
-        B_perp_norm[j-j_inicial] = np.linalg.norm(deltaB_perp[12,:])
-
-    theta = np.arccos(B[:,2]/MD[:,4]) * 57.2958#cos(theta) = Bz/|B|
-    phi = np.arctan2(B[:,0], B[:,1])* 57.2958#tg(phi) = By/Bx
-    theta_cut = theta[j_inicial+12:j_final+12]
-    phi_cut = phi[j_inicial+12:j_final+12]
-
-    t_plot = t[j_inicial+12:j_final+12]
+    t_plot, B_para, B_perp_norm = Bpara_Bperp(B, t, ti, tf)
 
     ###############################################################################################SWEA
     file_size_swea = os.path.getsize(path +  f'SWEA/mvn_swe_l2_svyspec_{year}{month}{day}_v04_r01.cdf')

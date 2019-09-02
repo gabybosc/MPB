@@ -6,7 +6,7 @@ import datetime as dt
 import pdb
 from matplotlib.mlab import normpdf
 from scipy.stats import norm
-from funciones import error, find_nearest, find_nearest_final, find_nearest_inicial, deltaB, Mij, next_available_row, datenum, unix_to_decimal
+from funciones import error, find_nearest, find_nearest_final, find_nearest_inicial, deltaB, Mij, next_available_row, datenum, unix_to_decimal, UTC_to_hdec
 from funciones_MVA import ajuste_conico, plot_velocidades, plot_FLorentz, plot_bootstrap, bootstrap
 from funciones_plot import hodograma, set_axes_equal
 import gspread
@@ -30,12 +30,17 @@ month = date_orbit.strftime("%m")
 day = date_orbit.strftime("%d")
 doy = date_orbit.strftime("%j")
 
-ti_MVA = float(input("t_incial = "))
-tf_MVA = float(input("t_final = "))
+# ti_MVA = float(input("t_incial = "))
+# tf_MVA = float(input("t_final = "))
+ti_MVA = UTC_to_hdec(input('Tiempo inicial hh:mm:ss\n'))
+tf_MVA = UTC_to_hdec(input('Tiempo final hh:mm:ss\n'))
 while tf_MVA < ti_MVA:
     print('t final no puede ser menor a t inicial. \n')
-    ti_MVA = float(input('t_inicial = '))
-    tf_MVA = float(input("t_final = "))
+    # ti_MVA = float(input('t_inicial = '))
+    # tf_MVA = float(input("t_final = "))
+    ti_MVA = UTC_to_hdec(input('Tiempo inicial hh:mm:ss\n'))
+    tf_MVA = UTC_to_hdec(input('Tiempo final hh:mm:ss\n'))
+
 
 path = '../../datos/' #path a los datos desde la laptop
 mag = np.genfromtxt(path + f'MAG_hires/mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts', skip_header=1000, skip_footer=1000)
@@ -111,6 +116,8 @@ B_upstream = np.mean(B[inicio_up:fin_up, :], axis=0) #nT
 inicio_down = np.where(t == find_nearest_inicial(t, t4))[0][0] #las 18:14:51
 fin_down = np.where(t == find_nearest_final(t, t4+0.015))[0][0] #las 18:15:52
 B_downstream = np.mean(B[inicio_down:fin_down,:], axis=0) #nT
+
+
 
 omega = np.arccos(np.dot(B_upstream,B_downstream)/(np.linalg.norm(B_upstream)*np.linalg.norm(B_downstream)))
 

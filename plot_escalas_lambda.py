@@ -70,9 +70,9 @@ t_MVA = t[inicio_MVA:fin_MVA]
 plt.figure()
 imshow_UTC(year, month, day, tiempo_central, cociente, escalas, 'inferno')
 # plot_datetime(year, month, day,t_MVA, B_MVA, 'cyan', '-', 1, 0.5) #no sé por qué se superpone mal, tiene mal los tiempos.
-for tt in timestamps:
-    plt.axvline(x = tt, color = 'g')
-plt.title('Heatmap del cociente de lambdas en distintas escalas temporales \n y el campo magnético superpuesto')
+for tt in timestamps[1:3]:
+    plt.axvline(x = tt, color = 'g') #plotea los tiempos t2 y t3
+plt.title('Heatmap del cociente de lambdas en distintas escalas temporales')
 plt.xlabel('Tiempo en el que está centrado (hh:mm:ss)')
 plt.ylabel('Radio (s) \n |B| (nT)')
 

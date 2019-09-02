@@ -20,6 +20,28 @@ def deltaB(B):
 
     return(abs_deltaB_para, abs_deltaB_perp)
 
+def Bpara_Bperp(B, t, ti, tf):
+    j_inicial = np.where(t == find_nearest(t, ti))[0][0]
+    j_final =  np.where(t == find_nearest(t, tf))[0][0]
+
+    #Lo hago en ventanas de 60s, moviendose de a 1s.
+    B_para = np.zeros(j_final - j_inicial)
+    B_perp = np.zeros((j_final - j_inicial, 3))
+    B_perp_norm = np.zeros(j_final - j_inicial)
+    for j in range(j_inicial, j_final):
+        Mi = j
+        Mf = j + 25
+        M_delta = 25
+        B_delta = B[Mi:Mf]
+        t_delta = t[Mi:Mf]
+        deltaB_para, deltaB_perp = deltaB(B_delta)
+        B_para[j-j_inicial] = deltaB_para[12]
+        B_perp[j-j_inicial, :] = deltaB_perp[12, :]
+        B_perp_norm[j-j_inicial] = np.linalg.norm(deltaB_perp[12,:])
+        
+
+    return(B_para, B_perp_norm, j_inicial, j_final)
+
 def error(lamb, B, M, x):
     phi = np.zeros((3,3))
     for i in range(3):
@@ -82,6 +104,11 @@ def unix_to_timestamp(t_unix):
     datenums = md.date2num(dates)
     return(datenums)
 
+def UTC_to_hdec(t_UTC):
+    (h, m, s) = t_UTC.split(':')
+    t_hdec = int(h) + int(m) / 60 + int(s) / 3600
+
+    return(t_hdec)
 
 def getrem(input):
     "this function yields the value behind the decimal point"

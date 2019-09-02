@@ -19,6 +19,10 @@ mag = np.loadtxt(path + 'MAG_1s/2016/mvn_mag_l2_2016076ss1s_20160316_v01_r01.sts
 n =2
 mag = mag[:-n, :]
 
+t1 = 18.2167
+t2 = 18.2204
+t3 = 18.235
+t4 = 18.2476
 
 t_unix = swia.varget('time_unix')
 density = swia.varget('density')
@@ -71,7 +75,7 @@ ancho_mpb = np.linalg.norm(posicion_cut[inicio_mpb] - posicion_cut[fin_mpb]) #km
 
 ####################
 
-density_mean = np.empty(tf_swia-ti_swia)
+density_mean = np.empty(tf_swia-ti_swia) #upstream
 for i in range(tf_swia-ti_swia):
     density_mean[i] = np.mean(density[ti_swia+i:ti_swia+i+30])
 
@@ -118,6 +122,57 @@ E_convective_normalized = np.linalg.norm(E_convective, axis=1) #nV/km
 
 print('El E convectivo medio es {0:1.3g} nV/km'.format(np.mean(E_convective_normalized[ti_mag:tf_mag]))) #en SI nV/km
 
+
+#########presión térmica
+ti_up = np.where(t_swia == find_nearest(t_swia, t1-0.15))[0][0]
+tf_up = np.where(t_swia == find_nearest(t_swia, t1))[0][0]
+ti_down = np.where(t_swia == find_nearest(t_swia, t4))[0][0]
+tf_down = np.where(t_swia == find_nearest(t_swia, t4+0.15))[0][0]
+
+density_up = np.empty(tf_up-ti_up) #upstream
+for i in range(tf_up-ti_up):
+    density_up[i] = np.mean(density[ti_up+i:tf_up+i+30]) * 1E6
+
+density_down = np.empty(tf_down-ti_down) #downstream
+for i in range(tf_down-ti_down):
+    density_down[i] = np.mean(density[ti_down+i:tf_down+i+30]) * 1E6
+
+
+#densidad en kg/m^3
+mp = 1.67e-27 #masa del proton en kg
+#mp = 1.5e-10 #masa del proton en joules/c^2
+rho_u = mp*density_up
+rho_d = mp*density_down
+
+#presion suponiendo gas ideal (en Pa=J/m^3)
+kB = 1.38e-23 #cte de Boltzmann en J/K
+#por ahora supongo T = 2*Ti, tendria que ser T=Ti+Te
+temperatura_swia_norm = np.linalg.norm(temperature, axis=1)
+T_up = 2*np.mean(temperatura_swia_norm[ti_up:tf_up])*(11604.5) #en K
+# T_down = 2*np.mean(temperatura_static_norm[ti_down:tf_down])*(11604.5) #en K ###en realidad como no tengo casi prptones del sw de este lado debería usar los datos de STATIC en lugar de swia. O buscar valor.
+T_down = 0.5 * 11604.5 #K
+##con Te estimadas de las distribuciones
+P_up = density_up*kB*T_up
+P_down = density_down*kB*T_down
+
+#######Presión magnética:
+inicio_up = np.where(t_diezmado == find_nearest_inicial(t_diezmado, t1-0.015))[0][0] #las 18:12:00
+fin_up = np.where(t_diezmado == find_nearest_final(t_diezmado, t1))[0][0] #las 18:13:00
+B_upstream = np.mean(B_cut[inicio_up:fin_up, :], axis=0) #nT
+
+inicio_down = np.where(t_diezmado == find_nearest_inicial(t_diezmado, t4))[0][0] #las 18:14:51
+fin_down = np.where(t_diezmado == find_nearest_final(t_diezmado, t4+0.015))[0][0] #las 18:15:52
+B_downstream = np.mean(B_cut[inicio_down:fin_down,:], axis=0) #nT
+
+#######cociente de presiones:
+mu = (np.pi*4)*(1e-7) #permeabilidad mag del vacio en N/A² =  T m/A
+
+P_Bup = np.linalg.norm(B_upstream*1E-9)**2/(2*mu) # T A/ m = Pa
+P_Bdown = np.linalg.norm(B_downstream*1E-9)**2/(2*mu)
+
+#beta del plasma
+beta_up = P_up/P_Bup
+beta_down = P_down / P_Bdown
 
 
 plt.figure()

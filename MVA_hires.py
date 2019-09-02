@@ -233,7 +233,6 @@ def MVA(date_entry, ti_MVA, tf_MVA, mag):
     cell_times = hoja_parametros.range(f'F{nr}:I{nr}')
     for i,cell in enumerate(cell_times):
         cell.value = tiempos[i]
-        print(tiempos[i])
     hoja_parametros.update_cells(cell_times)
 
 
