@@ -11,11 +11,17 @@ import matplotlib.dates as md
 plt.ion()
 
 
-date_entry = input('Enter a date in YYYY-DDD format \n')
+
+date_entry = input('Enter a date in YYYY-DDD or YYYY-MM-DD format \n')\
 hora = input('Hora de la orbita \n')
-# date_entry = '2016-066'
-year, doy = map(int, date_entry.split('-'))
-date_orbit = dt.datetime(year, 1, 1) + dt.timedelta(doy - 1) #para convertir el doty en date
+
+if date_entry.split('-') < 3:
+    year, doy = map(int, date_entry.split('-'))
+    date_orbit = dt.datetime(year, 1, 1) + dt.timedelta(doy - 1) #para convertir el doty en date
+else:
+    year, month, day = map(int, date_entry.split('-'))
+    date_orbit = dt.date(year, month, day)
+
 
 year = date_orbit.strftime("%Y")
 month = date_orbit.strftime("%m")

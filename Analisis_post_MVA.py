@@ -183,12 +183,6 @@ hoja_mva = client.open("MPB").worksheet('MVA')
 hoja_boot = client.open("MPB").worksheet('Bootstrap')
 hoja_fit = client.open("MPB").worksheet('Ajuste')
 
-if n_e == 1E7:
-    hoja_parametros.update_acell(f'C{nr}', f'LPW no tiene datos de densidad, puse n = 1E7')
-    hoja_mva.update_acell(f'C{nr}', f'LPW no tiene datos de densidad, puse n = 1E7')
-    hoja_boot.update_acell(f'C{nr}', f'LPW no tiene datos de densidad, puse n = 1E7')
-    hoja_fit.update_acell(f'C{nr}', f'LPW no tiene datos de densidad, puse n = 1E7')
-
 
 ##########
 #Parámetros

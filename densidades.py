@@ -3,14 +3,19 @@ import matplotlib.pyplot as plt
 from matplotlib.mlab import normpdf
 from scipy.stats import norm
 import cdflib as cdf
-from funciones import find_nearest, unix_to_decimal
+from funciones import find_nearest, unix_to_decimal, find_nearest_inicial, find_nearest_final
 
 np.set_printoptions(precision=4)
 
 """
-debuggear
-cambiar para que use cdflib
+En el cálculo de beta = P_termica / P_mag no puedo usar los datos de SWIA para calcular P_t downstream, ya que no hay datos de viento solar en esa zona.
 """
+
+##########CONSTANTES
+mp = 1.67e-27 #masa del proton en kg
+kB = 1.38e-23 #cte de Boltzmann en J/K
+#mp = 1.5e-10 #masa del proton en joules/c^2
+q_e = 1.602e-19 #carga del electrón en C
 
 ###########DATOS
 path = '../../datos/'
@@ -25,9 +30,9 @@ t3 = 18.235
 t4 = 18.2476
 
 t_unix = swia.varget('time_unix')
-density = swia.varget('density')
-temperature = swia.varget('temperature_mso')
-vel_mso_xyz = swia.varget('velocity_mso')
+density = swia.varget('density') #cm⁻³
+temperature = swia.varget('temperature_mso') #eV
+vel_mso_xyz = swia.varget('velocity_mso') #km/s
 
 t_swia = unix_to_decimal(t_unix)
 inicio = np.where(t_swia == find_nearest(t_swia, 17.9))[0][0]
@@ -94,6 +99,7 @@ v_maven = np.empty((len(idx),3))
 v_planet = np.empty((len(idx),3))
 
 
+
 for i in range(len(idx)-1):
     B_avg[i,:] = np.mean(B_cut[i:i+30,:], axis=0) * 1E-5 #lo paso a gauss
     B_avg_normalized[i,:] = B_avg[i,:] / np.linalg.norm(B_avg[i,:]) #adimensional
@@ -108,6 +114,21 @@ temp_perp = np.linalg.norm(temperature_cut - temp_para_xyz, axis=1) #eV
 v_alfven = np.linalg.norm(2.18E11 * B_avg / np.sqrt(density_avg), axis=1) * 1E-5 #km/s
 vel_mso = np.linalg.norm(vel_mso_xyz, axis = 1) #km/s
 
+
+corriente_comp = np.array(np.transpose([q_e * density_cut * vel_mso_xyz[:,columnas] * 1E9 for columnas in [0,1,2]]))#A/m²
+corriente_norma = q_e * vel_mso * density_cut * 1E9 #A/m²
+
+plt.figure()
+plt.plot(t_diezmado,corriente_norma*1E6)
+plt.xlabel('Tiempo')
+plt.ylabel('|j| (mA/m²)')
+
+plt.figure()
+plt.plot(t_diezmado,corriente_comp*1E6)
+plt.xlabel('Tiempo')
+plt.ylabel('Corriente (mA/m²)')
+plt.legend(['jx', 'jy', 'jz'])
+plt.show()
 
 ion_gyroradius = np.empty(tf_mag-ti_mag)
 for i in range(tf_mag-ti_mag):
@@ -139,13 +160,10 @@ for i in range(tf_down-ti_down):
 
 
 #densidad en kg/m^3
-mp = 1.67e-27 #masa del proton en kg
-#mp = 1.5e-10 #masa del proton en joules/c^2
 rho_u = mp*density_up
 rho_d = mp*density_down
 
 #presion suponiendo gas ideal (en Pa=J/m^3)
-kB = 1.38e-23 #cte de Boltzmann en J/K
 #por ahora supongo T = 2*Ti, tendria que ser T=Ti+Te
 temperatura_swia_norm = np.linalg.norm(temperature, axis=1)
 T_up = 2*np.mean(temperatura_swia_norm[ti_up:tf_up])*(11604.5) #en K
@@ -153,7 +171,7 @@ T_up = 2*np.mean(temperatura_swia_norm[ti_up:tf_up])*(11604.5) #en K
 T_down = 0.5 * 11604.5 #K
 ##con Te estimadas de las distribuciones
 P_up = density_up*kB*T_up
-P_down = density_down*kB*T_down
+P_down = density_down*kB*T_down #en realidad acá no está bien usar la presión térmica con la densidad de iones dada por SWIA, porque no hay más viento solar
 
 #######Presión magnética:
 inicio_up = np.where(t_diezmado == find_nearest_inicial(t_diezmado, t1-0.015))[0][0] #las 18:12:00

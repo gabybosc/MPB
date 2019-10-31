@@ -19,18 +19,25 @@ from funciones import find_nearest, Mij
 # tf = dates[l, -1]
 # hora = int(ti)
 
-date_entry = input('Enter a date in YYYY-DDD format \n')
-hora = input('Hora\n')
+# date_entry = input('Enter a date in YYYY-DDD format \n')
+
+date_entry = input('Enter a date in YYYY-DDD or YYYY-MM-DD format \n')\
+hora = input('Hora en HH\n')
+
+if date_entry.split('-') < 3:
+    year, doy = map(int, date_entry.split('-'))
+    date_orbit = dt.datetime(year, 1, 1) + dt.timedelta(doy - 1) #para convertir el doty en date
+else:
+    year, month, day = map(int, date_entry.split('-'))
+    date_orbit = dt.date(year, month, day)
 
 
-year, doy = map(int, date_entry.split('-'))
-
-date_orbit = dt.datetime(year, 1, 1) + dt.timedelta(doy - 1) #para convertir el doty en date
 
 year = date_orbit.strftime("%Y")
 month = date_orbit.strftime("%m")
 day = date_orbit.strftime("%d")
 doy = date_orbit.strftime("%j")
+
 
 tiempos_txt = np.loadtxt('outputs/t1t2t3t4.txt')
 for i in range(len(tiempos_txt)):
