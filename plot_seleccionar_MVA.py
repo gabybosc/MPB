@@ -24,13 +24,13 @@ np.set_printoptions(precision=4)
 
 date_entry = input('Enter a date in YYYY-DDD or YYYY-MM-DD format \n')\
 
-if date_entry.split('-') < 3:
+if len(date_entry.split('-')) < 3:
     year, doy = map(int, date_entry.split('-'))
     date_orbit = dt.datetime(year, 1, 1) + dt.timedelta(doy - 1) #para convertir el doty en date
 else:
     year, month, day = map(int, date_entry.split('-'))
     date_orbit = dt.date(year, month, day)
-    
+
 year = date_orbit.strftime("%Y")
 month = date_orbit.strftime("%m")
 day = date_orbit.strftime("%d")

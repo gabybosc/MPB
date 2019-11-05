@@ -15,7 +15,7 @@ plt.ion()
 date_entry = input('Enter a date in YYYY-DDD or YYYY-MM-DD format \n')\
 hora = input('Hora de la orbita \n')
 
-if date_entry.split('-') < 3:
+if len(date_entry.split('-')) < 3:
     year, doy = map(int, date_entry.split('-'))
     date_orbit = dt.datetime(year, 1, 1) + dt.timedelta(doy - 1) #para convertir el doty en date
 else:

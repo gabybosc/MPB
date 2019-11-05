@@ -117,10 +117,10 @@ for i,j in enumerate(path):
 
         """
         Clasificación por Z_MSO (ya se cumple porque lo pedí en el if)
+        """
         Z_MSO = pos[int(idx),2]
         if Z_MSO > 0:
             calendario[i*5+indice,4] = 1
-        """
 
 
 np.savetxt('tiempos_{}.txt'.format(year), sorted(calendario, key=lambda x: x[0]), fmt='%10d' ,header= "Día        Órbita        Altitud        SZA < 30     SZA entre 30 y 60    SZA > 60", newline="\r\n")

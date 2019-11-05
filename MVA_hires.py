@@ -31,7 +31,7 @@ Grafica el hodograma, el ajuste de vignes, y la comparación de las normales obt
 np.set_printoptions(precision=4)
 def MVA(date_entry, ti_MVA, tf_MVA, mag):
 
-    if date_entry.split('-') < 3:
+    if len(date_entry.split('-')) < 3:
         year, doy = map(int, date_entry.split('-'))
         date_orbit = dt.datetime(year, 1, 1) + dt.timedelta(doy - 1) #para convertir el doty en date
     else:
@@ -156,6 +156,9 @@ def MVA(date_entry, ti_MVA, tf_MVA, mag):
     B_medio_vectorial = np.mean(B_cut, axis=0)
     altitud = np.mean(MD_cut[:,8])
     SZA = np.arccos(np.clip(np.dot(posicion_cut[0,:]/np.linalg.norm(posicion_cut[0,:]), [1,0,0]), -1.0, 1.0))* 180/np.pi
+
+    if any(posicion_cut[:, 2]) < 0:
+        SZA = - SZA
 
     B_norm_medio = np.linalg.norm(B_medio_vectorial)
 

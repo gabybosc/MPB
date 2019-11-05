@@ -27,23 +27,27 @@ doy = date_orbit.strftime("%j")
 
 ti = float(input("Tiempo inicial = "))
 tf = float(input("Tiempo final = "))
-n = int(ti*32*3600)
+
+n = 150
 
 # path = '../../../MAVEN/mag_1s/2016/03/' #path a los datos desde la desktop
 path = '../../datos/' #path a los datos desde la laptop
-mag = np.loadtxt(path + f'MAG_hires/mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts', skiprows=n, usecols=(1,6,7,8,9))
 
-dia = mag[:,0]
-t = mag[:,1]  #el dia decimal
+mag = np.loadtxt(path + f'MAG_1s/{year}/mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts', skiprows=n)
+
+dia = mag[:,1]
+t = mag[:,6]  #el dia decimal
 t = (t - dia) * 24 #hdec
 
 M = np.size(t) #el numero de datos
 
 #el campo
+#el campo
 B = np.zeros((M, 3))
-for i in range(2,5):
-    B[:,i-2] = mag[:, i]
+for i in range(7,10):
+    B[:,i-7] = mag[:, i]
 
+#la posición(x,y,z)
 posicion = np.zeros((M, 3))
 for i in range(11,14):
     posicion[:,i-11] = mag[:, i]
@@ -51,9 +55,6 @@ for i in range(11,14):
 
 inicio = np.where(t == find_nearest(t, ti))[0][0]
 fin = np.where(t == find_nearest(t, tf))[0][0]
-
-if any(posicion[inicio:fin, 2]) > 0:
-    print('Norte')
 
 B_norm = np.linalg.norm(B, axis = 1)
 B_cut = B_norm[inicio:fin]
@@ -63,13 +64,19 @@ plt.figure()
 plt.plot(t_cut, B_cut)
 plt.xlabel('t (hdec)')
 plt.ylabel('|B|')
-plt.title('MAG hires hdec')
+plt.title('MAG lowres hdec')
 
 plt.figure()
 plot_datetime(year, month, day, t_cut, B_cut)
 # plt.plot(t_cut, B_cut)
 plt.xlabel('t (UTC)')
 plt.ylabel('|B|')
-plt.title('MAG hires UTC')
+plt.title('MAG lowres UTC')
+
+plt.figure()
+plt.plot(t[inicio:fin], posicion[inicio:fin, 2])
+plt.xlabel('t (hdec)')
+plt.ylabel('Z_MSO')
+plt.title('Z en función del tiempo')
 
 plt.show(block= False)
