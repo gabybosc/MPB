@@ -5,7 +5,7 @@ from funciones import find_nearest
 from funciones_plot import plot_datetime
 
 """
-Plotea sólo los datos de MAG de alta resolución
+Plotea sólo los datos de MAG de baja resolución
 """
 
 np.set_printoptions(precision=4)

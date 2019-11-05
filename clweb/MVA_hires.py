@@ -14,7 +14,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 
 """
 
-Para datos de mag de alta resolución. Para que tarde menos en cargar, skipea las primeras t1*32*3600 rows, lo malo de eso es que a veces no alcanza con esos datos.
+Para datos de mag del clweb.
 
 Este script pide como user input una fecha (puede ser o fecha dd-mm-aaaa o doy-año) y los tiempos entre los que voy a realizar el MVA.
 Eventualmente podría simplemente encontrar todos los cruces que quiero y decirle que lea directamente de algún lugar eso. (es lo que hace MVA_automatico)
@@ -61,12 +61,6 @@ def MVA(date_entry, ti_MVA, tf_MVA, mag):
     t3 = datos_tiempo[idx,4]
     t4 = datos_tiempo[idx,5]
     tiempos = np.array([t1,t2,t3,t4])
-
-
-    # path = '../../../MAVEN/mag_1s/2016/03/' #path a los datos desde la desktop
-    # path = '../../datos/' #path a los datos desde la laptop
-    # n = int(ti_MVA*32*3600 - 1000)
-    # mag = np.genfromtxt(path + f'MAG_hires/mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts', skip_header=n, skip_footer=1000) #skipea las filas anteriores a la hora que quiero medir para hacer más rápido
 
 
     hh = mag[:,3]
@@ -166,7 +160,7 @@ def MVA(date_entry, ti_MVA, tf_MVA, mag):
 
     B_norm_medio = np.linalg.norm(B_medio_vectorial)
 
-    hodograma(B1, B2, B3, 'nT', 'MAVEN MAG MVA')
+    hodograma(B1, B2, B3, date_entry)
 
     #el error
     phi, delta_B3 = error(lamb, B_cut, M_cut, x)
@@ -179,7 +173,7 @@ def MVA(date_entry, ti_MVA, tf_MVA, mag):
     index = np.where(t == t_nave)[0][0]
     x0 = 0.78
     e = 0.9
-    normal_fit, X1, Y1, Z1, R, L0 = ajuste_conico(posicion, index, orbita, x3)
+    normal_fit, X1, Y1, Z1, R, L0 = ajuste_conico(posicion, index, orbita, x3, date_entry)
 
     B3_fit = np.dot(B_cut, normal_fit)
 

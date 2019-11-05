@@ -83,6 +83,20 @@ t_plot = t[j_inicial+12:j_final+12]
 #
 # flux_plot = np.transpose(flux)[::-1]
 
+swea = np.loadtxt(path + 'diff_en_flux.asc')
+
+energy = swea[:, 7]
+JE_total = swea[:, -1]
+
+t_swea = np.unique(swea[:,3] + swea[:,4]/60 + swea[:,5]/3600) #hdec
+# ti = 10.5
+# tf = 11
+inicio_swea = np.where(t_swea == find_nearest(t_swea, ti))[0][0]
+fin_swea = np.where(t_swea == find_nearest(t_swea, tf))[0][0]
+
+energias = [100 + i*20 for i in range(6)]
+
+
 ###############################################################################################SWIA
 
 swia = np.loadtxt(path + 'swia_density.asc')
@@ -145,6 +159,15 @@ while not happy:
         # cax = divider.append_axes("top", size="7%", pad="1%")
         # cb = plt.colorbar(im, cax=cax, orientation="horizontal")
         # cax.xaxis.set_ticks_position("top")
+        for energia in energias:
+            index = np.where(energy == find_nearest(energy, energia))[0]
+            JE = JE_total[index]
+            plt.semilogy(t_swea, JE, label = energia)
+        ax5.grid()
+        plt.setp(ax5.get_xticklabels(), visible=False)
+        ax5.set_ylabel('JE')
+        ax5.legend()
+
 
 
         ax7 = plt.subplot2grid((3,2),(1,1), sharex=ax1)
@@ -178,8 +201,8 @@ while not happy:
 
 plt.show(block=False)
 
-with open('../outputs/t1t2t3t4.txt','a') as file:
-    file.write('\n')
-    file.write(f'{year}\t{doy}\t')
-    for k in outs:
-        file.write('{0:1.7}\t'.format(k))
+# with open('../outputs/t1t2t3t4.txt','a') as file:
+#     file.write('\n')
+#     file.write(f'{year}\t{doy}\t')
+#     for k in outs:
+#         file.write('{0:1.7}\t'.format(k))

@@ -85,15 +85,17 @@ for j in range(1):
 
     swea = np.loadtxt(path + 'diff_en_flux.asc')
 
-    flux = swea[:,-1]
-    energia = swea[:,7]
+    energy = swea[:, 7]
+    JE_total = swea[:, -1]
 
-    t_swea = swea[:,3] + swea[:,4]/60 + swea[:,5]/3600 #hdec
-
+    t_swea = np.unique(swea[:,3] + swea[:,4]/60 + swea[:,5]/3600) #hdec
+    # ti = 10.5
+    # tf = 11
     inicio_swea = np.where(t_swea == find_nearest(t_swea, ti))[0][0]
     fin_swea = np.where(t_swea == find_nearest(t_swea, tf))[0][0]
 
-    flux_plot = np.transpose(flux)[::-1]
+    energias = [100 + i*20 for i in range(6)]
+
 
     ###############################################################################################SWIA
     swia = np.loadtxt(path + 'swia_density.asc')
@@ -165,6 +167,15 @@ for j in range(1):
     # cax = divider.append_axes("top", size="7%", pad="1%")
     # cb = plt.colorbar(im, cax=cax, orientation="horizontal")
     # cax.xaxis.set_ticks_position("top")
+    for energia in energias:
+        index = np.where(energy == find_nearest(energy, energia))[0]
+        JE = JE_total[index]
+        plt.semilogy(t_swea[inicio_swea:fin_swea], JE[inicio_swea:fin_swea], label = energia)
+    for xc in tiempos:
+        plt.axvline(x = xc, color = 'k', linewidth=1)
+    ax5.set_xlabel('tiempo')
+    ax5.set_ylabel('JE')
+    ax5.legend()
 
 
 

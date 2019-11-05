@@ -2,6 +2,9 @@
 
 Python files for analysing the MPB
 
+READ CDF:
+Con cdflib, para ver todas las variables hacer variable_cdf.cdf_info()
+
 PLOTTING:
 
 plot_tiempos.py: plotea los datos de MAG, SWEA, SWIA, LPW con los tiempos t1t2t3t4 y los guarda como pickle. Para leerlos: usar outputs/leer_figs_MPB.py

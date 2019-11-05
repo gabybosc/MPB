@@ -28,7 +28,7 @@ def deltat():
     global x2
     return(x1, x2)
 
-def hodograma(B1, B2, B3, unidad = 'nT', titulo = 'Hodograma'): #, dia):
+def hodograma(B1, B2, B3, fecha, unidad = 'nT'):
     f, (ax1, ax2) = plt.subplots(1, 2, sharex=True) #tienen el mismo eje x
     ax1.plot(B2, B1)
     ax2.plot(B3, B1)
@@ -42,10 +42,10 @@ def hodograma(B1, B2, B3, unidad = 'nT', titulo = 'Hodograma'): #, dia):
     ax2.set_ylabel('B1 ({})'.format(unidad))
     ax1.grid()
     ax2.grid()
-    plt.suptitle(titulo)
+    plt.suptitle(f'MAVEN MAG {fecha}')
     plt.legend()
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
-    # plt.savefig('figuras/hodograma_%d.png'%dia[0])
+    plt.savefig(f'../outputs/figs_MPB/hodograma_{fecha}.png')
 
 def imshow_UTC(year, month, day, t, heatmap, eje_y, colormap = 'inferno'):
     """ Le das una fecha en np.datetime64 (UTC) y te grafica el imshow.

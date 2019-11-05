@@ -35,17 +35,17 @@ month = date_orbit.strftime("%m")
 day = date_orbit.strftime("%d")
 doy = date_orbit.strftime("%j")
 
-# ti_MVA = float(input("t_incial = "))
-# tf_MVA = float(input("t_final = "))
+ti_MVA = float(input("t_incial = "))
+tf_MVA = float(input("t_final = "))
 
-ti_MVA = UTC_to_hdec(input('Tiempo inicial hh:mm:ss\n'))
-tf_MVA = UTC_to_hdec(input('Tiempo final hh:mm:ss\n'))
-while tf_MVA < ti_MVA:
-    print('t final no puede ser menor a t inicial. \n')
-    # ti_MVA = float(input('t_inicial = '))
-    # tf_MVA = float(input("t_final = "))
-    ti_MVA = UTC_to_hdec(input('Tiempo inicial hh:mm:ss\n'))
-    tf_MVA = UTC_to_hdec(input('Tiempo final hh:mm:ss\n'))
+# ti_MVA = UTC_to_hdec(input('Tiempo inicial hh:mm:ss\n'))
+# tf_MVA = UTC_to_hdec(input('Tiempo final hh:mm:ss\n'))
+# while tf_MVA < ti_MVA:
+#     print('t final no puede ser menor a t inicial. \n')
+#     # ti_MVA = float(input('t_inicial = '))
+#     # tf_MVA = float(input("t_final = "))
+#     ti_MVA = UTC_to_hdec(input('Tiempo inicial hh:mm:ss\n'))
+#     tf_MVA = UTC_to_hdec(input('Tiempo final hh:mm:ss\n'))
 
 
 path = f'../../../datos/clweb/{year}-{month}-{day}/' #path a los datos desde la laptop
