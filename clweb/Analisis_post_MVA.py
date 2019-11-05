@@ -37,6 +37,7 @@ doy = date_orbit.strftime("%j")
 
 # ti_MVA = float(input("t_incial = "))
 # tf_MVA = float(input("t_final = "))
+
 ti_MVA = UTC_to_hdec(input('Tiempo inicial hh:mm:ss\n'))
 tf_MVA = UTC_to_hdec(input('Tiempo final hh:mm:ss\n'))
 while tf_MVA < ti_MVA:
@@ -145,9 +146,9 @@ fuerza_fit = np.cross(J_v_fit *1E-9, B[inicio_down,:]*1E-9) #N/m^3 #en t4
 fuerza_boot = np.cross(J_v_boot * 1E-9, B[inicio_down,:]*1E-9) #N/m^3
 
 
-e_density = lpw.varget('data')[:,3]
-t_unix = lpw.varget('time_unix')
-t_lpw = unix_to_decimal(t_unix)
+e_density = lpw[:,-1]
+t_lpw = lpw[:,3] + lpw[:,4]/60 + lpw[:,5]/3600
+
 ti_lpw = np.where(t_lpw == find_nearest(t_lpw, t2))[0][0]
 tf_lpw = np.where(t_lpw == find_nearest(t_lpw, t3))[0][0]
 n_e = np.nanmean(e_density[ti_lpw:tf_lpw]) #hace el mean ignorando los nans #cm⁻³
@@ -179,7 +180,7 @@ plt.show(block=False)
 #Ahora guardamos todo en la spreadsheet
 scope = ["https://spreadsheets.google.com/feeds","https://www.googleapis.com/auth/spreadsheets","https://www.googleapis.com/auth/drive.file","https://www.googleapis.com/auth/drive"]
 
-creds = ServiceAccountCredentials.from_json_keyfile_name("mpb_api.json", scope)
+creds = ServiceAccountCredentials.from_json_keyfile_name("../mpb_api.json", scope)
 
 client = gspread.authorize(creds)
 

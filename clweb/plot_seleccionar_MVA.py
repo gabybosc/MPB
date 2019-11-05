@@ -74,14 +74,14 @@ t_plot = t[j_inicial+12:j_final+12]
 
 ###############################################################################################SWEA
 
-swea = np.loadtxt(path + 'diff_en_flux.asc')
-
-flux = swea[:,-1]
-energia = swea[:,7]
-
-t_swea = swea[:,3] + swea[:,4]/60 + swea[:,5]/3600 #hdec
-
-flux_plot = np.transpose(flux)[::-1]
+# swea = np.loadtxt(path + 'diff_en_flux.asc')
+#
+# flux = swea[:,-1]
+# energia = swea[:,7]
+#
+# t_swea = swea[:,3] + swea[:,4]/60 + swea[:,5]/3600 #hdec
+#
+# flux_plot = np.transpose(flux)[::-1]
 
 ###############################################################################################SWIA
 

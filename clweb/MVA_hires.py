@@ -52,7 +52,7 @@ def MVA(date_entry, ti_MVA, tf_MVA, mag):
     #     ti_MVA = float(input('t_inicial = '))
     #     tf_MVA = float(input("t_final = "))
 
-    datos_tiempo = np.loadtxt('outputs/t1t2t3t4.txt')
+    datos_tiempo = np.loadtxt('../outputs/t1t2t3t4.txt')
     idx_d = np.where(int(doy) == datos_tiempo[:,1].astype(int))[0]
     idx_h = np.where(int(ti_MVA) == datos_tiempo[:,2].astype(int))[0]
     idx = np.intersect1d(idx_d, idx_h)[0]
@@ -69,33 +69,34 @@ def MVA(date_entry, ti_MVA, tf_MVA, mag):
     # mag = np.genfromtxt(path + f'MAG_hires/mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts', skip_header=n, skip_footer=1000) #skipea las filas anteriores a la hora que quiero medir para hacer más rápido
 
 
-    dia = mag[:,1]
-    t = mag[:,6]  #el dia decimal
-    t = (t - dia) * 24 #para que me de sobre la cantidad de horas
+    hh = mag[:,3]
+    mm = mag[:,4]
+    ss = mag[:,5]
+
+    t = hh + mm/60 + ss/3600 #hdec
 
     M = np.size(t) #el numero de datos
 
     #tengo que asegurarme de que no haya agujeros en mis datos
-    for i in range(M-1):
-        if t[i+1] - t[i] > 24 * 1.5e-5: #1.1e-5 es 1s, le doy un poco más
-            print('salto en la linea {} de {} segundos'.format(i+144, (t[i+1] - t[i]) / (24*1.1e-5)))
 
     #el campo
     B = np.zeros((M, 3))
-    for i in range(7,10):
-        B[:,i-7] = mag[:, i]
+    for i in range(6,9):
+        B[:,i-6] = mag[:, i]
+
+    Bnorm = mag[:,-1]
 
     #la posición(x,y,z)
     posicion = np.zeros((M, 3))
-    for i in range(11,14):
-        posicion[:,i-11] = mag[:, i]
+    for i in range(9,12):
+        posicion[:,i-9] = mag[:, i]
 
     #la matriz diaria:
     MD = np.zeros((M, 9))
     MD[:, 0] = t
     for i in range(1,4):
         MD[:, i] = B[:,i-1]
-    MD[:,4] = np.linalg.norm(B, axis=1)#la norma de B
+    MD[:,4] = Bnorm
     for i in range(5,8):
         MD[:,i] = posicion[:,i-5]/3390 #en radios marcianos
     MD[:, 8] = np.linalg.norm(posicion, axis=1) - 3390 #altitud en km
@@ -125,6 +126,7 @@ def MVA(date_entry, ti_MVA, tf_MVA, mag):
     MD_cut = MD[inicio : fin+1, :]
     M_cut = np.size(MD_cut[:,0])
     posicion_cut = posicion[inicio:fin+1,:]
+    n_p = int(len(posicion_cut)/2)
 
     M_ij = Mij(B_cut)
 
@@ -157,7 +159,10 @@ def MVA(date_entry, ti_MVA, tf_MVA, mag):
     #el B medio
     B_medio_vectorial = np.mean(B_cut, axis=0)
     altitud = np.mean(MD_cut[:,8])
-    SZA = np.arccos(np.clip(np.dot(posicion_cut[0,:]/np.linalg.norm(posicion_cut[0,:]), [1,0,0]), -1.0, 1.0))* 180/np.pi
+    SZA = np.arccos(np.clip(np.dot(posicion_cut[n_p,:]/np.linalg.norm(posicion_cut[n_p,:]), [1,0,0]), -1.0, 1.0))* 180/np.pi
+
+    if posicion_cut[n_p, 2] < 0:
+        SZA = - SZA
 
     B_norm_medio = np.linalg.norm(B_medio_vectorial)
 
@@ -206,7 +211,7 @@ def MVA(date_entry, ti_MVA, tf_MVA, mag):
     #ahora guardo todo en una spreadsheet
     scope = ["https://spreadsheets.google.com/feeds","https://www.googleapis.com/auth/spreadsheets","https://www.googleapis.com/auth/drive.file","https://www.googleapis.com/auth/drive"]
 
-    creds = ServiceAccountCredentials.from_json_keyfile_name("mpb_api.json", scope)
+    creds = ServiceAccountCredentials.from_json_keyfile_name("../mpb_api.json", scope)
 
     client = gspread.authorize(creds)
 
