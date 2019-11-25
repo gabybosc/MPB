@@ -47,10 +47,10 @@ for j in range(1):
         B = mag[:, :3]
 
         Bnorm = mag[:,-1]
-        mag = np.loadtxt(path + 'mag.asc')
+        mag = np.loadtxt(path + 'MAG.asc')
         Bxyz_paraperp = mag[:,6:9]
     else:
-        mag = np.loadtxt(path + 'mag.asc')
+        mag = np.loadtxt(path + 'MAG.asc')
         M = len(mag[:,0]) #el numero de datos
         B = mag[:, 6:9]
         Bnorm = np.linalg.norm(B, axis=1)
@@ -96,7 +96,7 @@ for j in range(1):
     fin = np.where(t == find_nearest(t, tf))[0][0]
     ###############################################################################################SWEA
 
-    swea = np.loadtxt(path + 'diff_en_flux.asc')
+    swea = np.loadtxt(path + 'SWEA.asc')
 
     energy = swea[:, 7]
     JE_total = swea[:, -1]
@@ -111,7 +111,7 @@ for j in range(1):
 
 
     ###############################################################################################SWIA
-    swia = np.loadtxt(path + 'swia_density.asc')
+    swia = np.loadtxt(path + 'SWIA.asc')
 
     density = swia[:,-1]
 
@@ -121,7 +121,7 @@ for j in range(1):
 
 
     ############################################################################################### LPW
-    lpw = np.loadtxt(path + 'lpw_density.asc')
+    lpw = np.loadtxt(path + 'LPW.asc')
 
     e_density = lpw[:,-1]
 

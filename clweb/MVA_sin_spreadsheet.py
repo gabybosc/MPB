@@ -59,26 +59,7 @@ def MVA(date_entry, ti_MVA, tf_MVA, mag):
     tiempos = np.array([t1,t2,t3,t4])
 
     path = f'../../../datos/clweb/{year}-{month}-{day}/' #path a los datos desde la laptop
-    if os.path.isfile(path + 'mag_filtrado.txt'):
-        # mag = np.loadtxt(path + 'mag_filtrado.txt', skiprows=2)
-        # M = len(mag[:,0]) #el numero de datos
-        # B = mag[:, :3]
-        #
-        # Bnorm = mag[:,-1]
-        # mag = np.loadtxt(path + 'mag.asc')
-        # Bxyz_paraperp = mag[:,6:9]
-        mag = np.loadtxt(path + 'mag.asc')
-        M = len(mag[:,0]) #el numero de datos
-        B = mag[:, 6:9]
-        Bnorm = np.linalg.norm(B, axis=1)
-        Bxyz_paraperp = mag[:,6:9]
 
-    else:
-        mag = np.loadtxt(path + 'mag.asc')
-        M = len(mag[:,0]) #el numero de datos
-        B = mag[:, 6:9]
-        Bnorm = np.linalg.norm(B, axis=1)
-        Bxyz_paraperp = mag[:,6:9]
 
     hh = mag[:,3]
     mm = mag[:,4]
@@ -90,12 +71,11 @@ def MVA(date_entry, ti_MVA, tf_MVA, mag):
 
     #tengo que asegurarme de que no haya agujeros en mis datos
 
-    #el campo
-    # B = np.zeros((M, 3))
-    # for i in range(6,9):
-    #     B[:,i-6] = mag[:, i]
-    #
-    # Bnorm = mag[:,-1]
+    mag = np.loadtxt(path + 'MAG.asc')
+    M = len(mag[:,0]) #el numero de datos
+    B = mag[:, 6:9]
+    Bnorm = np.linalg.norm(B, axis=1)
+    Bxyz_paraperp = mag[:,6:9]
 
     #la posición(x,y,z)
     posicion = np.zeros((M, 3))
@@ -171,10 +151,11 @@ def MVA(date_entry, ti_MVA, tf_MVA, mag):
     B_medio_vectorial = np.mean(B_cut, axis=0)
     altitud = np.mean(MD_cut[:,8])
     SZA = np.arccos(np.clip(np.dot(posicion_cut[n_p,:]/np.linalg.norm(posicion_cut[n_p,:]), [1,0,0]), -1.0, 1.0))* 180/np.pi
-
+    print('SZA = ',SZA)
     if posicion_cut[n_p, 2] < 0:
         SZA = - SZA
 
+    print('cociente de lambdas = ', lamb[1]/lamb[2])
     B_norm_medio = np.linalg.norm(B_medio_vectorial)
 
     hodograma(B1, B2, B3, date_entry)

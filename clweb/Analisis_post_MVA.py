@@ -50,9 +50,9 @@ while tf_MVA < ti_MVA:
 
 
 path = f'../../../datos/clweb/{year}-{month}-{day}/' #path a los datos desde la laptop
-mag = np.loadtxt(path + 'mag.asc')
-swia = np.loadtxt(path + 'swia_density.asc')
-lpw = np.loadtxt(path + 'lpw_density.asc')
+mag = np.loadtxt(path + 'MAG.asc')
+swia = np.loadtxt(path + 'SWIA.asc')
+lpw = np.loadtxt(path + 'LPW.asc')
 
 x3, normal_boot, normal_fit, t, B, posicion, inicio, fin, B_cut, t1, t2, t3, t4,B_medio_vectorial, nr = MVA(date_entry, ti_MVA, tf_MVA, mag)
 

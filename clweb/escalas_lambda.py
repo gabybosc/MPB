@@ -53,14 +53,14 @@ if os.path.isfile(path + 'mag_filtrado.txt'):
     B = mag[:, :3]
 
     Bnorm = mag[:,-1]
-    mag = np.loadtxt(path + 'mag.asc')
+    mag = np.loadtxt(path + 'MAG.asc')
     Bxyz_paraperp = mag[:,6:9]
 else:
-    mag = np.loadtxt(path + 'mag.asc')
+    mag = np.loadtxt(path + 'MAG.asc')
     M = len(mag[:,0]) #el numero de datos
     B = mag[:, 6:9]
     Bnorm = np.linalg.norm(B, axis=1)
-    
+
 tiempo_central = np.zeros(int((tf-ti)*3600)) #la cantidad de segundos entre tf y ti
 tiempo_central[0] = ti
 for i in range(len(tiempo_central)-1):

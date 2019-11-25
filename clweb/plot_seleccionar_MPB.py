@@ -42,10 +42,10 @@ if os.path.isfile(path + 'mag_filtrado.txt'):
     B = mag[:, :3]
 
     Bnorm = mag[:,-1]
-    mag = np.loadtxt(path + 'mag.asc')
+    mag = np.loadtxt(path + 'MAG.asc')
     Bxyz_paraperp = mag[:,6:9]
 else:
-    mag = np.loadtxt(path + 'mag.asc')
+    mag = np.loadtxt(path + 'MAG.asc')
     M = len(mag[:,0]) #el numero de datos
     B = mag[:, 6:9]
     Bnorm = np.linalg.norm(B, axis=1)
@@ -89,7 +89,7 @@ t_plot = t[j_inicial+12:j_final+12]
 #
 # flux_plot = np.transpose(flux)[::-1]
 
-swea = np.loadtxt(path + 'diff_en_flux.asc')
+swea = np.loadtxt(path + 'SWEA.asc')
 
 energy = swea[:, 7]
 JE_total = swea[:, -1]
@@ -105,7 +105,7 @@ energias = [100 + i*20 for i in range(6)]
 
 ###############################################################################################SWIA
 
-swia = np.loadtxt(path + 'swia_density.asc')
+swia = np.loadtxt(path + 'SWIA.asc')
 
 density = swia[:,-1]
 
@@ -113,7 +113,7 @@ t_swia = swia[:,3] + swia[:,4]/60 + swia[:,5]/3600 #hdec
 
 
 ############################################################################################### LPW
-lpw = np.loadtxt(path + 'lpw_density.asc')
+lpw = np.loadtxt(path + 'LPW.asc')
 
 e_density = lpw[:,-1]
 
@@ -192,16 +192,17 @@ while not happy:
         print('Click to select MPB: ')
         val = np.asarray(plt.ginput(4))[:,0]
         print('Selected values: ', val)
-        outs = np.concatenate((index, val))
-        outs = sorted(outs[2:6])
+        # outs = np.concatenate(([year, doy], val))
+        # outs = sorted(outs[2:6])
+        outs = sorted(val)
 
     print('Happy? Keyboard click for yes, mouse click for no.')
     happy = plt.waitforbuttonpress()
 
 plt.show(block=False)
 
-# with open('../outputs/t1t2t3t4.txt','a') as file:
-#     file.write('\n')
-#     file.write(f'{year}\t{doy}\t')
-#     for k in outs:
-#         file.write('{0:1.7}\t'.format(k))
+with open('../outputs/t1t2t3t4.txt','a') as file:
+    file.write('\n')
+    file.write(f'{year}\t{doy}\t')
+    for k in outs:
+        file.write('{0:1.7}\t'.format(k))

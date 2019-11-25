@@ -3,7 +3,9 @@
 Python files for analysing the MPB
 
 READ CDF:
-Con cdflib, para ver todas las variables hacer variable_cdf.cdf_info()
+Con cdflib, para ver todas las variables hacer archivo_cdf.cdf_info()
+Para abrir una variable: archivo_cdf.varget('nombre de la variable')
+
 
 UNPICKLE:
 with open('../outputs/figs_MPB/MPB_y2016_d336_t11.pkl', 'rb') as file:
