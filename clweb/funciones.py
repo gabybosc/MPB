@@ -21,8 +21,8 @@ def deltaB(B):
     return(abs_deltaB_para, abs_deltaB_perp)
 
 def Bpara_Bperp(B, t, ti, tf):
-    j_inicial = int(np.where(t == find_nearest(t, ti))[0][0] /32)
-    j_final =  int(np.where(t == find_nearest(t, tf))[0][0]/32)
+    j_inicial = int(np.where(t == find_nearest(t, ti))[0][0])
+    j_final =  int(np.where(t == find_nearest(t, tf))[0][0])
 
     #Lo hago en ventanas de 60s, moviendose de a 1s.
     B_para = np.zeros(j_final - j_inicial)

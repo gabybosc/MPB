@@ -10,7 +10,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 import time
 import matplotlib.dates as md
 import matplotlib.cm as cm
-import os as os
+import os
 
 
 """
@@ -36,7 +36,21 @@ doy = date_orbit.strftime("%j")
 
 
 path = f'../../../datos/clweb/{year}-{month}-{day}/' #path a los datos desde la laptop
-mag = np.loadtxt(path + 'mag.asc')
+if os.path.isfile(path + 'mag_filtrado.txt'):
+    mag = np.loadtxt(path + 'mag_filtrado.txt', skiprows=2)
+    M = len(mag[:,0]) #el numero de datos
+    B = mag[:, :3]
+
+    Bnorm = mag[:,-1]
+    mag = np.loadtxt(path + 'mag.asc')
+    Bxyz_paraperp = mag[:,6:9]
+else:
+    mag = np.loadtxt(path + 'mag.asc')
+    M = len(mag[:,0]) #el numero de datos
+    B = mag[:, 6:9]
+    Bnorm = np.linalg.norm(B, axis=1)
+    Bxyz_paraperp = mag[:,6:9]
+
 
 hh = mag[:,3]
 mm = mag[:,4]
@@ -44,14 +58,6 @@ ss = mag[:,5]
 
 t = hh + mm/60 + ss/3600 #hdec
 
-M = np.size(t) #el numero de datos
-
-#el campo
-B = np.zeros((M, 3))
-for i in range(6,9):
-    B[:,i-6] = mag[:, i]
-
-Bnorm = mag[:,-1]
 
 #Si quiero elegir manualmente la orbita:
 plt.plot(t, Bnorm)
@@ -69,7 +75,7 @@ while tf < ti:
     tf = float(input("Tiempo final = "))
 
 
-B_para, B_perp_norm, j_inicial, j_final = Bpara_Bperp(B, t, ti, tf)
+B_para, B_perp_norm, j_inicial, j_final = Bpara_Bperp(Bxyz_paraperp, t, ti, tf)
 t_plot = t[j_inicial+12:j_final+12]
 
 ###############################################################################################SWEA
@@ -152,20 +158,13 @@ while not happy:
         ax3.set_xlabel('Tiempo (hdec)')
 
         ax5 = plt.subplot2grid((3,2),(0,1), sharex=ax1)
-        # ax5.set_ylabel('Energia', picker=True)#, bbox=dict(facecolor='red'))
-        # plt.setp(ax5.get_xticklabels(), visible=False)
-        # im = plt.imshow(flux_plot, aspect = 'auto',origin = 'lower', extent=(t_swea[0], t_swea[-1],  energia[-1], energia[0]), cmap='inferno', norm=LogNorm(vmin=1E4, vmax=1E9))
-        # divider = make_axes_locatable(ax5)
-        # cax = divider.append_axes("top", size="7%", pad="1%")
-        # cb = plt.colorbar(im, cax=cax, orientation="horizontal")
-        # cax.xaxis.set_ticks_position("top")
         for energia in energias:
             index = np.where(energy == find_nearest(energy, energia))[0]
             JE = JE_total[index]
-            plt.semilogy(t_swea, JE, label = energia)
+            plt.semilogy(t_swea, JE, label = f'{energia} eV')
         ax5.grid()
         plt.setp(ax5.get_xticklabels(), visible=False)
-        ax5.set_ylabel('JE')
+        ax5.set_ylabel('diff en flux')
         ax5.legend()
 
 

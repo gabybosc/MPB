@@ -23,8 +23,8 @@ np.set_printoptions(precision=4)
 
 fechas = np.loadtxt('../outputs/t1t2t3t4.txt')
 # for i in range(len(fechas)):
+i = 16
 for j in range(1):
-    i = -1
     year = int(fechas[i,0])
     doy = int(fechas[i, 1])
     t1 = fechas[i,2]
@@ -41,7 +41,20 @@ for j in range(1):
 
     # path = '../../../MAVEN/mag_1s/2016/03/' #path a los datos desde la desktop
     path = f'../../../datos/clweb/{year}-{month}-{day}/' #path a los datos desde la laptop
-    mag = np.loadtxt(path + 'mag.asc')
+    if 1==2:#os.path.isfile(path + 'mag_filtrado.txt'):
+        mag = np.loadtxt(path + 'mag_filtrado.txt', skiprows=2)
+        M = len(mag[:,0]) #el numero de datos
+        B = mag[:, :3]
+
+        Bnorm = mag[:,-1]
+        mag = np.loadtxt(path + 'mag.asc')
+        Bxyz_paraperp = mag[:,6:9]
+    else:
+        mag = np.loadtxt(path + 'mag.asc')
+        M = len(mag[:,0]) #el numero de datos
+        B = mag[:, 6:9]
+        Bnorm = np.linalg.norm(B, axis=1)
+        Bxyz_paraperp = mag[:,6:9]
 
     hh = mag[:,3]
     mm = mag[:,4]
@@ -76,7 +89,7 @@ for j in range(1):
     ti = t1 - 0.15
     tf = t4 + 0.15
 
-    B_para, B_perp_norm, j_inicial, j_final = Bpara_Bperp(B, t, ti, tf)
+    B_para, B_perp_norm, j_inicial, j_final = Bpara_Bperp(Bxyz_paraperp, t, ti, tf)
     t_plot = t[j_inicial+12:j_final+12]
 
     inicio = np.where(t == find_nearest(t, ti))[0][0]
@@ -158,23 +171,14 @@ for j in range(1):
     ax3.set_xlabel('Tiempo (hdec)')
 
     ax5 = plt.subplot2grid((3,2),(0,1), sharex=ax1)
-    # ax5.set_ylabel('Energia', picker=True)#, bbox=dict(facecolor='red'))
-    # plt.setp(ax5.get_xticklabels(), visible=False)
-    # for xc in tiempos:
-    #     plt.axvline(x = xc, color = 'k', linewidth=1)
-    # im = plt.imshow(flux_plot, aspect = 'auto',origin = 'lower', extent=(t_swea[0], t_swea[-1],  energia[-1], energia[0]), cmap='inferno', norm=LogNorm(vmin=1E4, vmax=1E9))
-    # divider = make_axes_locatable(ax5)
-    # cax = divider.append_axes("top", size="7%", pad="1%")
-    # cb = plt.colorbar(im, cax=cax, orientation="horizontal")
-    # cax.xaxis.set_ticks_position("top")
     for energia in energias:
         index = np.where(energy == find_nearest(energy, energia))[0]
         JE = JE_total[index]
-        plt.semilogy(t_swea[inicio_swea:fin_swea], JE[inicio_swea:fin_swea], label = energia)
+        plt.semilogy(t_swea[inicio_swea:fin_swea], JE[inicio_swea:fin_swea], label = f'{energia} eV')
     for xc in tiempos:
         plt.axvline(x = xc, color = 'k', linewidth=1)
-    ax5.set_xlabel('tiempo')
-    ax5.set_ylabel('JE')
+    ax5.set_xlabel('tiempo (hdec)')
+    ax5.set_ylabel('diff en flux')
     ax5.legend()
 
 
@@ -196,7 +200,7 @@ for j in range(1):
     for xc in tiempos:
         plt.axvline(x = xc, color = 'k', linewidth=1)
 
-    plt.suptitle(f'MAVEN {year}-{doy}')
+    plt.suptitle(f'MAVEN {year}-{month}-{day}')
 
 
 
