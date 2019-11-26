@@ -7,34 +7,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import datetime as dt
 import time as time
-from funciones import find_nearest, Mij
+from funciones import find_nearest, Mij, fechas
 import os
-# dates = np.loadtxt('outputs/t1t2t3t4.txt')
 
-# for l in range(len(dates)):
-
-# year = int(dates[l,0])
-# doy = int(dates[l, 1])
-# ti = dates[l, 2]
-# tf = dates[l, -1]
-# hora = int(ti)
-
-
-date_entry = input('Enter a date in YYYY-DDD or YYYY-MM-DD format \n')
+year, month, day, doy = fechas()
 hora = input('Hora en HH\n')
-
-if len(date_entry.split('-')) < 3:
-    year, doy = map(int, date_entry.split('-'))
-    date_orbit = dt.datetime(year, 1, 1) + dt.timedelta(doy - 1) #para convertir el doty en date
-else:
-    year, month, day = map(int, date_entry.split('-'))
-    date_orbit = dt.date(year, month, day)
-
-year = date_orbit.strftime("%Y")
-month = date_orbit.strftime("%m")
-day = date_orbit.strftime("%d")
-doy = date_orbit.strftime("%j")
-
 
 tiempos_txt = np.loadtxt('../outputs/t1t2t3t4.txt')
 for i in range(len(tiempos_txt)):
@@ -52,9 +29,8 @@ if os.path.isfile(path + 'mag_filtrado.txt'):
     M = len(mag[:,0]) #el numero de datos
     B = mag[:, :3]
 
-    Bnorm = mag[:,-1]
     mag = np.loadtxt(path + 'MAG.asc')
-    Bxyz_paraperp = mag[:,6:9]
+
 else:
     mag = np.loadtxt(path + 'MAG.asc')
     M = len(mag[:,0]) #el numero de datos

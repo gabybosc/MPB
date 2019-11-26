@@ -7,14 +7,14 @@ import pdb
 import os
 from matplotlib.mlab import normpdf
 from scipy.stats import norm
-from funciones import error, find_nearest, find_nearest_final, find_nearest_inicial, deltaB, Mij, next_available_row, datenum, unix_to_decimal, UTC_to_hdec
+from funciones import error, find_nearest, find_nearest_final, find_nearest_inicial, deltaB, Mij, next_available_row, datenum, unix_to_decimal, UTC_to_hdec, fechas, tiempos
 from funciones_MVA import ajuste_conico, plot_velocidades, plot_FLorentz, plot_bootstrap, bootstrap
 from funciones_plot import hodograma, set_axes_equal
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
 """
-Hace el MVA
+Hace el MVA para una órbita outbound. La diferencia es que cuando corre el MVA, en los returns los devuelve t4,t3,t2,t1.
 calcula el ángulo entre normales
 calcula el ancho de la mpb
 calcula la corriente
@@ -22,31 +22,9 @@ calcula la corriente
 from MVA_hires import MVA
 
 
-date_entry = input('Enter a date in YYYY-DDD or YYYY-MM-DD format \n')\
+year, month, day, doy = fechas()
+ti_MVA, tf_MVA = tiempos()
 
-if len(date_entry.split('-')) < 3:
-    year, doy = map(int, date_entry.split('-'))
-    date_orbit = dt.datetime(year, 1, 1) + dt.timedelta(doy - 1) #para convertir el doty en date
-else:
-    year, month, day = map(int, date_entry.split('-'))
-    date_orbit = dt.date(year, month, day)
-
-year = date_orbit.strftime("%Y")
-month = date_orbit.strftime("%m")
-day = date_orbit.strftime("%d")
-doy = date_orbit.strftime("%j")
-
-# ti_MVA = float(input("t_incial = "))
-# tf_MVA = float(input("t_final = "))
-
-ti_MVA = UTC_to_hdec(input('Tiempo inicial hh:mm:ss\n'))
-tf_MVA = UTC_to_hdec(input('Tiempo final hh:mm:ss\n'))
-while tf_MVA < ti_MVA:
-    print('t final no puede ser menor a t inicial. \n')
-    # ti_MVA = float(input('t_inicial = '))
-    # tf_MVA = float(input("t_final = "))
-    ti_MVA = UTC_to_hdec(input('Tiempo inicial hh:mm:ss\n'))
-    tf_MVA = UTC_to_hdec(input('Tiempo final hh:mm:ss\n'))
 
 
 path = f'../../../datos/clweb/{year}-{month}-{day}/' #path a los datos desde la laptop
@@ -54,7 +32,7 @@ mag = np.loadtxt(path + 'MAG.asc')
 swia = np.loadtxt(path + 'SWIA.asc')
 lpw = np.loadtxt(path + 'LPW.asc')
 
-x3, normal_boot, normal_fit, t, B, posicion, inicio, fin, B_cut, t1, t2, t3, t4,B_medio_vectorial, nr = MVA(date_entry, ti_MVA, tf_MVA, mag)
+x3, normal_boot, normal_fit, t, B, posicion, inicio, fin, B_cut, t4, t3, t2, t1,B_medio_vectorial, nr = MVA(year, month, day, doy, ti_MVA, tf_MVA, mag)
 
 #########
 #buscamos el ángulo entre las normales
@@ -115,9 +93,9 @@ x_23_boot = v_para_boot * deltat_23
 
 #########
 ###análisis de corrientes
-
-inicio_up = np.where(t == find_nearest_inicial(t, t1-0.015))[0][0] #las 18:12:00
-fin_up = np.where(t == find_nearest_final(t, t1))[0][0] #las 18:13:00
+#los intervalos up/downstream son tomados +-54s respecto a los tiempos t1 y t4.
+inicio_up = np.where(t == find_nearest_inicial(t, t1-0.015))[0][0]
+fin_up = np.where(t == find_nearest_final(t, t1))[0][0]
 B_upstream = np.mean(B[inicio_up:fin_up, :], axis=0) #nT
 
 inicio_down = np.where(t == find_nearest_inicial(t, t4))[0][0] #las 18:14:51

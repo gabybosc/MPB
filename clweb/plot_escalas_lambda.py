@@ -5,26 +5,14 @@ Plotea los archivos que devuelve escalas_lambda.py
 import matplotlib.pyplot as plt
 import numpy as np
 import datetime as dt
-from funciones import find_nearest, array_datenums
+from funciones import find_nearest, array_datenums, fechas
 from funciones_plot import imshow_UTC, plot_datetime
 import matplotlib.dates as md
 import os
 plt.ion()
 
-date_entry = input('Enter a date in YYYY-DDD or YYYY-MM-DD format \n')
-hora = input('Hora en HH\n')
-
-if len(date_entry.split('-')) < 3:
-    year, doy = map(int, date_entry.split('-'))
-    date_orbit = dt.datetime(year, 1, 1) + dt.timedelta(doy - 1) #para convertir el doty en date
-else:
-    year, month, day = map(int, date_entry.split('-'))
-    date_orbit = dt.date(year, month, day)
-
-year = date_orbit.strftime("%Y")
-month = date_orbit.strftime("%m")
-day = date_orbit.strftime("%d")
-doy = date_orbit.strftime("%j")
+year, month, day, doy = fechas()
+hora = input('Hora (HH) \n')
 
 tiempos_txt = np.loadtxt('../outputs/t1t2t3t4.txt')
 for i in range(len(tiempos_txt)):

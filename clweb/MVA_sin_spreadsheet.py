@@ -141,6 +141,8 @@ def MVA(date_entry, ti_MVA, tf_MVA, mag):
         print('Cambio el signo de x1 para que los av formen terna derecha')
         x1 = -x1
 
+    print('la normal es ',x3)
+
     #las proyecciones
     B1 = np.dot(B_cut, x1)
     B2 = np.dot(B_cut, x2)

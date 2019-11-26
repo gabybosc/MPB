@@ -49,7 +49,7 @@ B_norm = np.linalg.norm(B, axis = 1)
 # t_cut = t[inicio:fin]
 
 plt.figure()
-plt.plot(t, B_norm)
+plt.plot(t, B_norm, linewidth=0.5)
 plt.xlabel('t (hdec)')
 plt.ylabel('|B|')
 plt.title('MAG hires hdec')

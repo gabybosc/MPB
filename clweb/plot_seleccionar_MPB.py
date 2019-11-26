@@ -4,7 +4,7 @@ from matplotlib.widgets import Cursor, MultiCursor
 from matplotlib.colors import LogNorm
 import cdflib as cdf
 import datetime as dt
-from funciones import find_nearest, deltaB, unix_to_decimal, unix_to_timestamp, Bpara_Bperp
+from funciones import find_nearest, deltaB, unix_to_decimal, unix_to_timestamp, Bpara_Bperp, fechas
 from funciones_plot import onpick1
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import time
@@ -15,24 +15,13 @@ import os
 
 """
 Le paso los datos de clweb y elijo los tiempos t1t2t3t4
+Usa los datos de baja resolución para calcular el B_para y B_perp
 """
 
 
 np.set_printoptions(precision=4)
 
-date_entry = input('Enter a date in YYYY-DDD or YYYY-MM-DD format \n')\
-
-if len(date_entry.split('-')) < 3:
-    year, doy = map(int, date_entry.split('-'))
-    date_orbit = dt.datetime(year, 1, 1) + dt.timedelta(doy - 1) #para convertir el doty en date
-else:
-    year, month, day = map(int, date_entry.split('-'))
-    date_orbit = dt.date(year, month, day)
-
-year = date_orbit.strftime("%Y")
-month = date_orbit.strftime("%m")
-day = date_orbit.strftime("%d")
-doy = date_orbit.strftime("%j")
+year, month, day, doy = fechas()
 
 
 path = f'../../../datos/clweb/{year}-{month}-{day}/' #path a los datos desde la laptop
@@ -40,18 +29,27 @@ if os.path.isfile(path + 'mag_filtrado.txt'):
     mag = np.loadtxt(path + 'mag_filtrado.txt', skiprows=2)
     M = len(mag[:,0]) #el numero de datos
     B = mag[:, :3]
-
     Bnorm = mag[:,-1]
-    mag = np.loadtxt(path + 'MAG.asc')
-    Bxyz_paraperp = mag[:,6:9]
+
+
 else:
     mag = np.loadtxt(path + 'MAG.asc')
     M = len(mag[:,0]) #el numero de datos
     B = mag[:, 6:9]
     Bnorm = np.linalg.norm(B, axis=1)
-    Bxyz_paraperp = mag[:,6:9]
+
+mag_low = np.loadtxt(path + 'mag_1s.sts', skiprows=160)
+tlow = mag_low[:,6]  #el dia decimal
+tlow = (tlow -int( doy)) * 24 #para que me de sobre la cantidad de horas
+
+Mlow = np.size(tlow) #el numero de datos
+#el campo
+Blow = np.zeros((Mlow, 3))
+for i in range(7,10):
+    Blow[:,i-7] = mag_low[:, i]
 
 
+mag = np.loadtxt(path + 'MAG.asc')
 hh = mag[:,3]
 mm = mag[:,4]
 ss = mag[:,5]
@@ -59,35 +57,8 @@ ss = mag[:,5]
 t = hh + mm/60 + ss/3600 #hdec
 
 
-#Si quiero elegir manualmente la orbita:
-plt.plot(t, Bnorm)
-plt.xlabel('t (hdec)')
-plt.ylabel('|B|')
-plt.title('Orbitas')
-plt.show()
-
-ti = float(input("Tiempo inicial = "))
-tf = float(input("Tiempo final = "))
-
-while tf < ti:
-    print('El tiempo inicial no puede ser mayor al final')
-    ti = float(input("Tiempo inicial = "))
-    tf = float(input("Tiempo final = "))
-
-
-B_para, B_perp_norm, j_inicial, j_final = Bpara_Bperp(Bxyz_paraperp, t, ti, tf)
-t_plot = t[j_inicial+12:j_final+12]
-
+B_para, B_perp_norm, t_plot = Bpara_Bperp(Blow, tlow, t[0], t[-1])
 ###############################################################################################SWEA
-
-# swea = np.loadtxt(path + 'diff_en_flux.asc')
-#
-# flux = swea[:,-1]
-# energia = swea[:,7]
-#
-# t_swea = swea[:,3] + swea[:,4]/60 + swea[:,5]/3600 #hdec
-#
-# flux_plot = np.transpose(flux)[::-1]
 
 swea = np.loadtxt(path + 'SWEA.asc')
 
@@ -95,10 +66,6 @@ energy = swea[:, 7]
 JE_total = swea[:, -1]
 
 t_swea = np.unique(swea[:,3] + swea[:,4]/60 + swea[:,5]/3600) #hdec
-# ti = 10.5
-# tf = 11
-inicio_swea = np.where(t_swea == find_nearest(t_swea, ti))[0][0]
-fin_swea = np.where(t_swea == find_nearest(t_swea, tf))[0][0]
 
 energias = [100 + i*20 for i in range(6)]
 
@@ -192,8 +159,6 @@ while not happy:
         print('Click to select MPB: ')
         val = np.asarray(plt.ginput(4))[:,0]
         print('Selected values: ', val)
-        # outs = np.concatenate(([year, doy], val))
-        # outs = sorted(outs[2:6])
         outs = sorted(val)
 
     print('Happy? Keyboard click for yes, mouse click for no.')

@@ -38,9 +38,9 @@ doy = date_orbit.strftime("%j")
 
 # path = '../../../MAVEN/mag_1s/2016/03/' #path a los datos desde la desktop
 path = '../../datos/' #path a los datos desde la laptop
-file_size = os.path.getsize(path +  f'MAG_1s/2016/mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts')
+file_size = os.path.getsize(path +  f'MAG_1s/{year}/mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts')
 if file_size > 12000000:
-    mag = np.loadtxt(path + f'MAG_1s/2016/mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts', skiprows=148) #datos MAG 1s (para plotear no quiero los datos pesados)
+    mag = np.loadtxt(path + f'MAG_1s/{year}/mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts', skiprows=148) #datos MAG 1s (para plotear no quiero los datos pesados)
     n =2
     mag = mag[:-n, :] #borra las ultimas 2 filas, que es ya el dia siguiente (no sé si siempre)
 else:
@@ -87,7 +87,7 @@ while tf < ti:
 
 ni = int(ti*32*3600)
 nf = int((24-tf)*32*3600)
-mag = np.genfromtxt(path + f'MAG_hires/mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts', skip_header=ni, skip_footer=nf)
+# mag = np.genfromtxt(path + f'MAG_hires/mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts', skip_header=ni, skip_footer=nf)
 
 t = mag[:,6]  #el dia decimal
 dia = mag[:,1]

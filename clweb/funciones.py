@@ -5,6 +5,7 @@ from numpy.random import rand
 import datetime as dt
 import calendar
 
+
 def deltaB(B):
     B_medio = np.mean(B, axis=0)
     abs_deltaB_para = np.abs(np.dot(B - B_medio, B_medio)) / np.linalg.norm(B_medio)**2   #|deltaB_para / B|
@@ -21,26 +22,28 @@ def deltaB(B):
     return(abs_deltaB_para, abs_deltaB_perp)
 
 def Bpara_Bperp(B, t, ti, tf):
-    j_inicial = int(np.where(t == find_nearest(t, ti))[0][0])
-    j_final =  int(np.where(t == find_nearest(t, tf))[0][0])
+    j_inicial = np.where(t == find_nearest(t, ti))[0][0]
+    j_final =  np.where(t == find_nearest(t, tf))[0][0]
 
-    #Lo hago en ventanas de 60s, moviendose de a 1s.
+    #Lo hago en ventanas de Mf-Mi, moviendose de a j (1s en baja resolución).
     B_para = np.zeros(j_final - j_inicial)
     B_perp = np.zeros((j_final - j_inicial, 3))
     B_perp_norm = np.zeros(j_final - j_inicial)
     for j in range(j_inicial, j_final):
         Mi = j
         Mf = j + 25
-        M_delta = 25
+        M_delta = 12 #overlap de 12
         B_delta = B[Mi:Mf]
         t_delta = t[Mi:Mf]
         deltaB_para, deltaB_perp = deltaB(B_delta)
-        B_para[j-j_inicial] = deltaB_para[12]
-        B_perp[j-j_inicial, :] = deltaB_perp[12, :]
-        B_perp_norm[j-j_inicial] = np.linalg.norm(deltaB_perp[12,:])
+        B_para[j-j_inicial] = deltaB_para[M_delta]
+        B_perp[j-j_inicial, :] = deltaB_perp[M_delta, :]
+        B_perp_norm[j-j_inicial] = np.linalg.norm(deltaB_perp[M_delta,:])
 
+        t_plot = t[j_inicial:j_final]
 
-    return(B_para, B_perp_norm, j_inicial, j_final)
+    return(B_para, B_perp_norm, t_plot)
+
 
 def error(lamb, B, M, x):
     phi = np.zeros((3,3))
@@ -73,6 +76,39 @@ def find_nearest_final(array,value): #el valor más cercano pero más chico
         idx = np.abs((array - (value - 1/3600))).argmin() #el indice va a ser la min dif entre el array y el valor-1seg
     return array[idx]
 
+def fechas():
+    date_entry = input('Enter a date in YYYY-DDD or YYYY-MM-DD format \n')\
+
+    if len(date_entry.split('-')) < 3:
+        year, doy = map(int, date_entry.split('-'))
+        date_orbit = dt.datetime(year, 1, 1) + dt.timedelta(doy - 1) #para convertir el doty en date
+    else:
+        year, month, day = map(int, date_entry.split('-'))
+        date_orbit = dt.date(year, month, day)
+
+    year = date_orbit.strftime("%Y")
+    month = date_orbit.strftime("%m")
+    day = date_orbit.strftime("%d")
+    doy = date_orbit.strftime("%j")
+
+    return(year, month, day, doy)
+
+def tiempos():
+    tii = input('Tiempo inicial hh:mm:ss o hdec\n')
+    tff = input('Tiempo final hh:mm:ss o hdec\n')
+    while tff < tii:
+        print('t final no puede ser menor a t inicial. \n')
+        tii = input('Tiempo inicial hh:mm:ss o hdec\n')
+        tff = input('Tiempo final hh:mm:ss o hdec\n')
+
+    if ':' in tii:
+        ti_MVA = UTC_to_hdec(tii)
+        tf_MVA = UTC_to_hdec(tff)
+    else:
+        ti_MVA = float(tii)
+        tf_MVA = float(tff)
+
+    return(ti_MVA, tf_MVA)
 
 def Mij(B):
     Mij = np.zeros((3,3))

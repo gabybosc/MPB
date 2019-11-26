@@ -23,7 +23,7 @@ np.set_printoptions(precision=4)
 
 fechas = np.loadtxt('../outputs/t1t2t3t4.txt')
 # for i in range(len(fechas)):
-i = 16
+i = -2
 for j in range(1):
     year = int(fechas[i,0])
     doy = int(fechas[i, 1])
@@ -41,7 +41,7 @@ for j in range(1):
 
     # path = '../../../MAVEN/mag_1s/2016/03/' #path a los datos desde la desktop
     path = f'../../../datos/clweb/{year}-{month}-{day}/' #path a los datos desde la laptop
-    if 1==2:#os.path.isfile(path + 'mag_filtrado.txt'):
+    if os.path.isfile(path + 'mag_filtrado.txt'):
         mag = np.loadtxt(path + 'mag_filtrado.txt', skiprows=2)
         M = len(mag[:,0]) #el numero de datos
         B = mag[:, :3]
@@ -56,20 +56,26 @@ for j in range(1):
         Bnorm = np.linalg.norm(B, axis=1)
         Bxyz_paraperp = mag[:,6:9]
 
+    mag_low = np.loadtxt(path + 'mag_1s.sts', skiprows=160)
+    tlow = mag_low[:,6]  #el dia decimal
+    tlow = (tlow -int( doy)) * 24 #para que me de sobre la cantidad de horas
+
+    Mlow = np.size(tlow) #el numero de datos
+    #el campo
+    Blow = np.zeros((Mlow, 3))
+    for i in range(7,10):
+        Blow[:,i-7] = mag_low[:, i]
+
+
+    mag = np.loadtxt(path + 'MAG.asc')
     hh = mag[:,3]
     mm = mag[:,4]
     ss = mag[:,5]
 
     t = hh + mm/60 + ss/3600 #hdec
 
-    M = np.size(t) #el numero de datos
 
-    #el campo
-    B = np.zeros((M, 3))
-    for i in range(6,9):
-        B[:,i-6] = mag[:, i]
 
-    Bnorm = mag[:,-1]
 
     #la posición(x,y,z)
     posicion = np.zeros((M, 3))
@@ -89,11 +95,9 @@ for j in range(1):
     ti = t1 - 0.15
     tf = t4 + 0.15
 
-    B_para, B_perp_norm, j_inicial, j_final = Bpara_Bperp(Bxyz_paraperp, t, ti, tf)
-    t_plot = t[j_inicial+12:j_final+12]
-
     inicio = np.where(t == find_nearest(t, ti))[0][0]
     fin = np.where(t == find_nearest(t, tf))[0][0]
+    B_para, B_perp_norm, t_plot = Bpara_Bperp(Blow, tlow, ti, tf)
     ###############################################################################################SWEA
 
     swea = np.loadtxt(path + 'SWEA.asc')

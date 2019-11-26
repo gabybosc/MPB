@@ -3,28 +3,21 @@ import scipy.signal as signal
 import matplotlib.pyplot as plt
 import datetime as dt
 from shutil import copyfile
-from funciones import datenum
+from funciones import datenum, fechas
 import matplotlib.dates as md
 import matplotlib.cm as cm
 
+"""
+Hace un filtro butterworth para quitar el ruido de la señal que es de aproximadamente 180 ms.
+Primero usa buttord para encontrar el orden. Es un filtro digital con lo cual pide que las frecuencias estén normalizadas respecto de la frec de Nyquist. En este caso Nyquist es 32Hz/2 = 16Hz.
+Como las frecuencias están normalizadas, da lo mismo usar f o w.
+N es el orden del filtro, en general voy a querer que N sea cercano a 10.
+"""
 
-date_entry = '2017-11-24' #input('Enter a date in YYYY-DDD or YYYY-MM-DD format \n')
-
-if len(date_entry.split('-')) < 3:
-    year, doy = map(int, date_entry.split('-'))
-    date_orbit = dt.datetime(year, 1, 1) + dt.timedelta(doy - 1) #para convertir el doty en date
-else:
-    year, month, day = map(int, date_entry.split('-'))
-    date_orbit = dt.date(year, month, day)
-
-year = date_orbit.strftime("%Y")
-month = date_orbit.strftime("%m")
-day = date_orbit.strftime("%d")
-doy = date_orbit.strftime("%j")
-
+year, month, day, doy = fechas()
 
 path = f'../../../datos/clweb/{year}-{month}-{day}/' #path a los datos desde la laptop
-mag = np.loadtxt(path + 'mag.asc')
+mag = np.loadtxt(path + 'MAG.asc')
 
 hh = mag[:,3]
 mm = mag[:,4]
@@ -41,40 +34,28 @@ B = mag[:, 6:9]
 Bnorm = mag[:,-1]
 
 
-T = 12.26 - 12.25
-Tseg = T * 3600
-ws = 2 * np.pi/Tseg
-wp = ws - ws/2
-# ws = 2*ws
-N, Wn = signal.buttord(wp, ws, 40, 50, False)
-b,a = signal.butter(N, Wn,'low', False)
-Bnorm_filtrado = signal.filtfilt(b, a, Bnorm)
-
-plt.plot(Bnorm, label='sin filtro')
-plt.plot(Bnorm_filtrado,linewidth = 1, label = ws)
-plt.legend()
-plt.show()
-
-# for w in [ws, 2*ws, 3*ws, 5*ws, 10*ws]:
-#
-#     N, Wn = signal.buttord(wp, w, 40, 50, False)
-#     b,a = signal.butter(N, Wn,'low', False)
-#     Bnorm_filtrado = signal.filtfilt(b, a, Bnorm)
-#
-#     plt.plot(Bnorm, label='sin filtro')
-#     plt.plot(Bnorm_filtrado,linewidth = 1, label = w)
-#     plt.legend()
-#     plt.show()
-
+Tseg = 180E-3 #180ms
+fs = 1/Tseg /16 #f normalizada, da lo mismo si es omega o frec
+fp = 3 /16
+N, Wn = signal.buttord(fp, fs, 3, 50)
+b,a = signal.butter(N, Wn,'low')
 Bx_filtrado = signal.filtfilt(b, a, B[:,0])
 By_filtrado = signal.filtfilt(b, a, B[:,1])
 Bz_filtrado = signal.filtfilt(b, a, B[:,2])
-happy = 'y'# input('If happy press Y\n')
+
+B_filtrado = np.linalg.norm([Bx_filtrado,By_filtrado,Bz_filtrado], axis=0)
+
+plt.plot(Bnorm, label='sin filtro')
+plt.plot(B_filtrado,linewidth = 0.5, label = f'fs = {fs:.3g}, fp = {fp:.3g}')
+plt.legend()
+plt.show(block=False)
+
+happy = input('If happy press Y\n')
 
 if happy == 'y' or 'Y':
     with open(path + 'mag_filtrado.txt','w') as file:
-        file.write(f'Los datos de MAG filtrados para frecuencia wp = {wp}, ws = {ws}.\n')
+        file.write(f'Los datos de MAG filtrados para frecuencia fp = {fp*16:.3g}, fs = {fs*16:.3g}.\n')
         file.write(f'Bx  By  Bz  B.\n')
         for i in range(M):
-            file.write(f'{Bx_filtrado[i]}\t{By_filtrado[i]}\t{Bz_filtrado[i]}\t{Bnorm_filtrado[i]}\t')
+            file.write(f'{Bx_filtrado[i]}\t{By_filtrado[i]}\t{Bz_filtrado[i]}\t{B_filtrado[i]}\t')
             file.write('\n')
