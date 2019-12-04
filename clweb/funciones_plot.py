@@ -58,7 +58,7 @@ def imshow_UTC(year, month, day, t, heatmap, eje_y, colormap = 'inferno'):
     ax = plt.gca()
     xfmt = md.DateFormatter('%H:%M:%S')
     ax.xaxis.set_major_formatter(xfmt)
-    plt.imshow(heatmap, aspect = 'auto',origin = 'lower', extent=(t_graph[0], t_graph[-1], eje_y[0], eje_y[-1]), cmap=colormap, vmax=30)
+    plt.imshow(heatmap, aspect = 'auto',origin = 'lower', extent=(t_graph[0], t_graph[-1], eje_y[0], eje_y[-1]), cmap=colormap, vmax=20)
     plt.colorbar()
 
 def line_select_callback(eclick, erelease):
@@ -95,6 +95,8 @@ def onpick1(event):
         ind = event.ind
         print('X='+str(np.take(xdata, ind)[0])) # Print X point
         # print('Y='+str(np.take(ydata, ind)[0])) # Print Y point
+
+
 
 def plot_datetime(year, month, day, t, y, colour = 'C0', estilo_linea = '-', ancho_linea = 1, transparencia = 1):
     timestamps = array_datenums(year, month, day, t)

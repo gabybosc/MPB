@@ -67,7 +67,7 @@ JE_total = swea[:, -1]
 
 t_swea = np.unique(swea[:,3] + swea[:,4]/60 + swea[:,5]/3600) #hdec
 
-energias = [100 + i*20 for i in range(6)]
+energias = [100 + i*100 for i in range(3)]
 
 
 ###############################################################################################SWIA
