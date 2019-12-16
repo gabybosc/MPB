@@ -6,6 +6,7 @@ import cdflib as cdf
 import datetime as dt
 from funciones import find_nearest, deltaB, unix_to_decimal, unix_to_timestamp, Bpara_Bperp, fechas
 from funciones_plot import onpick1
+from importar_datos import importar_mag, importar_lpw, importar_swea, importar_swia
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import time
 import matplotlib.dates as md
@@ -22,22 +23,10 @@ Usa los datos de baja resolución para calcular el B_para y B_perp
 np.set_printoptions(precision=4)
 
 year, month, day, doy = fechas()
+path = f'../../../datos/clweb/{year}-{month}-{day}/'
 
-
-path = f'../../../datos/clweb/{year}-{month}-{day}/' #path a los datos desde la laptop
-if os.path.isfile(path + 'mag_filtrado.txt'):
-    mag = np.loadtxt(path + 'mag_filtrado.txt', skiprows=2)
-    M = len(mag[:,0]) #el numero de datos
-    B = mag[:, :3]
-    Bnorm = mag[:,-1]
-
-
-else:
-    mag = np.loadtxt(path + 'MAG.asc')
-    M = len(mag[:,0]) #el numero de datos
-    B = mag[:, 6:9]
-    Bnorm = np.linalg.norm(B, axis=1)
-
+mag, t, B, posicion = importar_mag(year, month, day)
+Bnorm = np.linalg.norm(B, axis=1)
 mag_low = np.loadtxt(path + 'mag_1s.sts', skiprows=160)
 tlow = mag_low[:,6]  #el dia decimal
 tlow = (tlow -int( doy)) * 24 #para que me de sobre la cantidad de horas
@@ -48,44 +37,17 @@ Blow = np.zeros((Mlow, 3))
 for i in range(7,10):
     Blow[:,i-7] = mag_low[:, i]
 
-
-mag = np.loadtxt(path + 'MAG.asc')
-hh = mag[:,3]
-mm = mag[:,4]
-ss = mag[:,5]
-
-t = hh + mm/60 + ss/3600 #hdec
-
-
 B_para, B_perp_norm, t_plot = Bpara_Bperp(Blow, tlow, t[0], t[-1])
 ###############################################################################################SWEA
 
-swea = np.loadtxt(path + 'SWEA.asc')
-
-energy = swea[:, 7]
-JE_total = swea[:, -1]
-
-t_swea = np.unique(swea[:,3] + swea[:,4]/60 + swea[:,5]/3600) #hdec
-
-energias = [100 + i*100 for i in range(3)]
-
+swea, t_swea, energias = importar_swea(year, month, day)
 
 ###############################################################################################SWIA
 
-swia = np.loadtxt(path + 'SWIA.asc')
-
-density = swia[:,-1]
-
-t_swia = swia[:,3] + swia[:,4]/60 + swia[:,5]/3600 #hdec
-
+swia, t_swia, density = importar_swia(year, month, day)
 
 ############################################################################################### LPW
-lpw = np.loadtxt(path + 'LPW.asc')
-
-e_density = lpw[:,-1]
-
-t_lpw = lpw[:,3] + lpw[:,4]/60 + lpw[:,5]/3600
-
+lpw, t_lpw, e_density = importar_lpw(year, month, day)
 
 
 

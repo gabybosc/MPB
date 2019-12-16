@@ -4,6 +4,7 @@ from matplotlib.colors import LogNorm
 import cdflib as cdf
 import datetime as dt
 from funciones import find_nearest, deltaB, unix_to_decimal, unix_to_timestamp, Bpara_Bperp, fechas, tiempos
+from importar_datos import importar_mag, importar_lpw, importar_swea, importar_swia
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from matplotlib.widgets import MultiCursor
 import time
@@ -25,7 +26,7 @@ np.set_printoptions(precision=4)
 year, month, day, doy = fechas()
 ti, tf = tiempos()
 
-
+path = f'../../../datos/clweb/{year}-{month}-{day}/'
 datos = np.loadtxt('../outputs/t1t2t3t4.txt')
 for j in range(len(datos)):
     if datos[j,0] == float(year) and datos[j,1] == float(doy) and int(datos[j,2]) == int(ti):
@@ -37,28 +38,8 @@ t3 = datos[i,4]
 t4 = datos[i,5]
 tiempos = np.array([t1,t2,t3,t4])
 
-date_orbit = dt.datetime(int(year), 1, 1) + dt.timedelta(int(doy) - 1)
-year = date_orbit.strftime("%Y")
-doy = date_orbit.strftime("%j")
-month = date_orbit.strftime("%m")
-day = date_orbit.strftime("%d")
-
-# path = '../../../MAVEN/mag_1s/2016/03/' #path a los datos desde la desktop
-path = f'../../../datos/clweb/{year}-{month}-{day}/' #path a los datos desde la laptop
-if os.path.isfile(path + 'mag_filtrado.txt'):
-    mag = np.loadtxt(path + 'mag_filtrado.txt', skiprows=2)
-    M = len(mag[:,0]) #el numero de datos
-    B = mag[:, :3]
-
-    Bnorm = mag[:,-1]
-    mag = np.loadtxt(path + 'MAG.asc')
-    Bxyz_paraperp = mag[:,6:9]
-else:
-    mag = np.loadtxt(path + 'MAG.asc')
-    M = len(mag[:,0]) #el numero de datos
-    B = mag[:, 6:9]
-    Bnorm = np.linalg.norm(B, axis=1)
-    Bxyz_paraperp = mag[:,6:9]
+mag, t, B, posicion = importar_mag(year, month, day)
+Bnorm = np.linalg.norm(B, axis=1)
 
 mag_low = np.loadtxt(path + 'mag_1s.sts', skiprows=160)
 tlow = mag_low[:,6]  #el dia decimal
@@ -71,31 +52,6 @@ for i in range(7,10):
     Blow[:,i-7] = mag_low[:, i]
 
 
-mag = np.loadtxt(path + 'MAG.asc')
-hh = mag[:,3]
-mm = mag[:,4]
-ss = mag[:,5]
-
-t = hh + mm/60 + ss/3600 #hdec
-
-
-
-
-#la posición(x,y,z)
-posicion = np.zeros((M, 3))
-for i in range(9,12):
-    posicion[:,i-9] = mag[:, i]
-
-#la matriz diaria:
-MD = np.zeros((M, 9))
-MD[:, 0] = t
-for i in range(1,4):
-    MD[:, i] = B[:,i-1]
-MD[:,4] = Bnorm
-for i in range(5,8):
-    MD[:,i] = posicion[:,i-5]/3390 #en radios marcianos
-MD[:, 8] = np.linalg.norm(posicion, axis=1) - 3390 #altitud en km
-
 ti = t1 - 0.15
 tf = t4 + 0.15
 
@@ -104,40 +60,24 @@ fin = np.where(t == find_nearest(t, tf))[0][0]
 B_para, B_perp_norm, t_plot = Bpara_Bperp(Blow, tlow, ti, tf)
 ###############################################################################################SWEA
 
-swea = np.loadtxt(path + 'SWEA.asc')
+swea, t_swea, energias = importar_swea(year, month, day)
 
-energy = swea[:, 7]
-JE_total = swea[:, -1]
-
-t_swea = np.unique(swea[:,3] + swea[:,4]/60 + swea[:,5]/3600) #hdec
-# ti = 10.5
-# tf = 11
+energy = swea[:,7]
+JE_total = swea[:,-1]
 inicio_swea = np.where(t_swea == find_nearest(t_swea, ti))[0][0]
 fin_swea = np.where(t_swea == find_nearest(t_swea, tf))[0][0]
 
-energias = [100 + i*100 for i in range(3)]
-
-
 ###############################################################################################SWIA
-swia = np.loadtxt(path + 'SWIA.asc')
 
-density = swia[:,-1]
+swia, t_swia, density = importar_swia(year, month, day)
 
-t_swia = swia[:,3] + swia[:,4]/60 + swia[:,5]/3600 #hdec
 inicio_swia = np.where(t_swia == find_nearest(t_swia, ti))[0][0]
 fin_swia = np.where(t_swia == find_nearest(t_swia, tf))[0][0]
-
-
 ############################################################################################### LPW
-lpw = np.loadtxt(path + 'LPW.asc')
+lpw, t_lpw, e_density = importar_lpw(year, month, day)
 
-e_density = lpw[:,-1]
-
-t_lpw = lpw[:,3] + lpw[:,4]/60 + lpw[:,5]/3600
 inicio_lpw = np.where(t_lpw == find_nearest(t_lpw, ti))[0][0]
 fin_lpw = np.where(t_lpw == find_nearest(t_lpw, tf))[0][0]
-
-
 
 
 

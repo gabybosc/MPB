@@ -2,7 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from funciones import fechas, find_nearest_inicial,find_nearest_final, tiempos
 
-
+"""
+Hace la fig2 del poster de la AGU2019
+"""
 
 def datos():
     year, month, day, doy = fechas()
@@ -71,8 +73,8 @@ def BS_MPB(L, e, x0):
 def marte(x_bs, yz_bs, x_mpb, y_mpb):
     fig, ax = plt.subplots()
     ax.plot()
-    ax.plot(x_bs, yz_bs, color='#FF1493', linestyle='-.')
-    ax.plot(x_mpb, yz_mpb, color='#00ffff', linestyle='-.')
+    ax.plot(x_bs, yz_bs, color='#07aec7', linestyle='-.')
+    ax.plot(x_mpb, yz_mpb, color='#FF1493', linestyle='-.')
     ax.axis('equal')
     ax.set_xlim(0,3)
     ax.set_ylim(0,2.5)
@@ -117,4 +119,5 @@ t, posicion_cut, year, month, day = datos_fijos(2017,11,24,12,13)
 orbitas(posicion_cut, year, month, day)
 
 plt.legend()
-plt.show()
+plt.show(block=False)
+plt.savefig(f'../outputs/figs_MPB/Orbitas.png', dpi=200)

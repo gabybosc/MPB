@@ -28,7 +28,7 @@ def deltat():
     global x2
     return(x1, x2)
 
-def hodograma(B1, B2, B3, unidad = 'nT', titulo = 'Hodograma'): #, dia):
+def hodograma(B1, B2, B3, fecha, unidad = 'nT'):
     f, (ax1, ax2) = plt.subplots(1, 2, sharex=True) #tienen el mismo eje x
     ax1.plot(B2, B1)
     ax2.plot(B3, B1)
@@ -42,10 +42,10 @@ def hodograma(B1, B2, B3, unidad = 'nT', titulo = 'Hodograma'): #, dia):
     ax2.set_ylabel('B1 ({})'.format(unidad))
     ax1.grid()
     ax2.grid()
-    plt.suptitle(titulo)
+    plt.suptitle(f'MAVEN MAG {fecha}')
     plt.legend()
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
-    # plt.savefig('figuras/hodograma_%d.png'%dia[0])
+    plt.savefig(f'../outputs/figs_MPB/hodograma_{fecha}.png')
 
 def imshow_UTC(year, month, day, t, heatmap, eje_y, colormap = 'inferno'):
     """ Le das una fecha en np.datetime64 (UTC) y te grafica el imshow.
@@ -58,7 +58,7 @@ def imshow_UTC(year, month, day, t, heatmap, eje_y, colormap = 'inferno'):
     ax = plt.gca()
     xfmt = md.DateFormatter('%H:%M:%S')
     ax.xaxis.set_major_formatter(xfmt)
-    plt.imshow(heatmap, aspect = 'auto',origin = 'lower', extent=(t_graph[0], t_graph[-1], eje_y[0], eje_y[-1]), cmap=colormap, vmax=30)
+    plt.imshow(heatmap, aspect = 'auto',origin = 'lower', extent=(t_graph[0], t_graph[-1], eje_y[0], eje_y[-1]), cmap=colormap, vmax=20)
     plt.colorbar()
 
 def line_select_callback(eclick, erelease):
@@ -95,6 +95,8 @@ def onpick1(event):
         ind = event.ind
         print('X='+str(np.take(xdata, ind)[0])) # Print X point
         # print('Y='+str(np.take(ydata, ind)[0])) # Print Y point
+
+
 
 def plot_datetime(year, month, day, t, y, colour = 'C0', estilo_linea = '-', ancho_linea = 1, transparencia = 1):
     timestamps = array_datenums(year, month, day, t)

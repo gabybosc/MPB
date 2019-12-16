@@ -5,6 +5,10 @@ from plot_orbitas import datos_fijos
 from funciones import find_nearest, UTC_to_hdec
 from mpl_toolkits.mplot3d import axes3d
 
+"""
+Plotea la fig 5 del poster de la AGU2019
+"""
+
 def MPB(x0 = 0.78, e = 0.9, L = 0.96):
     theta = np.linspace(0, np.pi *3/4, 100)
     phi = np.linspace(0, 2 * np.pi, 100)
@@ -46,20 +50,25 @@ def normal_vignes(R, asc, bsc, csc):
 
     return()
 
-def normal_MVA(R, x3):
+def normal_MVA(R, x3, colour='k', lab = 'MVA normal'):
     fig = plt.gcf()
     ax = plt.gca()
-    ax.quiver(R[0], R[1], R[2], x3[0], x3[1], x3[2], color='k',length=0.5, label='MVA normal')
+    ax.quiver(R[0], R[1], R[2], x3[0], x3[1], x3[2], color=colour,length=0.5, label=lab)
     return()
 
 asc, bsc, csc = MPB()
 
+# dates = ['2015-10-12-18.75-19.75-19:19:13', '2015-10-10-12-13', '2016-04-05-5-6', '2016-03-31-12.5-13.5','2016-03-16-17.75-18.75', '2017-11-24-11.75-12.75']
+#
+# for date in dates:
+#     year, month, day, ti, tf, tm = date.split('-')
 t, posicion_cut, year, month, day = datos_fijos(2015,10,12,18.75,19.75)
 t_medio = UTC_to_hdec('19:19:13')
 index = np.where(t == find_nearest(t, t_medio))[0][0]
 R = posicion_cut[index,:] #la posicion de la nave en RM
 x3 = np.array([0.956, 0.048, -0.290])
 
+# normal_MVA(R, x3, '2015-oct-12')
 normal_MVA(R, x3)
 normal_vignes(R, asc, bsc,csc)
 
@@ -69,6 +78,7 @@ index = np.where(t == find_nearest(t, t_medio))[0][0]
 R = posicion_cut[index,:] #la posicion de la nave en RM
 x3 = np.array([0.956, -0.286, 0.070])
 
+# normal_MVA(R, x3, 'b', '2015-oct-10')
 normal_MVA(R, x3)
 normal_vignes(R, asc, bsc,csc)
 
@@ -78,6 +88,7 @@ index = np.where(t == find_nearest(t, t_medio))[0][0]
 R = posicion_cut[index,:] #la posicion de la nave en RM
 x3 = np.array([0.815, -0.575, 0.076])
 
+# normal_MVA(R, x3, 'r', '2016-apr-05')
 normal_MVA(R, x3)
 normal_vignes(R, asc, bsc,csc)
 
@@ -87,6 +98,7 @@ index = np.where(t == find_nearest(t, t_medio))[0][0]
 R = posicion_cut[index,:] #la posicion de la nave en RM
 x3 = np.array([0.871, -0.476, -0.117])
 
+# normal_MVA(R, x3, 'g', '2016-mar-31')
 normal_MVA(R, x3)
 normal_vignes(R, asc, bsc,csc)
 
@@ -96,6 +108,7 @@ index = np.where(t == find_nearest(t, t_medio))[0][0]
 R = posicion_cut[index,:] #la posicion de la nave en RM
 x3 = np.array([0.908, -0.296, 0.295])
 
+# normal_MVA(R, x3, 'm', '2016-mar-16')
 normal_MVA(R, x3)
 normal_vignes(R, asc, bsc,csc)
 
@@ -105,6 +118,7 @@ index = np.where(t == find_nearest(t, t_medio))[0][0]
 R = posicion_cut[index,:] #la posicion de la nave en RM
 x3 = np.array([0.981, -0.032, 0.193])
 
+# normal_MVA(R, x3, 'c', '2017-nov-24')
 normal_MVA(R, x3)
 normal_vignes(R, asc, bsc,csc)
 

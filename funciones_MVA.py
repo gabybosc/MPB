@@ -5,7 +5,7 @@ from funciones import Mij, error
 from scipy.stats import norm
 from matplotlib.mlab import normpdf
 
-def ajuste_conico(posicion, index, orbita, x3, x0 = 0.78, e = 0.9, L = 0.96):
+def ajuste_conico(posicion, index, orbita, fecha, x3, x0 = 0.78, e = 0.9, L = 0.96):
     ##### conica que toma los parámetros de Vignes
     theta = np.linspace(0, np.pi *3/4, 100)
     phi = np.linspace(0, 2 * np.pi, 100)
@@ -52,6 +52,8 @@ def ajuste_conico(posicion, index, orbita, x3, x0 = 0.78, e = 0.9, L = 0.96):
     ax.plot_wireframe(np.cos(u)*np.sin(v), np.sin(u)*np.sin(v), np.cos(v), color="r", linewidth=0.5)
     ax.legend()
     set_axes_equal(ax)
+
+    plt.savefig(f'../outputs/figs_MPB/ajuste_{fecha}.png')
 
     return(norm_vignes, X1, Y1, Z1, R, L0)
 
