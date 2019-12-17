@@ -81,21 +81,32 @@ swea, t_swea, energias = importar_swea(year, month, day)
 
 energy = swea[:,7]
 JE_total = swea[:,-1]
-inicio_swea = np.where(t_swea == find_nearest(t_swea, t1-0.075))[0][0]
-fin_swea = np.where(t_swea == find_nearest(t_swea, t4+0.075))[0][0]
+if inbound == 'y':
+    inicio_swea = np.where(t_swea == find_nearest(t_swea, t1-0.075))[0][0]
+    fin_swea = np.where(t_swea == find_nearest(t_swea, t4+0.075))[0][0]
+else:
+    inicio_swea = np.where(t_swea == find_nearest(t_swea, t4-0.075))[0][0]
+    fin_swea = np.where(t_swea == find_nearest(t_swea, t1+0.075))[0][0]
 
 ######## densidad SWIA
 
 swia, t_swia, density = importar_swia(year, month, day)
-
-inicio_swia = np.where(t_swia == find_nearest(t_swia, t1-0.075))[0][0]
-fin_swia = np.where(t_swia == find_nearest(t_swia, t4+0.075))[0][0]
+if inbound == 'y':
+    inicio_swia = np.where(t_swia == find_nearest(t_swia, t1-0.075))[0][0]
+    fin_swia = np.where(t_swia == find_nearest(t_swia, t4+0.075))[0][0]
+else:
+    inicio_swia = np.where(t_swia == find_nearest(t_swia, t4-0.075))[0][0]
+    fin_swia = np.where(t_swia == find_nearest(t_swia, t1+0.075))[0][0]
 
 ####### densidad electrones
 lpw, t_lpw, e_density = importar_lpw(year, month, day)
 
-inicio_lpw = np.where(t_lpw == find_nearest(t_lpw, t1-0.075))[0][0]
-fin_lpw = np.where(t_lpw == find_nearest(t_lpw, t4+0.075))[0][0]
+if inbound == 'y':
+    inicio_lpw = np.where(t_lpw == find_nearest(t_lpw, t1-0.075))[0][0]
+    fin_lpw = np.where(t_lpw == find_nearest(t_lpw, t4+0.075))[0][0]
+else:
+    inicio_lpw = np.where(t_lpw == find_nearest(t_lpw, t4-0.075))[0][0]
+    fin_lpw = np.where(t_lpw == find_nearest(t_lpw, t1+0.075))[0][0]
 
 ############# tiempos UTC
 year = int(year)
@@ -209,7 +220,7 @@ for ax in [axz1,axz2,axz3, axz4]:
 # plt.tight_layout()
 plt.show(block=False)
 
-#########La fig de la tesis
+#########La fig de la tesis sin LPW
 mpl.rcParams['axes.prop_cycle'] = cycler('color',['#5F021F','#336699', '#C70039', '#00270F'])
 fig = plt.figure(2, figsize=(8,30))#Lo bueno de esta forma es que puedo hacer que solo algunos compartan eje
 fig.subplots_adjust(top = 0.95, bottom = 0.1, left = 0.12,right=0.95, hspace = 0.0, wspace=0.15)
@@ -219,7 +230,7 @@ xfmt = md.DateFormatter('%H:%M')
 axz1 = plt.gca()
 
 axz1.xaxis.set_major_formatter(xfmt)
-axz1 = plt.subplot2grid((6,1),(0,0))
+axz1 = plt.subplot2grid((5,1),(0,0))
 axz1.plot(tiempo_mag, B[j_inicial:j_final,0], label='Bx MSO')
 axz1.plot(tiempo_mag, B[j_inicial:j_final,1], label='By MSO')
 axz1.plot(tiempo_mag, B[j_inicial:j_final,2], label='Bz MSO')
@@ -228,14 +239,14 @@ for xc in tiempo_lim:
 axz1.set_ylabel('B components (nT)')
 axz1.set_title(f'MAVEN MAG SWEA LPW SWIA {year}-{month}-{day}')
 
-axz2 = plt.subplot2grid((6,1),(1,0), sharex=axz1)
+axz2 = plt.subplot2grid((5,1),(1,0), sharex=axz1)
 axz2.xaxis.set_major_formatter(xfmt)
 plt.plot(tiempo_mag, Bnorm[j_inicial:j_final])
 for xc in tiempo_lim:
     plt.axvline(x = xc, color = 'k', linewidth=1.5)
 plt.ylabel('|B| (nT)')
 
-axz3 = plt.subplot2grid((6,1),(3,0), sharex=axz1)
+axz3 = plt.subplot2grid((5,1),(3,0), sharex=axz1)
 axz3.xaxis.set_major_formatter(xfmt)
 axz3.set_ylabel('Diff energy flux \n of the SW e- \n (cm⁻² sr⁻¹ s⁻¹)')
 for energia in energias:
@@ -245,15 +256,15 @@ for energia in energias:
 for xc in tiempo_lim:
     plt.axvline(x = xc, color = 'k', linewidth=1.5)
 
-axz4 = plt.subplot2grid((6,1),(4,0), sharex=axz1)
-axz4.xaxis.set_major_formatter(xfmt)
-plt.semilogy(tiempo_lpw, e_density[inicio_lpw:fin_lpw])
-for xc in tiempo_lim:
-    plt.axvline(x = xc, color = 'k', linewidth=1.5)
-axz4.grid()
-axz4.set_ylabel('Total electron \n density (cm⁻³)')
+# axz4 = plt.subplot2grid((6,1),(4,0), sharex=axz1)
+# axz4.xaxis.set_major_formatter(xfmt)
+# plt.semilogy(tiempo_lpw, e_density[inicio_lpw:fin_lpw])
+# for xc in tiempo_lim:
+#     plt.axvline(x = xc, color = 'k', linewidth=1.5)
+# axz4.grid()
+# axz4.set_ylabel('Total electron \n density (cm⁻³)')
 
-axz5 = plt.subplot2grid((6,1),(5,0), sharex=axz1)
+axz5 = plt.subplot2grid((5,1),(4,0), sharex=axz1)
 axz5.xaxis.set_major_formatter(xfmt)
 plt.plot(tiempo_swia, density[inicio_swia:fin_swia])
 for xc in tiempo_lim:
@@ -263,8 +274,8 @@ axz5.set_xlabel('Time (UTC)')
 
 axz6 = plt.subplot2grid((6,1),(2,0), sharex=axz1)
 axz6.xaxis.set_major_formatter(xfmt)
-axz6.semilogy(tiempo_low, B_para, linewidth=1, label=r'|$\Delta B \parallel$| / |B|')
-axz6.semilogy(tiempo_low, B_perp_norm, '-.', linewidth=1, label=r'|$\Delta B \perp$| / |B|')
+axz6.plot(tiempo_low, B_para, linewidth=1, label=r'|$\Delta B \parallel$| / |B|')
+axz6.plot(tiempo_low, B_perp_norm, '-.', linewidth=1, label=r'|$\Delta B \perp$| / |B|')
 for xc in tiempo_lim:
     plt.axvline(x = xc, color = 'k', linewidth=1.5)
 axz6.set_ylabel('Relative variation \n of B')

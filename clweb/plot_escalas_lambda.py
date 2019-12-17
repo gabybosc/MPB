@@ -69,8 +69,9 @@ B_MVA = Bnorm[inicio_MVA:fin_MVA]
 t_MVA = t[inicio_MVA:fin_MVA]
 
 
+
 plt.figure()
-imshow_UTC(year, month, day, tiempo_central, cociente, escalas, 'inferno')
+imshow_UTC(year, month, day, tiempo_central, cociente, escalas, 'inferno', 3)
 # plot_datetime(year, month, day,t_MVA, B_MVA, 'cyan', '-', 1, 0.5) #no sé por qué se superpone mal, tiene mal los tiempos.
 for tt in timestamps:
     plt.axvline(x = tt, color = 'g') #plotea los tiempos t1t2t3t4
