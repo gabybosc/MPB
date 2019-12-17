@@ -1,7 +1,8 @@
 import numpy as np
 import os
+from funciones import find_nearest
 
-def importar_mag(year, month, day):
+def importar_mag(year, month, day, ti, tf):
     path = f'../../../datos/clweb/{year}-{month}-{day}/' #path a los datos desde la laptop
     if os.path.isfile(path + 'mag_filtrado.txt'):
         mag = np.loadtxt(path + 'mag_filtrado.txt', skiprows=2)
@@ -27,10 +28,14 @@ def importar_mag(year, month, day):
     for i in range(9,12):
         posicion[:,i-9] = mag[:, i]
 
-    return(mag, t, B, posicion)
+    inicio = np.where(t == find_nearest(t, ti))[0][0]
+    fin = np.where(t == find_nearest(t, tf))[0][0]
+
+    t_cut = t[inicio:fin]
+    return(mag, t_cut, B, posicion)
 
     ###############################################################################################SWEA
-def importar_swea(year, month, day):
+def importar_swea(year, month, day, ti, tf):
     path = f'../../../datos/clweb/{year}-{month}-{day}/'
     swea = np.loadtxt(path + 'SWEA.asc')
 
@@ -41,24 +46,41 @@ def importar_swea(year, month, day):
 
     energias = [50 + i*50 for i in range(3)]
 
-    return(swea, t_swea, energias)
+    inicio = np.where(t == find_nearest(t, ti))[0][0]
+    fin = np.where(t == find_nearest(t, tf))[0][0]
+
+    t_cut = t[inicio:fin]
+
+    return(swea, t_cut, energias)
 
     ###############################################################################################SWIA
-def importar_swia(year, month, day):
+def importar_swia(year, month, day, ti, tf):
     path = f'../../../datos/clweb/{year}-{month}-{day}/'
     swia = np.loadtxt(path + 'SWIA.asc')
 
     density = swia[:,-1]
 
     t_swia = swia[:,3] + swia[:,4]/60 + swia[:,5]/3600 #hdec
-    return(swia, t_swia, density)
+
+    inicio = np.where(t == find_nearest(t, ti))[0][0]
+    fin = np.where(t == find_nearest(t, tf))[0][0]
+
+    t_cut = t[inicio:fin]
+
+    return(swia, t_cut, density)
 
     ############################################################################################### LPW
-def importar_lpw(year, month, day):
+def importar_lpw(year, month, day, ti, tf):
     path = f'../../../datos/clweb/{year}-{month}-{day}/'
     lpw = np.loadtxt(path + 'LPW.asc')
 
     e_density = lpw[:,-1]
 
     t_lpw = lpw[:,3] + lpw[:,4]/60 + lpw[:,5]/3600
-    return(lpw, t_lpw, e_density)
+
+    inicio = np.where(t == find_nearest(t, ti))[0][0]
+    fin = np.where(t == find_nearest(t, tf))[0][0]
+
+    t_cut = t[inicio:fin]
+
+    return(lpw, t_cut, e_density)

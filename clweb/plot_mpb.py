@@ -34,7 +34,7 @@ for j in range(len(datos)):
     if datos[j,0] == float(year) and datos[j,1] == float(doy) and int(datos[j,2]) == int(ti):
         i = j
 
-mag, t, B, posicion = importar_mag(year, month, day)
+mag, t, B, posicion = importar_mag(year, month, day, ti, tf)
 if inbound == 'y':
     t1 = datos[i,2]
     t2 = datos[i,3]
@@ -77,7 +77,7 @@ B_para, B_perp_norm, t_plot = Bpara_Bperp(Blow, tlow, t[0], t[-1])
 
 ########## SWEA
 
-swea, t_swea, energias = importar_swea(year, month, day)
+swea, t_swea, energias = importar_swea(year, month, day, ti, tf)
 
 energy = swea[:,7]
 JE_total = swea[:,-1]
@@ -90,7 +90,7 @@ else:
 
 ######## densidad SWIA
 
-swia, t_swia, density = importar_swia(year, month, day)
+swia, t_swia, density = importar_swia(year, month, day, ti, tf)
 if inbound == 'y':
     inicio_swia = np.where(t_swia == find_nearest(t_swia, t1-0.075))[0][0]
     fin_swia = np.where(t_swia == find_nearest(t_swia, t4+0.075))[0][0]
@@ -99,7 +99,7 @@ else:
     fin_swia = np.where(t_swia == find_nearest(t_swia, t1+0.075))[0][0]
 
 ####### densidad electrones
-lpw, t_lpw, e_density = importar_lpw(year, month, day)
+lpw, t_lpw, e_density = importar_lpw(year, month, day, ti, tf)
 
 if inbound == 'y':
     inicio_lpw = np.where(t_lpw == find_nearest(t_lpw, t1-0.075))[0][0]
