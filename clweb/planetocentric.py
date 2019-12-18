@@ -2,8 +2,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 from funciones import fechas, tiempos, find_nearest_final, find_nearest_inicial
 
-year, month, day, doy = 2017, 11, 24, 328#fechas()
-ti_MVA, tf_MVA = 12.24, 12.28#tiempos()
+"""
+Toma los datos en coordenadas pc y devuelve la latitud y longitud del cruce. Considera el cruce como el punto medio entre t2 y t3.
+"""
+
+year, month, day, doy = 2016, '03', 16, 76
+t2, t3 = 18.2204, 18.235
+
+# year, month, day, doy = fechas()
+# t2, t3 = tiempos()
 
 path = f'../../../datos/clweb/{year}-{month}-{day}/' #path a los datos desde la laptop
 
@@ -36,16 +43,20 @@ for i in range(5,8):
     MD[:,i] = posicion[:,i-5]/3390 #en radios marcianos
 MD[:, 8] = np.linalg.norm(posicion, axis=1) - 3390 #altitud en km
 
-x = posicion[:,0]/3390
-y = posicion[:,1]/3390
-z = posicion[:,2]/3390
+cruce = np.where(t == find_nearest_final(t, (t2+t3)/2))[0][0]
+x = posicion[cruce, 0]
+y = posicion[cruce, 1]
+z = posicion[cruce, 2]
 
-r = np.sqrt(x**2+y**2)
 
-inicio = np.where(t == find_nearest_inicial(t, ti_MVA))[0][0]
-fin = np.where(t == find_nearest_final(t, tf_MVA))[0][0]
+r = np.sqrt(x**2 + y**2 + z**2)
+phi = np.arctan2(y,x)
+theta = np.arccos(z/r)
 
-MD_cut = MD[inicio:fin]
-t_cut = t[inicio:fin]
-posicion_cut = posicion[inicio:fin]
-n_p = int(len(posicion_cut)/2)
+longitude = phi /np.pi *180
+latitude = theta /np.pi *180 - 90
+
+if latitude < 0:
+    print(f'latitude = {-latitude:.3g}ºN, longitude = {longitude:.3g}ºE')
+else:
+    print(f'latitude = {latitude:.3g}ºS, longitude = {longitude:.3g}ºE')

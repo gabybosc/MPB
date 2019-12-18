@@ -32,7 +32,9 @@ def importar_mag(year, month, day, ti, tf):
     fin = np.where(t == find_nearest(t, tf))[0][0]
 
     t_cut = t[inicio:fin]
-    return(mag, t_cut, B, posicion)
+    B_cut = B[inicio:fin]
+    posicion_cut = posicion[inicio:fin]
+    return(mag, t_cut, B_cut, posicion_cut)
 
     ###############################################################################################SWEA
 def importar_swea(year, month, day, ti, tf):
@@ -42,16 +44,14 @@ def importar_swea(year, month, day, ti, tf):
     energy = swea[:, 7]
     JE_total = swea[:, -1]
 
-    t_swea = np.unique(swea[:,3] + swea[:,4]/60 + swea[:,5]/3600) #hdec
+    t = np.unique(swea[:,3] + swea[:,4]/60 + swea[:,5]/3600) #hdec
 
     energias = [50 + i*50 for i in range(3)]
 
     inicio = np.where(t == find_nearest(t, ti))[0][0]
     fin = np.where(t == find_nearest(t, tf))[0][0]
 
-    t_cut = t[inicio:fin]
-
-    return(swea, t_cut, energias)
+    return(swea, t, energias)
 
     ###############################################################################################SWIA
 def importar_swia(year, month, day, ti, tf):
@@ -60,14 +60,15 @@ def importar_swia(year, month, day, ti, tf):
 
     density = swia[:,-1]
 
-    t_swia = swia[:,3] + swia[:,4]/60 + swia[:,5]/3600 #hdec
+    t = swia[:,3] + swia[:,4]/60 + swia[:,5]/3600 #hdec
 
     inicio = np.where(t == find_nearest(t, ti))[0][0]
     fin = np.where(t == find_nearest(t, tf))[0][0]
 
     t_cut = t[inicio:fin]
+    density_cut = density[inicio:fin]
 
-    return(swia, t_cut, density)
+    return(swia, t_cut, density_cut)
 
     ############################################################################################### LPW
 def importar_lpw(year, month, day, ti, tf):
@@ -76,11 +77,12 @@ def importar_lpw(year, month, day, ti, tf):
 
     e_density = lpw[:,-1]
 
-    t_lpw = lpw[:,3] + lpw[:,4]/60 + lpw[:,5]/3600
+    t = lpw[:,3] + lpw[:,4]/60 + lpw[:,5]/3600
 
     inicio = np.where(t == find_nearest(t, ti))[0][0]
     fin = np.where(t == find_nearest(t, tf))[0][0]
 
     t_cut = t[inicio:fin]
+    e_density_cut = e_density[inicio:fin]
 
-    return(lpw, t_cut, e_density)
+    return(lpw, t_cut, e_density_cut)

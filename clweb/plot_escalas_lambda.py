@@ -5,6 +5,7 @@ Plotea los archivos que devuelve escalas_lambda.py
 import matplotlib.pyplot as plt
 import numpy as np
 import datetime as dt
+from matplotlib.widgets import MultiCursor
 from funciones import find_nearest, array_datenums, fechas
 from funciones_plot import imshow_UTC, plot_datetime
 import matplotlib.dates as md
@@ -69,8 +70,9 @@ B_MVA = Bnorm[inicio_MVA:fin_MVA]
 t_MVA = t[inicio_MVA:fin_MVA]
 
 
+xfmt = md.DateFormatter('%H:%M:%S')
 
-plt.figure()
+plt.figure(1)
 imshow_UTC(year, month, day, tiempo_central, cociente, escalas, 'inferno', 3)
 # plot_datetime(year, month, day,t_MVA, B_MVA, 'cyan', '-', 1, 0.5) #no sé por qué se superpone mal, tiene mal los tiempos.
 for tt in timestamps:
@@ -79,11 +81,31 @@ plt.title(f'Heatmap del cociente de lambdas en distintas escalas temporales \n  
 plt.xlabel('Tiempo en el que está centrado (hh:mm:ss)')
 plt.ylabel('Radio (s) \n |B| (nT)')
 
-plt.figure()
+
+plt.figure(2)
 plot_datetime(year, month, day,t_cut, B_cut, 'red', '-', 1, 1)
 plt.ylabel('|B| (nT)')
 plt.xlabel('Tiempo UTC (hh:mm:ss)')
 
-"""
-pensar criterio para la escala maxima
-"""
+fig = plt.figure(3, constrained_layout=True)#Lo bueno de esta forma es que puedo hacer que solo algunos compartan eje
+fig.subplots_adjust(top = 0.93, bottom = 0.07, left = 0.05,right=0.95, hspace = 0.005, wspace=0.15)
+fig.set_size_inches(15, 10)#con este tamaño ocupa toda la pantalla de la laptop
+
+ax1 = plt.subplot2grid((1,2),(0,0))
+plot_datetime(year, month, day,t_cut, B_cut, 'red', '-', 1, 1)
+ax1.set_ylabel(r'|$\Delta B$|/ B')
+
+ax2 = plt.subplot2grid((1,2),(0,1), sharex=ax1)
+imshow_UTC(year, month, day, tiempo_central, cociente, escalas, 'inferno', 3)
+
+
+for ax in [ax1, ax2]:
+    ax.set_xlim(timestamps[0],timestamps[-1])
+    ax.xaxis.set_major_formatter(xfmt)
+    ax.grid()
+    for tt in timestamps:
+        ax.axvline(x = tt, color = 'g') #plotea los tiempos t1t2t3t4
+
+multi = MultiCursor(fig.canvas, (ax1, ax2), color='c', lw=1)
+
+plt.show()

@@ -78,8 +78,8 @@ index = np.where(t == find_nearest(t, t_medio))[0][0]
 R = posicion_cut[index,:] #la posicion de la nave en RM
 x3 = np.array([0.956, -0.286, 0.070])
 
-normal_MVA(R, x3, 'b', '2015-oct-10')
-# normal_MVA(R, x3)
+# normal_MVA(R, x3, 'b', '2015-oct-10')
+normal_MVA(R, x3)
 normal_vignes(R, asc, bsc,csc)
 
 t, posicion_cut, year, month, day = datos_fijos(2016,'04','05',5,6)
@@ -106,10 +106,10 @@ t, posicion_cut, year, month, day = datos_fijos(2016,'03',16,17.75,18.75)
 t_medio = UTC_to_hdec('18:13:50')
 index = np.where(t == find_nearest(t, t_medio))[0][0]
 R = posicion_cut[index,:] #la posicion de la nave en RM
-x3 = np.array([0.908, -0.296, 0.295])
+x3 = np.array([0.920,-0.302,0.251])
 
-normal_MVA(R, x3, 'm', '2016-mar-16')
-# normal_MVA(R, x3)
+# normal_MVA(R, x3, 'm', '2016-mar-16')
+normal_MVA(R, x3)
 normal_vignes(R, asc, bsc,csc)
 
 t, posicion_cut, year, month, day = datos_fijos(2017,11,24,11.75,12.75)
@@ -118,8 +118,8 @@ index = np.where(t == find_nearest(t, t_medio))[0][0]
 R = posicion_cut[index,:] #la posicion de la nave en RM
 x3 = np.array([0.981, -0.032, 0.193])
 
-normal_MVA(R, x3, 'g', '2017-nov-24')
-# normal_MVA(R, x3)
+# normal_MVA(R, x3, 'g', '2017-nov-24')
+normal_MVA(R, x3)
 normal_vignes(R, asc, bsc,csc)
 
 # plt.legend()

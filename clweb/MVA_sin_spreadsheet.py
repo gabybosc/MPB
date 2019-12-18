@@ -28,25 +28,8 @@ Devuelve el ancho de la MPB y la corriente que pasa. Calcula también la fuerza 
 Grafica el hodograma, el ajuste de vignes, y la comparación de las normales obtenidas por los distintos métodos.
 """
 np.set_printoptions(precision=4)
-def MVA(date_entry, ti_MVA, tf_MVA, mag):
-    if len(date_entry.split('-')) < 3:
-        year, doy = map(int, date_entry.split('-'))
-        date_orbit = dt.datetime(year, 1, 1) +   dt.timedelta(doy - 1) #para convertir el doty en date
-    else:
-        year, month, day = map(int, date_entry.split('-'))
-        date_orbit = dt.date(year, month, day)
-
-    year = date_orbit.strftime("%Y")
-    month = date_orbit.strftime("%m")
-    day = date_orbit.strftime("%d")
-    doy = date_orbit.strftime("%j")
-
-    # ti_MVA = float(input("t_incial = "))
-    # tf_MVA = float(input("t_final = "))
-    # while tf_MVA < ti_MVA:
-    #     print('t final no puede ser menor a t inicial. \n')
-    #     ti_MVA = float(input('t_inicial = '))
-    #     tf_MVA = float(input("t_final = "))
+def MVA(year, month, day, doy, ti_MVA, tf_MVA, mag):
+    date_entry = f'{year}-{month}-{day}'
 
     datos_tiempo = np.loadtxt('../outputs/t1t2t3t4.txt')
     idx_d = np.where(int(doy) == datos_tiempo[:,1].astype(int))[0]

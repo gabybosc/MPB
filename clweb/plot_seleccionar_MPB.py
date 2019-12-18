@@ -4,7 +4,7 @@ from matplotlib.widgets import Cursor, MultiCursor
 from matplotlib.colors import LogNorm
 import cdflib as cdf
 import datetime as dt
-from funciones import find_nearest, deltaB, unix_to_decimal, unix_to_timestamp, Bpara_Bperp, fechas
+from funciones import find_nearest, deltaB, unix_to_decimal, unix_to_timestamp, Bpara_Bperp, fechas, datenum, tiempos
 from funciones_plot import onpick1
 from importar_datos import importar_mag, importar_lpw, importar_swea, importar_swia
 from mpl_toolkits.axes_grid1 import make_axes_locatable
@@ -22,10 +22,11 @@ Usa los datos de baja resolución para calcular el B_para y B_perp
 
 np.set_printoptions(precision=4)
 
-year, month, day, doy = fechas()
+year, month, day, doy = 2016, '03', 16, 76#fechas()
+ti, tf = 17.5, 18.5#tiempos()
 path = f'../../../datos/clweb/{year}-{month}-{day}/'
 
-mag, t, B, posicion = importar_mag(year, month, day)
+mag, t, B, posicion = importar_mag(year, month, day, ti, tf)
 Bnorm = np.linalg.norm(B, axis=1)
 mag_low = np.loadtxt(path + 'mag_1s.sts', skiprows=160)
 tlow = mag_low[:,6]  #el dia decimal
@@ -38,21 +39,25 @@ for i in range(7,10):
     Blow[:,i-7] = mag_low[:, i]
 
 B_para, B_perp_norm, t_plot = Bpara_Bperp(Blow, tlow, t[0], t[-1])
+
+
 ###############################################################################################SWEA
 
-swea, t_swea, energias = importar_swea(year, month, day)
+swea, t_swea, energias = importar_swea(year, month, day, ti, tf)
+energy = swea[:,7]
+JE_total = swea[:,-1]
 
+inicio_swea = np.where(t_swea == find_nearest(t_swea, ti))[0][0]
+fin_swea = np.where(t_swea == find_nearest(t_swea, tf))[0][0]
 ###############################################################################################SWIA
 
-swia, t_swia, density = importar_swia(year, month, day)
+swia, t_swia, density = importar_swia(year, month, day, ti,tf)
 
 ############################################################################################### LPW
-lpw, t_lpw, e_density = importar_lpw(year, month, day)
-
+lpw, t_lpw, e_density = importar_lpw(year, month, day,ti,tf)
 
 
 index = np.array((int(year), int(day)))
-
 
 happy = False
 while not happy:
@@ -68,51 +73,47 @@ while not happy:
         plt.plot(t_plot, B_perp_norm, '-.', linewidth=1, label=r'|$\Delta B \perp$| / B')
         plt.setp(ax1.get_xticklabels(), visible=False)
         ax1.set_ylabel(r'|$\Delta B$|/ B')
-        ax1.grid()
-        ax1.legend()
 
-        ax4 = plt.subplot2grid((3,2),(1,0), sharex=ax1)
-        ax4.plot(t, B[:,0], label='Bx')
-        ax4.plot(t, B[:,1], label='By')
-        ax4.plot(t, B[:,2], label='Bz')
-        plt.setp(ax4.get_xticklabels(), visible=False)
-        ax4.set_ylabel('Bx, By, Bz (nT)')
-        ax4.legend()
-        ax4.grid()
+        ax2 = plt.subplot2grid((3,2),(1,0), sharex=ax1)
+        ax2.plot(t, B[:,0], label='Bx')
+        ax2.plot(t, B[:,1], label='By')
+        ax2.plot(t, B[:,2], label='Bz')
+        plt.setp(ax2.get_xticklabels(), visible=False)
+        ax2.set_ylabel('Bx, By, Bz (nT)')
 
         ax3 = plt.subplot2grid((3,2),(2,0), sharex=ax1)
         plt.plot(t, Bnorm)
-        ax3.grid()
         ax3.set_ylabel('|B| (nT)')
         ax3.set_xlabel('Tiempo (hdec)')
 
-        ax5 = plt.subplot2grid((3,2),(0,1), sharex=ax1)
+        ax4 = plt.subplot2grid((3,2),(0,1), sharex=ax1)
         for energia in energias:
             index = np.where(energy == find_nearest(energy, energia))[0]
             JE = JE_total[index]
-            plt.semilogy(t_swea, JE, label = f'{energia} eV')
-        ax5.grid()
-        plt.setp(ax5.get_xticklabels(), visible=False)
-        ax5.set_ylabel('diff en flux')
-        ax5.legend()
+            plt.semilogy(t_swea[inicio_swea:fin_swea], JE[inicio_swea:fin_swea], label = f'{energia} eV')
+        ax4.set_ylabel('diff en flux')
 
-
-
-        ax7 = plt.subplot2grid((3,2),(1,1), sharex=ax1)
-        plt.setp(ax7.get_xticklabels(), visible=False)
-        ax7.set_ylabel('Densidad de p+ \n del SW (cm⁻³)')
+        ax5 = plt.subplot2grid((3,2),(1,1), sharex=ax1)
+        ax5.set_ylabel('Densidad de p+ \n del SW (cm⁻³)')
         plt.plot(t_swia, density)
-        ax7.grid()
 
         ax6 = plt.subplot2grid((3,2),(2,1), sharex=ax1)
         ax6.set_ylabel('Densidad total \n de e- (cm⁻³)')
         ax6.set_xlabel('Tiempo (hdec)')
-
         plt.semilogy(t_lpw, e_density)
-        ax6.grid()
+
+
+        for ax in [ax1, ax2, ax4,ax5]:
+            plt.setp(ax.get_xticklabels(), visible=False)
+            ax.legend()
+
+        for ax in [ax1, ax2, ax3,ax4,ax5,ax6]:
+            ax.set_xlim(t[0],t[-1])
+            ax.grid()
+
 
         fig.canvas.mpl_connect('pick_event', onpick1)
-        multi = MultiCursor(fig.canvas, (ax1, ax3,ax4,ax5,ax6,ax7), color='black', lw=1)
+        multi = MultiCursor(fig.canvas, (ax1, ax2, ax3,ax4, ax5,ax6), color='black', lw=1)
 
         zoom_ok = False
         print('\nSpacebar when ready to click:\n')
@@ -128,8 +129,8 @@ while not happy:
 
 plt.show(block=False)
 
-with open('../outputs/t1t2t3t4.txt','a') as file:
-    file.write('\n')
-    file.write(f'{year}\t{doy}\t')
-    for k in outs:
-        file.write('{0:1.7}\t'.format(k))
+# with open('../outputs/t1t2t3t4.txt','a') as file:
+#     file.write('\n')
+#     file.write(f'{year}\t{doy}\t')
+#     for k in outs:
+#         file.write('{0:1.7}\t'.format(k))

@@ -14,7 +14,8 @@ Como las frecuencias están normalizadas, da lo mismo usar f o w.
 N es el orden del filtro, en general voy a querer que N sea cercano a 10.
 """
 
-year, month, day, doy = fechas()
+# year, month, day, doy = fechas()
+year, month, day, doy = 2016, '03', 16, 76
 
 path = f'../../../datos/clweb/{year}-{month}-{day}/' #path a los datos desde la laptop
 mag = np.loadtxt(path + 'MAG.asc')
@@ -50,12 +51,12 @@ plt.plot(B_filtrado,linewidth = 0.5, label = f'fs = {fs:.3g}, fp = {fp:.3g}')
 plt.legend()
 plt.show(block=False)
 
-happy = input('If happy press Y\n')
 
-if happy == 'y' or 'Y':
-    with open(path + 'mag_filtrado.txt','w') as file:
-        file.write(f'Los datos de MAG filtrados para frecuencia fp = {fp*16:.3g}, fs = {fs*16:.3g}.\n')
-        file.write(f'Bx  By  Bz  B.\n')
-        for i in range(M):
-            file.write(f'{Bx_filtrado[i]}\t{By_filtrado[i]}\t{Bz_filtrado[i]}\t{B_filtrado[i]}\t')
-            file.write('\n')
+# happy = input('If happy press Y\n')
+# if happy == 'y' or happy == 'Y':
+#     with open(path + 'mag_filtrado.txt','w') as file:
+#         file.write(f'Los datos de MAG filtrados para frecuencia fp = {fp*16:.3g}, fs = {fs*16:.3g}.\n')
+#         file.write(f'Bx  By  Bz  B.\n')
+#         for i in range(M):
+#             file.write(f'{Bx_filtrado[i]}\t{By_filtrado[i]}\t{Bz_filtrado[i]}\t{B_filtrado[i]}\t')
+#             file.write('\n')
