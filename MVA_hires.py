@@ -175,7 +175,7 @@ def MVA(date_entry, ti_MVA, tf_MVA, mag):
     index = np.where(t == t_nave)[0][0]
     x0 = 0.78
     e = 0.9
-    normal_fit, X1, Y1, Z1, R, L0 = ajuste_conico(posicion, index, orbita, x3)
+    normal_fit, X1, Y1, Z1, R, L0 = ajuste_conico(posicion, index, orbita, date_entry, x3)
 
     B3_fit = np.dot(B_cut, normal_fit)
 
@@ -204,112 +204,112 @@ def MVA(date_entry, ti_MVA, tf_MVA, mag):
 
     print('Fin del MVA')
     #############
-    #ahora guardo todo en una spreadsheet
-    scope = ["https://spreadsheets.google.com/feeds","https://www.googleapis.com/auth/spreadsheets","https://www.googleapis.com/auth/drive.file","https://www.googleapis.com/auth/drive"]
-
-    creds = ServiceAccountCredentials.from_json_keyfile_name("mpb_api.json", scope)
-
-    client = gspread.authorize(creds)
-
-    hoja_parametros = client.open("MPB").worksheet('Parametros')
-    hoja_mva = client.open("MPB").worksheet('MVA')
-    hoja_boot = client.open("MPB").worksheet('Bootstrap')
-    hoja_fit = client.open("MPB").worksheet('Ajuste')
-
-    fecha_sheet = hoja_mva.col_values(1)
-    hora_sheet = hoja_mva.col_values(2)
-
-    print('Acceso a la spreadsheet')
-    #si ya está esa fecha en la spreadsheet, la sobreescribe. Si no, usa la siguiente línea vacía
-    # pdb.set_trace()
-    if date_entry in fecha_sheet and str(int(t1)) in hora_sheet:
-        listaA = [a for a, fechas in enumerate(fecha_sheet) if fechas == date_entry]
-        listaB = [b for b, horas in enumerate(hora_sheet) if horas == str(int(t1))]
-        idx = list(set(listaA).intersection(listaB))[0]
-        nr = idx+1
-    else:
-        nr = next_available_row(hoja_mva)
-
-    #######updatºla hoja de los parámetros
-    hoja_parametros.update_acell(f'A{nr}', f'{date_entry}')
-    hoja_parametros.update_acell(f'B{nr}', f'{int(t1)}')
-    hoja_parametros.update_acell(f'D{nr}', f'{SZA:.3g}')
-    hoja_parametros.update_acell(f'E{nr}', f'{int(altitud)}')
-    hoja_parametros.update_acell(f'O{nr}', f'{round(B_norm_medio,2)}')
-
-    cell_times = hoja_parametros.range(f'F{nr}:I{nr}')
-    for i,cell in enumerate(cell_times):
-        cell.value = tiempos[i]
-    hoja_parametros.update_cells(cell_times)
-
-
-    cell_B = hoja_parametros.range(f'L{nr}:N{nr}')
-    for i,cell in enumerate(cell_B):
-        cell.value = round(B_medio_vectorial[i],2)
-    hoja_parametros.update_cells(cell_B)
-
-    if type(B_filtrado) != int: #si no es un int, en particular 0, agrega los datos a la lista
-        hoja_parametros.update_acell(f'J{nr}', f'{orden_filtro}')
-        hoja_parametros.update_acell(f'K{nr}', f'{frec_filtro}')
-    else:
-        hoja_parametros.update_acell(f'J{nr}', 'Sin filtrar')
-
-    ########update la hoja de MVA
-    hoja_mva.update_acell(f'A{nr}', f'{date_entry}')
-    hoja_mva.update_acell(f'B{nr}', f'{int(t1)}')
-    hoja_mva.update_acell(f'D{nr}', f'{ti_MVA}')
-    hoja_mva.update_acell(f'E{nr}', f'{tf_MVA}')
-    hoja_mva.update_acell(f'I{nr}', f'{lamb[1]/lamb[2]:.3g}')
-
-    hoja_mva.update_acell(f'S{nr}', f'{error_normal:.3g}')
-    hoja_mva.update_acell(f'T{nr}', f'{round(np.mean(B3),2)}')
-    hoja_mva.update_acell(f'U{nr}', f'{round(delta_B3,2)}')
-    hoja_mva.update_acell(f'V{nr}', f'{abs(round(np.mean(B3)/B_norm_medio,2))}')
-
-
-    cell_lambda = hoja_mva.range(f'F{nr}:H{nr}')
-    for i,cell in enumerate(cell_lambda):
-        cell.value = round(lamb[i],2)
-    hoja_mva.update_cells(cell_lambda)
-
-    cell_av = hoja_mva.range(f'J{nr}:R{nr}')
-    for i,cell in enumerate(cell_av):
-        cell.value = round(av[i],3)
-    hoja_mva.update_cells(cell_av)
-
-
-    ########update la hoja de bootstrap
-    hoja_boot.update_acell(f'A{nr}', f'{date_entry}')
-    hoja_boot.update_acell(f'B{nr}', f'{int(t1)}')
-    hoja_boot.update_acell(f'D{nr}', f'{M_cut}')
-    hoja_boot.update_acell(f'E{nr}', f'{N_boot}')
-
-    cell_normal = hoja_boot.range(f'F{nr}:H{nr}')
-    for i,cell in enumerate(cell_normal):
-        cell.value = round(normal_boot[i],3)
-    hoja_boot.update_cells(cell_normal)
-
-    hoja_boot.update_acell(f'I{nr}', f'{error_boot:.3g}')
-    hoja_boot.update_acell(f'J{nr}', f'{round(np.mean(B3_boot),2)}')
-    hoja_boot.update_acell(f'K{nr}', f'{round(sigmaB,2)}')
-    hoja_boot.update_acell(f'L{nr}', f'{abs(round(np.mean(B3_boot)/B_norm_medio,2))}')
-
-    ########update la hoja del ajuste
-    hoja_fit.update_acell(f'A{nr}', f'{date_entry}')
-    hoja_fit.update_acell(f'B{nr}', f'{int(t1)}')
-    hoja_fit.update_acell(f'D{nr}', f'{L0}')
-    hoja_fit.update_acell(f'E{nr}', f'{e}')
-    hoja_fit.update_acell(f'F{nr}', f'{x0}')
-
-    cell_normal = hoja_fit.range(f'G{nr}:I{nr}')
-    for i,cell in enumerate(cell_normal):
-        cell.value = round(normal_fit[i],3)
-    hoja_fit.update_cells(cell_normal)
-
-
-    hoja_fit.update_acell(f'K{nr}', f'{round(np.mean(B3_fit),2)}')
-    hoja_fit.update_acell(f'L{nr}', f'{abs(round(np.mean(B3_fit)/B_norm_medio,2))}')
-
-
-    print('escribe la spreadsheet')
-    return(x3, normal_boot, normal_fit, t, B, posicion, inicio, fin, B_cut, t1, t2, t3, t4,B_medio_vectorial, nr)
+    # #ahora guardo todo en una spreadsheet
+    # scope = ["https://spreadsheets.google.com/feeds","https://www.googleapis.com/auth/spreadsheets","https://www.googleapis.com/auth/drive.file","https://www.googleapis.com/auth/drive"]
+    #
+    # creds = ServiceAccountCredentials.from_json_keyfile_name("mpb_api.json", scope)
+    #
+    # client = gspread.authorize(creds)
+    #
+    # hoja_parametros = client.open("MPB").worksheet('Parametros')
+    # hoja_mva = client.open("MPB").worksheet('MVA')
+    # hoja_boot = client.open("MPB").worksheet('Bootstrap')
+    # hoja_fit = client.open("MPB").worksheet('Ajuste')
+    #
+    # fecha_sheet = hoja_mva.col_values(1)
+    # hora_sheet = hoja_mva.col_values(2)
+    #
+    # print('Acceso a la spreadsheet')
+    # #si ya está esa fecha en la spreadsheet, la sobreescribe. Si no, usa la siguiente línea vacía
+    # # pdb.set_trace()
+    # if date_entry in fecha_sheet and str(int(t1)) in hora_sheet:
+    #     listaA = [a for a, fechas in enumerate(fecha_sheet) if fechas == date_entry]
+    #     listaB = [b for b, horas in enumerate(hora_sheet) if horas == str(int(t1))]
+    #     idx = list(set(listaA).intersection(listaB))[0]
+    #     nr = idx+1
+    # else:
+    #     nr = next_available_row(hoja_mva)
+    #
+    # #######updatºla hoja de los parámetros
+    # hoja_parametros.update_acell(f'A{nr}', f'{date_entry}')
+    # hoja_parametros.update_acell(f'B{nr}', f'{int(t1)}')
+    # hoja_parametros.update_acell(f'D{nr}', f'{SZA:.3g}')
+    # hoja_parametros.update_acell(f'E{nr}', f'{int(altitud)}')
+    # hoja_parametros.update_acell(f'O{nr}', f'{round(B_norm_medio,2)}')
+    #
+    # cell_times = hoja_parametros.range(f'F{nr}:I{nr}')
+    # for i,cell in enumerate(cell_times):
+    #     cell.value = tiempos[i]
+    # hoja_parametros.update_cells(cell_times)
+    #
+    #
+    # cell_B = hoja_parametros.range(f'L{nr}:N{nr}')
+    # for i,cell in enumerate(cell_B):
+    #     cell.value = round(B_medio_vectorial[i],2)
+    # hoja_parametros.update_cells(cell_B)
+    #
+    # if type(B_filtrado) != int: #si no es un int, en particular 0, agrega los datos a la lista
+    #     hoja_parametros.update_acell(f'J{nr}', f'{orden_filtro}')
+    #     hoja_parametros.update_acell(f'K{nr}', f'{frec_filtro}')
+    # else:
+    #     hoja_parametros.update_acell(f'J{nr}', 'Sin filtrar')
+    #
+    # ########update la hoja de MVA
+    # hoja_mva.update_acell(f'A{nr}', f'{date_entry}')
+    # hoja_mva.update_acell(f'B{nr}', f'{int(t1)}')
+    # hoja_mva.update_acell(f'D{nr}', f'{ti_MVA}')
+    # hoja_mva.update_acell(f'E{nr}', f'{tf_MVA}')
+    # hoja_mva.update_acell(f'I{nr}', f'{lamb[1]/lamb[2]:.3g}')
+    #
+    # hoja_mva.update_acell(f'S{nr}', f'{error_normal:.3g}')
+    # hoja_mva.update_acell(f'T{nr}', f'{round(np.mean(B3),2)}')
+    # hoja_mva.update_acell(f'U{nr}', f'{round(delta_B3,2)}')
+    # hoja_mva.update_acell(f'V{nr}', f'{abs(round(np.mean(B3)/B_norm_medio,2))}')
+    #
+    #
+    # cell_lambda = hoja_mva.range(f'F{nr}:H{nr}')
+    # for i,cell in enumerate(cell_lambda):
+    #     cell.value = round(lamb[i],2)
+    # hoja_mva.update_cells(cell_lambda)
+    #
+    # cell_av = hoja_mva.range(f'J{nr}:R{nr}')
+    # for i,cell in enumerate(cell_av):
+    #     cell.value = round(av[i],3)
+    # hoja_mva.update_cells(cell_av)
+    #
+    #
+    # ########update la hoja de bootstrap
+    # hoja_boot.update_acell(f'A{nr}', f'{date_entry}')
+    # hoja_boot.update_acell(f'B{nr}', f'{int(t1)}')
+    # hoja_boot.update_acell(f'D{nr}', f'{M_cut}')
+    # hoja_boot.update_acell(f'E{nr}', f'{N_boot}')
+    #
+    # cell_normal = hoja_boot.range(f'F{nr}:H{nr}')
+    # for i,cell in enumerate(cell_normal):
+    #     cell.value = round(normal_boot[i],3)
+    # hoja_boot.update_cells(cell_normal)
+    #
+    # hoja_boot.update_acell(f'I{nr}', f'{error_boot:.3g}')
+    # hoja_boot.update_acell(f'J{nr}', f'{round(np.mean(B3_boot),2)}')
+    # hoja_boot.update_acell(f'K{nr}', f'{round(sigmaB,2)}')
+    # hoja_boot.update_acell(f'L{nr}', f'{abs(round(np.mean(B3_boot)/B_norm_medio,2))}')
+    #
+    # ########update la hoja del ajuste
+    # hoja_fit.update_acell(f'A{nr}', f'{date_entry}')
+    # hoja_fit.update_acell(f'B{nr}', f'{int(t1)}')
+    # hoja_fit.update_acell(f'D{nr}', f'{L0}')
+    # hoja_fit.update_acell(f'E{nr}', f'{e}')
+    # hoja_fit.update_acell(f'F{nr}', f'{x0}')
+    #
+    # cell_normal = hoja_fit.range(f'G{nr}:I{nr}')
+    # for i,cell in enumerate(cell_normal):
+    #     cell.value = round(normal_fit[i],3)
+    # hoja_fit.update_cells(cell_normal)
+    #
+    #
+    # hoja_fit.update_acell(f'K{nr}', f'{round(np.mean(B3_fit),2)}')
+    # hoja_fit.update_acell(f'L{nr}', f'{abs(round(np.mean(B3_fit)/B_norm_medio,2))}')
+    #
+    #
+    # print('escribe la spreadsheet')
+    # return(x3, normal_boot, normal_fit, t, B, posicion, inicio, fin, B_cut, t1, t2, t3, t4,B_medio_vectorial, nr)

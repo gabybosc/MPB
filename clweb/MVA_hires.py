@@ -171,7 +171,7 @@ def MVA(year, month, day, doy, ti_MVA, tf_MVA, mag):
     index = np.where(t == t_nave)[0][0]
     x0 = 0.78
     e = 0.9
-    normal_fit, X1, Y1, Z1, R, L0 = ajuste_conico(posicion, index, orbita, x3, date_entry)
+    normal_fit, X1, Y1, Z1, R, L0 = ajuste_conico(posicion, index, orbita, date_entry, x3)
 
     B3_fit = np.dot(B_cut, normal_fit)
 

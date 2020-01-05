@@ -45,7 +45,7 @@ def hodograma(B1, B2, B3, fecha, unidad = 'nT'):
     plt.suptitle(f'MAVEN MAG {fecha}')
     plt.legend()
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
-    plt.savefig(f'../outputs/figs_MPB/hodograma_{fecha}.png')
+    # plt.savefig(f'../outputs/figs_MPB/hodograma_{fecha}.png')
 
 def imshow_UTC(year, month, day, t, heatmap, eje_y, colormap = 'inferno'):
     """ Le das una fecha en np.datetime64 (UTC) y te grafica el imshow.

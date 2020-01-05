@@ -30,6 +30,8 @@ Grafica el hodograma, el ajuste de vignes, y la comparación de las normales obt
 np.set_printoptions(precision=4)
 def MVA(year, month, day, doy, ti_MVA, tf_MVA, mag):
     date_entry = f'{year}-{month}-{day}'
+    # year,month,day = 2016,'03',16
+    # ti_MVA, tf_MVA = UTC_to_hdec('18:13:33'), UTC_to_hdec('18:14:06')
 
     datos_tiempo = np.loadtxt('../outputs/t1t2t3t4.txt')
     idx_d = np.where(int(doy) == datos_tiempo[:,1].astype(int))[0]
@@ -79,22 +81,7 @@ def MVA(year, month, day, doy, ti_MVA, tf_MVA, mag):
     inicio = np.where(t == find_nearest_inicial(t, ti_MVA))[0][0]
     fin = np.where(t == find_nearest_final(t, tf_MVA))[0][0]
 
-    #################
-    #Filtramos
-    B_filtrado = 0
-    # orden_filtro = 3
-    # frec_filtro = 0.01
-    # b,a = signal.butter(orden_filtro,frec_filtro,btype='lowpass')
-    # Bx_filtrado = signal.filtfilt(b, a, B[:,0])
-    # By_filtrado = signal.filtfilt(b, a, B[:,1])
-    # Bz_filtrado = signal.filtfilt(b, a, B[:,2])
-    # B_filtrado = np.linalg.norm(np.array([Bx_filtrado, By_filtrado, Bz_filtrado]), axis=0) #es el axis 0 porque no está traspuesta
-
-    if type(B_filtrado) == int:
-        B_cut = B[inicio:fin,:]
-    else:
-        B_cut = np.transpose(np.array([Bx_filtrado[inicio:fin+1], By_filtrado[inicio:fin+1], Bz_filtrado[inicio:fin+1]]))
-
+    B_cut = B[inicio:fin,:]
 
     #ahora empieza el MVA con los datos que elegí
     MD_cut = MD[inicio : fin+1, :]
@@ -156,7 +143,7 @@ def MVA(year, month, day, doy, ti_MVA, tf_MVA, mag):
     index = np.where(t == t_nave)[0][0]
     x0 = 0.78
     e = 0.9
-    normal_fit, X1, Y1, Z1, R, L0 = ajuste_conico(posicion, index, orbita, x3, date_entry)
+    normal_fit, X1, Y1, Z1, R, L0 = ajuste_conico(posicion, index, orbita, date_entry, x3)
 
     B3_fit = np.dot(B_cut, normal_fit)
 

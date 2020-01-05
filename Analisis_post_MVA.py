@@ -171,126 +171,126 @@ plt.show(block=False)
 
 
 ############
-#Ahora guardamos todo en la spreadsheet
-scope = ["https://spreadsheets.google.com/feeds","https://www.googleapis.com/auth/spreadsheets","https://www.googleapis.com/auth/drive.file","https://www.googleapis.com/auth/drive"]
-
-creds = ServiceAccountCredentials.from_json_keyfile_name("mpb_api.json", scope)
-
-client = gspread.authorize(creds)
-
-hoja_parametros = client.open("MPB").worksheet('Parametros')
-hoja_mva = client.open("MPB").worksheet('MVA')
-hoja_boot = client.open("MPB").worksheet('Bootstrap')
-hoja_fit = client.open("MPB").worksheet('Ajuste')
-
-
-##########
-#Parámetros
-
-hoja_parametros.update_acell(f'Z{nr}', f'{omega*180/np.pi:.3g}')
-hoja_parametros.update_acell(f'S{nr}', f'{np.linalg.norm(v_media):.3g}')
-
-cell_vel = hoja_parametros.range(f'P{nr}:R{nr}')
-for i,cell in enumerate(cell_vel):
-    cell.value = round(v_media[i],2)
-hoja_parametros.update_cells(cell_vel)
-
-cell_Bup = hoja_parametros.range(f'T{nr}:V{nr}')
-for i,cell in enumerate(cell_Bup):
-    cell.value = round(B_upstream[i],2)
-hoja_parametros.update_cells(cell_Bup)
-
-cell_Bdown = hoja_parametros.range(f'W{nr}:Y{nr}')
-for i,cell in enumerate(cell_Bdown):
-    cell.value = round(B_downstream[i],2)
-hoja_parametros.update_cells(cell_Bdown)
-
-
-#La hoja del MVA
-
-hoja_mva.update_acell(f'W{nr}', f'{angulo_v_mva * 180/np.pi:.3g}')
-hoja_mva.update_acell(f'X{nr}', f'{angulo_B_mva * 180/np.pi:.3g}')
-hoja_mva.update_acell(f'Y{nr}', f'{np.linalg.norm(x_23_MVA):.3g}')
-hoja_mva.update_acell(f'Z{nr}', f'{np.linalg.norm(x_14_MVA):.3g}')
-# hoja_mva.update_acell(f'AA{nr}', f'{:.3g}')
-# hoja_mva.update_acell(f'AB{nr}', f'{:.3g}')
-
-hoja_mva.update_acell(f'AF{nr}', f'{np.linalg.norm(J_s_MVA)*1E-6:.3g}')
-hoja_mva.update_acell(f'AJ{nr}', f'{np.linalg.norm(J_v_MVA):.3g}')
-hoja_mva.update_acell(f'AK{nr}', f'{np.linalg.norm(fuerza_mva):.3g}')
-hoja_mva.update_acell(f'AO{nr}', f'{np.linalg.norm(E_Hall)*1E3:.3g}') #mV/m
-
-cell_Js = hoja_mva.range(f'AC{nr}:AE{nr}')
-for i,cell in enumerate(cell_Js):
-    cell.value = round(J_s_MVA[i] * 1E-6,3)
-hoja_mva.update_cells(cell_Js)
-
-cell_Jv = hoja_mva.range(f'AG{nr}:AI{nr}')
-for i,cell in enumerate(cell_Jv):
-    cell.value = round(J_v_MVA[i],3)
-hoja_mva.update_cells(cell_Jv)
-
-cell_EH = hoja_mva.range(f'AL{nr}:AN{nr}')
-for i,cell in enumerate(cell_EH):
-    cell.value = round(E_Hall[i]*1E3,3)
-hoja_mva.update_cells(cell_EH)
-
-#La hoja del bootstrap
-
-hoja_boot.update_acell(f'M{nr}', f'{angulo_v_boot * 180/np.pi:.3g}')
-hoja_boot.update_acell(f'N{nr}', f'{angulo_B_boot * 180/np.pi:.3g}')
-hoja_boot.update_acell(f'O{nr}', f'{np.linalg.norm(x_23_boot):.3g}')
-hoja_boot.update_acell(f'P{nr}', f'{np.linalg.norm(x_14_boot):.3g}')
-# hoja_boot.update_acell(f'Q{nr}', f'{:.3g}')
-# hoja_boot.update_acell(f'R{nr}', f'{:.3g}')
-
-hoja_boot.update_acell(f'V{nr}', f'{np.linalg.norm(J_s_boot)*1E-6:.3g}')
-hoja_boot.update_acell(f'Z{nr}', f'{np.linalg.norm(J_v_boot):.3g}')
-hoja_boot.update_acell(f'AA{nr}', f'{np.linalg.norm(fuerza_boot):.3g}')
-hoja_boot.update_acell(f'AE{nr}', f'{np.linalg.norm(E_Hall_boot)*1E3:.3g}')
-
-cell_Js = hoja_boot.range(f'S{nr}:U{nr}')
-for i,cell in enumerate(cell_Js):
-    cell.value = round(J_s_boot[i] * 1E-6,3)
-hoja_boot.update_cells(cell_Js)
-
-cell_Jv = hoja_boot.range(f'W{nr}:Y{nr}')
-for i,cell in enumerate(cell_Jv):
-    cell.value = round(J_v_boot[i],3)
-hoja_boot.update_cells(cell_Jv)
-
-cell_EH = hoja_boot.range(f'AB{nr}:AD{nr}')
-for i,cell in enumerate(cell_EH):
-    cell.value = round(E_Hall_boot[i]*1E3,3)
-hoja_boot.update_cells(cell_EH)
-
-
-#La hoja del ajuste
-
-hoja_fit.update_acell(f'J{nr}', f'{angulo_mva * 180/np.pi:.3g}')
-hoja_fit.update_acell(f'M{nr}', f'{angulo_v_fit * 180/np.pi:.3g}')
-hoja_fit.update_acell(f'N{nr}', f'{angulo_B_fit * 180/np.pi:.3g}')
-hoja_fit.update_acell(f'O{nr}', f'{np.linalg.norm(x_23_fit):.3g}')
-hoja_fit.update_acell(f'P{nr}', f'{np.linalg.norm(x_14_fit):.3g}')
-# hoja_fit.update_acell(f'Q{nr}', f'{:.3g}')
-# hoja_fit.update_acell(f'R{nr}', f'{:.3g}')
-
-hoja_fit.update_acell(f'V{nr}', f'{np.linalg.norm(J_s_fit)*1E-6:.3g}')
-hoja_fit.update_acell(f'Z{nr}', f'{np.linalg.norm(J_v_fit):.3g}')
-hoja_fit.update_acell(f'AA{nr}', f'{np.linalg.norm(fuerza_fit):.3g}')
-hoja_fit.update_acell(f'AE{nr}', f'{np.linalg.norm(E_Hall_fit)*1E3:.3g}')
-
-cell_Js = hoja_fit.range(f'S{nr}:U{nr}')
-for i,cell in enumerate(cell_Js):
-    cell.value = round(J_s_fit[i] * 1E-6,3)
-hoja_fit.update_cells(cell_Js)
-
-cell_Jv = hoja_fit.range(f'W{nr}:Y{nr}')
-for i,cell in enumerate(cell_Jv):
-    cell.value = round(J_v_fit[i],3)
-hoja_fit.update_cells(cell_Jv)
-
-cell_EH = hoja_fit.range(f'AB{nr}:AD{nr}')
-for i,cell in enumerate(cell_EH):
-    cell.value = round(E_Hall_fit[i]*1E3,3)
-hoja_fit.update_cells(cell_EH)
+# #Ahora guardamos todo en la spreadsheet
+# scope = ["https://spreadsheets.google.com/feeds","https://www.googleapis.com/auth/spreadsheets","https://www.googleapis.com/auth/drive.file","https://www.googleapis.com/auth/drive"]
+#
+# creds = ServiceAccountCredentials.from_json_keyfile_name("mpb_api.json", scope)
+#
+# client = gspread.authorize(creds)
+#
+# hoja_parametros = client.open("MPB").worksheet('Parametros')
+# hoja_mva = client.open("MPB").worksheet('MVA')
+# hoja_boot = client.open("MPB").worksheet('Bootstrap')
+# hoja_fit = client.open("MPB").worksheet('Ajuste')
+#
+#
+# ##########
+# #Parámetros
+#
+# hoja_parametros.update_acell(f'Z{nr}', f'{omega*180/np.pi:.3g}')
+# hoja_parametros.update_acell(f'S{nr}', f'{np.linalg.norm(v_media):.3g}')
+#
+# cell_vel = hoja_parametros.range(f'P{nr}:R{nr}')
+# for i,cell in enumerate(cell_vel):
+#     cell.value = round(v_media[i],2)
+# hoja_parametros.update_cells(cell_vel)
+#
+# cell_Bup = hoja_parametros.range(f'T{nr}:V{nr}')
+# for i,cell in enumerate(cell_Bup):
+#     cell.value = round(B_upstream[i],2)
+# hoja_parametros.update_cells(cell_Bup)
+#
+# cell_Bdown = hoja_parametros.range(f'W{nr}:Y{nr}')
+# for i,cell in enumerate(cell_Bdown):
+#     cell.value = round(B_downstream[i],2)
+# hoja_parametros.update_cells(cell_Bdown)
+#
+#
+# #La hoja del MVA
+#
+# hoja_mva.update_acell(f'W{nr}', f'{angulo_v_mva * 180/np.pi:.3g}')
+# hoja_mva.update_acell(f'X{nr}', f'{angulo_B_mva * 180/np.pi:.3g}')
+# hoja_mva.update_acell(f'Y{nr}', f'{np.linalg.norm(x_23_MVA):.3g}')
+# hoja_mva.update_acell(f'Z{nr}', f'{np.linalg.norm(x_14_MVA):.3g}')
+# # hoja_mva.update_acell(f'AA{nr}', f'{:.3g}')
+# # hoja_mva.update_acell(f'AB{nr}', f'{:.3g}')
+#
+# hoja_mva.update_acell(f'AF{nr}', f'{np.linalg.norm(J_s_MVA)*1E-6:.3g}')
+# hoja_mva.update_acell(f'AJ{nr}', f'{np.linalg.norm(J_v_MVA):.3g}')
+# hoja_mva.update_acell(f'AK{nr}', f'{np.linalg.norm(fuerza_mva):.3g}')
+# hoja_mva.update_acell(f'AO{nr}', f'{np.linalg.norm(E_Hall)*1E3:.3g}') #mV/m
+#
+# cell_Js = hoja_mva.range(f'AC{nr}:AE{nr}')
+# for i,cell in enumerate(cell_Js):
+#     cell.value = round(J_s_MVA[i] * 1E-6,3)
+# hoja_mva.update_cells(cell_Js)
+#
+# cell_Jv = hoja_mva.range(f'AG{nr}:AI{nr}')
+# for i,cell in enumerate(cell_Jv):
+#     cell.value = round(J_v_MVA[i],3)
+# hoja_mva.update_cells(cell_Jv)
+#
+# cell_EH = hoja_mva.range(f'AL{nr}:AN{nr}')
+# for i,cell in enumerate(cell_EH):
+#     cell.value = round(E_Hall[i]*1E3,3)
+# hoja_mva.update_cells(cell_EH)
+#
+# #La hoja del bootstrap
+#
+# hoja_boot.update_acell(f'M{nr}', f'{angulo_v_boot * 180/np.pi:.3g}')
+# hoja_boot.update_acell(f'N{nr}', f'{angulo_B_boot * 180/np.pi:.3g}')
+# hoja_boot.update_acell(f'O{nr}', f'{np.linalg.norm(x_23_boot):.3g}')
+# hoja_boot.update_acell(f'P{nr}', f'{np.linalg.norm(x_14_boot):.3g}')
+# # hoja_boot.update_acell(f'Q{nr}', f'{:.3g}')
+# # hoja_boot.update_acell(f'R{nr}', f'{:.3g}')
+#
+# hoja_boot.update_acell(f'V{nr}', f'{np.linalg.norm(J_s_boot)*1E-6:.3g}')
+# hoja_boot.update_acell(f'Z{nr}', f'{np.linalg.norm(J_v_boot):.3g}')
+# hoja_boot.update_acell(f'AA{nr}', f'{np.linalg.norm(fuerza_boot):.3g}')
+# hoja_boot.update_acell(f'AE{nr}', f'{np.linalg.norm(E_Hall_boot)*1E3:.3g}')
+#
+# cell_Js = hoja_boot.range(f'S{nr}:U{nr}')
+# for i,cell in enumerate(cell_Js):
+#     cell.value = round(J_s_boot[i] * 1E-6,3)
+# hoja_boot.update_cells(cell_Js)
+#
+# cell_Jv = hoja_boot.range(f'W{nr}:Y{nr}')
+# for i,cell in enumerate(cell_Jv):
+#     cell.value = round(J_v_boot[i],3)
+# hoja_boot.update_cells(cell_Jv)
+#
+# cell_EH = hoja_boot.range(f'AB{nr}:AD{nr}')
+# for i,cell in enumerate(cell_EH):
+#     cell.value = round(E_Hall_boot[i]*1E3,3)
+# hoja_boot.update_cells(cell_EH)
+#
+#
+# #La hoja del ajuste
+#
+# hoja_fit.update_acell(f'J{nr}', f'{angulo_mva * 180/np.pi:.3g}')
+# hoja_fit.update_acell(f'M{nr}', f'{angulo_v_fit * 180/np.pi:.3g}')
+# hoja_fit.update_acell(f'N{nr}', f'{angulo_B_fit * 180/np.pi:.3g}')
+# hoja_fit.update_acell(f'O{nr}', f'{np.linalg.norm(x_23_fit):.3g}')
+# hoja_fit.update_acell(f'P{nr}', f'{np.linalg.norm(x_14_fit):.3g}')
+# # hoja_fit.update_acell(f'Q{nr}', f'{:.3g}')
+# # hoja_fit.update_acell(f'R{nr}', f'{:.3g}')
+#
+# hoja_fit.update_acell(f'V{nr}', f'{np.linalg.norm(J_s_fit)*1E-6:.3g}')
+# hoja_fit.update_acell(f'Z{nr}', f'{np.linalg.norm(J_v_fit):.3g}')
+# hoja_fit.update_acell(f'AA{nr}', f'{np.linalg.norm(fuerza_fit):.3g}')
+# hoja_fit.update_acell(f'AE{nr}', f'{np.linalg.norm(E_Hall_fit)*1E3:.3g}')
+#
+# cell_Js = hoja_fit.range(f'S{nr}:U{nr}')
+# for i,cell in enumerate(cell_Js):
+#     cell.value = round(J_s_fit[i] * 1E-6,3)
+# hoja_fit.update_cells(cell_Js)
+#
+# cell_Jv = hoja_fit.range(f'W{nr}:Y{nr}')
+# for i,cell in enumerate(cell_Jv):
+#     cell.value = round(J_v_fit[i],3)
+# hoja_fit.update_cells(cell_Jv)
+#
+# cell_EH = hoja_fit.range(f'AB{nr}:AD{nr}')
+# for i,cell in enumerate(cell_EH):
+#     cell.value = round(E_Hall_fit[i]*1E3,3)
+# hoja_fit.update_cells(cell_EH)
