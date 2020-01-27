@@ -30,6 +30,8 @@ Grafica el hodograma, el ajuste de vignes, y la comparación de las normales obt
 np.set_printoptions(precision=4)
 def MVA(year, month, day, doy, ti_MVA, tf_MVA, mag):
     date_entry = f'{year}-{month}-{day}'
+    # year,month,day = 2016,'03',16
+    # ti_MVA, tf_MVA = UTC_to_hdec('18:13:33'), UTC_to_hdec('18:14:06')
 
     datos_tiempo = np.loadtxt('../outputs/t1t2t3t4.txt')
     idx_d = np.where(int(doy) == datos_tiempo[:,1].astype(int))[0]
@@ -54,11 +56,20 @@ def MVA(year, month, day, doy, ti_MVA, tf_MVA, mag):
 
     #tengo que asegurarme de que no haya agujeros en mis datos
 
-    mag = np.loadtxt(path + 'MAG.asc')
-    M = len(mag[:,0]) #el numero de datos
-    B = mag[:, 6:9]
-    Bnorm = np.linalg.norm(B, axis=1)
-    Bxyz_paraperp = mag[:,6:9]
+    if os.path.isfile(path + 'mag_filtrado.txt'):
+        mag = np.loadtxt(path + 'mag_filtrado.txt', skiprows=2)
+        M = len(mag[:,0]) #el numero de datos
+        B = mag[:, :3]
+
+        Bnorm = mag[:,-1]
+        mag = np.loadtxt(path + 'MAG.asc')
+        Bxyz_paraperp = mag[:,6:9]
+    else:
+        mag = np.loadtxt(path + 'MAG.asc')
+        M = len(mag[:,0]) #el numero de datos
+        B = mag[:, 6:9]
+        Bnorm = np.linalg.norm(B, axis=1)
+        Bxyz_paraperp = mag[:,6:9]
 
     #la posición(x,y,z)
     posicion = np.zeros((M, 3))
@@ -79,22 +90,7 @@ def MVA(year, month, day, doy, ti_MVA, tf_MVA, mag):
     inicio = np.where(t == find_nearest_inicial(t, ti_MVA))[0][0]
     fin = np.where(t == find_nearest_final(t, tf_MVA))[0][0]
 
-    #################
-    #Filtramos
-    B_filtrado = 0
-    # orden_filtro = 3
-    # frec_filtro = 0.01
-    # b,a = signal.butter(orden_filtro,frec_filtro,btype='lowpass')
-    # Bx_filtrado = signal.filtfilt(b, a, B[:,0])
-    # By_filtrado = signal.filtfilt(b, a, B[:,1])
-    # Bz_filtrado = signal.filtfilt(b, a, B[:,2])
-    # B_filtrado = np.linalg.norm(np.array([Bx_filtrado, By_filtrado, Bz_filtrado]), axis=0) #es el axis 0 porque no está traspuesta
-
-    if type(B_filtrado) == int:
-        B_cut = B[inicio:fin,:]
-    else:
-        B_cut = np.transpose(np.array([Bx_filtrado[inicio:fin+1], By_filtrado[inicio:fin+1], Bz_filtrado[inicio:fin+1]]))
-
+    B_cut = B[inicio:fin,:]
 
     #ahora empieza el MVA con los datos que elegí
     MD_cut = MD[inicio : fin+1, :]
@@ -156,7 +152,7 @@ def MVA(year, month, day, doy, ti_MVA, tf_MVA, mag):
     index = np.where(t == t_nave)[0][0]
     x0 = 0.78
     e = 0.9
-    normal_fit, X1, Y1, Z1, R, L0 = ajuste_conico(posicion, index, orbita, x3, date_entry)
+    normal_fit, X1, Y1, Z1, R, L0 = ajuste_conico(posicion, index, orbita, date_entry, x3)
 
     B3_fit = np.dot(B_cut, normal_fit)
 

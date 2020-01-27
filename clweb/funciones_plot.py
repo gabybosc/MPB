@@ -28,24 +28,26 @@ def deltat():
     global x2
     return(x1, x2)
 
-def hodograma(B1, B2, B3, fecha, unidad = 'nT'):
+def hodograma(B1, B2, B3, fecha = '16-03-16', unidad = 'nT'):
     f, (ax1, ax2) = plt.subplots(1, 2, sharex=True) #tienen el mismo eje x
-    ax1.plot(B2, B1)
-    ax2.plot(B3, B1)
-    ax1.scatter(B2[0], B1[0], marker='o', color='r', label = 'inicio')
-    ax1.scatter(B2[-1], B1[-1], marker='x',color='r', label = 'fin')
-    ax2.scatter(B3[0], B1[0], marker='o', color='r',label = 'inicio')
-    ax2.scatter(B3[-1], B1[-1], marker='x',color='r', label = 'fin')
-    ax1.set_xlabel('B2 ({})'.format(unidad))
-    ax2.set_xlabel('B3 ({})'.format(unidad))
-    ax1.set_ylabel('B1 ({})'.format(unidad))
-    ax2.set_ylabel('B1 ({})'.format(unidad))
+    ax1.plot(B2, B1, zorder=1)
+    ax2.plot(B3, B1, zorder=1)
+    ax1.scatter(B2[0], B1[0], s = 50,zorder=2,  marker='o', color='r', label = 'start')
+    ax1.scatter(B2[-1], B1[-1], s = 50,zorder=2, marker='x', color='r', label = 'end')
+    ax2.scatter(B3[0], B1[0], s = 50, zorder=2, marker='o', color='r',label = 'start')
+    ax2.scatter(B3[-1], B1[-1], s = 50,zorder=2, marker='x',color='r', label = 'end')
+    ax1.set_xlabel(f'B2 ({unidad})', fontsize = 16)
+    ax2.set_xlabel(f'B3 ({unidad})', fontsize = 16)
+    ax1.set_ylabel(f'B1 ({unidad})', fontsize = 16)
+    ax2.set_ylabel(f'B1 ({unidad})', fontsize = 16)
     ax1.grid()
     ax2.grid()
-    plt.suptitle(f'MAVEN MAG {fecha}')
-    plt.legend()
+    ax1.tick_params(axis='both', which='major', labelsize=14)
+    ax2.tick_params(axis='both', which='major', labelsize=14)
+    plt.suptitle('MAVEN MAG MVA', fontsize=18)
+    plt.legend(fontsize = 16)
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
-    plt.savefig(f'../outputs/figs_MPB/hodograma_{fecha}.png')
+    # plt.savefig(f'../outputs/figs_MPB/hodograma_{fecha}.png')
 
 def imshow_UTC(year, month, day, t, heatmap, eje_y, colormap = 'inferno', minimo=0, maximo = 20):
     """ Le das una fecha en np.datetime64 (UTC) y te grafica el imshow.

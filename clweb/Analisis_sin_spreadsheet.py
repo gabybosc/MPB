@@ -22,9 +22,10 @@ calcula la corriente
 """
 
 
-year, month, day, doy = fechas()
-ti_MVA, tf_MVA = tiempos()
-
+# year, month, day, doy = fechas()
+# ti_MVA, tf_MVA = tiempos()
+year, month, day, doy = 2016, '03', 16, 76
+ti_MVA, tf_MVA = UTC_to_hdec('18:13:33'), UTC_to_hdec('18:14:06')
 
 path = f'../../../datos/clweb/{year}-{month}-{day}/' #path a los datos desde la laptop
 mag = np.loadtxt(path + 'MAG.asc')

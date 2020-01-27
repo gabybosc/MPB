@@ -71,6 +71,26 @@ def importar_swia(year, month, day, ti, tf):
     return(swia, t_cut, density_cut)
 
     ############################################################################################### LPW
+
+def importar_swia_vel(year, month, day, ti, tf):
+    path = f'../../../datos/clweb/{year}-{month}-{day}/'
+    swia = np.loadtxt(path + 'SWIA_vel.asc')
+
+    density = swia[:,6]
+    vel_mso_xyz = swia[:,7:9]
+
+    t = swia[:,3] + swia[:,4]/60 + swia[:,5]/3600 #hdec
+
+    inicio = np.where(t == find_nearest(t, ti))[0][0]
+    fin = np.where(t == find_nearest(t, tf))[0][0]
+
+    t_cut = t[inicio:fin]
+    density_cut = density[inicio:fin]
+    vel_cut = vel_mso_xyz[inicio:fin]
+
+    return(swia, t_cut, density_cut, vel_cut)
+
+    ############################################################################################### LPW
 def importar_lpw(year, month, day, ti, tf):
     path = f'../../../datos/clweb/{year}-{month}-{day}/'
     lpw = np.loadtxt(path + 'LPW.asc')

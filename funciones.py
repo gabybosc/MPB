@@ -8,7 +8,7 @@ import calendar
 
 def deltaB(B):
     B_medio = np.mean(B, axis=0)
-    abs_deltaB_para = np.abs(np.dot(B - B_medio, B_medio)) / np.linalg.norm(B_medio)**2   #|deltaB_para / B|
+    abs_deltaB_para = np.abs(np.dot(B - B_medio, B_medio)) / np.linalg.norm(B_medio)   #|deltaB_para / B|
 
     dot = np.dot(B - B_medio, B_medio / np.linalg.norm(B_medio))
     N = np.zeros((len(dot), len(B_medio)))
@@ -44,6 +44,9 @@ def Bpara_Bperp(B, t, ti, tf):
 
     return(B_para, B_perp_norm, t_plot)
 
+def donde(en_donde, cual):
+    resultado = np.where(en_donde == find_nearest_inicial(en_donde, cual))[0][0]
+    return(resultado)
 
 def error(lamb, B, M, x):
     phi = np.zeros((3,3))

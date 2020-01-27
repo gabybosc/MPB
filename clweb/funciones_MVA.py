@@ -45,6 +45,8 @@ def ajuste_conico(posicion, index, orbita, fecha, x3, x0 = 0.78, e = 0.9, L = 0.
 
     ax.quiver(R[0], R[1], R[2], norm_vignes[0], norm_vignes[1], norm_vignes[2], color='b',length=0.5, label='Normal del ajuste') #asi se plotea un vector
     ax.quiver(R[0], R[1], R[2], x3[0], x3[1], x3[2], color='k',length=0.5, label='Normal del MVA')
+    print('vignes = ', norm_vignes)
+    print('MVA = ', x3)
     # normal_boot = np.array([0.9183, 0.3186, 0.2351])
     # ax.quiver(R[0], R[1], R[2], normal_boot[0], normal_boot[1], normal_boot[2], color='m',length=0.5, label='Normal del bootstrap')
 
