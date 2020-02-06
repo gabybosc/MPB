@@ -26,8 +26,9 @@ np.set_printoptions(precision=4)
 year, month, day, doy = 2016,'03', 16, 76#fechas()
 ti, tf = 17.5, 18.5#tiempos()
 
-path = f'../../../datos/clweb/{year}-{month}-{day}/'
+# path = f'../../../datos/clweb/{year}-{month}-{day}/'
 datos = np.loadtxt('../outputs/t1t2t3t4.txt')
+path = f'../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/'
 # for j in range(len(datos)):
 #     if datos[j,0] == float(year) and datos[j,1] == float(doy) and int(datos[j,2]) == int(ti):
 #         i = j

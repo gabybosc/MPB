@@ -24,7 +24,8 @@ np.set_printoptions(precision=4)
 
 year, month, day, doy = 2016, '03', 16, 76#fechas()
 ti, tf = 17.5, 18.5#tiempos()
-path = f'../../../datos/clweb/{year}-{month}-{day}/'
+# path = f'../../../datos/clweb/{year}-{month}-{day}/'
+path = f'../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/'
 
 mag, t, B, posicion = importar_mag(year, month, day, ti, tf)
 Bnorm = np.linalg.norm(B, axis=1)

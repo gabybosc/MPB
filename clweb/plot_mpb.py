@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Cursor, MultiCursor
-from matplotlib.mlab import normpdf
 from scipy.stats import norm
 import cdflib as cdf
 from datetime import datetime
@@ -25,7 +24,8 @@ Es la fig principal del grl.
 year, month, day, doy = 2016, '03', 16, 76
 ti, tf = 17.85, 18.4
 
-path = f'../../../datos/clweb/{year}-{month}-{day}/'
+# path = f'../../../datos/clweb/{year}-{month}-{day}/'
+path = f'../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/'  # path a los datos desde la desktop.
 datos = np.loadtxt('../outputs/t1t2t3t4.txt')
 
 mag, t, B, posicion = importar_mag(year, month, day, ti, tf)

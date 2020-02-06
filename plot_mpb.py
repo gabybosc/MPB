@@ -1,15 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.widgets import Cursor, MultiCursor
-from matplotlib.mlab import normpdf
-from scipy.stats import norm
 import cdflib as cdf
 from datetime import datetime
-from funciones import find_nearest, deltaB, onpick1, unix_to_decimal, plot_select, set_axes_equal, datenum, Bpara_Bperp
-from funcion_flujo_energia_cdf import flujo_energia
+from funciones import find_nearest, unix_to_decimal,  datenum, Bpara_Bperp
 import matplotlib.dates as md
 import datetime as dt
-import matplotlib.cm as cm
 
 np.set_printoptions(precision=4)
 

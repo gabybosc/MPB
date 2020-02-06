@@ -1,8 +1,8 @@
 import numpy as np
 import datetime as dt
-import os
 from funciones import find_nearest, unix_to_decimal
 import cdflib as cdf
+
 
 def importar_mag_1s(year, month, day, ti, tf):
     date_orbit = dt.date(int(year), int(month), int(day))
@@ -12,18 +12,20 @@ def importar_mag_1s(year, month, day, ti, tf):
     day = date_orbit.strftime("%d")
     doy = date_orbit.strftime("%j")
 
-    path = f'../../../../media/gabybosc/datos/MAG_1s/{year}/'
+    path = f"../../../../media/gabybosc/datos/MAG_1s/{year}/"
 
-    mag = np.loadtxt(path + f'mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts', skiprows=160)
+    mag = np.loadtxt(
+        path + f"mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts",
+        skiprows=160,
+    )
 
-    hh = mag[:,2]
-    mm = mag[:,3]
-    ss = mag[:,4]
+    hh = mag[:, 2]
+    mm = mag[:, 3]
+    ss = mag[:, 4]
 
-    t = hh + mm/60 + ss/3600 #hdec
+    t = hh + mm / 60 + ss / 3600  # hdec
 
     B = mag[:, 7:10]
-    Bnorm = np.linalg.norm(B, axis=1)
 
     posicion = mag[:, 11:14]
 
@@ -33,9 +35,12 @@ def importar_mag_1s(year, month, day, ti, tf):
     t_cut = t[inicio:fin]
     B_cut = B[inicio:fin]
     posicion_cut = posicion[inicio:fin]
-    return(mag, t_cut, B_cut, posicion_cut)
+    return mag, t_cut, B_cut, posicion_cut
+
 
 ###############################################################################################
+
+
 def importar_mag(year, month, day, ti, tf):
     date_orbit = dt.date(int(year), int(month), int(day))
 
@@ -44,18 +49,19 @@ def importar_mag(year, month, day, ti, tf):
     day = date_orbit.strftime("%d")
     doy = date_orbit.strftime("%j")
 
-    path = f'../../../../media/gabybosc/datos/MAG_hires/'
+    path = f"../../../../media/gabybosc/datos/MAG_hires/"
 
-    mag = np.loadtxt(path + f'mvn_mag_l2_{year}{doy}ss_{year}{month}{day}_v01_r01.sts', skiprows=160)
+    mag = np.loadtxt(
+        path + f"mvn_mag_l2_{year}{doy}ss_{year}{month}{day}_v01_r01.sts", skiprows=160
+    )
 
-    hh = mag[:,2]
-    mm = mag[:,3]
-    ss = mag[:,4]
+    hh = mag[:, 2]
+    mm = mag[:, 3]
+    ss = mag[:, 4]
 
-    t = hh + mm/60 + ss/3600 #hdec
+    t = hh + mm / 60 + ss / 3600  # hdec
 
     B = mag[:, 7:10]
-    Bnorm = np.linalg.norm(B, axis=1)
 
     posicion = mag[:, 11:14]
 
@@ -65,9 +71,10 @@ def importar_mag(year, month, day, ti, tf):
     t_cut = t[inicio:fin]
     B_cut = B[inicio:fin]
     posicion_cut = posicion[inicio:fin]
-    return(mag, t_cut, B_cut, posicion_cut)
+    return mag, t_cut, B_cut, posicion_cut
 
-###############################################################################################SWEA
+
+# ##############################################################################################SWEA
 # def importar_swea(year, month, day, ti, tf):
 #     date_orbit = dt.date(int(year), int(month), int(day))
 #     year = date_orbit.strftime("%Y")
@@ -90,23 +97,23 @@ def importar_mag(year, month, day, ti, tf):
 #     fin = np.where(t == find_nearest(t, tf))[0][0]
 #
 #     return(swea, t, energias)
+# ##############################################################################################SWIA
 
-    ###############################################################################################SWIA
+
 def importar_swia(year, month, day, ti, tf):
     date_orbit = dt.date(int(year), int(month), int(day))
     year = date_orbit.strftime("%Y")
     month = date_orbit.strftime("%m")
     day = date_orbit.strftime("%d")
-    doy = date_orbit.strftime("%j")
 
-    path = f'../../../../media/gabybosc/datos/SWIA/'
+    path = f"../../../../media/gabybosc/datos/SWIA/"
 
-    swia = cdf.CDF(path + f'mvn_swi_l2_onboardsvymom_{year}{month}{day}_v01_r01.cdf')
+    swia = cdf.CDF(path + f"mvn_swi_l2_onboardsvymom_{year}{month}{day}_v01_r01.cdf")
 
-    t_unix = swia.varget('time_unix')
-    density = swia.varget('density') #cm⁻³
-    temperature = swia.varget('temperature_mso') #eV
-    vel_mso_xyz = swia.varget('velocity_mso') #km/s
+    t_unix = swia.varget("time_unix")
+    density = swia.varget("density")  # cm⁻³
+    temperature = swia.varget("temperature_mso")  # eV
+    vel_mso_xyz = swia.varget("velocity_mso")  # km/s
 
     t_swia = unix_to_decimal(t_unix)
     inicio = np.where(t_swia == find_nearest(t_swia, ti))[0][0]
@@ -115,12 +122,12 @@ def importar_swia(year, month, day, ti, tf):
     t_cut = t_swia[inicio:fin]
     density_cut = density[inicio:fin]
     temperature_cut = temperature[inicio:fin]
-    vel_mso_cut = vel_mso_xyz[inicio:fin] #km/s
+    vel_mso_cut = vel_mso_xyz[inicio:fin]  # km/s
 
-    return(swia, t_cut, density_cut, temperature_cut, vel_mso_cut)
+    return swia, t_cut, density_cut, temperature_cut, vel_mso_cut
 
 
-    ############################################################################################### LPW
+# ############################################################################################## LPW
 # def importar_lpw(year, month, day, ti, tf):
 #     date_orbit = dt.date(int(year), int(month), int(day))
 #     year = date_orbit.strftime("%Y")

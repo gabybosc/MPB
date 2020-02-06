@@ -8,7 +8,7 @@ import calendar
 
 def deltaB(B):
     B_medio = np.mean(B, axis=0)
-    abs_deltaB_para = np.abs(np.dot(B - B_medio, B_medio)) / np.linalg.norm(B_medio)**2   #|deltaB_para / B|
+    abs_deltaB_para = np.abs(np.dot(B - B_medio, B_medio)) / np.linalg.norm(B_medio)**2   # |deltaB_para / B|
 
     dot = np.dot(B - B_medio, B_medio / np.linalg.norm(B_medio))
     N = np.zeros((len(dot), len(B_medio)))
@@ -16,7 +16,7 @@ def deltaB(B):
     for i in range(len(N)):
         N[i,:] = dot[i] * B_medio/np.linalg.norm(B_medio)
         deltaB_perp = (B - B_medio) - N
-        #y ahora necesito el valor abs de perp
+        # y ahora necesito el valor abs de perp
         abs_deltaB_perp = np.abs(deltaB_perp) / np.linalg.norm(B_medio)
 
     return(abs_deltaB_para, abs_deltaB_perp)

@@ -9,7 +9,8 @@ Hace la fig2 del poster de la AGU2019
 def datos():
     year, month, day, doy = fechas()
     ti, tf = tiempos()
-    path = f'../../../datos/clweb/{year}-{month}-{day}/' #path a los datos desde la laptop
+    # path = f'../../../datos/clweb/{year}-{month}-{day}/' #path a los datos desde la laptop
+    path = f'../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/'
     mag = np.loadtxt(path + 'MAG.asc')
 
     M = len(mag[:,0]) #el numero de datos
