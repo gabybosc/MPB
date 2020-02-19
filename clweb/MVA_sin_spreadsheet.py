@@ -3,7 +3,7 @@ import sys
 from importar_datos import importar_mag
 
 sys.path.append("..")
-from funciones import error, find_nearest, Mij
+from funciones import error, find_nearest, Mij, angulo
 from funciones_metodos import normal_fit
 from funciones_plot import hodograma
 
@@ -47,7 +47,7 @@ def MVA(year, month, day, ti_MVA, tf_MVA):
         MD[:, i] = posicion[:, i - 5] / 3390  # en radios marcianos
     MD[:, 8] = np.linalg.norm(posicion, axis=1) - 3390  # altitud en km
 
-    n_p = int(len(posicion) / 2)
+    n_p = int(M / 2)
 
     M_ij = Mij(B)
 
@@ -79,17 +79,8 @@ def MVA(year, month, day, ti_MVA, tf_MVA):
     # el B medio
     B_medio_vectorial = np.mean(B, axis=0)
     altitud = np.mean(MD[:, 8])
-    SZA = (
-        np.arccos(
-            np.clip(
-                np.dot(posicion[n_p, :] / np.linalg.norm(posicion[n_p, :]), [1, 0, 0],),
-                -1.0,
-                1.0,
-            )
-        )
-        * 180
-        / np.pi
-    )
+
+    SZA = angulo(posicion[n_p, :], [1, 0, 0]) * 180 / np.pi
     print(f"altitud = {altitud}, SZA = {SZA}")
 
     print("cociente de lambdas = ", lamb[1] / lamb[2])
@@ -117,13 +108,12 @@ def ajuste(year, month, day, doy, ti_MVA, tf_MVA):
 
     mag, t, B, posicion = importar_mag(year, month, day, ti_MVA, tf_MVA)
 
-    t_nave = find_nearest(
-        t, (t2 + t3) / 2
-    )  # el tiempo en el medio de la hoja de corriente
+    t_nave = find_nearest(t, (t2 + t3) / 2)
+    # el tiempo en el medio de la hoja de corriente
     index = np.where(t == t_nave)[0][0]
     # x0 = 0.78
     # e = 0.9
-    normal_ajuste = normal_fit(posicion, index)
+    normal_ajuste, L0 = normal_fit(posicion, index)
 
     B3_fit = np.dot(B, normal_ajuste)
 

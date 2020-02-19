@@ -4,9 +4,16 @@ from funciones_plot import set_axes_equal
 from funciones import Mij, error
 from scipy.stats import norm
 
+# from mpl_toolkits.mplot3d import Axes3D #de acá importo la proyección 3D
 
-def ajuste_conico(posicion, index, orbita, fecha, x3, x0=0.78, e=0.9, L=0.96):
-    # #### conica que toma los parámetros de Vignes
+"""
+Acá van las funciones que se relacionan con el MVA, el fit o el bootstrap
+"""
+
+
+def ajuste_conico(posicion, index, orbita, x3, x0=0.78, e=0.9, L=0.96):
+    """conica que toma los parámetros de Vignes y devuelve la normal
+    para plotear usar normales.py"""
     theta = np.linspace(0, np.pi * 3 / 4, 100)
     phi = np.linspace(0, 2 * np.pi, 100)
     THETA, PHI = np.meshgrid(theta, phi)
@@ -48,8 +55,8 @@ def ajuste_conico(posicion, index, orbita, fecha, x3, x0=0.78, e=0.9, L=0.96):
 
     norm_vignes = np.array(
         [(R[0] + csc) * 2 / asc ** 2, R[1] * 2 / bsc ** 2, R[2] * 2 / bsc ** 2]
-    )  # la normal de vignes
-    norm_vignes = norm_vignes / np.linalg.norm(norm_vignes)  # normalizado
+    )
+    norm_vignes = norm_vignes / np.linalg.norm(norm_vignes)
 
     ax.quiver(
         R[0],
@@ -61,7 +68,7 @@ def ajuste_conico(posicion, index, orbita, fecha, x3, x0=0.78, e=0.9, L=0.96):
         color="b",
         length=0.5,
         label="Normal del ajuste",
-    )  # asi se plotea un vector
+    )
     ax.quiver(
         R[0],
         R[1],
@@ -73,9 +80,6 @@ def ajuste_conico(posicion, index, orbita, fecha, x3, x0=0.78, e=0.9, L=0.96):
         length=0.5,
         label="Normal del MVA",
     )
-    # normal_boot = np.array([0.9183, 0.3186, 0.2351])
-    # ax.quiver(R[0], R[1], R[2], normal_boot[0], normal_boot[1], normal_boot[2],
-    # color='m',length=0.5, label='Normal del bootstrap')
 
     u, v = np.mgrid[0 : 2 * np.pi : 20j, 0 : np.pi : 10j]
     ax.plot_wireframe(
@@ -88,12 +92,11 @@ def ajuste_conico(posicion, index, orbita, fecha, x3, x0=0.78, e=0.9, L=0.96):
     ax.legend()
     set_axes_equal(ax)
 
-    plt.savefig(f"../outputs/figs_MPB/ajuste_{fecha}.png")
-
     return norm_vignes, X1, Y1, Z1, R, L0
 
 
 def bootstrap(N, B_cut, M_cut):
+    """Hace el bootstrap para M puntos de un campo B, N veces."""
     out = np.zeros(N)
     out_phi = np.zeros((N, 2))
     normal_ran = np.zeros((N, 3))
@@ -127,6 +130,32 @@ def bootstrap(N, B_cut, M_cut):
     return normal, phi, delta_B3, out, out_phi
 
 
+def normal_fit(posicion, index, x0=0.78, e=0.9):
+    """conica que toma los parámetros de Vignes y devuelve la normal
+    para plotear usar ajuste_conico """
+    theta = np.linspace(0, np.pi * 3 / 4, 100)
+    phi = np.linspace(0, 2 * np.pi, 100)
+    THETA, PHI = np.meshgrid(theta, phi)
+
+    R = posicion[index, :] / 3390  # la posicion de la nave en RM
+    # ###### Calculo mi propia elipse que pase por el punto.
+    r0 = R - np.array([x0, 0, 0])
+    theta0 = np.arccos(r0[0] / np.linalg.norm(r0))
+
+    L0 = np.linalg.norm(r0) * (1 + e * np.cos(theta0))
+
+    asc = L0 / (1 - e ** 2)  # semieje mayor
+    bsc = np.sqrt(asc * L0)
+    csc = e * asc - x0  # donde está centrada. Hay que ver el signo
+
+    norm_vignes = np.array(
+        [(R[0] + csc) * 2 / asc ** 2, R[1] * 2 / bsc ** 2, R[2] * 2 / bsc ** 2]
+    )  # la normal de vignes
+    norm_vignes = norm_vignes / np.linalg.norm(norm_vignes)  # normalizado
+
+    return norm_vignes, L0
+
+
 def plot_velocidades(X1, Y1, Z1, R, norm_vignes, x3, v_media, v_para, v_para_MVA):
     fig1 = plt.figure()
     ax1 = fig1.add_subplot(1, 1, 1, projection="3d")
@@ -149,7 +178,7 @@ def plot_velocidades(X1, Y1, Z1, R, norm_vignes, x3, v_media, v_para, v_para_MVA
         color="g",
         length=0.5,
         label="fit normal",
-    )  # asi se plotea un vector
+    )
     ax1.quiver(
         R[0],
         R[1],
@@ -284,6 +313,8 @@ def plot_FLorentz(X1, Y1, Z1, R, J_v, B_upstream, B_downstream, fuerza_mva, x3):
 
 
 def plot_bootstrap(out, out_phi):
+    """Plotea  el histograma del bootstrap y fitea la gaussiana.
+    Devuelve los valores de la gaussiana"""
     plt.figure()
     plt.subplot(311)
     n, bins, patches = plt.hist(out, 50, density=1, alpha=0.5)

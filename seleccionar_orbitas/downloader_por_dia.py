@@ -13,7 +13,7 @@ import sys
 
 p = os.path.abspath("../..")
 if p not in sys.path:
-    sys.path.append(p)
+    sys.path.append(p)  # esto es para poder llamar a funciones desde esta carpeta
 
 from MPB.funciones import fechas
 

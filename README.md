@@ -14,6 +14,8 @@ plt.show()
 
 PLOTTING:
 
+clweb/normales.py: plotea las normales y el fit
+
 plot_tiempos.py: plotea los datos de MAG, SWEA, SWIA, LPW con los tiempos t1t2t3t4 y los guarda como pickle. Para leerlos: usar outputs/leer_figs_MPB.py
 
 plot_seleccionar_MVA.py: plotea los datos MAG, SWEA, SWIA, LPW y me da un cursor interactivo para poder elegir los tiempos t1t2t3t4.
@@ -36,7 +38,10 @@ MVA_lowres.py: Hace todo para datos de baja resolución.
 OTROS ANÁLISIS:
 bup_bdown.py: grafica la variación de Bup y Bdown en el tiempo.
 
-densidades.py: ?
+giroradio_termico.py: Calcula el giroradio térmico (es decir, a partir de los datos de temperatura) y la long inercial.
+
+giroradio_in/outbound.py: Calcula el giroradio (usando v_perp al campo B y también usando la velocidad proyectada en la normal) y la long inercial.
+                          Versión para cruce inbound y outbound.
 
 Ehall_convectivo.py: Calcula el EHall a partir del Ecv.
 
@@ -46,13 +51,12 @@ Escalas_lambda.py: Hace un barrido en ventanas para ver cuándo se maximiza el c
 
 
 CLWEB:
-Analisis_inbound / Analisis_outbound / Analisis_sin_spreadsheet: Hacen el análisis completo (todo lo que está en el excel) para órbitas inbound/outbound. Plotea el hodograma y las normales.
-
-densidades.py: No anda. Podría tirarlo y empezar de cero.
+Analisis_in/outbound / Analisis_sin_spreadsheet: Hacen el análisis completo (todo lo que está en el excel) para órbitas in/outbound. Plotea el hodograma y las normales.
 
 escalas_lambda: Hace un barrido en ventanas para ver cuándo se maximiza el cociente de lambdas
 
-filtro: Hace un filtro butterworth para quitar el ruido de la señal del magnetómetro que es de aproximadamente 180 ms. Se puede usar para filtrar más cosas, pero esto se hace siempre.
+filtro.py: Hace un filtro butterworth para quitar el ruido de la señal del magnetómetro que es de aproximadamente 180 ms.
+            Se puede usar para filtrar más cosas, pero esto se hace siempre.
 
 funciones_mva: tiene funciones varias para hacer el mva y el análisis de vignes.
 funciones_plot: Tiene varias funciones que uso en los plots en general.
