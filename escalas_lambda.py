@@ -4,7 +4,6 @@ En el eje x están los tiempos en los cuales se centran las ventanas en las que 
 """
 
 import numpy as np
-import matplotlib.pyplot as plt
 import datetime as dt
 import time as time
 from funciones import find_nearest, Mij

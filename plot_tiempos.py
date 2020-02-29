@@ -3,11 +3,8 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 import cdflib as cdf
 import datetime as dt
-from funciones import find_nearest, deltaB, unix_to_decimal, unix_to_timestamp, Bpara_Bperp
+from funciones import find_nearest, unix_to_decimal, Bpara_Bperp
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-import time
-import matplotlib.dates as md
-import matplotlib.cm as cm
 import os as os
 import pickle
 
@@ -16,7 +13,7 @@ import pickle
 Con los tiempos t1 t2 t3 t4 ploteo los datos de MAG, SWEA, SWIA y LPW. Les dibujo encima líneas que correspondan a los tiempos.
 Guarda las figuras como png y como pickle (para poder reabrirlas con python y que sean interactivas)
 """
-#se fija que los datos no estén vacíos antes de cargarlos (para ahorrarme el error)
+# se fija que los datos no estén vacíos antes de cargarlos (para ahorrarme el error)
 
 
 np.set_printoptions(precision=4)
@@ -33,43 +30,44 @@ for j in range(1):
     t4 = fechas[i,5]
     tiempos = np.array([t1,t2,t3,t4])
 
-    date_orbit = dt.datetime(year, 1, 1) + dt.timedelta(doy - 1) #para convertir el doty en date
+    date_orbit = dt.datetime(year, 1, 1) + dt.timedelta(doy - 1)  # para convertir el doty en date
     year = date_orbit.strftime("%Y")
     doy = date_orbit.strftime("%j")
     month = date_orbit.strftime("%m")
     day = date_orbit.strftime("%d")
 
     # path = '../../../MAVEN/mag_1s/2016/03/' #path a los datos desde la desktop
-    path = '../../datos/' #path a los datos desde la laptop
-    mag = np.loadtxt(path + f'MAG_1s/2016/mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts', skiprows=148) #datos MAG 1s (para plotear no quiero los datos pesados)
+    path = '../../datos/'  # path a los datos desde la laptop
+    mag = np.loadtxt(path + f'MAG_1s/2016/mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts', skiprows=148)
+    # datos MAG 1s (para plotear no quiero los datos pesados)
     n =2
-    mag = mag[:-n, :] #borra las ultimas 2 filas, que es ya el dia siguiente (no sé si siempre)
+    mag = mag[:-n, :]  # borra las ultimas 2 filas, que es ya el dia siguiente (no sé si siempre)
 
     dia = mag[:,1]
-    t = mag[:,6]  #el dia decimal
-    t = (t - dia) * 24 #hdec
+    t = mag[:,6]  # el dia decimal
+    t = (t - dia) * 24  # hdec
 
-    M = np.size(t) #el numero de datos
+    M = np.size(t)  # el numero de datos
 
-    #el campo
+    # el campo
     B = np.zeros((M, 3))
     for i in range(7,10):
         B[:,i-7] = mag[:, i]
 
-    #la posición(x,y,z)
+    # la posición(x,y,z)
     posicion = np.zeros((M, 3))
     for i in range(11,14):
         posicion[:,i-11] = mag[:, i]
 
-    #la matriz diaria:
+    # la matriz diaria:
     MD = np.zeros((M, 9))
     MD[:, 0] = t
     for i in range(1,4):
         MD[:, i] = B[:,i-1]
-    MD[:,4] = np.linalg.norm(B, axis = 1)
+    MD[:,4] = np.linalg.norm(B, axis=1)
     for i in range(5,8):
-        MD[:,i] = posicion[:,i-5]/3390 #en radios marcianos
-    MD[:, 8] = np.linalg.norm(posicion, axis=1) - 3390 #altitud en km
+        MD[:,i] = posicion[:,i-5]/3390  # en radios marcianos
+    MD[:, 8] = np.linalg.norm(posicion, axis=1) - 3390  # altitud en km
 
     ti = t1 - 0.15
     tf = t4 + 0.15
@@ -127,15 +125,12 @@ for j in range(1):
     else:
         print('no hay datos de LPW')
 
-
-
     index = np.array((int(year), dia[0]))
 
-
-    plt.clf()#clear figure
-    fig = plt.figure(1, constrained_layout=True)#Lo bueno de esta forma es que puedo hacer que solo algunos compartan eje
+    plt.clf()  # clear figure
+    fig = plt.figure(1, constrained_layout=True)  # Lo bueno de esta forma es que puedo hacer que solo algunos compartan eje
     fig.subplots_adjust(top = 0.93, bottom = 0.07, left = 0.05,right=0.95, hspace = 0.005, wspace=0.15)
-    fig.set_size_inches(15, 10)#con este tamaño ocupa toda la pantalla de la laptop
+    fig.set_size_inches(15, 10)  # con este tamaño ocupa toda la pantalla de la laptop
 
     ax1 = plt.subplot2grid((3,2),(0,0))
     plt.plot(t_plot, B_para, linewidth=1, label=r'|$\Delta B \parallel$| / B')
