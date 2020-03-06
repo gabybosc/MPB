@@ -12,22 +12,20 @@ def importar_mag(year, month, day, ti, tf):
     # Estaría bueno ponerle un if para que detecte en cuál estoy.
     if os.path.isfile(path + "mag_filtrado.txt"):
         mag = np.loadtxt(path + "mag_filtrado.txt", skiprows=2)
-        M = len(mag[:, 0])  # el numero de datos
         B = mag[:, :3]
+        mag = np.loadtxt(path + "MAG.asc")
 
     else:
         mag = np.loadtxt(path + "MAG.asc")
-        M = len(mag[:, 0])  # el numero de datos
         B = mag[:, 6:9]
 
-    mag = np.loadtxt(path + "MAG.asc")
     hh = mag[:, 3]
     mm = mag[:, 4]
     ss = mag[:, 5]
 
     t = hh + mm / 60 + ss / 3600  # hdec
 
-    posicion = np.zeros((M, 3))
+    posicion = np.zeros((len(t), 3))
     for i in range(9, 12):
         posicion[:, i - 9] = mag[:, i]
 
@@ -56,7 +54,10 @@ def importar_swea(year, month, day, ti, tf):
     inicio = np.where(t == find_nearest(t, ti))[0][0]
     fin = np.where(t == find_nearest(t, tf))[0][0]
 
-    return swea, t, energias
+    energy_cut = energy[inicio:fin]
+    JE_cut = JE_total[inicio:fin]
+
+    return swea, t, energias, energy_cut, JE_cut
 
 
 # ##############################################################################################SWIA

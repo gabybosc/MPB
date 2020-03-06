@@ -1,11 +1,11 @@
 import numpy as np
 import time as time
-import os
 import sys
 
 sys.path.append("..")
 
 from funciones import find_nearest, Mij, fechas
+from importar_datos import importar_mag
 
 """
 Hace un barrido en ventanas para ver cuándo se maximiza el cociente de lambdas
@@ -35,19 +35,7 @@ for i in range(len(tiempos_txt)):
 ti = tiempos[0]
 tf = tiempos[3]
 
-path = f"../../../datos/clweb/{year}-{month}-{day}/"  # path a los datos desde la laptop
-if os.path.isfile(path + "mag_filtrado.txt"):
-    mag = np.loadtxt(path + "mag_filtrado.txt", skiprows=2)
-    M = len(mag[:, 0])  # el numero de datos
-    B = mag[:, :3]
-
-    mag = np.loadtxt(path + "MAG.asc")
-
-else:
-    mag = np.loadtxt(path + "MAG.asc")
-    M = len(mag[:, 0])  # el numero de datos
-    B = mag[:, 6:9]
-    Bnorm = np.linalg.norm(B, axis=1)
+mag, t, B, posicion = importar_mag(year, month, day, ti, tf)
 
 tiempo_central = np.zeros(
     int((tf - ti) * 3600)
@@ -67,14 +55,7 @@ for i in range(len(escalas) - 1):
 
 # print(f'escala mayor = {escalas[-1]*3600}s')
 
-
-hh = mag[:, 3]
-mm = mag[:, 4]
-ss = mag[:, 5]
-
-t = hh + mm / 60 + ss / 3600  # hdec
-
-M = np.size(t)  # el numero de datos
+M = len(t)  # el numero de datos
 
 
 program_starts = time.time()

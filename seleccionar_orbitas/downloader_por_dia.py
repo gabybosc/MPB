@@ -29,17 +29,17 @@ swia = f"https://pds-ppi.igpp.ucla.edu/ditdos/download?id=pds://PPI/maven.swia.c
 
 path = "../../../../../media/gabybosc/datos/"
 
-with urllib.request.urlopen(mag_hires) as response, open(
-    path + f"MAG_hires/mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts", "wb",
-) as out_file:
-    shutil.copyfileobj(response, out_file)
-print(f"mag dia {doy} listo")
-
 with urllib.request.urlopen(swea) as response, open(
     path + f"SWEA/mvn_swe_l2_svyspec_{year}{month}{day}_v04_r01.cdf", "wb"
 ) as out_file:
     shutil.copyfileobj(response, out_file)
 print(f"swea dia {doy} listo")
+
+with urllib.request.urlopen(mag_hires) as response, open(
+    path + f"MAG_hires/mvn_mag_l2_{year}{doy}ss_{year}{month}{day}_v01_r01.sts", "wb",
+) as out_file:
+    shutil.copyfileobj(response, out_file)
+print(f"mag dia {doy} listo")
 
 with urllib.request.urlopen(swia) as response, open(
     path + f"SWIA/mvn_swi_l2_onboardsvymom_{year}{month}{day}_v01_r01.cdf", "wb"

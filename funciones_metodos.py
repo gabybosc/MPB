@@ -4,7 +4,7 @@ from funciones_plot import set_axes_equal
 from funciones import Mij, error
 from scipy.stats import norm
 
-# from mpl_toolkits.mplot3d import Axes3D #de acá importo la proyección 3D
+from mpl_toolkits.mplot3d import Axes3D  # de acá importo la proyección 3D
 
 """
 Acá van las funciones que se relacionan con el MVA, el fit o el bootstrap

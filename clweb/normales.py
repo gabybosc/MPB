@@ -2,12 +2,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from plot_orbitas import datos_fijos
 import sys
+from mpl_toolkits.mplot3d import axes3d  # lo usa aunque esté marcado como que no!
 
 sys.path.append("..")
 from funciones import find_nearest, UTC_to_hdec
 from funciones_plot import set_axes_equal
 
-# from mpl_toolkits.mplot3d import axes3d
 
 """
 Plotea la fig 5 del poster de la AGU2019
@@ -30,7 +30,7 @@ def MPB(x0=0.78, e=0.9, L=0.96):
     ax = fig.add_subplot(1, 1, 1, projection="3d")
     ax.set_xlabel(r"$X_{MSO} (R_m)$", fontsize=14)
     ax.set_ylabel(r"$Y_{MSO} (R_m)$", fontsize=14)
-    ax.set_zlabel(r"$Z_{MSO} (R_m)$", fontsize=14)
+    # ax.set_zlabel(r"$Z_{MSO} (R_m)$", fontsize=14)
     ax.set_aspect("equal")
     ax.plot_surface(
         X1,
@@ -101,68 +101,37 @@ def normal_MVA(R, x3, colour="k", lab="MVA normal"):
 
 MPB()
 
-t, posicion_cut, year, month, day = datos_fijos(2015, 10, 12, 18.75, 19.75)
-t_medio = UTC_to_hdec("19:19:13")
-index = np.where(t == find_nearest(t, t_medio))[0][0]
-R = posicion_cut[index, :]  # la posicion de la nave en RM
-x3 = np.array([0.956, 0.048, -0.290])
-asc, bsc, csc = parametros_elipse(R)
 
-# normal_MVA(R, x3, '2015-oct-12')
-normal_MVA(R, x3)
-normal_vignes(R, asc, bsc, csc)
+x3 = [
+    np.array([0.956, 0.048, -0.290]),
+    np.array([0.956, -0.286, 0.070]),
+    np.array([0.815, -0.575, 0.076]),
+    np.array([0.871, -0.476, -0.117]),
+    np.array([0.9198, -0.3021, 0.2505]),
+    np.array([0.981, -0.032, 0.193]),
+]
+dates = [
+    [2015, 10, 12],
+    [2015, 10, 10],
+    [2016, "04", "05"],
+    [2016, "03", 31],
+    [2016, "03", 16],
+    [2017, 11, 24],
+]
+times = [[18.75, 19.75], [12, 13], [5, 6], [12.5, 13.5], [17.75, 18.75], [11.75, 12.75]]
+tmean = ["19:19:13", "12:40:47", "05:16:30", "13:04:38", "18:13:50", "12:15:27"]
 
-t, posicion_cut, year, month, day = datos_fijos(2015, 10, 10, 12, 13)
-t_medio = UTC_to_hdec("12:40:47")
-index = np.where(t == find_nearest(t, t_medio))[0][0]
-R = posicion_cut[index, :]  # la posicion de la nave en RM
-x3 = np.array([0.956, -0.286, 0.070])
-asc, bsc, csc = parametros_elipse(R)
-# normal_MVA(R, x3, 'b', '2015-oct-10')
-normal_MVA(R, x3)
-normal_vignes(R, asc, bsc, csc)
+for i in range(len(x3)):
+    t, posicion_cut, year, month, day = datos_fijos(
+        dates[i][0], dates[i][1], dates[i][2], times[i][0], times[i][1]
+    )
+    t_medio = UTC_to_hdec(tmean[i])
+    index = np.where(t == find_nearest(t, t_medio))[0][0]
+    R = posicion_cut[index, :]  # la posicion de la nave en RM
+    asc, bsc, csc = parametros_elipse(R)
 
-t, posicion_cut, year, month, day = datos_fijos(2016, "04", "05", 5, 6)
-t_medio = UTC_to_hdec("05:16:30")
-index = np.where(t == find_nearest(t, t_medio))[0][0]
-R = posicion_cut[index, :]  # la posicion de la nave en RM
-x3 = np.array([0.815, -0.575, 0.076])
-asc, bsc, csc = parametros_elipse(R)
-# normal_MVA(R, x3, 'r', '2016-apr-05')
-normal_MVA(R, x3)
-normal_vignes(R, asc, bsc, csc)
-
-t, posicion_cut, year, month, day = datos_fijos(2016, "03", 31, 12.5, 13.5)
-t_medio = UTC_to_hdec("13:04:38")
-index = np.where(t == find_nearest(t, t_medio))[0][0]
-R = posicion_cut[index, :]  # la posicion de la nave en RM
-x3 = np.array([0.871, -0.476, -0.117])
-asc, bsc, csc = parametros_elipse(R)
-# normal_MVA(R, x3, 'g', '2016-mar-31')
-normal_MVA(R, x3)
-normal_vignes(R, asc, bsc, csc)
-
-t, posicion_cut, year, month, day = datos_fijos(2016, "03", 16, 17.75, 18.75)
-t_medio = UTC_to_hdec("18:13:50")
-index = np.where(t == find_nearest(t, t_medio))[0][0]
-R = posicion_cut[index, :]  # la posicion de la nave en RM
-x3 = np.array([0.9198, -0.3021, 0.2505])
-nf = np.array([0.8565, -0.0662, 0.5119])
-asc, bsc, csc = parametros_elipse(R)
-
-# normal_MVA(R, x3, 'm', '2016-mar-16')
-normal_MVA(R, x3)
-normal_vignes(R, asc, bsc, csc)
-
-t, posicion_cut, year, month, day = datos_fijos(2017, 11, 24, 11.75, 12.75)
-t_medio = UTC_to_hdec("12:15:27")
-index = np.where(t == find_nearest(t, t_medio))[0][0]
-R = posicion_cut[index, :]  # la posicion de la nave en RM
-x3 = np.array([0.981, -0.032, 0.193])
-asc, bsc, csc = parametros_elipse(R)
-
-# normal_MVA(R, x3, 'g', '2017-nov-24')
-normal_MVA(R, x3)
-normal_vignes(R, asc, bsc, csc)
+    # normal_MVA(R, x3, '2015-oct-12')
+    normal_MVA(R, x3[i])
+    normal_vignes(R, asc, bsc, csc)
 
 plt.show()

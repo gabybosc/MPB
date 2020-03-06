@@ -26,7 +26,7 @@ datos = np.loadtxt("../outputs/t1t2t3t4.txt")
 
 mag, t, B, posicion = importar_mag(year, month, day, ti, tf)
 t1, t2, t3, t4 = 18.2167, 18.2204, 18.235, 18.2476
-tiempos = np.array([t1, t2, t3, t4])
+t1t2t3t4 = np.array([t1, t2, t3, t4])
 
 t_up = t1 - 0.015
 t_down = t4 + 0.015
@@ -49,21 +49,18 @@ for i in range(7, 10):
 
 B_para, B_perp_norm, t_plot = Bpara_Bperp(Blow, tlow, t[0], t[-1])
 
-########## SWEA
+# ######### SWEA
 
-swea, t_swea, energias = importar_swea(year, month, day, ti, tf)
+swea, t_swea, energias, energy, JE = importar_swea(year, month, day, ti, tf)
 
-energy = swea[:, 7]
-JE_total = swea[:, -1]
-
-######## densidad SWIA
+# ####### densidad SWIA
 
 swia, t_swia, density = importar_swia(year, month, day, ti, tf)
 
-####### densidad electrones
+# ###### densidad electrones
 lpw, t_lpw, e_density = importar_lpw(year, month, day, ti, tf)
 
-############# tiempos UTC
+# ############ tiempos UTC
 year = int(year)
 month = int(month)
 day = int(day)
@@ -221,8 +218,8 @@ ax4.xaxis.set_major_formatter(xfmt)
 ax4.set_ylabel("Diff energy flux \n of the SW e- \n (cm⁻² sr⁻¹ s⁻¹)")
 for energia in energias:
     index = np.where(energy == find_nearest(energy, energia))[0]
-    JE = JE_total[index]
-    plt.semilogy(tiempo_swea, JE, label=f"{energia} eV")
+    JEplot = JE[index]
+    plt.semilogy(tiempo_swea, JEplot, label=f"{energia} eV")
 
 ax5 = plt.subplot2grid((5, 1), (4, 0), sharex=ax1)
 ax5.xaxis.set_major_formatter(xfmt)
@@ -267,4 +264,4 @@ for ax in [ax1, ax2, ax3, ax4, ax5]:
 
 
 # plt.tight_layout()
-plt.show(block=False)
+plt.show()
