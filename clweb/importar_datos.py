@@ -39,25 +39,52 @@ def importar_mag(year, month, day, ti, tf):
 
 
 # ##############################################################################################SWEA
+# def importar_swea(year, month, day, ti, tf):
+#     # path = f'../../../datos/clweb/{year}-{month}-{day}/'
+#     path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
+#     swea = np.loadtxt(path + "SWEA.asc")
+#
+#     energy = swea[:, 7]
+#     JE_total = swea[:, -1]
+#
+#     t = np.unique(swea[:, 3] + swea[:, 4] / 60 + swea[:, 5] / 3600)  # hdec
+#
+#     energias = [50 + i * 50 for i in range(3)]
+#
+#     inicio = np.where(t == find_nearest(t, ti))[0][0]
+#     fin = np.where(t == find_nearest(t, tf))[0][0]
+#
+#     energy_cut = energy[inicio:fin]
+#     JE_cut = JE_total[inicio:fin]
+#     t_cut = t[inicio:fin]
+#
+#     return swea, t_cut, energias, energy_cut, JE_cut
 def importar_swea(year, month, day, ti, tf):
-    # path = f'../../../datos/clweb/{year}-{month}-{day}/'
-    path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
+    path = f"../../../datos/clweb/{year}-{month}-{day}/"
     swea = np.loadtxt(path + "SWEA.asc")
+
+    t_swea = np.unique(swea[:, 3] + swea[:, 4] / 60 + swea[:, 5] / 3600)  # hdec
+
+    energias = [50 + i * 50 for i in range(3)]
 
     energy = swea[:, 7]
     JE_total = swea[:, -1]
 
-    t = np.unique(swea[:, 3] + swea[:, 4] / 60 + swea[:, 5] / 3600)  # hdec
+    inicio = np.where(t_swea == find_nearest(t_swea, ti))[0][0]
+    fin = np.where(t_swea == find_nearest(t_swea, tf))[0][0]
 
-    energias = [50 + i * 50 for i in range(3)]
+    t_cut = t_swea[inicio:fin]
 
-    inicio = np.where(t == find_nearest(t, ti))[0][0]
-    fin = np.where(t == find_nearest(t, tf))[0][0]
+    idx = []
+    JE = []
+    JE_cut = []
+    for energia in energias:
+        idx.append(np.where(energy == find_nearest(energy, energia))[0])
+    for i in range(len(idx)):
+        JE.append(JE_total[idx[i]])
+        JE_cut.append(JE[i][inicio:fin])
 
-    energy_cut = energy[inicio:fin]
-    JE_cut = JE_total[inicio:fin]
-
-    return swea, t, energias, energy_cut, JE_cut
+    return (swea, t_cut, energias, JE_cut)
 
 
 # ##############################################################################################SWIA

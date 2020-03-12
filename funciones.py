@@ -29,6 +29,13 @@ def ancho_mpb(t1, t2, t3, t4, normal, vel):
     return x_14, x_23
 
 
+# def deltas(B):
+#
+#     B_medio = np.mean(B, axis=0)
+#     paralelo = np.dot(B - B_medio, B_medio) / np.linalg.norm(B_medio)**2
+#     perp = (B - B_medio) / np.linalg.norm(B_medio)**2 - paralelo
+
+
 def deltaB(B):
     """B es un array de Nx3, una matriz."""
     B_medio = np.mean(B, axis=0)
@@ -43,6 +50,17 @@ def deltaB(B):
         deltaB_perp = (B - B_medio) - N
         # y ahora necesito el valor abs de perp
         abs_deltaB_perp = np.abs(deltaB_perp) / np.linalg.norm(B_medio)
+
+    # print(np.shape(prod_interno), np.shape(abs_deltaB_para), np.shape(abs_deltaB_perp))
+    # B_medio = np.mean(B, axis=0)
+    # paralelo = np.dot(B - B_medio, B_medio) / np.linalg.norm(B_medio) ** 2
+    # print(np.shape(paralelo))
+    # print(np.shape(B-B_medio))
+    # perp = (B - B_medio) / np.linalg.norm(B_medio) ** 2 - paralelo
+    # print(np.shape(perp))
+    #
+    # abs_deltaB_para = np.abs(paralelo)
+    # abs_deltaB_perp = np.abs(perp)
 
     return abs_deltaB_para, abs_deltaB_perp
 
@@ -198,6 +216,11 @@ def rms(x):
     return sol
 
 
+def SZA(posicion, index):
+    SZA = angulo(posicion[index, :], [1, 0, 0]) * 180 / np.pi
+    return SZA
+
+
 def unix_to_decimal(t_unix):
     """Le doy un tiempo en unix y me lo pasa a hora decimal."""
     t = np.zeros(np.size(t_unix))
@@ -222,6 +245,16 @@ def UTC_to_hdec(t_UTC):
     t_hdec = int(h) + int(m) / 60 + int(s) / 3600
 
     return t_hdec
+
+
+def hdec_to_UTC(hdec):
+    """Convierte de hdec a utc"""
+    h = int(hdec)
+    m = round((hdec % 1) * 60)
+    s = round((((hdec % 1) * 60) % 1) * 60)
+    UTC = f"{h}:{m}:{s}"
+
+    print(UTC)
 
 
 def getrem(ins):

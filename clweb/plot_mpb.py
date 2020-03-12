@@ -51,8 +51,9 @@ B_para, B_perp_norm, t_plot = Bpara_Bperp(Blow, tlow, t[0], t[-1])
 
 # ######### SWEA
 
-swea, t_swea, energias, energy, JE = importar_swea(year, month, day, ti, tf)
-
+swea, t_swea, energias, JE_cut = importar_swea(year, month, day, ti, tf)
+# inicio_swea = np.where(t_swea == find_nearest(t_swea, t1 - 0.075))[0][0]
+# fin_swea = np.where(t_swea == find_nearest(t_swea, t4 + 0.075))[0][0]
 # ####### densidad SWIA
 
 swia, t_swia, density = importar_swia(year, month, day, ti, tf)
@@ -86,84 +87,84 @@ tmpr = np.where(t == find_nearest(t, UTC_to_hdec("18:19:00")))
 tiempo_lim = [tiempo_mag[tm1], tiempo_mag[tm2], tiempo_mag[tm3], tiempo_mag[tm4]]
 
 
-#####plot grl zoom
+# ####plot grl zoom
 
-mpl.rcParams["axes.prop_cycle"] = cycler(
-    "color", ["#5F021F", "#336699", "#C70039", "#00270F"]
-)
-fig = plt.figure(
-    1, figsize=(20, 10)
-)  # Lo bueno de esta forma es que puedo hacer que solo algunos compartan eje
-fig.subplots_adjust(
-    top=0.95, bottom=0.1, left=0.12, right=0.95, hspace=0.0, wspace=0.15
-)
-plt.xticks(rotation=25)
-xfmt = md.DateFormatter("%H:%M")
+# mpl.rcParams["axes.prop_cycle"] = cycler(
+#     "color", ["#5F021F", "#336699", "#C70039", "#00270F"]
+# )
+# fig = plt.figure(
+#     1, figsize=(20, 10)
+# )  # Lo bueno de esta forma es que puedo hacer que solo algunos compartan eje
+# fig.subplots_adjust(
+#     top=0.95, bottom=0.1, left=0.12, right=0.95, hspace=0.0, wspace=0.15
+# )
+# plt.xticks(rotation=25)
+# xfmt = md.DateFormatter("%H:%M")
+#
+# axz1 = plt.gca()
+#
+# axz1.xaxis.set_major_formatter(xfmt)
+# axz1 = plt.subplot2grid((2, 1), (0, 0))
+# axz1.plot(tiempo_mag, B[:, 0], label="Bx MSO")
+# axz1.plot(tiempo_mag, B[:, 1], label="By MSO")
+# axz1.plot(tiempo_mag, B[:, 2], label="Bz MSO")
+# plt.setp(axz1.get_xticklabels(), visible=False)
+# axz1.set_ylabel("B components (nT)")
+# axz1.set_title(f"MAVEN MAG 2016 March 16th")
+#
+# axz2 = plt.subplot2grid((2, 1), (1, 0), sharex=axz1)
+# axz2.xaxis.set_major_formatter(xfmt)
+# axz2.plot(tiempo_mag, Bnorm)
+# axz2.set_ylabel("|B| (nT)")
+#
+# axz2.set_xlabel("Time (UTC)")
+#
+#
+# axz1.axvspan(
+#     xmin=tiempo_mag[tm_up][0], xmax=tiempo_mag[tm1][0], facecolor="#581845", alpha=0.5
+# )
+# axz1.axvspan(
+#     xmin=tiempo_mag[tmva][0], xmax=tiempo_mag[tm4][0], facecolor="#FFC300", alpha=0.75
+# )
+# axz1.axvspan(
+#     xmin=tiempo_mag[tm4][0], xmax=tiempo_mag[tm_down][0], facecolor="#C70039", alpha=0.5
+# )
+#
+# axz2.axvspan(
+#     xmin=tiempo_mag[tm_up][0],
+#     xmax=tiempo_mag[tm1][0],
+#     facecolor="#581845",
+#     alpha=0.5,
+#     label="Upstream",
+# )
+# axz2.axvspan(
+#     xmin=tiempo_mag[tmva][0],
+#     xmax=tiempo_mag[tm4][0],
+#     facecolor="#FFC300",
+#     alpha=0.75,
+#     label="MVA",
+# )
+# axz2.axvspan(
+#     xmin=tiempo_mag[tm4][0],
+#     xmax=tiempo_mag[tm_down][0],
+#     facecolor="#C70039",
+#     alpha=0.5,
+#     label="Downstream",
+# )
+#
+#
+# for ax in [axz1, axz2]:
+#     ax.set_xlim(tiempo_mag[zoom_inicial], tiempo_mag[zoom_final])
+#     ax.grid()
+#     ax.legend()
+#     for xc in tiempo_lim:
+#         ax.axvline(x=xc, color="k", linewidth=1.5)
+#
+# # plt.tight_layout()
+# plt.show(block=False)
 
-axz1 = plt.gca()
 
-axz1.xaxis.set_major_formatter(xfmt)
-axz1 = plt.subplot2grid((2, 1), (0, 0))
-axz1.plot(tiempo_mag, B[:, 0], label="Bx MSO")
-axz1.plot(tiempo_mag, B[:, 1], label="By MSO")
-axz1.plot(tiempo_mag, B[:, 2], label="Bz MSO")
-plt.setp(axz1.get_xticklabels(), visible=False)
-axz1.set_ylabel("B components (nT)")
-axz1.set_title(f"MAVEN MAG 2016 March 16th")
-
-axz2 = plt.subplot2grid((2, 1), (1, 0), sharex=axz1)
-axz2.xaxis.set_major_formatter(xfmt)
-axz2.plot(tiempo_mag, Bnorm)
-axz2.set_ylabel("|B| (nT)")
-
-axz2.set_xlabel("Time (UTC)")
-
-
-axz1.axvspan(
-    xmin=tiempo_mag[tm_up][0], xmax=tiempo_mag[tm1][0], facecolor="#581845", alpha=0.5
-)
-axz1.axvspan(
-    xmin=tiempo_mag[tmva][0], xmax=tiempo_mag[tm4][0], facecolor="#FFC300", alpha=0.75
-)
-axz1.axvspan(
-    xmin=tiempo_mag[tm4][0], xmax=tiempo_mag[tm_down][0], facecolor="#C70039", alpha=0.5
-)
-
-axz2.axvspan(
-    xmin=tiempo_mag[tm_up][0],
-    xmax=tiempo_mag[tm1][0],
-    facecolor="#581845",
-    alpha=0.5,
-    label="Upstream",
-)
-axz2.axvspan(
-    xmin=tiempo_mag[tmva][0],
-    xmax=tiempo_mag[tm4][0],
-    facecolor="#FFC300",
-    alpha=0.75,
-    label="MVA",
-)
-axz2.axvspan(
-    xmin=tiempo_mag[tm4][0],
-    xmax=tiempo_mag[tm_down][0],
-    facecolor="#C70039",
-    alpha=0.5,
-    label="Downstream",
-)
-
-
-for ax in [axz1, axz2]:
-    ax.set_xlim(tiempo_mag[zoom_inicial], tiempo_mag[zoom_final])
-    ax.grid()
-    ax.legend()
-    for xc in tiempo_lim:
-        ax.axvline(x=xc, color="k", linewidth=1.5)
-
-# plt.tight_layout()
-plt.show(block=False)
-
-
-###### funciones para el plot que se repiten
+# ##### funciones para el plot que se repiten
 def regiones(ax, tiempo_mag, tm1, tm4, tm_up, tm_down, tbs, tmpr):
     ax.axvspan(
         xmin=tiempo_mag[tbs][0], xmax=tiempo_mag[tm1][0], facecolor="#FE6779", alpha=0.6
@@ -179,7 +180,7 @@ def regiones(ax, tiempo_mag, tm1, tm4, tm_up, tm_down, tbs, tmpr):
     )  # MPR
 
 
-#########La fig de la tesis pero sin LPW
+# ########La fig de la tesis pero sin LPW
 mpl.rcParams["axes.prop_cycle"] = cycler(
     "color", ["#5F021F", "#336699", "#C70039", "#00270F"]
 )
@@ -216,16 +217,29 @@ ax3.set_ylabel("Relative variation \n of B")
 ax4 = plt.subplot2grid((5, 1), (3, 0), sharex=ax1)
 ax4.xaxis.set_major_formatter(xfmt)
 ax4.set_ylabel("Diff energy flux \n of the SW e- \n (cm⁻² sr⁻¹ s⁻¹)")
-for energia in energias:
-    index = np.where(energy == find_nearest(energy, energia))[0]
-    JEplot = JE[index]
-    plt.semilogy(tiempo_swea, JEplot, label=f"{energia} eV")
+for i in range(len(energias)):
+    plt.semilogy(tiempo_swea, JE_cut[i], label=f"{energias[i]} eV")
+
 
 ax5 = plt.subplot2grid((5, 1), (4, 0), sharex=ax1)
 ax5.xaxis.set_major_formatter(xfmt)
 plt.plot(tiempo_swia, density)
 ax5.set_ylabel("SW proton \n density (cm⁻³)")
-ax5.set_xlabel("Time (UTC)")
+ax5.set_xlabel("Time (UTC) \nSZA (º)\nDistance (RM)")
+ax5.xaxis.set_label_coords(-0.05, -0.05)
+
+ax5.set_xticklabels(
+    [
+        "17:55\n19º\n1.62",
+        "18:00\n10º\n1.51",
+        "18:05\n5º\n1.39",
+        "18:10\n15º\n1.28",
+        "18:15\n29º\n1.18",
+        "18:20\n46º\n1.10",
+    ],
+    fontdict=None,
+    minor=False,
+)
 
 
 for ax in [ax1, ax2, ax3, ax4]:
@@ -264,4 +278,5 @@ for ax in [ax1, ax2, ax3, ax4, ax5]:
 
 
 # plt.tight_layout()
+
 plt.show()
