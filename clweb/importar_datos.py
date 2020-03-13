@@ -1,15 +1,19 @@
 import numpy as np
 import os
 import sys
+import psutil
 
 sys.path.append("..")
 from funciones import find_nearest
 
 
 def importar_mag(year, month, day, ti, tf):
-    # path = f'../../../datos/clweb/{year}-{month}-{day}/' #path a los datos desde la laptop
-    path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"  # path a los datos desde la desktop.
-    # Estaría bueno ponerle un if para que detecte en cuál estoy.
+    ram = int(psutil.virtual_memory().total / (1024 ** 3))
+    if ram == 15:
+        path = f"../../../datos/clweb/{year}-{month}-{day}/"
+    else:
+        path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
+
     if os.path.isfile(path + "mag_filtrado.txt"):
         mag = np.loadtxt(path + "mag_filtrado.txt", skiprows=2)
         B = mag[:, :3]
@@ -38,29 +42,16 @@ def importar_mag(year, month, day, ti, tf):
     return mag, t_cut, B_cut, posicion_cut
 
 
-# ##############################################################################################SWEA
-# def importar_swea(year, month, day, ti, tf):
-#     # path = f'../../../datos/clweb/{year}-{month}-{day}/'
-#     path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
-#     swea = np.loadtxt(path + "SWEA.asc")
-#
-#     energy = swea[:, 7]
-#     JE_total = swea[:, -1]
-#
-#     t = np.unique(swea[:, 3] + swea[:, 4] / 60 + swea[:, 5] / 3600)  # hdec
-#
-#     energias = [50 + i * 50 for i in range(3)]
-#
-#     inicio = np.where(t == find_nearest(t, ti))[0][0]
-#     fin = np.where(t == find_nearest(t, tf))[0][0]
-#
-#     energy_cut = energy[inicio:fin]
-#     JE_cut = JE_total[inicio:fin]
-#     t_cut = t[inicio:fin]
-#
-#     return swea, t_cut, energias, energy_cut, JE_cut
+# #########################################################################SWEA
+
+
 def importar_swea(year, month, day, ti, tf):
-    path = f"../../../datos/clweb/{year}-{month}-{day}/"
+    ram = int(psutil.virtual_memory().total / (1024 ** 3))
+    if ram == 15:
+        path = f"../../../datos/clweb/{year}-{month}-{day}/"
+    else:
+        path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
+
     swea = np.loadtxt(path + "SWEA.asc")
 
     t_swea = np.unique(swea[:, 3] + swea[:, 4] / 60 + swea[:, 5] / 3600)  # hdec
@@ -87,12 +78,16 @@ def importar_swea(year, month, day, ti, tf):
     return (swea, t_cut, energias, JE_cut)
 
 
-# ##############################################################################################SWIA
+# #########################################################################SWIA
 
 
 def importar_swia(year, month, day, ti, tf):
-    # path = f'../../../datos/clweb/{year}-{month}-{day}/'
-    path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
+    ram = int(psutil.virtual_memory().total / (1024 ** 3))
+    if ram == 15:
+        path = f"../../../datos/clweb/{year}-{month}-{day}/"
+    else:
+        path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
+
     swia = np.loadtxt(path + "SWIA.asc")
 
     density = swia[:, -1]
@@ -108,12 +103,16 @@ def importar_swia(year, month, day, ti, tf):
     return swia, t_cut, density_cut
 
 
-# ############################################################################################## LPW
+# ######################################################################## SWIA
 
 
 def importar_swia_vel(year, month, day, ti, tf):
-    # path = f'../../../datos/clweb/{year}-{month}-{day}/'
-    path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
+    ram = int(psutil.virtual_memory().total / (1024 ** 3))
+    if ram == 15:
+        path = f"../../../datos/clweb/{year}-{month}-{day}/"
+    else:
+        path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
+
     swia = np.loadtxt(path + "SWIA_vel.asc")
 
     density = swia[:, 6]
@@ -131,12 +130,16 @@ def importar_swia_vel(year, month, day, ti, tf):
     return swia, t_cut, density_cut, vel_cut
 
 
-# ############################################################################################## LPW
+# ########################################################################## LPW
 
 
 def importar_lpw(year, month, day, ti, tf):
-    # path = f'../../../datos/clweb/{year}-{month}-{day}/'
-    path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
+    ram = int(psutil.virtual_memory().total / (1024 ** 3))
+    if ram == 15:
+        path = f"../../../datos/clweb/{year}-{month}-{day}/"
+    else:
+        path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
+
     lpw = np.loadtxt(path + "LPW.asc")
 
     e_density = lpw[:, -1]

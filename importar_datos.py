@@ -2,6 +2,7 @@ import numpy as np
 import datetime as dt
 from funciones import find_nearest, unix_to_decimal
 import cdflib as cdf
+import psutil
 
 
 def importar_mag_1s(year, month, day, ti, tf):
@@ -12,7 +13,11 @@ def importar_mag_1s(year, month, day, ti, tf):
     day = date_orbit.strftime("%d")
     doy = date_orbit.strftime("%j")
 
-    path = f"../../../../media/gabybosc/datos/MAG_1s/{year}/"
+    ram = int(psutil.virtual_memory().total / (1024 ** 3))
+    if ram == 15:
+        path = f"../../../datos/MAG_1s/{year}-{month}-{day}/"
+    else:
+        path = f"../../../../media/gabybosc/datos/MAG_1s/{year}/"
 
     mag = np.loadtxt(
         path + f"mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts",
@@ -38,7 +43,7 @@ def importar_mag_1s(year, month, day, ti, tf):
     return mag, t_cut, B_cut, posicion_cut
 
 
-###############################################################################################
+########################################################################
 
 
 def importar_mag(year, month, day, ti, tf):
@@ -49,7 +54,11 @@ def importar_mag(year, month, day, ti, tf):
     day = date_orbit.strftime("%d")
     doy = date_orbit.strftime("%j")
 
-    path = f"../../../../media/gabybosc/datos/MAG_hires/"
+    ram = int(psutil.virtual_memory().total / (1024 ** 3))
+    if ram == 15:
+        path = f"../../../datos/MAG_hires/"
+    else:
+        path = f"../../../../media/gabybosc/datos/MAG_hires/"
 
     mag = np.loadtxt(
         path + f"mvn_mag_l2_{year}{doy}ss_{year}{month}{day}_v01_r01.sts", skiprows=160
@@ -74,7 +83,7 @@ def importar_mag(year, month, day, ti, tf):
     return mag, t_cut, B_cut, posicion_cut
 
 
-# ##############################################################################################SWEA
+# #########################################################################SWEA
 # def importar_swea(year, month, day, ti, tf):
 #     date_orbit = dt.date(int(year), int(month), int(day))
 #     year = date_orbit.strftime("%Y")
@@ -97,7 +106,7 @@ def importar_mag(year, month, day, ti, tf):
 #     fin = np.where(t == find_nearest(t, tf))[0][0]
 #
 #     return(swea, t, energias)
-# ##############################################################################################SWIA
+# #########################################################################SWIA
 
 
 def importar_swia(year, month, day, ti, tf):
@@ -106,7 +115,11 @@ def importar_swia(year, month, day, ti, tf):
     month = date_orbit.strftime("%m")
     day = date_orbit.strftime("%d")
 
-    path = f"../../../../media/gabybosc/datos/SWIA/"
+    ram = int(psutil.virtual_memory().total / (1024 ** 3))
+    if ram == 15:
+        path = f"../../../datos/SWIA/"
+    else:
+        path = f"../../../../media/gabybosc/datos/SWIA/"
 
     swia = cdf.CDF(path + f"mvn_swi_l2_onboardsvymom_{year}{month}{day}_v01_r01.cdf")
 
@@ -127,26 +140,29 @@ def importar_swia(year, month, day, ti, tf):
     return swia, t_cut, density_cut, temperature_cut, vel_mso_cut
 
 
-# ############################################################################################## LPW
-# def importar_lpw(year, month, day, ti, tf):
-#     date_orbit = dt.date(int(year), int(month), int(day))
-#     year = date_orbit.strftime("%Y")
-#     month = date_orbit.strftime("%m")
-#     day = date_orbit.strftime("%d")
-#     doy = date_orbit.strftime("%j")
-#
-#     path = f'../../../../media/gabybosc/datos/LPW/'
-#
-#     swia = cdf.CDF(path + f'mvn_lpw_l2_lpnt_{year}{month}{day}_v03_r02.cdf')
-#
-#     e_density = lpw[:,-1]
-#
-#     t = lpw[:,3] + lpw[:,4]/60 + lpw[:,5]/3600
-#
-#     inicio = np.where(t == find_nearest(t, ti))[0][0]
-#     fin = np.where(t == find_nearest(t, tf))[0][0]
-#
-#     t_cut = t[inicio:fin]
-#     e_density_cut = e_density[inicio:fin]
-#
-#     return(lpw, t_cut, e_density_cut)
+# ###################################################################### LPW
+def importar_lpw(year, month, day, ti, tf):
+    date_orbit = dt.date(int(year), int(month), int(day))
+    year = date_orbit.strftime("%Y")
+    month = date_orbit.strftime("%m")
+    day = date_orbit.strftime("%d")
+
+    ram = int(psutil.virtual_memory().total / (1024 ** 3))
+    if ram == 15:
+        path = f"../../../datos/LPW/"
+    else:
+        path = f"../../../../media/gabybosc/datos/LPW/"
+
+    lpw = cdf.CDF(path + f"mvn_lpw_l2_lpnt_{year}{month}{day}_v03_r02.cdf")
+
+    e_density = lpw[:, -1]
+
+    t = lpw[:, 3] + lpw[:, 4] / 60 + lpw[:, 5] / 3600
+
+    inicio = np.where(t == find_nearest(t, ti))[0][0]
+    fin = np.where(t == find_nearest(t, tf))[0][0]
+
+    t_cut = t[inicio:fin]
+    e_density_cut = e_density[inicio:fin]
+
+    return (lpw, t_cut, e_density_cut)

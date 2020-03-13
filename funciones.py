@@ -29,38 +29,21 @@ def ancho_mpb(t1, t2, t3, t4, normal, vel):
     return x_14, x_23
 
 
-# def deltas(B):
-#
-#     B_medio = np.mean(B, axis=0)
-#     paralelo = np.dot(B - B_medio, B_medio) / np.linalg.norm(B_medio)**2
-#     perp = (B - B_medio) / np.linalg.norm(B_medio)**2 - paralelo
-
-
 def deltaB(B):
     """B es un array de Nx3, una matriz."""
     B_medio = np.mean(B, axis=0)
+    Bnorm = np.linalg.norm(B_medio)
 
-    prod_interno = np.dot(B - B_medio, B_medio / np.linalg.norm(B_medio))
-    abs_deltaB_para = np.abs(prod_interno)  # |deltaB_para / B|
+    prod_interno = np.dot(B - B_medio, B_medio) / Bnorm
+    abs_deltaB_para = np.abs(prod_interno) / Bnorm  # |deltaB_para / B|
 
     N = np.zeros((len(prod_interno), len(B_medio)))
 
     for i in range(len(N)):
-        N[i, :] = prod_interno[i] * B_medio / np.linalg.norm(B_medio)
+        N[i, :] = prod_interno[i] * B_medio / Bnorm
         deltaB_perp = (B - B_medio) - N
         # y ahora necesito el valor abs de perp
-        abs_deltaB_perp = np.abs(deltaB_perp) / np.linalg.norm(B_medio)
-
-    # print(np.shape(prod_interno), np.shape(abs_deltaB_para), np.shape(abs_deltaB_perp))
-    # B_medio = np.mean(B, axis=0)
-    # paralelo = np.dot(B - B_medio, B_medio) / np.linalg.norm(B_medio) ** 2
-    # print(np.shape(paralelo))
-    # print(np.shape(B-B_medio))
-    # perp = (B - B_medio) / np.linalg.norm(B_medio) ** 2 - paralelo
-    # print(np.shape(perp))
-    #
-    # abs_deltaB_para = np.abs(paralelo)
-    # abs_deltaB_perp = np.abs(perp)
+        abs_deltaB_perp = np.abs(deltaB_perp) / Bnorm
 
     return abs_deltaB_para, abs_deltaB_perp
 
