@@ -1,18 +1,18 @@
 import numpy as np
 import os
 import sys
-import psutil
+from socket import gethostname
 
 sys.path.append("..")
 from funciones import find_nearest
 
 
 def importar_mag(year, month, day, ti, tf):
-    ram = int(psutil.virtual_memory().total / (1024 ** 3))
-    if ram == 15:
-        path = f"../../../datos/clweb/{year}-{month}-{day}/"
-    else:
+
+    if gethostname() == "magneto2":
         path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
+    else:
+        path = f"../../../datos/clweb/{year}-{month}-{day}/"
 
     if os.path.isfile(path + "mag_filtrado.txt"):
         mag = np.loadtxt(path + "mag_filtrado.txt", skiprows=2)
@@ -46,11 +46,10 @@ def importar_mag(year, month, day, ti, tf):
 
 
 def importar_swea(year, month, day, ti, tf):
-    ram = int(psutil.virtual_memory().total / (1024 ** 3))
-    if ram == 15:
-        path = f"../../../datos/clweb/{year}-{month}-{day}/"
-    else:
+    if gethostname() == "magneto2":
         path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
+    else:
+        path = f"../../../datos/clweb/{year}-{month}-{day}/"
 
     swea = np.loadtxt(path + "SWEA.asc")
 
@@ -82,11 +81,10 @@ def importar_swea(year, month, day, ti, tf):
 
 
 def importar_swia(year, month, day, ti, tf):
-    ram = int(psutil.virtual_memory().total / (1024 ** 3))
-    if ram == 15:
-        path = f"../../../datos/clweb/{year}-{month}-{day}/"
-    else:
+    if gethostname() == "magneto2":
         path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
+    else:
+        path = f"../../../datos/clweb/{year}-{month}-{day}/"
 
     swia = np.loadtxt(path + "SWIA.asc")
 
@@ -107,11 +105,11 @@ def importar_swia(year, month, day, ti, tf):
 
 
 def importar_swia_vel(year, month, day, ti, tf):
-    ram = int(psutil.virtual_memory().total / (1024 ** 3))
-    if ram == 15:
-        path = f"../../../datos/clweb/{year}-{month}-{day}/"
-    else:
+
+    if gethostname() == "magneto2":
         path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
+    else:
+        path = f"../../../datos/clweb/{year}-{month}-{day}/"
 
     swia = np.loadtxt(path + "SWIA_vel.asc")
 
@@ -134,11 +132,10 @@ def importar_swia_vel(year, month, day, ti, tf):
 
 
 def importar_lpw(year, month, day, ti, tf):
-    ram = int(psutil.virtual_memory().total / (1024 ** 3))
-    if ram == 15:
-        path = f"../../../datos/clweb/{year}-{month}-{day}/"
-    else:
+    if gethostname() == "magneto2":
         path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
+    else:
+        path = f"../../../datos/clweb/{year}-{month}-{day}/"
 
     lpw = np.loadtxt(path + "LPW.asc")
 

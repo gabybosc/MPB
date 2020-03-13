@@ -2,7 +2,7 @@ import numpy as np
 import datetime as dt
 from funciones import find_nearest, unix_to_decimal
 import cdflib as cdf
-import psutil
+from socket import gethostname
 
 
 def importar_mag_1s(year, month, day, ti, tf):
@@ -13,11 +13,10 @@ def importar_mag_1s(year, month, day, ti, tf):
     day = date_orbit.strftime("%d")
     doy = date_orbit.strftime("%j")
 
-    ram = int(psutil.virtual_memory().total / (1024 ** 3))
-    if ram == 15:
-        path = f"../../../datos/MAG_1s/{year}-{month}-{day}/"
-    else:
+    if gethostname() == "magneto2":
         path = f"../../../../media/gabybosc/datos/MAG_1s/{year}/"
+    else:
+        path = f"../../../datos/MAG_1s/{year}-{month}-{day}/"
 
     mag = np.loadtxt(
         path + f"mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts",
@@ -54,11 +53,10 @@ def importar_mag(year, month, day, ti, tf):
     day = date_orbit.strftime("%d")
     doy = date_orbit.strftime("%j")
 
-    ram = int(psutil.virtual_memory().total / (1024 ** 3))
-    if ram == 15:
-        path = f"../../../datos/MAG_hires/"
-    else:
+    if gethostname() == "magneto2":
         path = f"../../../../media/gabybosc/datos/MAG_hires/"
+    else:
+        path = f"../../../datos/MAG_hires/"
 
     mag = np.loadtxt(
         path + f"mvn_mag_l2_{year}{doy}ss_{year}{month}{day}_v01_r01.sts", skiprows=160
@@ -115,11 +113,10 @@ def importar_swia(year, month, day, ti, tf):
     month = date_orbit.strftime("%m")
     day = date_orbit.strftime("%d")
 
-    ram = int(psutil.virtual_memory().total / (1024 ** 3))
-    if ram == 15:
-        path = f"../../../datos/SWIA/"
-    else:
+    if gethostname() == "magneto2":
         path = f"../../../../media/gabybosc/datos/SWIA/"
+    else:
+        path = f"../../../datos/SWIA/"
 
     swia = cdf.CDF(path + f"mvn_swi_l2_onboardsvymom_{year}{month}{day}_v01_r01.cdf")
 
@@ -147,11 +144,10 @@ def importar_lpw(year, month, day, ti, tf):
     month = date_orbit.strftime("%m")
     day = date_orbit.strftime("%d")
 
-    ram = int(psutil.virtual_memory().total / (1024 ** 3))
-    if ram == 15:
-        path = f"../../../datos/LPW/"
-    else:
+    if gethostname() == "magneto2":
         path = f"../../../../media/gabybosc/datos/LPW/"
+    else:
+        path = f"../../../datos/LPW/"
 
     lpw = cdf.CDF(path + f"mvn_lpw_l2_lpnt_{year}{month}{day}_v03_r02.cdf")
 
