@@ -10,7 +10,7 @@ También están las del análisis de la MPB.
 
 
 def angulo(v1, v2):
-    """Calcula el ángulo entre dos vectores, si no están normalizados los normaliza"""
+    """Calcula el ángulo (en radianes) entre dos vectores, si no están normalizados los normaliza"""
     v1_norm = v1 / np.linalg.norm(v1)
     v2_norm = v2 / np.linalg.norm(v2)
     angle = np.arccos(np.clip(np.dot(v1_norm, v2_norm), -1.0, 1.0))
@@ -191,6 +191,39 @@ def next_available_row(sheet):
     """Devuelve la próxima fila vacía en una spreadsheet"""
     str_list = list(filter(None, sheet.col_values(1)))
     return str(len(str_list) + 1)
+
+
+def proyecciones(B):
+    M = len(B)
+    Bnorm = np.linalg.norm(B, axis=1)
+
+    n_p = int(M / 2)
+
+    M_ij = Mij(B)
+
+    # ahora quiero los autovectores y autovalores
+    [lamb, x] = np.linalg.eigh(M_ij)  # uso eigh porque es simetrica
+
+    # Los ordeno de mayor a menor
+    idx = lamb.argsort()[::-1]
+    lamb = lamb[idx]
+    x = x[:, idx]
+    # ojo que me da las columnas en vez de las filas como autovectores: el av x1 = x[:,0]
+    x1 = x[:, 0]
+    x2 = x[:, 1]
+    x3 = x[:, 2]
+
+    if x3[0] < 0:  # si la normal aputna para adentro me la da vuelta
+        x3 = -x3
+    if any(np.cross(x1, x2) - x3) > 0.01:
+        x1 = -x1
+
+    # las proyecciones
+    B1 = np.dot(B, x1)
+    B2 = np.dot(B, x2)
+    B3 = np.dot(B, x3)
+
+    return B1, B2, B3
 
 
 def rms(x):

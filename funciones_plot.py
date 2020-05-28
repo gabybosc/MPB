@@ -30,18 +30,19 @@ def deltat():
     return x1, x2
 
 
-def hodograma(B1, B2, B3, unidad="nT"):
-    f, (ax1, ax2) = plt.subplots(1, 2, sharex=True)  # tienen el mismo eje x
+def hodograma(B1, B2, B3):
+    f, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 10), sharex=True)
+
     ax1.plot(B2, B1, zorder=1)
     ax2.plot(B3, B1, zorder=1)
     ax1.scatter(B2[0], B1[0], s=50, zorder=2, marker="o", color="r", label="start")
     ax1.scatter(B2[-1], B1[-1], s=50, zorder=2, marker="x", color="r", label="end")
     ax2.scatter(B3[0], B1[0], s=50, zorder=2, marker="o", color="r", label="start")
     ax2.scatter(B3[-1], B1[-1], s=50, zorder=2, marker="x", color="r", label="end")
-    ax1.set_xlabel(f"B2 ({unidad})", fontsize=16)
-    ax2.set_xlabel(f"B3 ({unidad})", fontsize=16)
-    ax1.set_ylabel(f"B1 ({unidad})", fontsize=16)
-    ax2.set_ylabel(f"B1 ({unidad})", fontsize=16)
+    ax1.set_xlabel(f"B2 (nT)", fontsize=16)
+    ax2.set_xlabel(f"B3 (nT)", fontsize=16)
+    ax1.set_ylabel(f"B1 (nT)", fontsize=16)
+    ax2.set_ylabel(f"B1 (nT)", fontsize=16)
     ax1.grid()
     ax2.grid()
     ax1.tick_params(axis="both", which="major", labelsize=14)

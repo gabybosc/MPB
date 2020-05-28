@@ -87,7 +87,7 @@ def MVA(year, month, day, ti_MVA, tf_MVA):
     B_norm_medio = np.linalg.norm(B_medio_vectorial)
 
     print(f"El B medio es {B_norm_medio}")
-    hodograma(B1, B2, B3, date_entry)
+    hodograma(B1, B2, B3)
 
     # el error
     phi, delta_B3 = error(lamb, B, M, x)

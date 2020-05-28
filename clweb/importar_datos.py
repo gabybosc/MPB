@@ -101,6 +101,24 @@ def importar_swia(year, month, day, ti, tf):
     return swia, t_cut, density_cut
 
 
+def importar_swicfa(year, month, day, ti, tf):
+    if gethostname() == "magneto2":
+        path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
+    else:
+        path = f"../../../datos/clweb/{year}-{month}-{day}/"
+
+    swica = np.loadtxt(path + "SWICA.asc")
+    swifa = np.loadtxt(path + "SWIFA.asc")
+
+    density_c = swica[:, -1]
+    density_f = swifa[:, -1]
+
+    t_c = swica[:, 3] + swica[:, 4] / 60 + swica[:, 5] / 3600  # hdec
+    t_f = swifa[:, 3] + swifa[:, 4] / 60 + swifa[:, 5] / 3600  # hdec
+
+    return t_c, t_f, density_c, density_f
+
+
 # ######################################################################## SWIA
 
 
@@ -126,6 +144,30 @@ def importar_swia_vel(year, month, day, ti, tf):
     vel_cut = vel_mso_xyz[inicio:fin]
 
     return swia, t_cut, density_cut, vel_cut
+
+
+def importar_vel_swica(year, month, day, ti, tf):
+
+    if gethostname() == "magneto2":
+        path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
+    else:
+        path = f"../../../datos/clweb/{year}-{month}-{day}/"
+
+    swia = np.loadtxt(path + "SW_vel.asc")
+
+    vel_norm = swia[:, -1]
+    vel_mso_xyz = swia[:, 6:9]
+
+    t = swia[:, 3] + swia[:, 4] / 60 + swia[:, 5] / 3600  # hdec
+
+    inicio = np.where(t == find_nearest(t, ti))[0][0]
+    fin = np.where(t == find_nearest(t, tf))[0][0]
+
+    t_cut = t[inicio:fin]
+    vel_cut = vel_mso_xyz[inicio:fin]
+    vel_norm_cut = vel_norm[inicio:fin]
+
+    return swia, t_cut, vel_cut, vel_norm_cut
 
 
 # ########################################################################## LPW

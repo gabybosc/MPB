@@ -10,6 +10,8 @@ import urllib.request
 import shutil
 import os
 import sys
+from socket import gethostname
+
 
 p = os.path.abspath("../..")
 if p not in sys.path:
@@ -27,7 +29,11 @@ lpw = f"https://pds-ppi.igpp.ucla.edu/ditdos/download?id=pds://PPI/maven.lpw.der
 
 swia = f"https://pds-ppi.igpp.ucla.edu/ditdos/download?id=pds://PPI/maven.swia.calibrated/data/onboard_svy_mom/{year}/{month}/mvn_swi_l2_onboardsvymom_{year}{month}{day}_v01_r01.cdf"
 
-path = "../../../../../media/gabybosc/datos/"
+if gethostname() == "magneto2":
+    path = f"../../../../media/gabybosc/datos/MAG_1s/{year}/"
+else:
+    path = "../../../datos/"
+
 
 with urllib.request.urlopen(swea) as response, open(
     path + f"SWEA/mvn_swe_l2_svyspec_{year}{month}{day}_v04_r01.cdf", "wb"

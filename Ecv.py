@@ -17,8 +17,10 @@ ti, tf = tiempos("magnetofunda + mpb")
 
 
 def importar_mag(year, month, day, ti, tf):
-    # path = f'../../../datos/clweb/{year}-{month}-{day}/' #path a los datos desde la laptop
-    path = f"../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"  # path a los datos desde la desktop.
+    path = (
+        f"../../datos/clweb/{year}-{month}-{day}/"  # path a los datos desde la laptop
+    )
+    # path = f"../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"  # path a los datos desde la desktop.
     # Estaría bueno ponerle un if para que detecte en cuál estoy.
     if os.path.isfile(path + "mag_filtrado.txt"):
         mag = np.loadtxt(path + "mag_filtrado.txt", skiprows=2)

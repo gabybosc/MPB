@@ -15,6 +15,8 @@ def importar_mag_1s(year, month, day, ti, tf):
 
     if gethostname() == "magneto2":
         path = f"../../../../media/gabybosc/datos/MAG_1s/{year}/"
+    elif gethostname() == "Gaby":
+        path = "../../datos/MAG_1s/"
     else:
         path = f"../../../datos/MAG_1s/{year}-{month}-{day}/"
 
@@ -55,6 +57,8 @@ def importar_mag(year, month, day, ti, tf):
 
     if gethostname() == "magneto2":
         path = f"../../../../media/gabybosc/datos/MAG_hires/"
+    elif gethostname() == "Gaby":
+        path = "../../datos/MAG_hires/"
     else:
         path = f"../../../datos/MAG_hires/"
 
@@ -115,6 +119,8 @@ def importar_swia(year, month, day, ti, tf):
 
     if gethostname() == "magneto2":
         path = f"../../../../media/gabybosc/datos/SWIA/"
+    elif gethostname() == "Gaby":
+        path = "../../datos/SWIA/"
     else:
         path = f"../../../datos/SWIA/"
 
@@ -146,6 +152,8 @@ def importar_lpw(year, month, day, ti, tf):
 
     if gethostname() == "magneto2":
         path = f"../../../../media/gabybosc/datos/LPW/"
+    elif gethostname() == "Gaby":
+        path = "../../datos/LPW/"
     else:
         path = f"../../../datos/LPW/"
 
