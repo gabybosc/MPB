@@ -21,17 +21,15 @@ np.set_printoptions(precision=4)
 
 mp = 1.67e-27  # kg
 
-year, month, day = 2016, "03", "16"  # fechas()
-ti, tf = 18, 19  # tiempos()
-t1 = 18.2167
+year, month, day, doy = fechas()
+ti, t1 = tiempos("tiempo inicial de mediciones y tiempo t1")
+# t1 = 18.2167
 normal = [
-    0.920,
-    -0.302,
-    0.251,
-]  # [float(x) for x in input("Enter the normal in N.NN N.NN N.NN format\n").split()]
-densidad = 5  # part por cm3
+    float(x) for x in input("Enter the normal in N.NN N.NN N.NN format\n").split()
+]
+densidad = float(input("Enter the density upstream from the MPB\n"))
 
-swia, t, vel, vel_norm = importar_vel_swica(year, month, day, ti, tf)
+swia, t, vel, vel_norm = importar_vel_swica(year, month, day, ti, t1)
 inicio_up = donde(t, t1 - 0.015)
 fin_up = donde(t, t1)
 
