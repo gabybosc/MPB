@@ -9,7 +9,7 @@ y0 = array de N-dim de valores iniciales
 
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.integrate import solve_ivp
+from scipy.integrate import solve_ivp, RK45
 
 
 def diff(x, Y, eps=0.1, vy0=1, vz0=1):
@@ -35,7 +35,7 @@ params = [epsilon, vy_0, vz_0]
 # Resolver para MPB 1D estacionaria, ecs de 2 fluidos
 x0 = 5
 xf = 0  # va de marte al sol
-Nx = 29000
+Nx = 1000
 N = 3
 Y = np.zeros(N)
 
@@ -43,13 +43,15 @@ Y = np.zeros(N)
 Y[0] = 1  # u(0)
 Y[1] = 0  # by(0)
 Y[2] = 0  # bz(0)
-dx = (xf - x0) / Nx
+dx = abs(xf - x0) / Nx
 x = x0
 
 dydx = diff(x, Y)
-sol = solve_ivp(diff, (x0, xf), Y)
+sol = solve_ivp(diff, (x0, xf), Y, max_step=dx)
 YY = sol.y
 XX = sol.t
+
+# rk = RK45(diff, x0, Y, xf)
 
 plt.plot(YY[1, :], YY[2, :])
 plt.xlabel("by")
