@@ -91,7 +91,9 @@ print(f"El loop tardó {program_ends-program_starts:.2f} s")
 Una vez que está normales lleno, elijo un tiempo y las normales en todo el "radio"
 que le corresponde. Hago un gif con el ángulo entre las normales para cada radio
 centrado en diferentes tiempos (cada cuadro es un tiempo central, cada heatmap
-es una matriz de los ángulos)
+es una matriz de los ángulos).
+Finalmente, un histograma con el número de veces que aparece cada ángulo de 0 a
+20, sin contar los ceros de la diagonal.
 """
 
 minimo = escalas[0] * 3600
@@ -110,7 +112,7 @@ def plot(k, angle, minimo=minimo, maximo=maximo):
         vmax=10,
     )
     cbar = plt.colorbar()
-    cbar.set_label("Angle between normals", rotation=270)
+    cbar.set_label("Angle between normals (º)", rotation=270)
     plt.title(f"Heatmap centered in t = {k}")
     plt.xlabel("Radius (s)")
     plt.ylabel("Radius (s)")
@@ -129,8 +131,17 @@ for k in range(int(len(tiempo_central) / n)):
             angle[i, j] = angulo(normales_t1[i], normales_t1[j]) * 180 / np.pi
     frame = plot(thdec, angle)
     frames.append(frame)
+    hist, bins = np.histogram(angle, bins=b)
+    hist[0] = hist[0] - 29  # saco los 29 ceros de la diagonal
+    histograma += hist
 
 gif.save(frames, "heatmap.gif", duration=500)
+
+center = (bins[:-1] + bins[1:]) / 2
+plt.bar(center, histograma)
+plt.xlabel("Angle (º)")
+plt.ylabel("Counts")
+plt.show()
 
 """
 Para hacer screenshots de tiempos particulares sólo tengo que elegir el valor de NN
