@@ -17,8 +17,8 @@ N es el orden del filtro, en general voy a querer que N sea cercano a 10.
 Comentado está otro filtro más fuerte.
 """
 
-year, month, day, doy = fechas()
-# year, month, day, doy = 2016, "03", 16, 76
+# year, month, day, doy = fechas()
+year, month, day, doy = 2016, "03", 16, 76
 
 path = f"../../../datos/clweb/{year}-{month}-{day}/"  # path a los datos desde la laptop
 mag = np.loadtxt(path + "MAG.asc")
@@ -48,29 +48,24 @@ Bx_filtrado = signal.filtfilt(b, a, B[:, 0])
 By_filtrado = signal.filtfilt(b, a, B[:, 1])
 Bz_filtrado = signal.filtfilt(b, a, B[:, 2])
 
+
+# filtro más fuerte
+
+# Tseg = 4
+# fp = 1 / Tseg / 16  # fp < fs para que sea pasabajos
+# fs = 1 / 16  # f normalizada, da lo mismo si es omega o frec
+# N, Wn = signal.buttord(fp, fs, 3, 50)
+# b, a = signal.butter(N, Wn, "low")
+# Bx_filtrado = signal.filtfilt(b, a, B[:, 0])
+# By_filtrado = signal.filtfilt(b, a, B[:, 1])
+# Bz_filtrado = signal.filtfilt(b, a, B[:, 2])
+
 B_filtrado = np.linalg.norm([Bx_filtrado, By_filtrado, Bz_filtrado], axis=0)
 
 plt.plot(t, Bnorm, label="sin filtro")
-plt.plot(t, B_filtrado, linewidth=0.5, label=f"fs = {fs:.3g}, fp = {fp:.3g}")
+plt.plot(t, B_filtrado, linewidth=1, label=f"fs = {fs:.3g}, fp = {fp:.3g}")
 plt.legend()
 plt.show(block=False)
-
-# filtro más fuerte
-# Tseg = 4
-# fp = 1/Tseg /16 #fp < fs para que sea pasabajos
-# fs = 1 /16 #f normalizada, da lo mismo si es omega o frec
-# N, Wn = signal.buttord(fp, fs, 3, 50)
-# b,a = signal.butter(N, Wn,'low')
-# Bx_filtrado = signal.filtfilt(b, a, B[:,0])
-# By_filtrado = signal.filtfilt(b, a, B[:,1])
-# Bz_filtrado = signal.filtfilt(b, a, B[:,2])
-#
-# B_filtrado = np.linalg.norm([Bx_filtrado,By_filtrado,Bz_filtrado], axis=0)
-#
-# plt.plot(t,Bnorm, label='sin filtro')
-# plt.plot(t,B_filtrado,linewidth = 1, label = f'fs = {fs:.3g}, fp = {fp:.3g}')
-# plt.legend()
-# plt.show(block=False)
 
 happy = input("If happy press Y\n")
 if happy == "y" or happy == "Y":

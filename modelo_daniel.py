@@ -9,7 +9,7 @@ y0 = array de N-dim de valores iniciales
 
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.integrate import solve_ivp, RK45
+from scipy.integrate import solve_ivp
 
 
 def diff(x, Y, eps=0.1, vy0=1, vz0=1):
@@ -51,7 +51,6 @@ sol = solve_ivp(diff, (x0, xf), Y, max_step=dx)
 YY = sol.y
 XX = sol.t
 
-# rk = RK45(diff, x0, Y, xf)
 
 plt.plot(YY[1, :], YY[2, :])
 plt.xlabel("by")

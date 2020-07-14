@@ -243,12 +243,12 @@ ax5.xaxis.set_label_coords(-0.05, -0.05)
 
 ax5.set_xticklabels(
     [
-        "17:55\n19º\n1.62",
-        "18:00\n10º\n1.51",
-        "18:05\n5º\n1.39",
-        "18:10\n15º\n1.28",
-        "18:15\n29º\n1.18",
-        "18:20\n46º\n1.10",
+        "17:55\n19\n1.62",
+        "18:00\n10\n1.51",
+        "18:05\n5\n1.39",
+        "18:10\n15\n1.28",
+        "18:15\n29\n1.18",
+        "18:20\n46\n1.10",
     ],
     fontdict=None,
     minor=False,
@@ -292,6 +292,16 @@ for ax in [ax1, ax2, ax3, ax4, ax5]:
     for xc in tiempo_lim:
         ax.axvline(x=xc, color="k", linewidth=1.5)
 
+ax5.text(tiempo_mag[tbs][0] - 50000000, 0.75, "BS", fontsize=14, color="c", rotation=90)
+ax5.text(tiempo_mag[tm1][0] - 50000000, 2, "t1", fontsize=13, color="k", rotation=90)
+ax5.text(tiempo_mag[tm2][0] - 40000000, 0.55, "t2", fontsize=13, color="k", rotation=90)
+ax5.text(tiempo_mag[tm3][0] - 50000000, 2, "t3", fontsize=13, color="k", rotation=90)
+ax5.text(tiempo_mag[tm4][0] - 50000000, 0.55, "t4", fontsize=13, color="k", rotation=90)
+
+axz2.text(tiempo_mag[tm1][0] - 7500000, 0, "t1", fontsize=16, color="k", rotation=90)
+axz2.text(tiempo_mag[tm2][0] - 7500000, 10, "t2", fontsize=16, color="k", rotation=90)
+axz2.text(tiempo_mag[tm3][0] - 7500000, 0, "t3", fontsize=16, color="k", rotation=90)
+axz2.text(tiempo_mag[tm4][0] - 7500000, 10, "t4", fontsize=16, color="k", rotation=90)
 
 plt.tight_layout()
 

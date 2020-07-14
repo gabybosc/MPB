@@ -266,11 +266,10 @@ def UTC_to_hdec(t_UTC):
 def hdec_to_UTC(hdec):
     """Convierte de hdec a utc"""
     h = int(hdec)
-    m = round((hdec % 1) * 60)
-    s = round((((hdec % 1) * 60) % 1) * 60)
+    m = int((hdec % 1) * 60)
+    s = int((((hdec % 1) * 60) % 1) * 60)
     UTC = f"{h}:{m}:{s}"
-
-    print(UTC)
+    return UTC
 
 
 def getrem(ins):
