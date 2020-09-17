@@ -47,7 +47,7 @@ def hodograma(B1, B2, B3):
     ax2.grid()
     ax1.tick_params(axis="both", which="major", labelsize=14)
     ax2.tick_params(axis="both", which="major", labelsize=14)
-    plt.suptitle("MAVEN MAG MVA", fontsize=18)
+    plt.suptitle("MAVEN MAG MVA 10-10-2015", fontsize=18)
     plt.legend(fontsize=16)
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
 
@@ -180,6 +180,27 @@ def plot_select(x, y, E):
     ax.set_ylim(1e4, 4 * 1e9)
     ax.legend()
     fig.canvas.mpl_connect("pick_event", onpick1)
+
+
+def scatter_datetime(
+    year, month, day, t, y, colour="C0", marcador="o", tamanio=1, transparencia=1,
+):
+    timestamps = array_datenums(year, month, day, t)
+    t_graph = md.date2num(timestamps)
+
+    plt.subplots_adjust(bottom=0.2)
+    plt.xticks(rotation=25)
+    ax = plt.gca()
+    xfmt = md.DateFormatter("%H:%M:%S")
+    ax.xaxis.set_major_formatter(xfmt)
+    plt.scatter(
+        t_graph,
+        y,
+        marker=marcador,
+        color=colour,
+        linewidths=tamanio,
+        alpha=transparencia,
+    )
 
 
 def set_axes_equal(ax):

@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
-from MVA_sin_spreadsheet import MVA, ajuste
+from MVA_sin_spreadsheet import MVA, ajuste, normal_coplanar
 from importar_datos import importar_mag, importar_lpw
 
 sys.path.append("..")
@@ -28,12 +28,12 @@ calcula la corriente
 """
 
 
-# year, month, day, doy = fechas()
-# ti, tf = tiempos("Región de análisis (no MVA)")
-# ti_MVA, tf_MVA = tiempos('Intervalo del MVA')
-year, month, day, doy = 2016, "03", 16, 76
-ti_MVA, tf_MVA = UTC_to_hdec("18:13:33"), UTC_to_hdec("18:14:06")
-ti, tf = UTC_to_hdec("17:55:00"), UTC_to_hdec("18:30:00")
+year, month, day, doy = fechas()
+ti, tf = tiempos("Región de análisis (no MVA)")
+ti_MVA, tf_MVA = tiempos("Intervalo del MVA")
+# year, month, day, doy = 2016, "03", 16, 76
+# ti_MVA, tf_MVA = UTC_to_hdec("18:13:33"), UTC_to_hdec("18:14:06")
+# ti, tf = UTC_to_hdec("17:55:00"), UTC_to_hdec("18:30:00")
 
 mag, t, B, posicion = importar_mag(year, month, day, ti, tf)
 lpw, t_lpw, e_density = importar_lpw(year, month, day, ti, tf)
@@ -89,6 +89,8 @@ B_upstream = np.mean(B[inicio_up:fin_up, :], axis=0)  # nT
 inicio_down = np.where(t == find_nearest_inicial(t, t4))[0][0]
 fin_down = np.where(t == find_nearest_final(t, t4 + 0.015))[0][0]
 B_downstream = np.mean(B[inicio_down:fin_down, :], axis=0)  # nT
+
+n_coplanar = normal_coplanar(B_upstream, B_downstream)
 
 omega = angulo(B_upstream, B_downstream)
 

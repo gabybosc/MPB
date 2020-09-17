@@ -23,9 +23,14 @@ from funciones import fechas, tiempos, donde, angulo, UTC_to_hdec, Mij
 #
 # print(f"El ángulo entre j y B magnetofunda es {ang}º")
 
-year, month, day, doy = 2016, "03", 16, 76
-ti_MVA, tf_MVA = UTC_to_hdec("18:13:33"), UTC_to_hdec("18:14:06")
-ti, tf = UTC_to_hdec("17:55:00"), UTC_to_hdec("18:30:00")
+# year, month, day, doy = 2016, "03", 16, 76
+# ti_MVA, tf_MVA = UTC_to_hdec("18:13:33"), UTC_to_hdec("18:14:06")
+# ti, tf = UTC_to_hdec("17:55:00"), UTC_to_hdec("18:30:00")
+
+year, month, day, doy = fechas()  # 10-10-2015
+ti_MVA, tf_MVA = 12.675, 12.68444
+ti, tf = 12.4, 13
+
 
 date_entry = f"{year}-{month}-{day}"
 
@@ -143,7 +148,7 @@ ax1.grid()
 ax2.grid()
 ax1.tick_params(axis="both", which="major", labelsize=14)
 ax2.tick_params(axis="both", which="major", labelsize=14)
-plt.suptitle("MAVEN MAG MVA", fontsize=18)
+plt.suptitle(f"MAVEN MAG MVA {year}-{month}-{day}", fontsize=18)
 plt.legend(fontsize=16)
 plt.tight_layout(rect=[0, 0.03, 1, 0.95])
 plt.show()

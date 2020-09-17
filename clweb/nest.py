@@ -18,8 +18,8 @@ persimétrica (simétrica en la antidiagonal). Hace el heatmap de estos ángulos
 para cada t y finalmente me devuelve todo en un gif con un cuadro cada 2 segundos.
 """
 
-year, month, day, doy = fechas()
-hora = input("Hora en HH\n")
+year, month, day, doy = 2016, "03", 16, "076"  # fechas()
+hora = 18  # input("Hora en HH\n")
 
 tiempos_txt = np.loadtxt("../outputs/t1t2t3t4.txt")
 for i in range(len(tiempos_txt)):
@@ -35,8 +35,8 @@ for i in range(len(tiempos_txt)):
             tiempos_txt[i, 5],
         ]
 
-ti = tiempos[0]
-tf = tiempos[3]
+ti = tiempos[1]
+tf = tiempos[2]
 
 mag, t, B, posicion = importar_mag(year, month, day, ti, tf)
 
@@ -91,7 +91,8 @@ print(f"El loop tardó {program_ends-program_starts:.2f} s")
 Una vez que está normales lleno, elijo un tiempo y las normales en todo el "radio"
 que le corresponde. Hago un gif con el ángulo entre las normales para cada radio
 centrado en diferentes tiempos (cada cuadro es un tiempo central, cada heatmap
-es una matriz de los ángulos).
+es una matriz de los ángulos). Es decir, calculo el ángulo a tiempo fijo para
+cada intervalo.
 Finalmente, un histograma con el número de veces que aparece cada ángulo de 0 a
 20, sin contar los ceros de la diagonal.
 """
@@ -118,29 +119,91 @@ def plot(k, angle, minimo=minimo, maximo=maximo):
     plt.ylabel("Radius (s)")
 
 
-frames = []
-n = 2  # un frame cada 2 segundos
+# frames = []
+n = 1
+b = [i for i in range(20)]
+histograma = 0
 for k in range(int(len(tiempo_central) / n)):
     NN = int(k * n)
-    tiempo_central[NN]
+    # tiempo_central[NN]
     normales_t1 = normales[NN]
     angle = np.zeros((len(normales_t1), len(normales_t1)))
     thdec = hdec_to_UTC(tiempo_central[NN])
     for i in range(len(normales_t1)):
         for j in range(len(normales_t1)):
             angle[i, j] = angulo(normales_t1[i], normales_t1[j]) * 180 / np.pi
-    frame = plot(thdec, angle)
-    frames.append(frame)
+    # frame = plot(thdec, angle)
+    # frames.append(frame)
     hist, bins = np.histogram(angle, bins=b)
     hist[0] = hist[0] - 29  # saco los 29 ceros de la diagonal
     histograma += hist
 
-gif.save(frames, "heatmap.gif", duration=500)
+t = 0
+s = 0
+for i in range(len(histograma)):
+    s += histograma[i] * ((bins[i] + bins[i + 1]) / 2)
+mean = s / np.sum(histograma)
+for i in range(len(histograma)):
+    t += histograma[i] * (bins[i] - mean) ** 2
+std = np.sqrt(t / np.sum(histograma))
+# gif.save(frames, "heatmap.gif", duration=500)
+
+center = (bins[:-1] + bins[1:]) / 2
+plt.bar(center, histograma)
+plt.axvline(x=std, ls="--", color="orange", alpha=0.7, label=r"$\sigma$")
+plt.axvline(x=2 * std, ls="--", color="red", alpha=0.7, label=r"2 $\sigma$")
+plt.xlabel("Angle (º)")
+plt.ylabel("Counts")
+plt.title(
+    "Angle between normals centered at the same time, different interval\n(between t1 and t4)"
+)
+plt.legend()
+plt.show()
+
+"""
+Histograma a tiempo fijo variando el intervalo (lo mismo que antes).
+Ángulo entre estas normales y la normal del MVA.
+"""
+for bines in [10, 20]:
+    b = [i for i in range(bines)]
+    normal = [0.920, -0.302, 0.251]
+    histograma = 0
+    for k in range(len(tiempo_central)):
+        normales_t1 = normales[k, :, :]
+        angle = np.zeros(len(normales_t1))
+        for i in range(len(normales_t1)):
+            angle[i] = angulo(normal, normales_t1[i]) * 180 / np.pi
+        hist, bins = np.histogram(angle, bins=b)
+        histograma += hist
+
+    center = (bins[:-1] + bins[1:]) / 2
+    plt.figure()
+    plt.bar(center, histograma)
+    plt.xlabel("Angle (º)")
+    plt.ylabel("Counts")
+    plt.title("Fixed time, varying interval.\nAngle with respect to MVA normal.")
+plt.show()
+
+"""
+Histograma a intervalo fijo pero variando el tiempo. Ángulo entre estas normales
+y la normal del MVA.
+"""
+b = [i for i in range(10)]
+normal = [0.920, -0.302, 0.251]
+histograma = 0
+for k in range(len(escalas)):
+    normales_intervalo = normales[:, k, :]
+    angle = np.zeros(len(normales_intervalo))
+    for i in range(len(normales_intervalo)):
+        angle[i] = angulo(normal, normales_intervalo[i]) * 180 / np.pi
+    hist, bins = np.histogram(angle, bins=10)
+    histograma += hist
 
 center = (bins[:-1] + bins[1:]) / 2
 plt.bar(center, histograma)
 plt.xlabel("Angle (º)")
 plt.ylabel("Counts")
+plt.title("Fixed interval, varying time.\nAngle with respect to MVA normal.")
 plt.show()
 
 """

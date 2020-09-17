@@ -3,7 +3,14 @@ import sys
 from importar_datos import importar_mag
 
 sys.path.append("..")
-from funciones import error, find_nearest, Mij, angulo
+from funciones import (
+    error,
+    find_nearest,
+    Mij,
+    angulo,
+    find_nearest_final,
+    find_nearest_inicial,
+)
 from funciones_metodos import normal_fit
 from funciones_plot import hodograma
 
@@ -122,3 +129,14 @@ def ajuste(year, month, day, doy, ti_MVA, tf_MVA):
     print("Ajuste terminado")
 
     return normal_ajuste, t1, t2, t3, t4
+
+
+def normal_coplanar(B_upstream, B_downstream):
+    # Anda mal cuando el ángulo entre B y la normal es 0 o 90.
+    deltaB = B_downstream - B_upstream
+
+    coplanar = np.cross(np.cross(B_downstream, B_upstream), deltaB)
+
+    normal = coplanar / np.linalg.norm(coplanar, axis=0)
+
+    return normal

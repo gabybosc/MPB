@@ -83,7 +83,7 @@ def corrientes(normal, Bup, Bdown, ancho_mpb):
 
 def donde(array, valor):
     """Me dice dónde en un array está el valor más parecido a un valor dado."""
-    resultado = np.where(array == find_nearest_inicial(array, valor))[0][0]
+    resultado = np.where(array == find_nearest(array, valor))[0][0]
     return resultado
 
 
@@ -168,9 +168,11 @@ def tiempos(string=" "):
 
     if ":" in tii:
         ti_MVA = UTC_to_hdec(tii)
-        tf_MVA = UTC_to_hdec(tff)
     else:
         ti_MVA = float(tii)
+    if ":" in tff:
+        tf_MVA = UTC_to_hdec(tff)
+    else:
         tf_MVA = float(tff)
 
     return ti_MVA, tf_MVA
@@ -257,8 +259,12 @@ def unix_to_timestamp(t_unix):
 
 def UTC_to_hdec(t_UTC):
     """Convierte de UTC a hdec"""
-    (h, m, s) = t_UTC.split(":")
-    t_hdec = int(h) + int(m) / 60 + int(s) / 3600
+    if len(t_UTC) == 8:
+        (h, m, s) = t_UTC.split(":")
+        t_hdec = int(h) + int(m) / 60 + int(s) / 3600
+    elif len(t_UTC) == 5:
+        (h, m) = t_UTC.split(":")
+        t_hdec = int(h) + int(m) / 60
 
     return t_hdec
 
