@@ -5,29 +5,16 @@ El problema es que no puede asegurarse de que existan los archivos antes porque 
 
 import urllib.request
 import shutil
-import os as os
 import numpy as np
 import datetime as dt
 
 np.set_printoptions(precision=4)
 
 # year = input('Year\n')
-# fechas = np.loadtxt(f'outputs/fechas_buenas_{year}.txt', skiprows = 1)
-# lista = []
-# for j in range(len(fechas)):
-#     lista = np.append(lista, int(fechas[j, 0]))
-#
-# lista = set(lista) #me saca los repetidos
+year = 2018
+directory = f"../../../datos/MAG_1s/{year}/"
 
-# directory = f'../../../../../media/gabybosc/datos/MAG_1s/{year}/'
-# if not os.path.exists(directory):
-#     os.makedirs(directory)
-
-directory = "../../../datos/MAG_1s/"
-
-year = 2015
-
-for doy in [283, 285]:  # range(0,366):
+for doy in range(0, 366):
     date_orbit = dt.datetime(int(year), 1, 1) + dt.timedelta(
         int(doy) - 1
     )  # para convertir el doty en date
