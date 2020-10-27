@@ -13,6 +13,8 @@ y entre [-2,2] y z entre [-2,2].
 A su vez, a medida que recorto x,y,z tengo que ir recortando también la corriente.
 Si quiero recortar más datos tengo que concatenarlos en val.
 Ahora querría agregarle Marte y la posición de la MPB de vignes.
+A su vez, para tener un corte en los planos x=0, y=0, z=0 tengo que agregar esa
+constraint.
 """
 
 val = np.concatenate((posicion, corrientes), axis=1)
@@ -24,10 +26,12 @@ ycut = np.array([xcut[i, :] for i in range(len(xcut)) if np.abs(xcut[i, 1]) <= 2
 zcut = np.array([ycut[i, :] for i in range(len(ycut)) if np.abs(ycut[i, 2]) <= 2])
 # zcut es el cut final y el que voy a usar el resto del tiempo
 
-x = zcut[:, 0]
-y = zcut[:, 1]
-z = zcut[:, 2]
-j = np.linalg.norm(zcut[:, 3:6], axis=1)
+zcero = np.array([zcut[i, :] for i in range(len(zcut)) if np.abs(zcut[i, 2]) <= 0.01])
+
+x = zcero[:, 0]
+y = zcero[:, 1]
+z = zcero[:, 2]
+j = np.linalg.norm(zcero[:, 3:6], axis=1)
 
 THETA = np.linspace(0, np.pi * 3 / 4, 100)
 PHI = np.linspace(0, 2 * np.pi, 100)
@@ -51,31 +55,31 @@ plt.colorbar(label="corriente (va de 0 a 0.5)")
 plt.xlabel("x (RM)")
 plt.ylabel("y (RM)")
 plt.legend()
-plt.title("Simulacion corrientes plano (x,y)")
+plt.title("Simulacion corrientes plano z=0")
 
-plt.figure()
-plt.scatter(x[::100], z[::100], c=j[::100], cmap="Blues", alpha=0.5)
-plt.plot(X1, Y1, c="C1", label="Mean MPB")
-plt.plot(X1, -Y1, c="C1")
-plt.clim(0, 0.1)
-plt.xlim(left=0)
-plt.colorbar(label="corriente (va de 0 a 0.5)")
-plt.xlabel("x (RM)")
-plt.ylabel("z (RM)")
-plt.legend()
-plt.title("Simulacion corrientes plano (x,z)")
-
-plt.figure()
-plt.scatter(x[::100], y[::100], c=j[::100], cmap="Greens", alpha=0.5)
-plt.plot(X1, Y1, label="Mean MPB")
-plt.plot(X1, -Y1, c="C0")
-plt.clim(0, 0.1)
-plt.xlim(left=0)
-plt.colorbar(label="corriente (va de 0 a 0.5)")
-plt.xlabel("y (RM)")
-plt.ylabel("z (RM)")
-plt.legend()
-plt.title("Simulacion corrientes plano (y,z)")
+# plt.figure()
+# plt.scatter(x[::100], z[::100], c=j[::100], cmap="Blues", alpha=0.5)
+# plt.plot(X1, Y1, c="C1", label="Mean MPB")
+# plt.plot(X1, -Y1, c="C1")
+# plt.clim(0, 0.1)
+# plt.xlim(left=0)
+# plt.colorbar(label="corriente (va de 0 a 0.5)")
+# plt.xlabel("x (RM)")
+# plt.ylabel("z (RM)")
+# plt.legend()
+# plt.title("Simulacion corrientes plano (x,z)")
+#
+# plt.figure()
+# plt.scatter(x[::100], y[::100], c=j[::100], cmap="Greens", alpha=0.5)
+# plt.plot(X1, Y1, label="Mean MPB")
+# plt.plot(X1, -Y1, c="C0")
+# plt.clim(0, 0.1)
+# plt.xlim(left=0)
+# plt.colorbar(label="corriente (va de 0 a 0.5)")
+# plt.xlabel("y (RM)")
+# plt.ylabel("z (RM)")
+# plt.legend()
+# plt.title("Simulacion corrientes plano (y,z)")
 
 plt.show()
 # adding the Contour lines with labels
