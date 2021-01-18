@@ -1,90 +1,60 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-path = "../../datos/simulacion_leonardo/"
-corrientes = np.loadtxt(path + "corriente.txt")
-campo = np.loadtxt(path + "campo.txt")
-posicion = np.loadtxt(path + "pos_mhd.txt")
-
 """
-Usamos un poco de list comprehension para elegir las posiciones menores a 2Rm en
-valor absoluto. Creo que en realidad para x me alcanza con x entre [0,2],
-y entre [-2,2] y z entre [-2,2].
-A su vez, a medida que recorto x,y,z tengo que ir recortando también la corriente.
-Si quiero recortar más datos tengo que concatenarlos en val.
-Ahora querría agregarle Marte y la posición de la MPB de vignes.
-A su vez, para tener un corte en los planos x=0, y=0, z=0 tengo que agregar esa
-constraint.
+Quiero comparar J con rotB y con qn(vi-ve)
 """
 
-val = np.concatenate((posicion, corrientes), axis=1)
+path = "../../../datos/simulacion_leonardo/"
+reordenados = np.load(
+    path + "ordenado_cut_0dot05.npy"
+)  # todos los datos ordenados con y,z menores a 0.05
 
-xcut = np.array(
-    [val[i, :] for i in range(len(val)) if val[i, 0] <= 2 and val[i, 0] >= 0]
-)
-ycut = np.array([xcut[i, :] for i in range(len(xcut)) if np.abs(xcut[i, 1]) <= 2])
-zcut = np.array([ycut[i, :] for i in range(len(ycut)) if np.abs(ycut[i, 2]) <= 2])
-# zcut es el cut final y el que voy a usar el resto del tiempo
+x = reordenados[:, 0]  # Rm
+pos = reordenados[:, :3]
+rho = reordenados[:, 3]  # 1/cm³
+v_e = reordenados[:, 4:7]  # km/s
+B = reordenados[:, 7:10]  # nT
+Ptot = reordenados[:, 10]  # nPa
+HpRho = reordenados[:, 11]
+v_i = reordenados[:, 12:15]
+HP = reordenados[:, 15]
+O2pRho = reordenados[:, 16]
+O2P = reordenados[:, 20]
+OpRho = reordenados[:, 21]
+OP = reordenados[:, 25]
+CO2pRho = reordenados[:, 26]
+CO2P = reordenados[:, 30]
+J = reordenados[:, -3:]  # uA/m²
 
-zcero = np.array([zcut[i, :] for i in range(len(zcut)) if np.abs(zcut[i, 2]) <= 0.01])
+e = 1.6e-19  # C
+mu_0 = 4e-7 * np.pi  # T m / A = nT m / nA
 
-x = zcero[:, 0]
-y = zcero[:, 1]
-z = zcero[:, 2]
-j = np.linalg.norm(zcero[:, 3:6], axis=1)
-
-THETA = np.linspace(0, np.pi * 3 / 4, 100)
-PHI = np.linspace(0, 2 * np.pi, 100)
-
-L = 0.96
-e = 0.9
-x0 = 0.78
-r1 = L / (1 + e * np.cos(THETA))
-
-X1 = x0 + r1 * np.cos(THETA)
-Y1 = r1 * np.sin(THETA)
+j_ampere = (
+    1e9 * e * np.array([HpRho[i] * (v_i[i, :] - v_e[i, :]) for i in range(len(v_i))])
+)  # A/m²
 
 
-plt.figure()
-plt.scatter(x[::100], y[::100], c=j[::100], cmap="Reds", alpha=0.5)
-plt.plot(X1, Y1, label="Mean MPB")
-plt.plot(X1, -Y1, c="C0")
-plt.clim(0, 0.1)
-plt.xlim(left=0)
-plt.colorbar(label="corriente (va de 0 a 0.5)")
+def dif_finitas(f, dx):
+    diff = np.array([f[i + 1] - f[i] for i in range(len(f) - 1)])
+    # agregamos el que falta al final
+    diff = np.append(diff, f[-1] - f[-2])
+    sol = diff / dx
+    return sol
+
+
+dy = np.abs(reordenados[4, 1] - reordenados[2, 1])
+dyBz = np.gradient(B[:, 2], dy * 3390) / 3390000  # nT / m
+
+dz = np.abs(reordenados[4, 2] - reordenados[0, 2])
+dzBy = np.gradient(B[:, 1], dz * 3390) / 3390000
+
+j_curl = (dyBz - dzBy) / mu_0  # nA / m²
+
+plt.plot(x, J[:, 0] * 1e3, label="J simu")
+plt.plot(x, j_ampere[:, 0] * 1e9, label="J ampère")
+plt.plot(x, j_curl, label="J rotor")
 plt.xlabel("x (RM)")
-plt.ylabel("y (RM)")
+plt.ylabel("Jx (nA/m²)")
 plt.legend()
-plt.title("Simulacion corrientes plano z=0")
-
-# plt.figure()
-# plt.scatter(x[::100], z[::100], c=j[::100], cmap="Blues", alpha=0.5)
-# plt.plot(X1, Y1, c="C1", label="Mean MPB")
-# plt.plot(X1, -Y1, c="C1")
-# plt.clim(0, 0.1)
-# plt.xlim(left=0)
-# plt.colorbar(label="corriente (va de 0 a 0.5)")
-# plt.xlabel("x (RM)")
-# plt.ylabel("z (RM)")
-# plt.legend()
-# plt.title("Simulacion corrientes plano (x,z)")
-#
-# plt.figure()
-# plt.scatter(x[::100], y[::100], c=j[::100], cmap="Greens", alpha=0.5)
-# plt.plot(X1, Y1, label="Mean MPB")
-# plt.plot(X1, -Y1, c="C0")
-# plt.clim(0, 0.1)
-# plt.xlim(left=0)
-# plt.colorbar(label="corriente (va de 0 a 0.5)")
-# plt.xlabel("y (RM)")
-# plt.ylabel("z (RM)")
-# plt.legend()
-# plt.title("Simulacion corrientes plano (y,z)")
-
 plt.show()
-# adding the Contour lines with labels
-# cset = contour(Z,arange(-1,1.5,0.2),linewidths=2,cmap=cm.Set2)
-# clabel(cset,inline=True,fmt='%1.1f',fontsize=10)
-# colorbar(im) # adding the colobar on the right
-# # latex fashion title
-# title('$z=(1-x^2+y^3) e^{-(x^2+y^2)/2}$')
