@@ -49,8 +49,8 @@ def deltaB(B):
 
 
 def Bpara_Bperp(B, t, ti, tf):
-    j_inicial = np.where(t == find_nearest(t, ti))[0][0]
-    j_final = np.where(t == find_nearest(t, tf))[0][0]
+    j_inicial = donde(t, ti)
+    j_final = donde(t, tf)
 
     # Lo hago en ventanas de Mf-Mi, moviendose de a j (1s en baja resolución).
     B_para = np.zeros(j_final - j_inicial)
@@ -79,6 +79,16 @@ def corrientes(normal, Bup, Bdown, ancho_mpb):
     jv = js / (1000 * ancho_mpb)  # nA/m²
 
     return js, jv
+
+
+def diezmar(largo, corto):
+    """le doy un array largo que quiero que mida como el corto y me devuelve los
+    índices tal que len(largo[idx]) == len(corto)"""
+    idx = np.zeros(len(corto))
+    for i in range(len(corto)):
+        idx[i] = donde(largo, corto[i])
+    idx = idx.astype(int)
+    return idx
 
 
 def donde(array, valor):

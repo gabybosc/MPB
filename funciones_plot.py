@@ -238,3 +238,35 @@ def toggle_selector(event):
         if event.key in ["A", "a"] and not toggle_selector.RS.active:
             print(" RectangleSelector activated.")
             toggle_selector.RS.set_active(True)
+
+
+def zoom_scroll(ax, base_scale=0.2):
+    def zoom_fun(event):
+        current_x = ax.get_xlim()
+        current_y = ax.get_ylim()
+        current_xrange = (current_x[1] - current_x[0]) * 0.5
+        current_yrange = (current_y[1] - current_y[0]) * 0.5
+        xdata = event.xdata
+        ydata = event.ydata
+        if event.button == "up":
+            scale_factor = 1 / base_scale
+        elif event.button == "down":
+            scale_factor = base_scale
+        else:  # por si pasa algo raro
+            scale_factor = 1
+            print(event.button)
+        # nuevos limites
+        ax.set_xlim = [
+            xdata - current_xrange * scale_factor,
+            xdata + current_xrange * scale_factor,
+        ]
+        ax.set_ylim = [
+            ydata - current_yrange * scale_factor,
+            ydata + current_yrange * scale_factor,
+        ]
+        plt.draw()
+
+    fig = ax.get_figure()
+    fig.canvas.mpl_connect("scroll_event", zoom_fun)
+
+    return zoom_fun

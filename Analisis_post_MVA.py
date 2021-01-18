@@ -16,6 +16,8 @@ Hace el MVA
 calcula el ángulo entre normales
 calcula el ancho de la mpb
 calcula la corriente
+
+NO NECESITA YA ACTUALIZAR LA FECHA EN GDOCS
 """
 
 year, month, day, doy = fechas()

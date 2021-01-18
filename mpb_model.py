@@ -24,7 +24,6 @@ v0 = 0.03
 b0 = 15
 v00 = v0 - b0 * eps ** 2
 mach = 0.65
-params = [eps, v00, mach]
 
 # Integrates dY/dx=F(x,Y,par) using RK4
 # Y: N-dim vector of unknowns (N=3)
@@ -57,7 +56,16 @@ p = YY[2] + 1 / (mach ** 2 * YY[2]) + eps ** 2 * (YY[0] ** 2 + YY[1] ** 2) / 2
 
 pmag = eps ** 2 * (YY[0] ** 2 + YY[1] ** 2) / 2
 
+plt.figure()
 plt.plot(pmag / p)
+plt.title("pmag/p")
+
+plt.figure()
+plt.plot(YY[1, :], YY[2, :])
+plt.xlabel("by")
+plt.ylabel("bz")
+plt.title("by vs bz, RK4 integration")
+
 plt.show()
 
 print(f"p_mag/p_total inicial = {pmag[0] / p[0]}")

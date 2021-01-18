@@ -1,7 +1,7 @@
 from sys import exit
 import numpy as np
 from funciones import fechas, donde
-from importar_datos import importar_mag_1s, importar_swia
+from importar_datos import importar_mag_1s, importar_swia, importar_fila
 
 np.set_printoptions(precision=4)
 
@@ -23,25 +23,20 @@ in_out = input("Inbound? (y/n)\n")
 if in_out == "n":
     print("este no sirve!")
     exit()
-lst = input("La normal como nn,nn,nn\n").split(",")
-normal = np.array([float(i) for i in lst])
 
-datos = np.loadtxt("outputs/t1t2t3t4.txt")
-for j in range(len(datos)):
-    if (
-        datos[j, 0] == float(year)
-        and datos[j, 1] == float(doy)
-        and int(datos[j, 2]) == int(ti)
-    ):
-        i = j
-    else:
-        print("No tengo el ancho de la MPB para esa fecha")
-        exit()
+fila, hoja_parametros, hoja_MVA, hoja_Bootstrap, hoja_Ajuste = importar_fila(
+    year, month, day, doy, ti
+)
+normal = [
+    float(hoja_MVA.cell(fila, 16).value),
+    float(hoja_MVA.cell(fila, 17).value),
+    float(hoja_MVA.cell(fila, 18).value),
+]
 
-t1 = datos[i, 2]
-t2 = datos[i, 3]
-t3 = datos[i, 4]
-t4 = datos[i, 5]
+t1 = float(hoja_parametros.cell(fila, 6).value)
+t2 = float(hoja_parametros.cell(fila, 7).value)
+t3 = float(hoja_parametros.cell(fila, 8).value)
+t4 = float(hoja_parametros.cell(fila, 9).value)
 
 mag, t_mag_entero, B_entero, posicion = importar_mag_1s(year, month, day, ti, tf)
 swia, t_swia_entero, density, temperature, vel_mso_xyz = importar_swia(

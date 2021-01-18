@@ -6,7 +6,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 from socket import gethostname
 
 sys.path.append("..")
-from funciones import find_nearest, donde
+from funciones import find_nearest
 
 
 def importar_mag(year, month, day, ti, tf):
@@ -201,18 +201,6 @@ def importar_lpw(year, month, day, ti, tf):
 ##################################### tiempos t1t2t3t4
 def importar_t1t2t3t4(year, doy, hour):
     fila = input("Qué fila es en el archivo MPB?\n")
-    # scope = [
-    #     "https://spreadsheets.google.com/feeds",
-    #     "https://www.googleapis.com/auth/spreadsheets",
-    #     "https://www.googleapis.com/auth/drive.file",
-    #     "https://www.googleapis.com/auth/drive",
-    # ]
-    #
-    # creds = ServiceAccountCredentials.from_json_keyfile_name("../mpb_api.json", scope)
-    #
-    # client = gspread.authorize(creds)
-    #
-    # hoja_parametros = client.open("MPB").worksheet("Parametros")
     hoja_parametros, hoja_MVA, hoja_Bootstrap, hoja_Ajuste = importar_gdocs()
     t1 = float(hoja_parametros.cell(fila, 6).value)  # ojo que cuenta desde 1 no desde 0
     t2 = float(hoja_parametros.cell(fila, 7).value)

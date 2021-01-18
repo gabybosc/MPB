@@ -1,7 +1,9 @@
 import numpy as np
 import datetime as dt
-from funciones import find_nearest, unix_to_decimal
+from funciones import donde, unix_to_decimal
 import cdflib as cdf
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 from socket import gethostname
 
 
@@ -15,8 +17,8 @@ def importar_mag_1s(year, month, day, ti, tf):
 
     if gethostname() == "magneto2":
         path = f"../../../../media/gabybosc/datos/MAG_1s/{year}/"
-    elif gethostname() == "Gaby":
-        path = "../../datos/MAG_1s/"
+    elif gethostname() == "gabybosc":
+        path = f"../../datos/MAG_1s/{year}/"
     else:
         path = f"../../../datos/MAG_1s/{year}-{month}-{day}/"
 
@@ -35,8 +37,8 @@ def importar_mag_1s(year, month, day, ti, tf):
 
     posicion = mag[:, 11:14]
 
-    inicio = np.where(t == find_nearest(t, ti))[0][0]
-    fin = np.where(t == find_nearest(t, tf))[0][0]
+    inicio = donde(t, ti)
+    fin = donde(t, tf)
 
     t_cut = t[inicio:fin]
     B_cut = B[inicio:fin]
@@ -57,7 +59,7 @@ def importar_mag(year, month, day, ti, tf):
 
     if gethostname() == "magneto2":
         path = f"../../../../media/gabybosc/datos/MAG_hires/"
-    elif gethostname() == "Gaby":
+    elif gethostname() == "gabybosc":
         path = "../../datos/MAG_hires/"
     else:
         path = f"../../../datos/MAG_hires/"
@@ -76,8 +78,8 @@ def importar_mag(year, month, day, ti, tf):
 
     posicion = mag[:, 11:14]
 
-    inicio = np.where(t == find_nearest(t, ti))[0][0]
-    fin = np.where(t == find_nearest(t, tf))[0][0]
+    inicio = donde(t, ti)
+    fin = donde(t, tf)
 
     t_cut = t[inicio:fin]
     B_cut = B[inicio:fin]
@@ -85,30 +87,40 @@ def importar_mag(year, month, day, ti, tf):
     return mag, t_cut, B_cut, posicion_cut
 
 
-# #########################################################################SWEA
-# def importar_swea(year, month, day, ti, tf):
-#     date_orbit = dt.date(int(year), int(month), int(day))
-#     year = date_orbit.strftime("%Y")
-#     month = date_orbit.strftime("%m")
-#     day = date_orbit.strftime("%d")
-#     doy = date_orbit.strftime("%j")
-#
-#     path = f'../../../../media/gabybosc/datos/SWEA/'
-#
-#     swea = cdf.CDF(path + f'SWEA/mvn_swe_l2_svyspec_{year}{month}{day}_v04_r01.cdf.cdf')
-#
-#     energy = swea[:, 7]
-#     JE_total = swea[:, -1]
-#
-#     t = np.unique(swea[:,3] + swea[:,4]/60 + swea[:,5]/3600) #hdec
-#
-#     energias = [50 + i*50 for i in range(3)]
-#
-#     inicio = np.where(t == find_nearest(t, ti))[0][0]
-#     fin = np.where(t == find_nearest(t, tf))[0][0]
-#
-#     return(swea, t, energias)
-# #########################################################################SWIA
+# ######################################################################## SWEA
+def importar_swea(year, month, day, ti, tf):
+    date_orbit = dt.date(int(year), int(month), int(day))
+    year = date_orbit.strftime("%Y")
+    month = date_orbit.strftime("%m")
+    day = date_orbit.strftime("%d")
+
+    if gethostname() == "magneto2":
+        path = f"../../../../media/gabybosc/datos/SWEA/"
+    elif gethostname() == "gabybosc":
+        path = "../../datos/SWEA/"
+    else:
+        path = f"../../../datos/SWEA/"
+
+    swea = cdf.CDF(path + f"/mvn_swe_l2_svyspec_{year}{month}{day}_v04_r01.cdf")
+
+    flux_all = swea.varget("diff_en_fluxes")
+    energia = swea.varget("energy")
+    t_unix = swea.varget("time_unix")
+
+    t = unix_to_decimal(t_unix)
+
+    inicio = donde(t, ti)
+    fin = donde(t, tf)
+
+    t_cut = t[inicio:fin]
+
+    flux = flux_all[inicio:fin]
+    flux_plot = np.transpose(flux)[::-1]
+
+    return swea, t_cut, energia, flux_plot
+
+
+# ######################################################################## SWIA
 
 
 def importar_swia(year, month, day, ti, tf):
@@ -119,7 +131,7 @@ def importar_swia(year, month, day, ti, tf):
 
     if gethostname() == "magneto2":
         path = f"../../../../media/gabybosc/datos/SWIA/"
-    elif gethostname() == "Gaby":
+    elif gethostname() == "gabybosc":
         path = "../../datos/SWIA/"
     else:
         path = f"../../../datos/SWIA/"
@@ -132,8 +144,8 @@ def importar_swia(year, month, day, ti, tf):
     vel_mso_xyz = swia.varget("velocity_mso")  # km/s
 
     t_swia = unix_to_decimal(t_unix)
-    inicio = np.where(t_swia == find_nearest(t_swia, ti))[0][0]
-    fin = np.where(t_swia == find_nearest(t_swia, tf))[0][0]
+    inicio = donde(t_swia, ti)
+    fin = donde(t_swia, tf)
 
     t_cut = t_swia[inicio:fin]
     density_cut = density[inicio:fin]
@@ -152,21 +164,100 @@ def importar_lpw(year, month, day, ti, tf):
 
     if gethostname() == "magneto2":
         path = f"../../../../media/gabybosc/datos/LPW/"
-    elif gethostname() == "Gaby":
+    elif gethostname() == "gabybosc":
         path = "../../datos/LPW/"
     else:
         path = f"../../../datos/LPW/"
 
     lpw = cdf.CDF(path + f"mvn_lpw_l2_lpnt_{year}{month}{day}_v03_r02.cdf")
 
-    e_density = lpw[:, -1]
+    t_unix = lpw.varget("time_unix")
+    e_density = lpw.varget("data")[:, 3]
 
-    t = lpw[:, 3] + lpw[:, 4] / 60 + lpw[:, 5] / 3600
+    t = unix_to_decimal(t_unix)
 
-    inicio = np.where(t == find_nearest(t, ti))[0][0]
-    fin = np.where(t == find_nearest(t, tf))[0][0]
+    inicio = donde(t, ti)
+    fin = donde(t, tf)
 
     t_cut = t[inicio:fin]
     e_density_cut = e_density[inicio:fin]
 
-    return (lpw, t_cut, e_density_cut)
+    return lpw, t_cut, e_density_cut
+
+
+###########################
+def importar_t1t2t3t4(year, month, day, doy, hour):
+
+    datos = np.loadtxt("../outputs/t1t2t3t4.txt")
+    fecha = datos[:, 0:2].astype(int)
+    hora = datos[:, 2].astype(int)
+    fecha_in = [int(year), int(doy)]
+    for j in range(len(datos)):
+        if all(fecha[j, 0:2]) == all(fecha_in):
+            if hora[j] == hour or hora[j] == hour + 1 or hora[j] == hour - 1:
+                idx = j
+    t1, t2, t3, t4 = datos[idx, 2:]
+
+    return t1, t2, t3, t4
+
+
+###################################
+def importar_gdocs():
+    scope = [
+        "https://spreadsheets.google.com/feeds",
+        "https://www.googleapis.com/auth/spreadsheets",
+        "https://www.googleapis.com/auth/drive.file",
+        "https://www.googleapis.com/auth/drive",
+    ]
+
+    creds = ServiceAccountCredentials.from_json_keyfile_name("mpb_api.json", scope)
+
+    client = gspread.authorize(creds)
+
+    hoja_parametros = client.open("MPB").worksheet("Parametros")
+    hoja_MVA = client.open("MPB").worksheet("MVA")
+    hoja_Bootstrap = client.open("MPB").worksheet("Bootstrap")
+    hoja_Ajuste = client.open("MPB").worksheet("Ajuste")
+
+    return hoja_parametros, hoja_MVA, hoja_Bootstrap, hoja_Ajuste
+
+
+###########
+def importar_fila(year, month, day, doy, hora):
+    hoja_parametros, hoja_MVA, hoja_Bootstrap, hoja_Ajuste = importar_gdocs()
+
+    meses = {
+        "Jan": "01",
+        "Feb": "02",
+        "Mar": "03",
+        "Apr": "04",
+        "May": "05",
+        "Jun": "06",
+        "Jul": "07",
+        "Aug": "08",
+        "Sep": "09",
+        "Oct": "10",
+        "Nov": "11",
+        "Dec": "12",
+    }
+    fecha = hoja_parametros.col_values(1)[3:]
+    hh = hoja_parametros.col_values(2)[3:]
+
+    fila = None
+
+    for i in range(len(fecha)):
+        dd, mm, yy = fecha[i].split()
+        mes = meses[mm]
+        if (
+            yy == str(year)
+            and mes == month
+            and int(dd) == int(day)
+            and int(hh[i]) == int(hora)
+        ):
+            fila = i + 4
+            break
+
+    if fila is None:
+        print("no encuentro la fila")
+
+    return fila, hoja_parametros, hoja_MVA, hoja_Bootstrap, hoja_Ajuste

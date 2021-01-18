@@ -1,7 +1,7 @@
 import numpy as np
 from sys import exit
 from funciones import fechas, donde
-from importar_datos import importar_mag_1s, importar_swia
+from importar_datos import importar_mag_1s, importar_swia, importar_fila
 
 np.set_printoptions(precision=4)
 
@@ -17,30 +17,32 @@ q_e = 1.602e-19  # carga del electrón en C
 
 # ##########DATOS
 year, month, day, doy = fechas()
-ti = int(input('Hora del cruce (HH)\n'))
+ti = int(input("Hora del cruce (HH)\n"))
 tf = ti + 1
-in_out = input('Inbound? (y/n)\n')
-if in_out == 'y':
-    print('este no sirve!')
+in_out = input("Inbound? (y/n)\n")
+if in_out == "y":
+    print("este no sirve!")
     exit()
-lst = input('La normal como nn,nn,nn\n').split(',')
-normal = np.array([float(i) for i in lst])
 
-datos = np.loadtxt('outputs/t1t2t3t4.txt')
-for j in range(len(datos)):
-    if datos[j, 0] == float(year) and datos[j, 1] == float(doy) and int(datos[j, 2]) == int(ti):
-        i = j
-    else:
-        print('No tengo el ancho de la MPB para esa fecha')
-        exit()
+fila, hoja_parametros, hoja_MVA, hoja_Bootstrap, hoja_Ajuste = importar_fila(
+    year, month, day, doy, ti
+)
 
-t1 = datos[i, 5]
-t2 = datos[i, 4]
-t3 = datos[i, 3]
-t4 = datos[i, 2]
+normal = [
+    float(hoja_MVA.cell(fila, 16).value),
+    float(hoja_MVA.cell(fila, 17).value),
+    float(hoja_MVA.cell(fila, 18).value),
+]
+
+t1 = float(hoja_parametros.cell(fila, 9).value)
+t2 = float(hoja_parametros.cell(fila, 8).value)
+t3 = float(hoja_parametros.cell(fila, 7).value)
+t4 = float(hoja_parametros.cell(fila, 6).value)
 
 mag, t_mag_entero, B_entero, posicion = importar_mag_1s(year, month, day, ti, tf)
-swia, t_swia_entero, density, temperature, vel_mso_xyz = importar_swia(year, month, day, ti, tf)
+swia, t_swia_entero, density, temperature, vel_mso_xyz = importar_swia(
+    year, month, day, ti, tf
+)
 
 """
 giroradio: rg = mp * v_perp / (q_e * B)  en la región upstream
@@ -54,13 +56,13 @@ inicio_swia = donde(t_swia_entero, t4 + 0.05)
 fin_swia = donde(t_swia_entero, t4 + 0.1)
 
 t_mag = t_mag_entero[inicio_mag:fin_mag]
-B = B_entero[inicio_mag:fin_mag] * 1E-9  # T
+B = B_entero[inicio_mag:fin_mag] * 1e-9  # T
 
 t_swia = t_swia_entero[inicio_swia:fin_swia]
 velocidad = vel_mso_xyz[inicio_swia:fin_swia]
 
 # para poder proyectar v_para voy a tener que diezmar B
-paso = int(len(B)/len(velocidad))
+paso = int(len(B) / len(velocidad))
 B_diezmado = B[::paso]
 
 # ahora que están recortadas las convierto en lo que busco: la intensidad de B y la v perp
@@ -80,7 +82,7 @@ v_perp = np.mean(velocidad - N, axis=0)
 # el giroradio entonces:
 rg = mp * np.linalg.norm(v_perp) / (q_e * np.linalg.norm(B_medio))
 
-print(f'El radio de Larmor es {rg:1.3g} km')
+print(f"El radio de Larmor es {rg:1.3g} km")
 
 """
 Proyectando en la normal:
@@ -91,20 +93,24 @@ v_normal = np.dot(np.mean(velocidad, axis=0), normal)
 # el giroradio entonces:
 rg_normal = mp * np.linalg.norm(v_normal) / (q_e * np.linalg.norm(B_medio))
 
-print(f'El radio de Larmor con la velocidad proyectada en la normal es {rg_normal:1.3g} km')
+print(
+    f"El radio de Larmor con la velocidad proyectada en la normal es {rg_normal:1.3g} km"
+)
 
 
 """
 Longitud inercial
 """
-density_mean = np.zeros(fin_swia-inicio_swia)  # upstream
+density_mean = np.zeros(fin_swia - inicio_swia)  # upstream
 paso = 20  # cada paso son 4 segundos.
-for i in range(fin_swia-inicio_swia):
-    density_mean[i] = np.mean(density[inicio_swia+i-paso:inicio_swia+i])  # toma desde atrás del ti así no se mete en la MPB nunca
+for i in range(fin_swia - inicio_swia):
+    density_mean[i] = np.mean(
+        density[inicio_swia + i - paso : inicio_swia + i]
+    )  # toma desde atrás del ti así no se mete en la MPB nunca
 
 # Elijo la densidad promedio media
-idx_d = int(np.abs(np.argmin(density_mean) + np.argmax(density_mean))/2)
+idx_d = int(np.abs(np.argmin(density_mean) + np.argmax(density_mean)) / 2)
 density_avg = density_mean[idx_d]  # cm
 
-ion_length = 2.28E07 / np.sqrt(density_avg) * 1E-5  # km
-print(f'La longitud inercial de iones es {ion_length:1.3g} km')
+ion_length = 2.28e07 / np.sqrt(density_avg) * 1e-5  # km
+print(f"La longitud inercial de iones es {ion_length:1.3g} km")

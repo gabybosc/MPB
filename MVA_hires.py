@@ -210,27 +210,16 @@ def MVA(year, month, day, doy, ti_MVA, tf_MVA, mag):
     hora_sheet = hoja_mva.col_values(2)
 
     print("Acceso a la spreadsheet")
-    # si ya está esa fecha en la spreadsheet, la sobreescribe. Si no, usa la siguiente línea vacía
-    # pdb.set_trace()
-    if date_entry in fecha_sheet and str(int(t1)) in hora_sheet:
-        listaA = [a for a, fechas in enumerate(fecha_sheet) if fechas == date_entry]
-        listaB = [b for b, horas in enumerate(hora_sheet) if horas == str(int(t1))]
-        idx = list(set(listaA).intersection(listaB))[0]
-        nr = idx + 1
-    else:
-        nr = next_available_row(hoja_mva)
+
+    listaA = [a for a, fechas in enumerate(fecha_sheet) if fechas == date_entry]
+    listaB = [b for b, horas in enumerate(hora_sheet) if horas == str(int(t1))]
+    idx = list(set(listaA).intersection(listaB))[0]
+    nr = idx + 1
 
     # ######updatºla hoja de los parámetros
-    hoja_parametros.update_acell(f"A{nr}", f"{date_entry}")
-    hoja_parametros.update_acell(f"B{nr}", f"{int(t1)}")
     hoja_parametros.update_acell(f"D{nr}", f"{SZA:.3g}")
     hoja_parametros.update_acell(f"E{nr}", f"{int(altitud)}")
     hoja_parametros.update_acell(f"O{nr}", f"{round(B_norm_medio,2)}")
-
-    cell_times = hoja_parametros.range(f"F{nr}:I{nr}")
-    for i, cell in enumerate(cell_times):
-        cell.value = tiempos[i]
-    hoja_parametros.update_cells(cell_times)
 
     cell_B = hoja_parametros.range(f"L{nr}:N{nr}")
     for i, cell in enumerate(cell_B):
@@ -246,8 +235,6 @@ def MVA(year, month, day, doy, ti_MVA, tf_MVA, mag):
         hoja_parametros.update_acell(f"J{nr}", "Sin filtrar")
 
     # #######update la hoja de MVA
-    hoja_mva.update_acell(f"A{nr}", f"{date_entry}")
-    hoja_mva.update_acell(f"B{nr}", f"{int(t1)}")
     hoja_mva.update_acell(f"D{nr}", f"{ti_MVA}")
     hoja_mva.update_acell(f"E{nr}", f"{tf_MVA}")
     hoja_mva.update_acell(f"I{nr}", f"{lamb[1]/lamb[2]:.3g}")
@@ -268,8 +255,6 @@ def MVA(year, month, day, doy, ti_MVA, tf_MVA, mag):
     hoja_mva.update_cells(cell_av)
 
     # #######update la hoja de bootstrap
-    hoja_boot.update_acell(f"A{nr}", f"{date_entry}")
-    hoja_boot.update_acell(f"B{nr}", f"{int(t1)}")
     hoja_boot.update_acell(f"D{nr}", f"{M_cut}")
     hoja_boot.update_acell(f"E{nr}", f"{N_boot}")
 
@@ -284,8 +269,6 @@ def MVA(year, month, day, doy, ti_MVA, tf_MVA, mag):
     hoja_boot.update_acell(f"L{nr}", f"{abs(round(np.mean(B3_boot)/B_norm_medio,2))}")
 
     # #######update la hoja del ajuste
-    hoja_fit.update_acell(f"A{nr}", f"{date_entry}")
-    hoja_fit.update_acell(f"B{nr}", f"{int(t1)}")
     hoja_fit.update_acell(f"D{nr}", f"{L0}")
     hoja_fit.update_acell(f"E{nr}", f"{e}")
     hoja_fit.update_acell(f"F{nr}", f"{x0}")

@@ -2,26 +2,26 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 from importar_datos import importar_swia
-from funciones import find_nearest, fechas, donde, tiempos
+from funciones import fechas, donde, tiempos, diezmar
 
 np.set_printoptions(precision=4)
 
 """
-Calcula el E convectivo. Igual debería asegurarme de que esté funcionando bien porque tengo mis dudas.
+Calcula el E convectivo. Igual debería asegurarme de que esté funcionando bien
+porque tengo mis dudas.
 Usa los datos de SWIA de pds y los de MAG de clweb.
 """
 
 # ##########DATOS
 year, month, day, doy = fechas()
-ti, tf = tiempos("magnetofunda + mpb")
+ti_ms, tf_ms = 18.06, 18.2193  # tiempos("magnetofunda")
+ti_up, tf_up = 18.3, 18.5  # tiempos("región upstream")
 
 
 def importar_mag(year, month, day, ti, tf):
     path = (
         f"../../datos/clweb/{year}-{month}-{day}/"  # path a los datos desde la laptop
     )
-    # path = f"../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"  # path a los datos desde la desktop.
-    # Estaría bueno ponerle un if para que detecte en cuál estoy.
     if os.path.isfile(path + "mag_filtrado.txt"):
         mag = np.loadtxt(path + "mag_filtrado.txt", skiprows=2)
         B = mag[:, :3]
@@ -41,8 +41,8 @@ def importar_mag(year, month, day, ti, tf):
     for i in range(9, 12):
         posicion[:, i - 9] = mag[:, i]
 
-    inicio = np.where(t == find_nearest(t, ti))[0][0]
-    fin = np.where(t == find_nearest(t, tf))[0][0]
+    inicio = donde(t, ti)
+    fin = donde(t, tf)
 
     t_cut = t[inicio:fin]
     B_cut = B[inicio:fin]
@@ -50,29 +50,24 @@ def importar_mag(year, month, day, ti, tf):
     return mag, t_cut, B_cut, posicion_cut
 
 
-swia, t_swia, density, temperature, vel_mso = importar_swia(year, month, day, ti, tf)
-mag, t_mag, B, posicion = importar_mag(year, month, day, ti, tf)
+swia, t_swia, density, temperature, vel_mso = importar_swia(
+    year, month, day, ti_ms, tf_up
+)
+mag, t_mag, B, posicion = importar_mag(year, month, day, ti_ms, tf_up)
 
 
 # quiero diezmar el tiempo y el campo para que sean los mismos que tiene swia
-idx = np.zeros(len(t_swia))
-for i in range(len(t_swia)):
-    idx[i] = donde(t_mag, t_swia[i])
-idx = idx.astype(int)
+idx = diezmar(t_mag, t_swia)
 
-tmag_diezmado = t_mag[idx]  # lo diezmó
-
+tmag_diezmado = t_mag[idx]
 B_cut = B[idx]
 posicion_cut = posicion[idx]
 
-ti_up, tf_up = tiempos("región upstream")
-
-inicio_up = donde(t_swia, ti_up)
+inicio_up = donde(t_swia, ti_up)  # tiene que dar lo mismo si uso tswia o tmag
 fin_up = donde(t_swia, tf_up)
 
-inicio_up_mag = donde(tmag_diezmado, ti_up)
-fin_up_mag = donde(tmag_diezmado, tf_up)
-
+ti_funda = donde(tmag_diezmado, ti_ms)
+tf_funda = donde(tmag_diezmado, tf_ms)
 ####################
 
 
@@ -84,8 +79,8 @@ v_planet = np.empty((len(idx), 3))
 for i in range(len(idx)):
     B_avg[i, :] = np.mean(B_cut[i : i + 30, :], axis=0)
     v_maven[i, :] = (
-        (posicion_cut[inicio_up_mag + 1, :] - posicion_cut[inicio_up_mag, :])
-        / (tmag_diezmado[inicio_up_mag + 1] - tmag_diezmado[inicio_up_mag])
+        (posicion_cut[inicio_up + 1, :] - posicion_cut[inicio_up, :])
+        / (tmag_diezmado[inicio_up + 1] - tmag_diezmado[inicio_up])
         / 3600
     )  # en km/s
 for i in range(len(idx)):
@@ -97,19 +92,17 @@ E_convective = np.cross(-v_planet * 1e3, B_avg * 1e-9)
 E_convective_normalized = np.linalg.norm(E_convective, axis=1)  # V/m
 
 print(f"El Ecv medio es {np.mean(E_convective, axis=0)}")
-
-plt.plot(t_swia, E_convective * 1e3)
-plt.legend(["x", "y", "z"])
-plt.xlabel("tiempo hdec")
-plt.ylabel("Ecv mV/m")
-
-ti_funda = donde(tmag_diezmado, 18.06)
-tf_funda = donde(tmag_diezmado, 18.2193)
 print(
     "El E convectivo medio en la magnetofunda es {0:1.3g} mV/m".format(
         np.mean(E_convective_normalized[ti_funda:tf_funda] * 1e3)
     )
-)  # en V/m
+)  # en mV/m
 
+plt.plot(t_swia, E_convective * 1e3)
+plt.plot(t_swia, np.linalg.norm(E_convective * 1e3, axis=1))
+plt.axvspan(18.21, 18.25, color="red", alpha=0.2)
+plt.legend(["x", "y", "z", "|B|", "MPB"])
+plt.xlabel("tiempo hdec")
+plt.ylabel("Ecv mV/m")
 
 plt.show()

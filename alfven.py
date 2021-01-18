@@ -1,13 +1,16 @@
+import numpy as np
+import matplotlib.pyplot as plt
 from matplotlib.widgets import Cursor
-from funciones import *
-from funciones_plot import *
+from funciones import donde, fechas
+from funciones_plot import onpick1
 from importar_datos import importar_mag_1s, importar_swia
 
 np.set_printoptions(precision=4)
 
 """
 Ex densidades.py
-Calcula el giroradio térmico y la long inercial. Hay que seleccionar el rango en el cual tomo la densidad (el intervalo upstream es elegido a mano)
+Calcula el giroradio térmico y la long inercial. Hay que seleccionar el rango en
+ el cual tomo la densidad (el intervalo upstream es elegido a mano)
 """
 
 # #########CONSTANTES
@@ -17,10 +20,10 @@ kB = 1.38e-23  # cte de Boltzmann en J/K
 q_e = 1.602e-19  # carga del electrón en C
 
 # ########## DATOS
-year, month, day, doy = 2016, "03", 16, "076"  # fechas()
-ti = 18  # int(input('Hora del cruce (HH)\n'))
+year, month, day, doy = fechas()
+ti = int(input("Hora del cruce (HH)\n"))
 tf = ti + 1
-in_out = "y"  # input('Inbound? (y/n)\n')
+in_out = input("Inbound? (y/n)\n")
 
 datos = np.loadtxt("outputs/t1t2t3t4.txt")
 for j in range(len(datos)):
@@ -30,8 +33,8 @@ for j in range(len(datos)):
         and int(datos[j, 2]) == int(ti)
     ):
         i = j
-    else:
-        print("No tengo el ancho de la MPB para esa fecha")
+        break
+
 
 if in_out == "y":
     t1 = datos[i, 2]
@@ -52,7 +55,7 @@ swia, t_swia, density, temperature, vel_mso_xyz = importar_swia(
 # quiero diezmar el tiempo y el campo para que sean los mismos que tiene swia
 idx = np.zeros(len(t_swia))
 for i in range(len(idx)):
-    idx[i] = np.where(t_mag == find_nearest(t_mag, t_swia[i]))[0][0]
+    idx[i] = donde(t_mag, t_swia[i])
 idx = idx.astype(int)
 
 t_diezmado = t_mag[idx]  # lo diezmó
@@ -98,12 +101,6 @@ while not happy:
     happy = plt.waitforbuttonpress()
 
 plt.show()
-
-
-def donde(en_donde, cual):
-    resultado = np.where(en_donde == find_nearest_inicial(en_donde, cual))[0][0]
-    return resultado
-
 
 ti_swia = donde(t_swia, outs[0])
 tf_swia = donde(t_swia, outs[1])
