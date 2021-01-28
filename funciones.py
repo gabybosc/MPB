@@ -83,7 +83,8 @@ def corrientes(normal, Bup, Bdown, ancho_mpb):
 
 def diezmar(largo, corto):
     """le doy un array largo que quiero que mida como el corto y me devuelve los
-    índices tal que len(largo[idx]) == len(corto)"""
+    índices tal que len(largo[idx]) == len(corto). Ambos tienen que tener
+    valores similares (e.g. ambos ser arrays temporales)."""
     idx = np.zeros(len(corto))
     for i in range(len(corto)):
         idx[i] = donde(largo, corto[i])

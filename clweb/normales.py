@@ -31,7 +31,6 @@ def MPB(x0=0.78, e=0.9, L=0.96):
     ax.set_xlabel(r"$X_{MSO} (R_m)$", fontsize=14)
     ax.set_ylabel(r"$Y_{MSO} (R_m)$", fontsize=14)
     # ax.set_zlabel(r"$Z_{MSO} (R_m)$", fontsize=14)
-    ax.set_aspect("equal")
     ax.plot_surface(
         X1,
         Y1,
@@ -43,13 +42,19 @@ def MPB(x0=0.78, e=0.9, L=0.96):
         cmap=plt.get_cmap("Blues_r"),
     )
 
-    # u, v = np.mgrid[0:2*np.pi:20j, 0:np.pi:10j]
-    # ax.plot_wireframe(np.cos(u)*np.sin(v), np.sin(u)*np.sin(v), np.cos(v), color='#c1440e', linewidth=0.5)
-    set_axes_equal(ax)
+    u, v = np.mgrid[0 : 2 * np.pi : 20j, 0 : np.pi : 10j]
+    ax.plot_wireframe(
+        np.cos(u) * np.sin(v),
+        np.sin(u) * np.sin(v),
+        np.cos(v),
+        color="#c1440e",
+        linewidth=0.5,
+    )
+    plt.show()
+    # set_axes_equal(ax)
 
     # plt.savefig(f'../outputs/figs_MPB/ajuste_{fecha}.png')
     #
-    return ()
 
 
 def parametros_elipse(R, x0=0.78, e=0.9, L=0.96):  # R es la posicion del cruce en RM

@@ -49,7 +49,13 @@ dyBz = np.gradient(B[:, 2], dy * 3390) / 3390000  # nT / m
 dz = np.abs(reordenados[4, 2] - reordenados[0, 2])
 dzBy = np.gradient(B[:, 1], dz * 3390) / 3390000
 
+dx = np.abs(x[4] - x[0])
+dxBz = np.gradient(B[:, 1], dx * 3390) / 3390000
+
 j_curl = (dyBz - dzBy) / mu_0  # nA / m²
+
+plt.plot(x, -dxBz / mu_0)
+plt.plot(x, J[:, 1] * 1e3)
 
 plt.plot(x, J[:, 0] * 1e3, label="J simu")
 plt.plot(x, j_ampere[:, 0] * 1e9, label="J ampère")

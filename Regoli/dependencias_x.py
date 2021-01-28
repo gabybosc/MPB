@@ -7,11 +7,6 @@ sys.path.append("..")
 from funciones import donde, Mij
 from funciones_plot import hodograma
 
-path = "../../../datos/simulacion_leonardo/"
-# variables = np.loadtxt(path + "variables.txt")
-# np.save(path+'variables.npy', variables)
-posicion = np.load(path + "pos_cut.npy")  # cut es porque no tienen los ceros
-variables = np.load(path + "var_cut.npy")
 
 """
 Rho Ux Uy Uz Bx By Bz P HpRho HpUx HpUy HpUz HpP O2pRho O2pUx O2pUy O2pUz O2pP
@@ -25,20 +20,11 @@ Primero, voy a buscar las posiciones y=0, z=0 y con eso plotear para esos índic
 Veo que efectivamente donde tengo la MPB aparece un salto en J.
 """
 
-
-val = np.concatenate((posicion, variables), axis=1)
+path = "../../../datos/simulacion_leonardo/"
+reordenados = np.load(
+    path + "ordenado_cut_0dot05.npy"
+)  # todos los datos ordenados con y,z menores a 0.05
 limite = 0.05
-
-zcero = np.array([val[i, :] for i in range(len(val)) if np.abs(val[i, 2]) <= limite])
-ycero = np.array(
-    [zcero[i, :] for i in range(len(zcero)) if np.abs(zcero[i, 1]) <= limite]
-)
-zona_interes = np.array(
-    [ycero[i, :] for i in range(len(ycero)) if 0 < ycero[i, 0] <= 5]
-)
-
-# quiero reordenar los x de forma creciente
-reordenados = np.array(sorted(zona_interes, key=lambda f: f[0]))
 
 x = reordenados[:, 0]
 pos = reordenados[:, :3]
@@ -121,14 +107,14 @@ print(f"Bup = {B_upstream} \n Bdown = {B_downstream}\nomega = {omega}")
 q_e = 1.6e-19  # C
 m_p = 1.6e-27  # kg
 
-j = (
-    np.array([q_e * HpRho[i] * (v_i[i, :] - v_e[i, :]) for i in range(len(HpRho))])
-    * 1e18
-)
-plt.plot(j)
-plt.plot(J)
-plt.legend(["jx", "jy", "jz", "Jx", "Jy", "Jz"])
-plt.show()
+# j = (
+#     np.array([q_e * HpRho[i] * (v_i[i, :] - v_e[i, :]) for i in range(len(HpRho))])
+#     * 1e18
+# )
+# plt.plot(j)
+# plt.plot(J)
+# plt.legend(["jx", "jy", "jz", "Jx", "Jy", "Jz"])
+# plt.show()
 
 #
 # plt.plot(J[:, 1], J[:, 2], label="J")
@@ -137,46 +123,48 @@ plt.show()
 # plt.show()
 
 
-# plt.figure()
-# plt.plot(x, HpRho, label="Densidad H+")
-# plt.plot(x, OpRho, label="Densidad O+")
-# plt.plot(x, O2pRho, label="Densidad O2+")
-# plt.plot(x, CO2pRho, label="Densidad CO2+")
-# plt.axvline(x=1.25, c="black", ls="--", label="MPB")
-# plt.axvline(x=1.7, c="m", ls="--", label="BS")
-# plt.title(f"Densidad de partículas para y,z < {limite}")
-# plt.legend()
-# plt.xlabel("x (RM)")
-# plt.ylim((0, 200))
-#
-# plt.figure()
-# plt.plot(x, np.linalg.norm(B, axis=1))
-# plt.plot(x, B)
-# plt.title(f"Bx,By,Bz (nT) vs x (RM) para y,z < {limite}")
-# plt.legend(["|B|", "Bx", "By", "Bz"])
-# plt.xlim((1, 2))
-# plt.ylim((-10, 100))
-#
-# plt.figure()
-# plt.plot(x, J)
-# plt.plot(x, np.linalg.norm(J, axis=1), label="|J| (nA/m2)")
-# plt.title(f"Jx,Jy,Jz (nA/m2) vs x (RM) para y,z < {limite}")
-# plt.legend(["Jx", "Jy", "Jz", "|J|"])
-# plt.xlim((1, 2))
-# plt.ylim((-100, 100))
-#
-# plt.figure()
-# plt.plot(x, Ptot - CO2P - HP - OP - O2P, label="Presion electronica?")
-# plt.plot(x, CO2P, label="Presion CO2+")
-# plt.plot(x, HP, label="Presion H+")
-# plt.plot(x, OP, label="Presion O+")
-# plt.plot(x, O2P, label="Presion O2+")
-# plt.axvline(x=1.25, c="black", ls="--", label="MPB")
-# plt.axvline(x=1.7, c="m", ls="--", label="BS")
-# plt.title(f"Presión para y,z < {limite}")
-# plt.legend()
-# plt.xlabel("x (RM)")
-# # plt.ylim((0, 10))
-#
-#
-# plt.show()
+plt.figure()
+plt.plot(x, HpRho, label="Densidad H+")
+plt.plot(x, OpRho, label="Densidad O+")
+plt.plot(x, O2pRho, label="Densidad O2+")
+plt.plot(x, CO2pRho, label="Densidad CO2+")
+plt.axvline(x=1.25, c="black", ls="--", label="MPB")
+plt.axvline(x=1.7, c="m", ls="--", label="BS")
+plt.title(f"Densidad de partículas para y,z < {limite}")
+plt.legend()
+plt.xlabel("x (RM)")
+plt.ylim((0, 200))
+
+plt.figure()
+plt.plot(x, np.linalg.norm(B, axis=1))
+plt.plot(x, B)
+plt.title(f"Bx,By,Bz (nT) vs x (RM) para y,z < {limite}")
+plt.legend(["|B|", "Bx", "By", "Bz"])
+plt.xlim((1, 2))
+plt.ylim((-10, 100))
+
+plt.figure()
+plt.plot(x, J)
+plt.plot(x, np.linalg.norm(J, axis=1), label="|J| (nA/m2)")
+plt.title(f"Jx,Jy,Jz (nA/m2) vs x (RM) para y,z < {limite}")
+plt.legend(["Jx", "Jy", "Jz", "|J|"])
+plt.xlim((1, 2))
+plt.ylim((-100, 100))
+
+plt.figure()
+plt.plot(x, Ptot - CO2P - HP - OP - O2P, label="Presion electronica?")
+plt.plot(x, CO2P, label="Presion CO2+")
+plt.plot(x, HP, label="Presion H+")
+plt.plot(x, OP, label="Presion O+")
+plt.plot(x, O2P, label="Presion O2+")
+plt.axvline(x=1.25, c="black", ls="--", label="MPB")
+plt.axvline(x=1.7, c="m", ls="--", label="BS")
+plt.title(f"Presión para y,z < {limite}")
+plt.legend()
+plt.xlabel("x (RM)")
+# plt.ylim((0, 10))
+
+plt.figure()
+plt.plot(x, v_i)
+
+plt.show()

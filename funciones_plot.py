@@ -203,7 +203,7 @@ def scatter_datetime(
     )
 
 
-def set_axes_equal(ax):
+def set_axes_equal(ax):  # creo que ya no anda: usar equal_axes
     """Make axes of 3D plot have equal scale so that spheres appear as spheres,
     cubes as cubes, etc..  This is one possible solution to Matplotlib's
     ax.set_aspect('equal') and ax.axis('equal') not working for 3D.
@@ -228,6 +228,30 @@ def set_axes_equal(ax):
     ax.set_xlim3d([x_middle - plot_radius, x_middle + plot_radius])
     ax.set_ylim3d([y_middle - plot_radius, y_middle + plot_radius])
     ax.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])
+
+
+def equal_axes(ax, x, y, z):
+    """
+    Le damos un ax y los datos y va a crear un cubo transparente que incluya todo.
+    Entonces al tener una bounding box desaparece el problema.
+    Hay que pasarle x,y,z de los datos más grandes (por ejemplo, la órbita entera
+    en lugar del planeta, etc.)
+    """
+    max_range = np.array(
+        [x.max() - x.min(), y.max() - y.min(), z.max() - z.min()]
+    ).max()
+    Xb = 0.5 * max_range * np.mgrid[-1:2:2, -1:2:2, -1:2:2][0].flatten() + 0.5 * (
+        x.max() + x.min()
+    )
+    Yb = 0.5 * max_range * np.mgrid[-1:2:2, -1:2:2, -1:2:2][1].flatten() + 0.5 * (
+        y.max() + y.min()
+    )
+    Zb = 0.5 * max_range * np.mgrid[-1:2:2, -1:2:2, -1:2:2][2].flatten() + 0.5 * (
+        z.max() + z.min()
+    )
+    # Comment or uncomment following both lines to test the fake bounding box:
+    for xb, yb, zb in zip(Xb, Yb, Zb):
+        ax.plot([xb], [yb], [zb], "w")
 
 
 def toggle_selector(event):

@@ -5,11 +5,7 @@ import sys
 sys.path.append("..")
 
 path = "../../../datos/simulacion_leonardo/"
-# variables = np.loadtxt(path + "variables.txt")
-# np.save(path+'variables.npy', variables)
-# posicion = np.load(path + "pos_mhd.npy")
-# variables = np.load(path + "variables.npy")
-reordenados = np.load(
+datos = np.load(
     path + "ordenado_cut_0dot05.npy"
 )  # todos los datos ordenados con y,z menores a 0.05
 
@@ -35,13 +31,24 @@ mu0 = 4e-7 * np.pi  # T m / A
 mp = 1.67e-27  # proton mass, kg
 g = 3.7  # Mars surface gravity, m/s²
 
+reordenados = []
+for i in range(len(datos) - 1):
+    if datos[i, 0] != datos[i + 1, 0]:
+        reordenados.append(datos[i, :])
+
+reordenados = np.array(reordenados)
+
 x = reordenados[:, 0]
 pos = reordenados[:, :3]
 rho = reordenados[:, 3]
 B = reordenados[:, 7:10]
-J = reordenados[:, -3:] * 1000
-HpRho = reordenados[:, 11]
+J = reordenados[:, -3:]
 velocidad = reordenados[:, 4:7]  # km/s
+
+HpRho = reordenados[:, 11]
+O2pRho = reordenados[:, 16]
+OpRho = reordenados[:, 21]
+CO2pRho = reordenados[:, 26]
 
 # Presiones
 Ptermica = reordenados[:, 10]  # nPa
@@ -55,16 +62,44 @@ P_B = np.linalg.norm(B, axis=1) ** 2 * 1e-9 / (2 * mu0)
 Pe = Ptermica - CO2P - HP - OP - O2P
 P_ram = 1.67e-6 * HpRho * velocidad[:, 0] ** 2  # nPa
 
-dxx = np.abs(x[4] - x[0])
+grav = []
+grav_O2 = []
+grav_O = []
+grav_CO2 = []
+for i in range(len(HpRho) - 2):
+    grav.append(np.trapz(HpRho[i : i + 2] * 1e6 * mp * g, x[i : i + 2] * 3390e3))
+    grav_O2.append(np.trapz(O2pRho[i : i + 2] * 1e6 * mp * g, x[i : i + 2] * 3390e3))
+    grav_O.append(np.trapz(OpRho[i : i + 2] * 1e6 * mp * g, x[i : i + 2] * 3390e3))
+    grav_CO2.append(np.trapz(CO2pRho[i : i + 2] * 1e6 * mp * g, x[i : i + 2] * 3390e3))
 
-grav = np.trapz(-HpRho * 1e6 * mp * g, x * 3390e3) * 1e9
-# grav = np.trapz(-HpRho * 1e6 * mp * g, dx=dxx * 3390e3)
+np.trapz(HpRho[i : i + 2] * 1e6 * mp * g, x[i : i + 2] * 3390e3)
 
-# plt.plot(x, -HpRho * 1e6 * mp * g)
-# plt.show()
 
-P_grav = grav * np.ones(len(grav))
-P_total = P_heavy + P_B + Pe + P_ram + HP + P_grav
+def trapecio(f, x):
+    sol = np.zeros(len(x))
+    for i in range(len(x) - 1):
+        sol[i] = (x[i + 1] - x[i]) * (f[i] + f[i + 1]) / 2
+    sol[-1] = sol[-2]
+    return sol
+
+
+trapecio(HpRho * 1e6 * mp * g, x * 3390e3)
+
+# grav.append(grav[-3:])
+# grav_O.append(grav_O[-2:])
+# grav_O2.append(grav_O2[-2:])
+# grav_CO2.append(grav_CO2[-2:])
+
+g_total = (
+    np.array(grav) + np.array(grav_O) + np.array(grav_O2) + np.array(grav_CO2)
+) * 1e9
+
+g_total = np.append(g_total, g_total[-2:])
+
+plt.plot(x, g_total)
+plt.show()
+
+P_total = P_heavy + P_B + Pe + P_ram + HP + g_total
 #
 # inicio_MPB = donde(pos[:, 0], 1.2)
 # fin_MPB = donde(pos[:, 0], 1.36)
@@ -93,7 +128,7 @@ plt.scatter(x, Pe, label="Presion electronica?")
 plt.scatter(x, P_heavy, label="Presion heavy")
 plt.scatter(x, P_B, label="Presion B")
 plt.scatter(x, P_ram, label="Presion ram")
-plt.scatter(x, P_grav, label="Presion grav")
+# plt.scatter(x, P_grav, label="Presion grav")
 plt.scatter(x, P_total, label="presión total")
 plt.scatter(x, HP, label="Presion H+", marker=".")
 plt.axvline(x=1.25, c="black", ls="--", label="MPB")
@@ -105,4 +140,74 @@ plt.ylabel("P (nPa)")
 plt.ylim(0, 1)
 
 
+plt.show()
+
+from scipy.optimize import curve_fit
+from funciones import donde
+
+
+def sigmoid(x, L, x0, k, b):
+    y = L / (1 + np.exp(-k * (x - x0))) + b
+    return y
+
+
+i = donde(x, 1.18)
+f = donde(x, 1.7)
+xx = x[i:f]
+
+plt.plot(x[i:f], HpRho[i:f])
+plt.plot(x[i:f], O2pRho[i:f])
+plt.plot(x[i:f], OpRho[i:f])
+plt.plot(x[i:f], CO2pRho[i:f])
+plt.show()
+
+
+def func(x, a, b, c):
+    return a * np.exp(-b * x) + c
+
+
+densidad = O2pRho[i:f]
+guess = [max(densidad), 1, min(densidad)]  # this is an mandatory initial guess
+
+popt, pcov = curve_fit(func, xx, densidad, guess, method="dogbox")
+yp = func(x, *popt)
+
+plt.figure()
+plt.plot(x, O2pRho, "ko", label="Original Noised Data")
+plt.plot(x, yp, "r-", label="Fitted Curve")
+plt.legend()
+plt.show()
+
+
+r = HpRho[i:f]
+p0 = [max(r), np.median(xx), 1, min(r)]  # this is an mandatory initial guess
+
+popt, pcov = curve_fit(sigmoid, xx, r, p0, method="lm")
+
+y = sigmoid(xx, *popt)
+
+L = popt[0]
+x0 = popt[1]
+k = popt[2]
+b = popt[3]
+
+integral = mp * g * (b + L) * xx + mp * g * L / k * np.log(1 + np.exp(-k * (xx - x0)))
+
+plt.plot(xx, integral)
+plt.show()
+
+# L = popt[0] * 1e6
+# x0 = popt[1] * 3390e3
+# k = popt[2]
+# b = popt[3] * 1e6
+#
+# integral = mp * g * (b + L) * xx * 3390e3 + mp * g * L / k * np.log(
+#     1 + np.exp(-k * (xx * 3390e3 - x0))
+# )
+#
+# plt.plot(xx * 3390e3, integral * 1e9)
+# plt.show()
+
+plt.plot(xx, r)
+plt.plot(xx, y)
 plt.show()

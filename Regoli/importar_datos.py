@@ -226,3 +226,44 @@ def importar_gdocs():
     hoja_Ajuste = client.open("MPB").worksheet("Ajuste")
 
     return hoja_parametros, hoja_MVA, hoja_Bootstrap, hoja_Ajuste
+
+
+##########
+def importar_fila(year, month, day, doy, hora):
+    hoja_parametros, hoja_MVA, hoja_Bootstrap, hoja_Ajuste = importar_gdocs()
+
+    meses = {
+        "Jan": "01",
+        "Feb": "02",
+        "Mar": "03",
+        "Apr": "04",
+        "May": "05",
+        "Jun": "06",
+        "Jul": "07",
+        "Aug": "08",
+        "Sep": "09",
+        "Oct": "10",
+        "Nov": "11",
+        "Dec": "12",
+    }
+    fecha = hoja_parametros.col_values(1)[3:]
+    hh = hoja_parametros.col_values(2)[3:]
+
+    fila = None
+
+    for i in range(len(fecha)):
+        dd, mm, yy = fecha[i].split()
+        mes = meses[mm]
+        if (
+            yy == str(year)
+            and mes == month
+            and int(dd) == int(day)
+            and int(hh[i]) == int(hora)
+        ):
+            fila = i + 4
+            break
+
+    if fila is None:
+        print("no encuentro la fila")
+
+    return fila, hoja_parametros, hoja_MVA, hoja_Bootstrap, hoja_Ajuste
