@@ -155,6 +155,39 @@ def importar_swia(year, month, day, ti, tf):
     return swia, t_cut, density_cut, temperature_cut, vel_mso_cut
 
 
+# def importar_swicfa(year, month, day, ti, tf):
+#     # esto tiene el problema de que no tengo las densidades y eso en swica directo...
+#     date_orbit = dt.date(int(year), int(month), int(day))
+#     year = date_orbit.strftime("%Y")
+#     month = date_orbit.strftime("%m")
+#     day = date_orbit.strftime("%d")
+#
+#     if gethostname() == "magneto2":
+#         path = f"../../../../media/gabybosc/datos/SWIA/"
+#     elif gethostname() == "gabybosc":
+#         path = "../../datos/SWIA/"
+#     else:
+#         path = f"../../../datos/SWIA/"
+#
+#     swica = cdf.CDF(path + f"mvn_swi_l2_coarsearc3d_{year}{month}{day}_v01_r01.cdf")
+#     swifa = cdf.CDF(path + f"mvn_swi_l2_finearc3d_{year}{month}{day}_v01_r01.cdf")
+#
+#     t_unix = swia.varget("time_unix")
+#     density = swia.varget("density")  # cm⁻³
+#     temperature = swia.varget("temperature_mso")  # eV
+#     vel_mso_xyz = swia.varget("velocity_mso")  # km/s
+#
+#     t_swia = unix_to_decimal(t_unix)
+#     inicio = donde(t_swia, ti)
+#     fin = donde(t_swia, tf)
+#
+#     t_cut = t_swia[inicio:fin]
+#     density_cut = density[inicio:fin]
+#     temperature_cut = temperature[inicio:fin]
+#     vel_mso_cut = vel_mso_xyz[inicio:fin]  # km/s
+#
+#     return swia, t_cut, density_cut, temperature_cut, vel_mso_cut
+
 # ###################################################################### LPW
 def importar_lpw(year, month, day, ti, tf):
     date_orbit = dt.date(int(year), int(month), int(day))
@@ -187,16 +220,24 @@ def importar_lpw(year, month, day, ti, tf):
 
 ###########################
 def importar_t1t2t3t4(year, month, day, doy, hour):
+    fila, hoja_parametros, hoja_MVA, hoja_Bootstrap, hoja_Ajuste = importar_fila(
+        year, month, day, doy, hour
+    )
+    # hoja_parametros, hoja_MVA, hoja_Bootstrap, hoja_Ajuste = importar_gdocs()
+    t1 = float(hoja_parametros.cell(fila, 6).value)  # ojo que cuenta desde 1 no desde 0
+    t2 = float(hoja_parametros.cell(fila, 7).value)
+    t3 = float(hoja_parametros.cell(fila, 8).value)
+    t4 = float(hoja_parametros.cell(fila, 9).value)
 
-    datos = np.loadtxt("../outputs/t1t2t3t4.txt")
-    fecha = datos[:, 0:2].astype(int)
-    hora = datos[:, 2].astype(int)
-    fecha_in = [int(year), int(doy)]
-    for j in range(len(datos)):
-        if all(fecha[j, 0:2]) == all(fecha_in):
-            if hora[j] == hour or hora[j] == hour + 1 or hora[j] == hour - 1:
-                idx = j
-    t1, t2, t3, t4 = datos[idx, 2:]
+    # datos = np.loadtxt("../outputs/t1t2t3t4.txt")
+    # fecha = datos[:, 0:2].astype(int)
+    # hora = datos[:, 2].astype(int)
+    # fecha_in = [int(year), int(doy)]
+    # for j in range(len(datos)):
+    #     if all(fecha[j, 0:2]) == all(fecha_in):
+    #         if hora[j] == hour or hora[j] == hour + 1 or hora[j] == hour - 1:
+    #             idx = j
+    # t1, t2, t3, t4 = datos[idx, 2:]
 
     return t1, t2, t3, t4
 

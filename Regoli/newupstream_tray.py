@@ -8,10 +8,10 @@ import sys
 sys.path.append("..")
 
 from funciones_plot import equal_axes, onpick1
-from funciones import diezmar, donde, corrientes
+from funciones import diezmar, donde
 
 path = "../../../datos/simulacion_leonardo/"
-datos = np.loadtxt(path + "newupstream_tray.sat", skiprows=2)
+datos_enteros = np.loadtxt(path + "newupstream_tray.sat", skiprows=8641)
 
 """
 Mismos análisis pero para los datos sobre la trayectoria de la nave
@@ -25,6 +25,10 @@ b1y b1z e jx jy jz (40 a 45)
 """
 
 # Datos de la simulación
+pi = 0
+pf = 600
+
+datos = datos_enteros[pi:pf]
 
 x = datos[:, 8]
 y = datos[:, 9]
@@ -53,8 +57,6 @@ normal = [0.920, -0.302, 0.251]
 j_maven = 282  # nA/m²
 
 # hay 10 órbitas, cada una de 1620 puntos
-pi = 10200
-pf = 10800
 """Plotea nuestra MPB y la órbita de la simu que estamos usando"""
 L = 0.96
 x0 = 0.78
@@ -100,7 +102,7 @@ ax.plot_wireframe(
     color="#c1440e",
     linewidth=0.5,
 )
-ax.plot(x[pi:pf], y[pi:pf], z[pi:pf])
+ax.plot(x, y, z)
 equal_axes(ax, X1, Y1, Z1)
 plt.show()
 
@@ -119,16 +121,6 @@ plt.show()
 #
 # plt.show()
 
-"""
-Las primeras órbitas, hasta el punto 10200 aprox, no tienen una MPB. El campo
-en ellas es menor a 10 nT siempre.
-"""
-
-x_cut = x[pi:pf]
-y_cut = y[pi:pf]
-z_cut = z[pi:pf]
-B_cut = B[pi:pf, :]
-
 
 """
 Comparación de B y de la densidad de protones
@@ -138,7 +130,7 @@ idx = diezmar(t, t_swia)
 
 plt.figure()
 plt.plot(posicion[:, 0] / 3390, np.linalg.norm(B_mag, axis=1), label="MAVEN")
-plt.plot(x_cut, np.linalg.norm(B_cut, axis=1), label="simulación")
+plt.plot(x, np.linalg.norm(B, axis=1), label="simulación")
 plt.axvline(x=R[0], color="k", linestyle="--", label="cruce MAVEN")
 plt.axvline(x=1.26, color="C3", linestyle="--", label="MPB simulacion")
 plt.xlabel("x (RM)")
@@ -147,7 +139,7 @@ plt.legend()
 
 plt.figure()
 plt.plot(posicion[idx, 0] / 3390, proton_density, label="swia")
-plt.plot(x_cut, HpRho[pi:pf], label="simulación")
+plt.plot(x, HpRho, label="simulación")
 plt.axvline(x=R[0], color="k", linestyle="--", label="cruce MAVEN")
 plt.axvline(x=1.26, color="C3", linestyle="--", label="MPB simulacion")
 plt.ylim(ymax=30)
@@ -157,13 +149,6 @@ plt.legend()
 
 plt.show()
 
-plt.figure()
-plt.plot(x[:8640], np.linalg.norm(B[:8640], axis=1), label="datos 0 a 8640")
-plt.plot(x[8640:], np.linalg.norm(B[8640:], axis=1), label="datos 8640 a 17278")
-plt.xlabel("x (RM)")
-plt.ylabel("|B| (nT)")
-plt.legend()
-plt.show()
 # Descomentar esto si quiero seleccionar la MPB de la simu
 
 # happy = False
@@ -178,13 +163,13 @@ plt.show()
 #         plt.title("Spacebar when ready to click:")
 #
 #         ax1 = plt.subplot2grid((2, 1), (0, 0))
-#         plt.plot(x_cut, np.linalg.norm(B_cut, axis=1))
+#         plt.plot(x, np.linalg.norm(B, axis=1))
 #         ax1.set_ylabel("|B| (nT)")
 #
 #         ax5 = plt.subplot2grid((2, 1), (1, 0), sharex=ax1)
 #         ax5.set_ylabel("Densidad de p+ \n del SW (cm⁻³)")
 #         ax5.set_xlabel("x (RM)")
-#         plt.plot(x_cut, HpRho[pi:pf])
+#         plt.plot(x, HpRho[pi:pf])
 #
 #         fig.canvas.mpl_connect("pick_event", onpick1)
 #         multi = MultiCursor(fig.canvas, (ax1, ax5), color="black", lw=1)
@@ -215,27 +200,27 @@ x4 = 1.1474673758014104
 x23 = (x2 - x3) * 3390e3  # ancho en m
 ancho_updown = 0.015 * 13000 / 3390
 
-inicio_up = donde(x_cut[200:], x1 + ancho_updown)
-fin_up = donde(x_cut[200:], x1)
-inicio_down = donde(x_cut[200:], x4)
-fin_down = donde(x_cut[200:], x4 - ancho_updown)
+inicio_up = donde(x[200:], x1 + ancho_updown)
+fin_up = donde(x[200:], x1)
+inicio_down = donde(x[200:], x4)
+fin_down = donde(x[200:], x4 - ancho_updown)
 
-B_upstream = np.mean(B_cut[inicio_up:fin_up], axis=0)
-B_downstream = np.mean(B_cut[inicio_down:fin_down], axis=0)
+B_upstream = np.mean(B[inicio_up:fin_up], axis=0)
+B_downstream = np.mean(B[inicio_down:fin_down], axis=0)
 mu = 4 * np.pi * 1e-7
 J_v = np.cross(normal, (B_upstream - B_downstream)) / mu / x23
 
 plt.figure()
-plt.plot(x_cut, np.linalg.norm(J[pi:pf], axis=1) * 1e3)
+plt.plot(x, np.linalg.norm(J[pi:pf], axis=1) * 1e3)
 plt.axvline(x=R[0], color="k")
 plt.xlabel("x (RM)")
 plt.ylabel("j (nA/m²)")
 
 plt.show()
 
-plt.plot(x_cut, OpRho[pi:pf], label="O+")
-plt.plot(x_cut, O2pRho[pi:pf], label="O2+")
-plt.plot(x_cut, CO2pRho[pi:pf], label="CO2+")
+plt.plot(x, OpRho, label="O+")
+plt.plot(x, O2pRho, label="O2+")
+plt.plot(x, CO2pRho, label="CO2+")
 plt.axvline(x=R[0], color="k")
 plt.legend()
 plt.ylim(-1, 50)
@@ -244,10 +229,10 @@ plt.xlabel("x (RM)")
 plt.ylabel("rho (mp/cc)")
 
 plt.figure()
-plt.plot(x_cut, presion_H[pi:pf], label="H+")
-plt.plot(x_cut, presion_O[pi:pf], label="O+")
-plt.plot(x_cut, presion_O2[pi:pf], label="O2+")
-plt.plot(x_cut, presion_CO2[pi:pf], label="CO2+")
+plt.plot(x, presion_H, label="H+")
+plt.plot(x, presion_O, label="O+")
+plt.plot(x, presion_O2, label="O2+")
+plt.plot(x, presion_CO2, label="CO2+")
 plt.axvline(x=R[0], color="k")
 plt.legend()
 plt.xlabel("x (RM)")

@@ -1,15 +1,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import cdflib as cdf
 from funciones import (
-    find_nearest,
-    find_nearest_final,
-    find_nearest_inicial,
-    unix_to_decimal,
+    donde,
+    corrientes,
+    angulo,
     fechas,
     tiempos,
 )
 from MVA_hires import MVA
+from importar_datos import importar_lpw, importar_mag
 
 """
 Hace el MVA
@@ -23,23 +22,13 @@ NO NECESITA YA ACTUALIZAR LA FECHA EN GDOCS
 year, month, day, doy = fechas()
 ti_MVA, tf_MVA = tiempos()
 
-
-path = "../../datos/"  # path a los datos desde la laptop
-mag = np.genfromtxt(
-    path + f"MAG_hires/mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts",
-    skip_header=1000,
-    skip_footer=1000,
-)
-swia = cdf.CDF(path + f"mvn_swi_l2_onboardsvymom_{year}{month}{day}_v01_r01.cdf")
-lpw = cdf.CDF(path + f"LPW/mvn_lpw_l2_lpnt_{year}{month}{day}_v03_r02.cdf")
+mag, t, B, posicion = importar_mag(year, month, day, ti_MVA - 1, tf_MVA + 1)
+lpw, t_lpw, e_density = importar_lpw(year, month, day, ti_MVA - 1, tf_MVA + 1)
 
 (
     x3,
     normal_boot,
     normal_fit,
-    t,
-    B,
-    posicion,
     inicio,
     fin,
     B_cut,
@@ -48,17 +37,17 @@ lpw = cdf.CDF(path + f"LPW/mvn_lpw_l2_lpnt_{year}{month}{day}_v03_r02.cdf")
     t3,
     t4,
     B_medio_vectorial,
-    nr,
-) = MVA(year, month, day, doy, ti_MVA, tf_MVA, mag)
+    fila,
+    hoja_parametros,
+    hoja_mva,
+    hoja_boot,
+    hoja_fit,
+) = MVA(year, month, day, doy, ti_MVA, tf_MVA, t, B, posicion)
 
 #########
 # buscamos el ángulo entre las normales
-angulo_mva = np.arccos(
-    np.clip(np.dot(normal_fit, x3), -1.0, 1.0)
-)  # el clip hace que si por algun motivo el dot me da >1 (i.e. 1,00002), me lo convierte en 1
-angulo_boot = np.arccos(
-    np.clip(np.dot(normal_boot, x3), -1.0, 1.0)
-)  # Es importante que los vectoers estén normalizados!
+angulo_mva = angulo(normal_fit, x3)
+angulo_boot = angulo(normal_boot, x3)
 
 
 ##############
@@ -83,31 +72,19 @@ v_media = np.array(
 v_media_norm = v_media / np.linalg.norm(
     v_media
 )  # la normalizo por cuestion de  cuentas nomas
-angulo_v_fit = np.arccos(
-    np.clip(np.dot(normal_fit, v_media_norm), -1.0, 1.0)
-)  # Es importante que los vectoers estén normalizados!
-angulo_v_mva = np.arccos(
-    np.clip(np.dot(x3, v_media_norm), -1.0, 1.0)
-)  # Es importante que los vectoers estén normalizados!
-angulo_v_boot = np.arccos(
-    np.clip(np.dot(normal_boot, v_media_norm), -1.0, 1.0)
-)  # Es importante que los vectoers estén normalizados!
+angulo_v_fit = angulo(normal_fit, v_media_norm)
+angulo_v_mva = angulo(x3, v_media_norm)
+angulo_v_boot = angulo(normal_boot, v_media_norm)
 
 B_intermedio = B_medio_vectorial / np.linalg.norm(
     B_medio_vectorial
 )  # la normalizo por cuestion de  cuentas nomas
-angulo_B_fit = np.arccos(
-    np.clip(np.dot(normal_fit, B_intermedio), -1.0, 1.0)
-)  # Es importante que los vectoers estén normalizados!
-angulo_B_mva = np.arccos(
-    np.clip(np.dot(x3, B_intermedio), -1.0, 1.0)
-)  # Es importante que los vectoers estén normalizados!
-angulo_B_boot = np.arccos(
-    np.clip(np.dot(normal_boot, B_intermedio), -1.0, 1.0)
-)  # Es importante que los vectoers estén normalizados!
+angulo_B_fit = angulo(normal_fit, B_intermedio)
+angulo_B_mva = angulo(x3, B_intermedio)
+angulo_B_boot = angulo(normal_boot, B_intermedio)
 
 ######
-##Espesor de la MPB
+# Espesor de la MPB
 # ahora veamos v_para
 deltat_14 = (t4 - t1) * 3600
 deltat_23 = (t3 - t2) * 3600
@@ -133,14 +110,14 @@ x_23_boot = v_para_boot * deltat_23
 
 
 #########
-###análisis de corrientes
+# análisis de corrientes
 
-inicio_up = np.where(t == find_nearest_inicial(t, t1 - 0.015))[0][0]  # las 18:12:00
-fin_up = np.where(t == find_nearest_final(t, t1))[0][0]  # las 18:13:00
+inicio_up = donde(t, t1 - 0.015)  # las 18:12:00
+fin_up = donde(t, t1)  # las 18:13:00
 B_upstream = np.mean(B[inicio_up:fin_up, :], axis=0)  # nT
 
-inicio_down = np.where(t == find_nearest_inicial(t, t4))[0][0]  # las 18:14:51
-fin_down = np.where(t == find_nearest_final(t, t4 + 0.015))[0][0]  # las 18:15:52
+inicio_down = donde(t, t4)  # las 18:14:51
+fin_down = donde(t, t4 + 0.015)  # las 18:15:52
 B_downstream = np.mean(B[inicio_down:fin_down, :], axis=0)  # nT
 
 
@@ -151,32 +128,22 @@ omega = np.arccos(
 
 mu = 4 * np.pi * 1e-7  # Henry/m
 
-J_s_MVA = np.cross(x3, (B_upstream - B_downstream)) / mu  # nA/m
-ancho_mpb = np.linalg.norm(
-    x_23_MVA
-)  # considero que es el tiempo corto a lo largo de la normal del MVA
-J_v_MVA = J_s_MVA / (1000 * ancho_mpb)  # nA/m²
+J_s_MVA, J_v_MVA = corrientes(x3, B_upstream, B_downstream, np.linalg.norm(x_23_MVA))
+J_s_fit, J_v_fit = corrientes(
+    normal_fit, B_upstream, B_downstream, np.linalg.norm(x_23_fit)
+)
+J_s_boot, J_v_boot = corrientes(
+    normal_boot, B_upstream, B_downstream, np.linalg.norm(x_23_boot)
+)
 
-J_s_fit = np.cross(normal_fit, (B_upstream - B_downstream)) / mu  # nA/m
-ancho_mpb_fit = np.linalg.norm(
-    x_23_fit
-)  # considero que es el tiempo corto a lo largo de la normal del ajuste
-J_v_fit = J_s_fit / (1000 * ancho_mpb)  # nA/m²
-
-J_s_boot = np.cross(normal_boot, (B_upstream - B_downstream)) / mu  # nA/m
-ancho_mpb_boot = np.linalg.norm(x_23_boot)  # km
-J_v_boot = J_s_boot / (1000 * ancho_mpb_boot)  # nA/m²
 
 fuerza_mva = np.cross(J_v_MVA * 1e-9, B[inicio_down, :] * 1e-9)  # N/m^3 #en t4
 fuerza_fit = np.cross(J_v_fit * 1e-9, B[inicio_down, :] * 1e-9)  # N/m^3 #en t4
 fuerza_boot = np.cross(J_v_boot * 1e-9, B[inicio_down, :] * 1e-9)  # N/m^3
 
 
-e_density = lpw.varget("data")[:, 3]
-t_unix = lpw.varget("time_unix")
-t_lpw = unix_to_decimal(t_unix)
-ti_lpw = np.where(t_lpw == find_nearest(t_lpw, t2))[0][0]
-tf_lpw = np.where(t_lpw == find_nearest(t_lpw, t3))[0][0]
+ti_lpw = donde(t_lpw, t2)
+tf_lpw = donde(t_lpw, t3)
 n_e = np.nanmean(e_density[ti_lpw:tf_lpw])  # hace el mean ignorando los nans #cm⁻³
 n_e = n_e * 1e6  # m⁻³
 if np.isnan(n_e):
@@ -204,125 +171,115 @@ plt.show(block=False)
 
 ############
 # #Ahora guardamos todo en la spreadsheet
-# scope = ["https://spreadsheets.google.com/feeds","https://www.googleapis.com/auth/spreadsheets","https://www.googleapis.com/auth/drive.file","https://www.googleapis.com/auth/drive"]
-#
-# creds = ServiceAccountCredentials.from_json_keyfile_name("mpb_api.json", scope)
-#
-# client = gspread.authorize(creds)
-#
-# hoja_parametros = client.open("MPB").worksheet('Parametros')
-# hoja_mva = client.open("MPB").worksheet('MVA')
-# hoja_boot = client.open("MPB").worksheet('Bootstrap')
-# hoja_fit = client.open("MPB").worksheet('Ajuste')
 #
 #
 # ##########
 # #Parámetros
 #
-# hoja_parametros.update_acell(f'Z{nr}', f'{omega*180/np.pi:.3g}')
-# hoja_parametros.update_acell(f'S{nr}', f'{np.linalg.norm(v_media):.3g}')
+# hoja_parametros.update_acell(f"Z{fila}", f"{omega*180/np.pi:.3g}")
+# hoja_parametros.update_acell(f"S{fila}", f"{np.linalg.norm(v_media):.3g}")
 #
-# cell_vel = hoja_parametros.range(f'P{nr}:R{nr}')
-# for i,cell in enumerate(cell_vel):
-#     cell.value = round(v_media[i],2)
+# cell_vel = hoja_parametros.range(f"P{fila}:R{fila}")
+# for i, cell in enumerate(cell_vel):
+#     cell.value = round(v_media[i], 2)
 # hoja_parametros.update_cells(cell_vel)
 #
-# cell_Bup = hoja_parametros.range(f'T{nr}:V{nr}')
-# for i,cell in enumerate(cell_Bup):
-#     cell.value = round(B_upstream[i],2)
+# cell_Bup = hoja_parametros.range(f"T{fila}:V{fila}")
+# for i, cell in enumerate(cell_Bup):
+#     cell.value = round(B_upstream[i], 2)
 # hoja_parametros.update_cells(cell_Bup)
 #
-# cell_Bdown = hoja_parametros.range(f'W{nr}:Y{nr}')
-# for i,cell in enumerate(cell_Bdown):
-#     cell.value = round(B_downstream[i],2)
+# cell_Bdown = hoja_parametros.range(f"W{fila}:Y{fila}")
+# for i, cell in enumerate(cell_Bdown):
+#     cell.value = round(B_downstream[i], 2)
 # hoja_parametros.update_cells(cell_Bdown)
 #
 #
-# #La hoja del MVA
+# # La hoja del MVA
 #
-# hoja_mva.update_acell(f'W{nr}', f'{angulo_v_mva * 180/np.pi:.3g}')
-# hoja_mva.update_acell(f'X{nr}', f'{angulo_B_mva * 180/np.pi:.3g}')
-# hoja_mva.update_acell(f'Y{nr}', f'{np.linalg.norm(x_23_MVA):.3g}')
-# hoja_mva.update_acell(f'Z{nr}', f'{np.linalg.norm(x_14_MVA):.3g}')
-# # hoja_mva.update_acell(f'AA{nr}', f'{:.3g}')
-# # hoja_mva.update_acell(f'AB{nr}', f'{:.3g}')
+# hoja_mva.update_acell(f"W{fila}", f"{angulo_v_mva * 180/np.pi:.3g}")
+# hoja_mva.update_acell(f"X{fila}", f"{angulo_B_mva * 180/np.pi:.3g}")
+# hoja_mva.update_acell(f"Y{fila}", f"{np.linalg.norm(x_23_MVA):.3g}")
+# hoja_mva.update_acell(f"Z{fila}", f"{np.linalg.norm(x_14_MVA):.3g}")
+# # hoja_mva.update_acell(f'AA{fila}', f'{:.3g}')
+# # hoja_mva.update_acell(f'AB{fila}', f'{:.3g}')
 #
-# hoja_mva.update_acell(f'AF{nr}', f'{np.linalg.norm(J_s_MVA)*1E-6:.3g}')
-# hoja_mva.update_acell(f'AJ{nr}', f'{np.linalg.norm(J_v_MVA):.3g}')
-# hoja_mva.update_acell(f'AK{nr}', f'{np.linalg.norm(fuerza_mva):.3g}')
-# hoja_mva.update_acell(f'AO{nr}', f'{np.linalg.norm(E_Hall)*1E3:.3g}') #mV/m
+# hoja_mva.update_acell(f"AF{fila}", f"{np.linalg.norm(J_s_MVA)*1E-6:.3g}")
+# hoja_mva.update_acell(f"AJ{fila}", f"{np.linalg.norm(J_v_MVA):.3g}")
+# hoja_mva.update_acell(f"AK{fila}", f"{np.linalg.norm(fuerza_mva):.3g}")
+# hoja_mva.update_acell(f"AO{fila}", f"{np.linalg.norm(E_Hall)*1E3:.3g}")  # mV/m
 #
-# cell_Js = hoja_mva.range(f'AC{nr}:AE{nr}')
-# for i,cell in enumerate(cell_Js):
-#     cell.value = round(J_s_MVA[i] * 1E-6,3)
+# cell_Js = hoja_mva.range(f"AC{fila}:AE{fila}")
+# for i, cell in enumerate(cell_Js):
+#     cell.value = round(J_s_MVA[i] * 1e-6, 3)
 # hoja_mva.update_cells(cell_Js)
 #
-# cell_Jv = hoja_mva.range(f'AG{nr}:AI{nr}')
-# for i,cell in enumerate(cell_Jv):
-#     cell.value = round(J_v_MVA[i],3)
+# cell_Jv = hoja_mva.range(f"AG{fila}:AI{fila}")
+# for i, cell in enumerate(cell_Jv):
+#     cell.value = round(J_v_MVA[i], 3)
 # hoja_mva.update_cells(cell_Jv)
 #
-# cell_EH = hoja_mva.range(f'AL{nr}:AN{nr}')
-# for i,cell in enumerate(cell_EH):
-#     cell.value = round(E_Hall[i]*1E3,3)
+# cell_EH = hoja_mva.range(f"AL{fila}:AN{fila}")
+# for i, cell in enumerate(cell_EH):
+#     cell.value = round(E_Hall[i] * 1e3, 3)
 # hoja_mva.update_cells(cell_EH)
 #
-# #La hoja del bootstrap
+# # La hoja del bootstrap
 #
-# hoja_boot.update_acell(f'M{nr}', f'{angulo_v_boot * 180/np.pi:.3g}')
-# hoja_boot.update_acell(f'N{nr}', f'{angulo_B_boot * 180/np.pi:.3g}')
-# hoja_boot.update_acell(f'O{nr}', f'{np.linalg.norm(x_23_boot):.3g}')
-# hoja_boot.update_acell(f'P{nr}', f'{np.linalg.norm(x_14_boot):.3g}')
-# # hoja_boot.update_acell(f'Q{nr}', f'{:.3g}')
-# # hoja_boot.update_acell(f'R{nr}', f'{:.3g}')
+# hoja_boot.update_acell(f"M{fila}", f"{angulo_v_boot * 180/np.pi:.3g}")
+# hoja_boot.update_acell(f"N{fila}", f"{angulo_B_boot * 180/np.pi:.3g}")
+# hoja_boot.update_acell(f"O{fila}", f"{np.linalg.norm(x_23_boot):.3g}")
+# hoja_boot.update_acell(f"P{fila}", f"{np.linalg.norm(x_14_boot):.3g}")
+# # hoja_boot.update_acell(f'Q{fila}', f'{:.3g}')
+# # hoja_boot.update_acell(f'R{fila}', f'{:.3g}')
 #
-# hoja_boot.update_acell(f'V{nr}', f'{np.linalg.norm(J_s_boot)*1E-6:.3g}')
-# hoja_boot.update_acell(f'Z{nr}', f'{np.linalg.norm(J_v_boot):.3g}')
-# hoja_boot.update_acell(f'AA{nr}', f'{np.linalg.norm(fuerza_boot):.3g}')
-# hoja_boot.update_acell(f'AE{nr}', f'{np.linalg.norm(E_Hall_boot)*1E3:.3g}')
+# hoja_boot.update_acell(f"V{fila}", f"{np.linalg.norm(J_s_boot)*1E-6:.3g}")
+# hoja_boot.update_acell(f"Z{fila}", f"{np.linalg.norm(J_v_boot):.3g}")
+# hoja_boot.update_acell(f"AA{fila}", f"{np.linalg.norm(fuerza_boot):.3g}")
+# hoja_boot.update_acell(f"AE{fila}", f"{np.linalg.norm(E_Hall_boot)*1E3:.3g}")
 #
-# cell_Js = hoja_boot.range(f'S{nr}:U{nr}')
-# for i,cell in enumerate(cell_Js):
-#     cell.value = round(J_s_boot[i] * 1E-6,3)
+# cell_Js = hoja_boot.range(f"S{fila}:U{fila}")
+# for i, cell in enumerate(cell_Js):
+#     cell.value = round(J_s_boot[i] * 1e-6, 3)
 # hoja_boot.update_cells(cell_Js)
 #
-# cell_Jv = hoja_boot.range(f'W{nr}:Y{nr}')
-# for i,cell in enumerate(cell_Jv):
-#     cell.value = round(J_v_boot[i],3)
+# cell_Jv = hoja_boot.range(f"W{fila}:Y{fila}")
+# for i, cell in enumerate(cell_Jv):
+#     cell.value = round(J_v_boot[i], 3)
 # hoja_boot.update_cells(cell_Jv)
 #
-# cell_EH = hoja_boot.range(f'AB{nr}:AD{nr}')
-# for i,cell in enumerate(cell_EH):
-#     cell.value = round(E_Hall_boot[i]*1E3,3)
+# cell_EH = hoja_boot.range(f"AB{fila}:AD{fila}")
+# for i, cell in enumerate(cell_EH):
+#     cell.value = round(E_Hall_boot[i] * 1e3, 3)
 # hoja_boot.update_cells(cell_EH)
 #
 #
-# #La hoja del ajuste
+# # La hoja del ajuste
 #
-# hoja_fit.update_acell(f'J{nr}', f'{angulo_mva * 180/np.pi:.3g}')
-# hoja_fit.update_acell(f'M{nr}', f'{angulo_v_fit * 180/np.pi:.3g}')
-# hoja_fit.update_acell(f'N{nr}', f'{angulo_B_fit * 180/np.pi:.3g}')
-# hoja_fit.update_acell(f'O{nr}', f'{np.linalg.norm(x_23_fit):.3g}')
-# hoja_fit.update_acell(f'P{nr}', f'{np.linalg.norm(x_14_fit):.3g}')
-# # hoja_fit.update_acell(f'Q{nr}', f'{:.3g}')
-# # hoja_fit.update_acell(f'R{nr}', f'{:.3g}')
+# hoja_fit.update_acell(f"J{fila}", f"{angulo_mva * 180/np.pi:.3g}")
+# hoja_fit.update_acell(f"M{fila}", f"{angulo_v_fit * 180/np.pi:.3g}")
+# hoja_fit.update_acell(f"N{fila}", f"{angulo_B_fit * 180/np.pi:.3g}")
+# hoja_fit.update_acell(f"O{fila}", f"{np.linalg.norm(x_23_fit):.3g}")
+# hoja_fit.update_acell(f"P{fila}", f"{np.linalg.norm(x_14_fit):.3g}")
+# # hoja_fit.update_acell(f'Q{fila}', f'{:.3g}')
+# # hoja_fit.update_acell(f'R{fila}', f'{:.3g}')
 #
-# hoja_fit.update_acell(f'V{nr}', f'{np.linalg.norm(J_s_fit)*1E-6:.3g}')
-# hoja_fit.update_acell(f'Z{nr}', f'{np.linalg.norm(J_v_fit):.3g}')
-# hoja_fit.update_acell(f'AA{nr}', f'{np.linalg.norm(fuerza_fit):.3g}')
-# hoja_fit.update_acell(f'AE{nr}', f'{np.linalg.norm(E_Hall_fit)*1E3:.3g}')
+# hoja_fit.update_acell(f"V{fila}", f"{np.linalg.norm(J_s_fit)*1E-6:.3g}")
+# hoja_fit.update_acell(f"Z{fila}", f"{np.linalg.norm(J_v_fit):.3g}")
+# hoja_fit.update_acell(f"AA{fila}", f"{np.linalg.norm(fuerza_fit):.3g}")
+# hoja_fit.update_acell(f"AE{fila}", f"{np.linalg.norm(E_Hall_fit)*1E3:.3g}")
 #
-# cell_Js = hoja_fit.range(f'S{nr}:U{nr}')
-# for i,cell in enumerate(cell_Js):
-#     cell.value = round(J_s_fit[i] * 1E-6,3)
+# cell_Js = hoja_fit.range(f"S{fila}:U{fila}")
+# for i, cell in enumerate(cell_Js):
+#     cell.value = round(J_s_fit[i] * 1e-6, 3)
 # hoja_fit.update_cells(cell_Js)
 #
-# cell_Jv = hoja_fit.range(f'W{nr}:Y{nr}')
-# for i,cell in enumerate(cell_Jv):
-#     cell.value = round(J_v_fit[i],3)
+# cell_Jv = hoja_fit.range(f"W{fila}:Y{fila}")
+# for i, cell in enumerate(cell_Jv):
+#     cell.value = round(J_v_fit[i], 3)
 # hoja_fit.update_cells(cell_Jv)
 #
-# cell_EH = hoja_fit.range(f'AB{nr}:AD{nr}')
-# for i,cell in enumerate(cell_EH):
-#     cell.value = round(E_Hall_fit[i]*1E3,3)
+# cell_EH = hoja_fit.range(f"AB{fila}:AD{fila}")
+# for i, cell in enumerate(cell_EH):
+#     cell.value = round(E_Hall_fit[i] * 1e3, 3)
 # hoja_fit.update_cells(cell_EH)

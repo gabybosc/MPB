@@ -98,8 +98,9 @@ def donde(array, valor):
     return resultado
 
 
-def error(lamb, B, M, x):
+def error(lamb, B, x):
     phi = np.zeros((3, 3))
+    M = len(B)
     for i in range(3):
         for j in range(3):
             if i == j:

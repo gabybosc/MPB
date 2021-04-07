@@ -1,13 +1,16 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.optimize import curve_fit
 import sys
 
-sys.path.append("..")
 
 path = "../../../datos/simulacion_leonardo/"
 datos = np.load(
     path + "ordenado_cut_0dot05.npy"
 )  # todos los datos ordenados con y,z menores a 0.05
+
+sys.path.append("..")
+from funciones import donde
 
 
 """
@@ -44,6 +47,7 @@ rho = reordenados[:, 3]
 B = reordenados[:, 7:10]
 J = reordenados[:, -3:]
 velocidad = reordenados[:, 4:7]  # km/s
+velocidad_i = reordenados[:, 12:15]
 
 HpRho = reordenados[:, 11]
 O2pRho = reordenados[:, 16]
@@ -60,75 +64,89 @@ CO2P = reordenados[:, 30]
 P_heavy = OP + O2P + CO2P
 P_B = np.linalg.norm(B, axis=1) ** 2 * 1e-9 / (2 * mu0)
 Pe = Ptermica - CO2P - HP - OP - O2P
-P_ram = 1.67e-6 * HpRho * velocidad[:, 0] ** 2  # nPa
+P_ram = 1.67e-6 * HpRho * velocidad_i[:, 0] ** 2  # nPa
 
-grav = []
-grav_O2 = []
-grav_O = []
-grav_CO2 = []
-for i in range(len(HpRho) - 2):
-    grav.append(np.trapz(HpRho[i : i + 2] * 1e6 * mp * g, x[i : i + 2] * 3390e3))
-    grav_O2.append(np.trapz(O2pRho[i : i + 2] * 1e6 * mp * g, x[i : i + 2] * 3390e3))
-    grav_O.append(np.trapz(OpRho[i : i + 2] * 1e6 * mp * g, x[i : i + 2] * 3390e3))
-    grav_CO2.append(np.trapz(CO2pRho[i : i + 2] * 1e6 * mp * g, x[i : i + 2] * 3390e3))
+beta = Ptermica / P_B
 
-np.trapz(HpRho[i : i + 2] * 1e6 * mp * g, x[i : i + 2] * 3390e3)
-
-
-def trapecio(f, x):
-    sol = np.zeros(len(x))
-    for i in range(len(x) - 1):
-        sol[i] = (x[i + 1] - x[i]) * (f[i] + f[i + 1]) / 2
-    sol[-1] = sol[-2]
-    return sol
-
-
-trapecio(HpRho * 1e6 * mp * g, x * 3390e3)
-
-# grav.append(grav[-3:])
-# grav_O.append(grav_O[-2:])
-# grav_O2.append(grav_O2[-2:])
-# grav_CO2.append(grav_CO2[-2:])
-
-g_total = (
-    np.array(grav) + np.array(grav_O) + np.array(grav_O2) + np.array(grav_CO2)
-) * 1e9
-
-g_total = np.append(g_total, g_total[-2:])
-
-plt.plot(x, g_total)
-plt.show()
-
-P_total = P_heavy + P_B + Pe + P_ram + HP + g_total
 #
 # inicio_MPB = donde(pos[:, 0], 1.2)
 # fin_MPB = donde(pos[:, 0], 1.36)
 # inicio_BS = donde(pos[:, 0], 1.67)
 # fin_BS = donde(pos[:, 0], 1.72)
 #
-# B_MPB = reordenados[inicio_MPB:fin_MPB, 7:10]
-# J_MPB = reordenados[inicio_MPB:fin_MPB, -3:] * 1000
-#
-#
-# plt.figure()
-# plt.plot(x, Pe, label="Presion electronica?")
-# plt.plot(x, CO2P, label="Presion CO2+")
-# plt.plot(x, HP, label="Presion H+")
-# plt.plot(x, OP, label="Presion O+")
-# plt.plot(x, O2P, label="Presion O2+")
-# plt.axvline(x=1.25, c="black", ls="--", label="MPB")
-# plt.axvline(x=1.7, c="m", ls="--", label="BS")
-# plt.title(f"Presión para y,z < {limite}")
-# plt.legend()
-# plt.xlabel("x (RM)")
-#
-#
+
+
+# def sigmoid(x, L, x0, k, b):
+#     y = L / (1 + np.exp(-k * (x - x0))) + b
+#     return y
+
+
+i = donde(x, 1.1)
+f = donde(x, 1.3)
+
+plt.figure()
+plt.plot(x[i:f], HpRho[i:f])
+plt.plot(x[i:f], O2pRho[i:f])
+plt.plot(x[i:f], OpRho[i:f])
+plt.plot(x[i:f], CO2pRho[i:f])
+plt.show()
+
+
+xx = x[i:f] * 3390e3
+
+
+def lineal(x, a, b):
+    y = a * x + b
+    return y
+
+
+grav = []
+
+for densidad in [OpRho[i:f], O2pRho[i:f], CO2pRho[i:f]]:
+    logfit = np.log(densidad * 1e6)
+
+    # coef = np.polyfit(xx, logfit, 1)
+    # poly1d_fn = np.poly1d(coef)
+    #
+    # plt.plot(xx, logfit, "yo", xx, poly1d_fn(xx), "--k")
+
+    guess = [-50, 63]
+    popt, pcov = curve_fit(lineal, xx, logfit, guess, method="lm")
+    yy = lineal(xx, *popt)
+
+    plt.figure()
+    plt.plot(xx, logfit, "o", label="datos")
+    plt.plot(xx, yy, "r-", label="Fit")
+    plt.legend()
+
+    plt.figure()
+    plt.plot(xx, densidad * 1e6)
+    plt.plot(xx, np.exp(yy))
+
+    plt.show()
+
+    a = popt[0]  # tiene que tener unidades de 1/m
+    b = popt[1]  # adimensional, pero e^b tiene unidades 1/m³
+    int = np.exp(popt[0] * xx + popt[1]) / (popt[0])  # esto está en 1/m²
+    grav.append(-int * mp * g * 1e9)  # en nPan   # es menos la integral
+    print(
+        "deberian ser iguales",
+        sum(-int * mp * g * 1e9),
+        np.trapz(densidad * 1e6 * mp * g, xx) * 1e9,
+    )
+
+P_grav = np.zeros(len(P_heavy))
+P_grav[i:f] = grav[0] + grav[1] + grav[2]
+
+P_total = P_heavy + P_B + Pe + P_ram + HP + P_grav
+
+
 plt.figure()
 plt.scatter(x, Pe, label="Presion electronica?")
 plt.scatter(x, P_heavy, label="Presion heavy")
 plt.scatter(x, P_B, label="Presion B")
 plt.scatter(x, P_ram, label="Presion ram")
-# plt.scatter(x, P_grav, label="Presion grav")
+plt.scatter(x, P_grav, label="Presion grav")
 plt.scatter(x, P_total, label="presión total")
 plt.scatter(x, HP, label="Presion H+", marker=".")
 plt.axvline(x=1.25, c="black", ls="--", label="MPB")
@@ -140,74 +158,4 @@ plt.ylabel("P (nPa)")
 plt.ylim(0, 1)
 
 
-plt.show()
-
-from scipy.optimize import curve_fit
-from funciones import donde
-
-
-def sigmoid(x, L, x0, k, b):
-    y = L / (1 + np.exp(-k * (x - x0))) + b
-    return y
-
-
-i = donde(x, 1.18)
-f = donde(x, 1.7)
-xx = x[i:f]
-
-plt.plot(x[i:f], HpRho[i:f])
-plt.plot(x[i:f], O2pRho[i:f])
-plt.plot(x[i:f], OpRho[i:f])
-plt.plot(x[i:f], CO2pRho[i:f])
-plt.show()
-
-
-def func(x, a, b, c):
-    return a * np.exp(-b * x) + c
-
-
-densidad = O2pRho[i:f]
-guess = [max(densidad), 1, min(densidad)]  # this is an mandatory initial guess
-
-popt, pcov = curve_fit(func, xx, densidad, guess, method="dogbox")
-yp = func(x, *popt)
-
-plt.figure()
-plt.plot(x, O2pRho, "ko", label="Original Noised Data")
-plt.plot(x, yp, "r-", label="Fitted Curve")
-plt.legend()
-plt.show()
-
-
-r = HpRho[i:f]
-p0 = [max(r), np.median(xx), 1, min(r)]  # this is an mandatory initial guess
-
-popt, pcov = curve_fit(sigmoid, xx, r, p0, method="lm")
-
-y = sigmoid(xx, *popt)
-
-L = popt[0]
-x0 = popt[1]
-k = popt[2]
-b = popt[3]
-
-integral = mp * g * (b + L) * xx + mp * g * L / k * np.log(1 + np.exp(-k * (xx - x0)))
-
-plt.plot(xx, integral)
-plt.show()
-
-# L = popt[0] * 1e6
-# x0 = popt[1] * 3390e3
-# k = popt[2]
-# b = popt[3] * 1e6
-#
-# integral = mp * g * (b + L) * xx * 3390e3 + mp * g * L / k * np.log(
-#     1 + np.exp(-k * (xx * 3390e3 - x0))
-# )
-#
-# plt.plot(xx * 3390e3, integral * 1e9)
-# plt.show()
-
-plt.plot(xx, r)
-plt.plot(xx, y)
 plt.show()

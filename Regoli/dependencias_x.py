@@ -29,7 +29,7 @@ limite = 0.05
 x = reordenados[:, 0]
 pos = reordenados[:, :3]
 rho = reordenados[:, 3]
-v_e = reordenados[:, 4:7]
+v_plasma = reordenados[:, 4:7]
 B = reordenados[:, 7:10]
 Ptot = reordenados[:, 10]
 HpRho = reordenados[:, 11]
@@ -107,10 +107,6 @@ print(f"Bup = {B_upstream} \n Bdown = {B_downstream}\nomega = {omega}")
 q_e = 1.6e-19  # C
 m_p = 1.6e-27  # kg
 
-# j = (
-#     np.array([q_e * HpRho[i] * (v_i[i, :] - v_e[i, :]) for i in range(len(HpRho))])
-#     * 1e18
-# )
 # plt.plot(j)
 # plt.plot(J)
 # plt.legend(["jx", "jy", "jz", "Jx", "Jy", "Jz"])

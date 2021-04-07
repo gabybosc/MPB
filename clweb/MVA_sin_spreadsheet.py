@@ -97,7 +97,7 @@ def MVA(year, month, day, ti_MVA, tf_MVA):
     hodograma(B1, B2, B3)
 
     # el error
-    phi, delta_B3 = error(lamb, B, M, x)
+    phi, delta_B3 = error(lamb, B, x)
     print("MVA terminado")
     return x3, B, t, posicion
 
@@ -125,7 +125,7 @@ def ajuste(year, month, day, doy, ti_MVA, tf_MVA):
     B3_fit = np.dot(B, normal_ajuste)
 
     print(f"La normal del fit es {normal_ajuste}")
-    print(f"B3 del fit es {B3_fit}")
+    # print(f"B3 del fit es {B3_fit}")
     print("Ajuste terminado")
 
     return normal_ajuste, t1, t2, t3, t4

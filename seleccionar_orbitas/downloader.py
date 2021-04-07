@@ -1,6 +1,9 @@
 """
-descarga los archivos de mag hi res (pues si llegue hasta acá es porque ya vi los low res), lpw, swea y swia de la lista de fechas del año que le pida
-El problema es que no puede asegurarse de que existan los archivos antes porque la página no tira 404. (Si tira 404, acá está la solución https://stackoverflow.com/questions/20387246/checking-file-exists-before-download-using-head)
+descarga los archivos de mag hi res (pues si llegue hasta acá es porque ya vi los
+low res), lpw, swea y swia de la lista de fechas del año que le pida.
+El problema es que no puede asegurarse de que existan los archivos antes porque
+la página no tira 404. (Si tira 404, acá está la solución
+https://stackoverflow.com/questions/20387246/checking-file-exists-before-download-using-head)
 """
 
 import urllib.request
@@ -8,9 +11,9 @@ import shutil
 import numpy as np
 import datetime as dt
 
+year = 2016
 fechas = np.loadtxt("outputs/fechas_MVA_2016.txt")
 for j in range(len(fechas)):
-    year = 2016
     doy = int(fechas[j])
 
     date_orbit = dt.datetime(year, 1, 1) + dt.timedelta(
@@ -30,6 +33,10 @@ for j in range(len(fechas)):
 
     swia = f"https://pds-ppi.igpp.ucla.edu/ditdos/download?id=pds://PPI/maven.swia.calibrated/data/onboard_svy_mom/{year}/{month}/mvn_swi_l2_onboardsvymom_{year}{month}{day}_v01_r01.cdf"
 
+    swica = f"https://pds-ppi.igpp.ucla.edu/ditdos/download?id=pds://PPI/maven.swia.calibrated/data/coarse_arc_3d/{year}/{month}/mvn_swi_l2_coarsearc3d_{year}{month}{day}_v01_r01.cdf"
+
+    swifa = f"https://pds-ppi.igpp.ucla.edu/ditdos/download?id=pds://PPI/maven.swia.calibrated/data/fine_arc_3d/{year}/{month}/mvn_swi_l2_finearc3d_{year}{month}{day}_v01_r01.cdf"
+
     with urllib.request.urlopen(mag_hires) as response, open(
         f"../../datos/MAG_hires/mvn_mag_l2_{year}{doy}ss_{year}{month}{day}_v01_r01.sts",
         "wb",
@@ -48,7 +55,19 @@ for j in range(len(fechas)):
         "wb",
     ) as out_file:
         shutil.copyfileobj(response, out_file)
-    print(f"swia dia {doy} listo")
+    print(f"swia (onboard) dia {doy} listo")
+
+    with urllib.request.urlopen(swica) as response, open(
+        f"../../datos/SWIA/mvn_swi_l2_coarsearc3d_{year}{month}{day}_v01_r01.cdf", "wb",
+    ) as out_file:
+        shutil.copyfileobj(response, out_file)
+    print(f"swica dia {doy} listo")
+
+    with urllib.request.urlopen(swifa) as response, open(
+        f"../../datos/SWIA/mvn_swi_l2_finearc3d_{year}{month}{day}_v01_r01.cdf", "wb",
+    ) as out_file:
+        shutil.copyfileobj(response, out_file)
+    print(f"swifa dia {doy} listo")
 
     with urllib.request.urlopen(lpw) as response, open(
         f"../../datos/LPW/mvn_lpw_l2_lpnt_{year}{month}{day}_v03_r02.cdf", "wb"

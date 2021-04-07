@@ -1,17 +1,18 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-from matplotlib.widgets import MultiCursor
+
+# from matplotlib.widgets import MultiCursor
 from importar_datos import importar_mag, importar_swia
 import sys
 
 sys.path.append("..")
 
-from funciones_plot import equal_axes, onpick1
-from funciones import diezmar, donde, corrientes
+from funciones_plot import equal_axes  # , onpick1
+from funciones import diezmar, donde
 
 path = "../../../datos/simulacion_leonardo/"
-datos = np.loadtxt(path + "simu_tray.sat", skiprows=2)
+datos_enteros = np.loadtxt(path + "simu_tray.sat", skiprows=8641)
 
 """
 Mismos análisis pero para los datos sobre la trayectoria de la nave
@@ -26,28 +27,57 @@ b1y b1z e jx jy jz (40 a 45)
 
 # Datos de la simulación
 
+
+pi = 0
+pf = 600
+mu0 = 4 * np.pi * 1e-7
+datos = datos_enteros[pi:pf]
+
 x = datos[:, 8]
 y = datos[:, 9]
 z = datos[:, 10]
 B = datos[:, 15:18]
 
-pi = 10200
-pf = 10800
+velocidad_plasma = datos[:, 12:15]
+velocidad_i = datos[:, 20:23]
+J = datos[:, -3:]
 
-velocidad = datos[pi:pf, 12:15]
-J = datos[pi:pf, -3:]
+rho = datos[:, 11]
+HpRho = datos[:, 19]
+O2pRho = datos[:, 24]
+OpRho = datos[:, 29]
+CO2pRho = datos[:, 34]
 
-rho = datos[pi:pf, 11]
-HpRho = datos[pi:pf, 19]
-O2pRho = datos[pi:pf, 24]
-OpRho = datos[pi:pf, 29]
-CO2pRho = datos[pi:pf, 34]
+P_plasma = datos[:, 18]
+presion_H = datos[:, 23]
+presion_O2 = datos[:, 28]
+presion_O = datos[:, 33]
+presion_CO2 = datos[:, 38]
 
-Ptermica = datos[pi:pf, 18]
-presion_H = datos[pi:pf, 23]
-presion_O2 = datos[pi:pf, 28]
-presion_O = datos[pi:pf, 33]
-presion_CO2 = datos[pi:pf, 38]
+
+kT_H = presion_H / HpRho
+kT_O = presion_O / OpRho
+kT_O2 = presion_O2 / O2pRho
+kT_CO2 = presion_CO2 / CO2pRho
+
+P_heavy = presion_O + presion_O2 + presion_CO2
+P_B = np.linalg.norm(B, axis=1) ** 2 * 1e-9 / (2 * mu0)
+Pe = P_plasma - P_heavy - presion_H
+P_ram = 1.67e-6 * HpRho * velocidad_i[:, 0] ** 2  # nPa
+P_total = P_heavy + P_B + Pe + P_ram + presion_H
+
+beta = P_plasma / P_B
+
+density_mean = [np.mean(HpRho[i : i + 50]) for i in range(len(HpRho) - 50)]
+ion_length = 2.28e07 / np.sqrt(density_mean) * 1e-5  # km
+ion_length = np.append(ion_length, ion_length[-51:-1])
+plt.plot(x, kT_H)
+plt.plot(x, Pe / rho)
+# plt.plot(x, kT_O)
+# plt.plot(x, kT_O2)
+# plt.plot(x, kT_CO2)
+plt.show()
+
 
 # Datos de MAVEN
 mag, t, B_mag, posicion = importar_mag(2016, "03", 16, 17.7, 19)
@@ -56,8 +86,7 @@ swia, t_swia, proton_density = importar_swia(2016, "03", 16, 17.7, 19)
 # Datos del análisis de MAVEN
 R = [1.082, -0.064, 0.515]
 normal = [0.920, -0.302, 0.251]
-j_maven = 282  # nA/m²
-mu0 = 4 * np.pi * 1e-7
+j_maven = 23.2  # mA/m
 
 # hay 10 órbitas, cada una de 1620 puntos
 """Plotea nuestra MPB y la órbita de la simu que estamos usando"""
@@ -105,8 +134,11 @@ ax.plot_wireframe(
     color="#c1440e",
     linewidth=0.5,
 )
-ax.plot(x[pi:pf], y[pi:pf], z[pi:pf])
+# sc = ax.scatter(x, y, z, vmin=80, vmax=150, c=ion_length, cmap="magma")
+sc = ax.scatter(x, y, z, c=np.log10(beta), vmin=-1.5, vmax=1.5, cmap="PiYG")
+plt.colorbar(sc)
 equal_axes(ax, X1, Y1, Z1)
+ax.set_title("log10(beta)")
 plt.show()
 
 
@@ -125,26 +157,33 @@ plt.show()
 # plt.show()
 
 """
-Las primeras órbitas, hasta el punto 10200 aprox, no tienen una MPB. El campo
-en ellas es menor a 10 nT siempre.
-"""
-
-x_cut = x[pi:pf]
-y_cut = y[pi:pf]
-z_cut = z[pi:pf]
-B_cut = B[pi:pf, :]
-
-
-"""
 Comparación de B y de la densidad de protones
 """
+
+t1t2t3t4 = [18.2167, 18.2204, 18.235, 18.2476]
+i1 = donde(t, t1t2t3t4[0])
+i2 = donde(t, t1t2t3t4[1])
+i3 = donde(t, t1t2t3t4[2])
+i4 = donde(t, t1t2t3t4[3])
 
 idx = diezmar(t, t_swia)
 
 plt.figure()
 plt.plot(posicion[:, 0] / 3390, np.linalg.norm(B_mag, axis=1), label="MAVEN")
-plt.plot(x_cut, np.linalg.norm(B_cut, axis=1), label="simulación")
-plt.axvline(x=R[0], color="k", linestyle="--", label="cruce MAVEN")
+plt.axvline(posicion[i1, 0] / 3390, color="C2", linestyle="--", label="t1")
+plt.axvline(posicion[i2, 0] / 3390, color="C3", linestyle="--", label="t2")
+plt.axvline(posicion[i3, 0] / 3390, color="C4", linestyle="--", label="t3")
+plt.axvline(posicion[i4, 0] / 3390, color="C5", linestyle="--", label="t4")
+plt.xlabel("x (RM)")
+plt.ylabel("|B| (nT)")
+plt.legend()
+
+plt.figure()
+plt.plot(
+    posicion[:, 0] / 3390 + 600 / 3390, np.linalg.norm(B_mag, axis=1), label="MAVEN"
+)
+plt.plot(x, np.linalg.norm(B, axis=1), label="simulación")
+plt.axvline(x=R[0] + 600 / 3390, color="k", linestyle="--", label="cruce MAVEN")
 plt.axvline(x=1.26, color="C3", linestyle="--", label="MPB simulacion")
 plt.xlabel("x (RM)")
 plt.ylabel("|B| (nT)")
@@ -152,7 +191,7 @@ plt.legend()
 
 plt.figure()
 plt.plot(posicion[idx, 0] / 3390, proton_density, label="swia")
-plt.plot(x_cut, HpRho, label="simulación")
+plt.plot(x, HpRho, label="simulación")
 plt.axvline(x=R[0], color="k", linestyle="--", label="cruce MAVEN")
 plt.axvline(x=1.26, color="C3", linestyle="--", label="MPB simulacion")
 plt.ylim(ymax=30)
@@ -176,13 +215,13 @@ plt.show()
 #         plt.title("Spacebar when ready to click:")
 #
 #         ax1 = plt.subplot2grid((2, 1), (0, 0))
-#         plt.plot(x_cut, np.linalg.norm(B_cut, axis=1))
+#         plt.plot(x, np.linalg.norm(B, axis=1))
 #         ax1.set_ylabel("|B| (nT)")
 #
 #         ax5 = plt.subplot2grid((2, 1), (1, 0), sharex=ax1)
 #         ax5.set_ylabel("Densidad de p+ \n del SW (cm⁻³)")
 #         ax5.set_xlabel("x (RM)")
-#         plt.plot(x_cut, HpRho[pi:pf])
+#         plt.plot(x, HpRho)
 #
 #         fig.canvas.mpl_connect("pick_event", onpick1)
 #         multi = MultiCursor(fig.canvas, (ax1, ax5), color="black", lw=1)
@@ -213,30 +252,48 @@ x4 = 1.1474673758014104
 x23 = (x2 - x3) * 3390e3  # ancho en m
 ancho_updown = 0.015 * 13000 / 3390
 
-inicio_up = donde(x_cut, x1 + ancho_updown)
-fin_up = donde(x_cut, x1)
-inicio_down = donde(x_cut, x4)
-fin_down = donde(x_cut, x4 - ancho_updown)
+inicio_up = donde(x, x1 + ancho_updown)
+fin_up = donde(x, x1)
+inicio_down = donde(x, x4)
+fin_down = donde(x, x4 - ancho_updown)
+inicio_MPB = donde(x, x2)
+fin_MPB = donde(x, x3)
 
 n2 = [0.856, -0.066, 0.512]
-B_upstream = np.mean(B_cut[inicio_up:fin_up], axis=0)
-B_downstream = np.mean(B_cut[inicio_down:fin_down], axis=0)
-J_v = np.cross(n2, (B_upstream - B_downstream)) / mu0 / x23
+B_upstream = np.mean(B[inicio_up:fin_up], axis=0)
+B_downstream = np.mean(B[inicio_down:fin_down], axis=0)
+J_s = np.cross(n2, (B_upstream - B_downstream)) / mu0  # nA/m
+
+J_integrado = np.trapz(J[inicio_MPB:fin_MPB, 0], x[inicio_MPB:fin_MPB])
+# Integramos el J de la simulación en x para obtener un Js
+
+# plt.figure()
+# plt.plot(x, np.linalg.norm(J_integrado, axis=1) * 1e-3)
+# plt.axvline(x=R[0], color="k", linestyle="--", label="cruce MAVEN")
+# plt.axvline(x=1.26, color="C3", linestyle="--", label="MPB simulacion")
+# plt.axhline(y=np.linalg.norm(J_s * 1e-6), color="C1", label="J = n x (Bu-Bd)")
+# plt.axhline(y=np.linalg.norm(j_maven), color="C2", label="J = n x (Bu-Bd)")
+# plt.xlim(xmin=1)
+# plt.xlabel("x MSO (RM)")
+# plt.ylabel("J_s  (mA/m)")
+# plt.legend()
+# plt.show()
+
 
 plt.figure()
-plt.plot(x_cut, np.linalg.norm(J, axis=1) * 1e3)
+plt.plot(x, np.linalg.norm(J, axis=1) * 1e3)
 plt.axvline(x=R[0], color="k", linestyle="--", label="cruce MAVEN")
 plt.axvline(x=1.26, color="C3", linestyle="--", label="MPB simulacion")
-plt.axhline(y=np.linalg.norm(J_v), color="C1", label="J = n x (Bu-Bd) / h (simu)")
+plt.axhline(y=np.linalg.norm(J_s / x23), color="C1", label="J = n x (Bu-Bd) / h (simu)")
 plt.ylim(ymax=100)
 plt.xlabel("x (RM)")
-plt.ylabel("j (nA/m²)")
+plt.ylabel("j_v (nA/m²)")
 plt.legend()
 plt.show()
 
-plt.plot(x_cut, OpRho, label="O+")
-plt.plot(x_cut, O2pRho, label="O2+")
-plt.plot(x_cut, CO2pRho, label="CO2+")
+plt.plot(x, OpRho, label="O+")
+plt.plot(x, O2pRho, label="O2+")
+plt.plot(x, CO2pRho, label="CO2+")
 plt.axvline(x=R[0], color="k", linestyle="--", label="cruce MAVEN")
 plt.axvline(x=1.26, color="C3", linestyle="--", label="MPB simulacion")
 plt.legend()
@@ -248,21 +305,25 @@ plt.ylabel("rho (mp/cc)")
 """
 Análsis de las presiones
 """
-P_heavy = presion_O + presion_O2 + presion_CO2
-P_B = np.linalg.norm(B_cut, axis=1) ** 2 * 1e-9 / (2 * mu0)
-Pe = Ptermica - presion_CO2 - presion_H - presion_O - presion_O2
-P_ram = 1.67e-6 * HpRho * velocidad[:, 0] ** 2  # nPa
-P_total = P_heavy + P_B + Pe + P_ram + presion_H
 
 plt.figure()
-plt.plot(x_cut, P_heavy, label="P heavies")
-plt.plot(x_cut, P_B, label="P magnética")
-plt.plot(x_cut, Pe, label="P electrónica")
-plt.plot(x_cut, P_ram, label="P ram")
-plt.plot(x_cut, P_total, label="P total")
-plt.axvline(x=R[0], color="k", linestyle="--", label="cruce MAVEN")
-plt.axvline(x=1.26, color="C3", linestyle="--", label="MPB simulacion")
+sc = plt.scatter(x, y, c=np.log10(beta), vmin=-4, vmax=4, s=35, cmap="coolwarm",)
+plt.xlabel("X (RM)")
+plt.ylabel("Y (RM)")
+plt.title("log10(beta)")
+plt.colorbar(sc)
 
+
+plt.figure()
+plt.scatter(x, P_total, label="P total")
+plt.scatter(x, Pe, label="P electrónica")
+plt.scatter(x, P_B, label="P magnética")
+plt.scatter(x, P_ram, label="P ram")
+plt.scatter(x, presion_H, label="P protones", marker=".")
+plt.scatter(x, P_heavy, label="P heavies")
+plt.axvspan(x2, x3, color="red", alpha=0.2, label="MPB")
+plt.xlim([1, 1.5])
+plt.ylim([0, 1])
 plt.legend()
 plt.xlabel("x (RM)")
 plt.ylabel("presion (nPa)")

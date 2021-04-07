@@ -32,7 +32,6 @@ def ajuste_conico(posicion, index, orbita, x3, x0=0.78, e=0.9, L=0.96):
     ax.set_xlabel(r"$X_{MSO} (R_m)$")
     ax.set_ylabel(r"$Y_{MSO} (R_m)$")
     ax.set_zlabel(r"$Z_{MSO} (R_m)$")
-    ax.set_aspect("equal")
     ax.plot(orbita[:, 0], orbita[:, 1], orbita[:, 2], color="green", label="Órbita")
     ax.scatter(R[0], R[1], R[2], label="MAVEN", color="k", s=40)
     X1 = x0 + r1 * np.cos(THETA)
@@ -95,8 +94,9 @@ def ajuste_conico(posicion, index, orbita, x3, x0=0.78, e=0.9, L=0.96):
     return norm_vignes, X1, Y1, Z1, R, L0
 
 
-def bootstrap(N, B_cut, M_cut):
+def bootstrap(N, B_cut):
     """Hace el bootstrap para M puntos de un campo B, N veces."""
+    M_cut = len(B_cut)
     out = np.zeros(N)
     out_phi = np.zeros((N, 2))
     normal_ran = np.zeros((N, 3))
@@ -119,7 +119,7 @@ def bootstrap(N, B_cut, M_cut):
         normal_ran[a, :] = x3_ran
 
         B3_ran = np.dot(B_random, x3_ran)
-        phi, delta_B3 = error(lamb_ran, B_random, M_cut, x_ran)
+        phi, delta_B3 = error(lamb_ran, B_random, x_ran)
         out[a] = np.mean(B3_ran)
         out_phi[a, 0] = phi[2, 0]
         out_phi[a, 1] = phi[2, 1]

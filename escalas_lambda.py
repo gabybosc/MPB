@@ -8,6 +8,7 @@ El mapa de colores me va a dar el valor del cociente.
 import numpy as np
 import time as time
 from funciones import find_nearest, Mij, fechas
+from importar_datos import importar_t1t2t3t4, importar_mag
 
 # dates = np.loadtxt('outputs/t1t2t3t4.txt')
 
@@ -17,34 +18,14 @@ from funciones import find_nearest, Mij, fechas
 year, month, day, doy = fechas()
 hora = input("Hora en HH\n")
 
-tiempos_txt = np.loadtxt("outputs/t1t2t3t4.txt")
-for i in range(len(tiempos_txt)):
-    if (
-        int(year) == int(tiempos_txt[i, 0])
-        and int(doy) == int(tiempos_txt[i, 1])
-        and int(hora) == int(tiempos_txt[i, 2])
-    ):
-        tiempos = [
-            tiempos_txt[i, 2],
-            tiempos_txt[i, 3],
-            tiempos_txt[i, 4],
-            tiempos_txt[i, 5],
-        ]
+tiempos = importar_t1t2t3t4(year, month, day, doy, int(hora))
 
 # ti = float(input('Tiempo inicial del barrido\n'))
 # tf = float(input('Tiempo final del barrido\n'))
 ti = tiempos[0]
 tf = tiempos[3]
 
-path = "../../datos/"  # path a los datos desde la laptop
-ni = int(ti * 32 * 3600)
-nf = int((24 - tf) * 32 * 3600)
-mag = np.genfromtxt(
-    path + f"MAG_hires/mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts",
-    skip_header=ni,
-    skip_footer=nf,
-)
-
+mag, t, B, posicion = importar_mag(year, month, day, ti, tf)
 
 tiempo_central = np.zeros(
     int((tf - ti) * 3600)
@@ -63,17 +44,6 @@ for i in range(len(escalas) - 1):
     escalas[i + 1] = escalas[i] + 1 / 3600
 
 # print(f'escala mayor = {escalas[-1]*3600}s')
-
-dia = mag[:, 1]
-t = mag[:, 6]  # el dia decimal
-t = (t - dia) * 24  # para que me de sobre la cantidad de horas
-
-M = np.size(t)  # el numero de datos
-
-# el campo
-B = np.zeros((M, 3))
-for i in range(7, 10):
-    B[:, i - 7] = mag[:, i]
 
 
 program_starts = time.time()

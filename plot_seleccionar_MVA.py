@@ -19,8 +19,12 @@ Para eso, grafica |B|, BxByBz, swea, swia y lpw.
 np.set_printoptions(precision=4)
 
 year, month, day, doy = fechas()
-ti, tf = tiempos()
+mag, t, B, posicion = importar_mag_1s(year, month, day, 0.1, 24)
+plt.plot(t, np.linalg.norm(B, axis=1))
+plt.ylim([0, 70])
+plt.show()
 
+ti, tf = tiempos()
 mag, t, B, posicion = importar_mag_1s(year, month, day, ti, tf)
 swea, t_swea, energia, flux_plot = importar_swea(year, month, day, ti, tf)
 swia, t_swia, i_density, i_temp, vel_mso = importar_swia(year, month, day, ti, tf)

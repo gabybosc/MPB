@@ -27,7 +27,12 @@ swea = f"https://pds-ppi.igpp.ucla.edu/ditdos/download?id=pds://PPI/maven.swea.c
 
 lpw = f"https://pds-ppi.igpp.ucla.edu/ditdos/download?id=pds://PPI/maven.lpw.derived/data/lp-nt/{year}/{month}/mvn_lpw_l2_lpnt_{year}{month}{day}_v03_r02.cdf"
 
-swia = f"https://pds-ppi.igpp.ucla.edu/ditdos/download?id=pds://PPI/maven.swia.calibrated/data/onboard_svy_mom/{year}/{month}/mvn_swi_l2_onboardsvymom_{year}{month}{day}_v01_r01.cdf"
+swia_onboard = f"https://pds-ppi.igpp.ucla.edu/ditdos/download?id=pds://PPI/maven.swia.calibrated/data/onboard_svy_mom/{year}/{month}/mvn_swi_l2_onboardsvymom_{year}{month}{day}_v01_r01.cdf"
+
+swica = f"https://pds-ppi.igpp.ucla.edu/ditdos/download?id=pds://PPI/maven.swia.calibrated/data/coarse_arc_3d/{year}/{month}/mvn_swi_l2_coarsearc3d_{year}{month}{day}_v01_r01.cdf"
+
+swifa = f"https://pds-ppi.igpp.ucla.edu/ditdos/download?id=pds://PPI/maven.swia.calibrated/data/fine_arc_3d/{year}/{month}/mvn_swi_l2_finearc3d_{year}{month}{day}_v01_r01.cdf"
+
 
 if gethostname() == "magneto2":
     path = f"../../../../media/gabybosc/datos/MAG_1s/{year}/"
@@ -47,11 +52,24 @@ with urllib.request.urlopen(mag_hires) as response, open(
     shutil.copyfileobj(response, out_file)
 print(f"mag dia {doy} listo")
 
-with urllib.request.urlopen(swia) as response, open(
+with urllib.request.urlopen(swia_onboard) as response, open(
     path + f"SWIA/mvn_swi_l2_onboardsvymom_{year}{month}{day}_v01_r01.cdf", "wb"
 ) as out_file:
     shutil.copyfileobj(response, out_file)
 print(f"swia dia {doy} listo")
+
+with urllib.request.urlopen(swica) as response, open(
+    f"../../datos/SWIA/mvn_swi_l2_coarsearc3d_{year}{month}{day}_v01_r01.cdf", "wb",
+) as out_file:
+    shutil.copyfileobj(response, out_file)
+print(f"swica dia {doy} listo")
+
+with urllib.request.urlopen(swifa) as response, open(
+    f"../../datos/SWIA/mvn_swi_l2_finearc3d_{year}{month}{day}_v01_r01.cdf", "wb",
+) as out_file:
+    shutil.copyfileobj(response, out_file)
+print(f"swifa dia {doy} listo")
+
 
 with urllib.request.urlopen(lpw) as response, open(
     path + f"LPW/mvn_lpw_l2_lpnt_{year}{month}{day}_v03_r02.cdf", "wb"

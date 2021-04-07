@@ -1,7 +1,11 @@
 import numpy as np
 import os
 import matplotlib.pyplot as plt
-from importar_datos import importar_swia
+from importar_datos import importar_swia_vel
+import sys
+
+sys.path.append("..")
+
 from funciones import fechas, donde, tiempos, diezmar
 
 np.set_printoptions(precision=4)
@@ -50,17 +54,10 @@ def importar_mag(year, month, day, ti, tf):
     return mag, t_cut, B_cut, posicion_cut
 
 
-if ti_ms < tf_down:
-    swia, t_swia, density, temperature, vel_mso = importar_swia(
-        year, month, day, ti_ms, tf_down
-    )
-    mag, t_mag, B, posicion = importar_mag(year, month, day, ti_ms, tf_down)
-
-else:
-    swia, t_swia, density, temperature, vel_mso = importar_swia(
-        year, month, day, ti_down, tf_ms
-    )
-    mag, t_mag, B, posicion = importar_mag(year, month, day, ti_down, tf_ms)
+swia, t_swia, density, vel_mso = importar_swia_vel(
+    year, month, day, ti_ms, tf_down
+)
+mag, t_mag, B, posicion = importar_mag(year, month, day, ti_ms, tf_down)
 
 
 # quiero diezmar el tiempo y el campo para que sean los mismos que tiene swia
@@ -71,6 +68,7 @@ B_cut = B[idx]
 posicion_cut = posicion[idx]
 
 inicio_up = donde(t_swia, ti_down)  # tiene que dar lo mismo si uso tswia o tmag
+fin_up = donde(t_swia, tf_down)
 
 ti_funda = donde(tmag_diezmado, ti_ms)
 tf_funda = donde(tmag_diezmado, tf_ms)

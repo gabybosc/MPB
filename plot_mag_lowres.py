@@ -11,7 +11,7 @@ np.set_printoptions(precision=4)
 
 year, month, day, doy = fechas()
 
-n = 150
+n = 200
 
 # path = '../../../MAVEN/mag_1s/2016/03/' #path a los datos desde la desktop
 path = "../../datos/"  # path a los datos desde la laptop
@@ -43,6 +43,7 @@ plt.figure()
 plot_datetime(year, month, day, t, np.linalg.norm(B, axis=1))
 plt.xlabel("t (UTC)")
 plt.ylabel("|B|")
+plt.ylim(ymin=0, ymax=70)
 plt.title("MAG lowres hdec")
 
 

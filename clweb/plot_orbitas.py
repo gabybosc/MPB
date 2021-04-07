@@ -78,7 +78,7 @@ def BS_MPB(L, e, x0):
     return (X1, yz)
 
 
-def marte(x_bs, yz_bs, x_mpb, y_mpb):
+def marte(x_bs, yz_bs, x_mpb, yz_mpb):
     fig, ax = plt.subplots()
     ax.plot()
     ax.plot(x_bs, yz_bs, color="#07aec7", linestyle="-.")

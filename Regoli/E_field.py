@@ -20,7 +20,13 @@ Vamos a escribir cada término de la ley de Ohm generalizada.
 Necesito los valores de v, B, j y p en una región más amplia que el eje x nomás
 """
 
-reordenados = np.load(path + "ordenado_cut_0dot05.npy")
+reordenados_full = np.load(path + "ordenado_cut_0dot05.npy")
+
+# Lo "diezmamos" para que no repita valores de x
+x_full = reordenados_full[:, 0]
+idx = [i for i in range(len(x_full) - 1) if x_full[i] != x_full[i + 1]]
+
+reordenados = reordenados_full[idx]
 
 x = reordenados[:, 0]
 pos = reordenados[:, :3]
@@ -63,11 +69,19 @@ n_SI = HpRho * 1e6  # 1/m3
 J_SI = J * 1e-6  # A/m2
 P_SI = Ptot * 1e-9  # Pa
 
+# idx = [i for i in range(len(x) - 1) if x[i] != x[i + 1]]
+# P_diezmado = P_SI[idx]
+# x_diezmado = x[idx] * 3390e3
+# n_diezmado = n_SI[idx]
+# Ep = -1 / (e_SI * n_diezmado) * np.gradient(P_diezmado, x_diezmado)
+
+
 Ecv = np.array([-np.cross(v_SI[i], B_SI[i]) for i in range(len(B))])  # V/m
 Ehall = np.array(
     [1 / (e_SI * n_SI[i]) * np.cross(J_SI[i], B_SI[i]) for i in range(len(B))]
 )
-Ep = -1 / (3390e3 * e_SI * n_SI) * np.gradient(P_SI, x[10] - x[7] * 3390e3)
+# Ep = -1 / (e_SI * n_SI) * np.gradient(P_SI, (x[10] - x[7]) * 3390e3)
+Ep = -1 / (e_SI * n_SI) * np.gradient(P_SI, x * 3390e3)
 
 J_mean = np.mean(J[inicio_MPB:fin_MPB], axis=0)
 B_mean = np.mean(B[inicio_MPB:fin_MPB], axis=0)
