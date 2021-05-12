@@ -23,13 +23,13 @@ limite = 1
 # idx = [i for i, x in enumerate(a) if x]
 # zcero = posicion[idx, :]
 
-zcero = np.array([val[i, :] for i in range(len(val)) if np.abs(val[i, 2]) <= 0.05])
-ycero = np.array([zcero[i, :] for i in range(len(zcero)) if np.abs(zcero[i, 1]) <= 2])
+zcero = np.array([val[i, :] for i in range(len(val)) if np.abs(val[i, 2]) <= 1.5])
+ycero = np.array([zcero[i, :] for i in range(len(zcero)) if np.abs(zcero[i, 1]) <= 1.5])
 zona_interes = np.array(
-    [ycero[i, :] for i in range(len(ycero)) if 0 < ycero[i, 0] <= 5]
+    [ycero[i, :] for i in range(len(ycero)) if 1 < ycero[i, 0] <= 2]
 )
 
 # quiero reordenar los x de forma creciente
 reordenados = np.array(sorted(zona_interes, key=lambda f: f[0]))
 
-# np.save(path + "recorte_zcero.npy", reordenados)
+np.save(path + "cubo_Daniel.npy", reordenados)

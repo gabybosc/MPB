@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.dates as md
 import datetime as dt
 import calendar
+from scipy.spatial import KDTree
 
 """
 Acá vienen las funciones que son útiles para muchas cosas, no sólo para este análisis.
@@ -93,8 +94,18 @@ def diezmar(largo, corto):
 
 
 def donde(array, valor):
-    """Me dice dónde en un array está el valor más parecido a un valor dado."""
+    """Me dice dónde en un array está el valor más parecido a un valor dado.
+    Solo funciona para 1D"""
     resultado = np.where(array == find_nearest(array, valor))[0][0]
+    return resultado
+
+
+def donde_kD(array, valor):
+    """Me dice dónde en un array está el valor más parecido a un valor dado.
+    Funciona para k dimensiones"""
+    kdtree = KDTree(array)
+    distancia, indice = kdtree.query(valor)
+    resultado = array[indice[0]]
     return resultado
 
 
@@ -124,7 +135,7 @@ def error(lamb, B, x):
 def find_nearest(array, value):
     """Busca el valor más cercano a uno dado en un array"""
     idx = (np.abs(array - value)).argmin()
-    # argmin me da el valor del minimo en el array
+    # argmin me da el valor del minimo en el flattened array
     return array[idx]
 
 

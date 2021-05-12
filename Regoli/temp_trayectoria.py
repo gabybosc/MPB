@@ -62,56 +62,95 @@ x_km = x * 3390
 
 deltat = np.abs((x_km[200] - x_km[201]) / v_x)
 
+
+t1, t2, t3, t4 = 18.2167, 18.2204, 18.235, 18.2476
+t_up = t1 - 0.015
+t_down = t4 + 0.015
+
 # Suponiendo que MAVEN y los datos están en el mismo lugar a las 17.7 h:
+# 17.7h debería ser un punto en el viento solar
 
 i = donde(x_km, posicion[0, 0])
 x = x[i:]
 x_km = x_km[i:]
 B_cut = B[i:]
-t_simu = [18 + deltat * i for i in range(len(x_km))]
+t_simu = np.array([18 + deltat * i for i in range(len(x_km))])
+
+inicio_MPB = donde(t_simu, t1)
+fin_MPB = donde(t_simu, t4)
+inicio_up = donde(t_simu, t_up)
+fin_down = donde(t_simu, t_down)
+
 
 plt.figure()
 ax1 = plt.subplot2grid((2, 1), (0, 0))
-ax1.plot(t_simu, x_km)
+ax1.scatter(t_simu, x_km)
+ax1.set_title('Simulación')
 ax2 = plt.subplot2grid((2, 1), (1, 0))
-ax2.plot(t, posicion[:, 0])
+ax2.scatter(t, posicion[:, 0])
+ax2.set_title('MAVEN')
+for ax in [ax1, ax2]:
+    ax.axvspan(
+        xmin=t_simu[inicio_MPB],
+        xmax=t_simu[fin_MPB],
+        facecolor="#FFC300",
+        alpha=0.5,
+        label='MPB'
+    )
+    ax.axvspan(
+        xmin=t_simu[inicio_up],
+        xmax=t_simu[inicio_MPB],
+        facecolor="#581845",
+        alpha=0.5,
+        label='Upstream'
+    )
+    ax.axvspan(
+        xmin=t_simu[fin_MPB],
+        xmax=t_simu[fin_down],
+        facecolor="#C70039",
+        alpha=0.5,
+        label='Downstream'
+    )
+    ax.set_xlim(18, 19)
+plt.legend()
 plt.show()
+
 
 """
 Comparación de B y de la densidad de protones
 """
 
-idx = diezmar(t, t_swia)
-
-
-plt.figure()
-plt.plot(t, np.linalg.norm(B_mag, axis=1), label="MAVEN")
-plt.plot(t_simu, np.linalg.norm(B_cut, axis=1), label="simulación")
-plt.xlabel("x (RM)")
-plt.ylabel("|B| (nT)")
-plt.legend()
-
-plt.figure()
-plt.plot(posicion[:, 0] / 3390, np.linalg.norm(B_mag, axis=1), label="MAVEN")
-plt.plot(x, np.linalg.norm(B, axis=1), label="simulación")
-plt.plot(x - 0.178, np.linalg.norm(B, axis=1), label="simulación")
-plt.axvline(x=R[0], color="k", linestyle="--", label="cruce MAVEN")
-plt.axvline(x=1.26, color="C3", linestyle="--", label="MPB simulacion")
-plt.xlabel("x (RM)")
-plt.ylabel("|B| (nT)")
-plt.legend()
-
-plt.figure()
-plt.plot(posicion[idx, 0] / 3390, proton_density, label="swia")
-plt.plot(x, HpRho[pi:pf], label="simulación")
-plt.axvline(x=R[0], color="k", linestyle="--", label="cruce MAVEN")
-plt.axvline(x=1.26, color="C3", linestyle="--", label="MPB simulacion")
-plt.ylim(ymax=30)
-plt.xlabel("x (RM)")
-plt.ylabel("Densidad de protones")
-plt.legend()
-
-plt.show()
+# idx = diezmar(t, t_swia)
+#
+#
+# plt.figure()
+# plt.plot(t, np.linalg.norm(B_mag, axis=1), label="MAVEN")
+# plt.plot(t_simu, np.linalg.norm(B_cut, axis=1), label="simulación")
+# plt.xlabel("x (RM)")
+# plt.ylabel("|B| (nT)")
+# plt.legend()
+#
+# plt.figure()
+# plt.plot(posicion[:, 0] / 3390, np.linalg.norm(B_mag, axis=1), label="MAVEN")
+# plt.plot(x, np.linalg.norm(B, axis=1), label="simulación")
+# plt.plot(x - 0.178, np.linalg.norm(B, axis=1), label="simulación")
+# plt.axvline(x=R[0], color="k", linestyle="--", label="cruce MAVEN")
+# plt.axvline(x=1.26, color="C3", linestyle="--", label="MPB simulacion")
+# plt.xlabel("x (RM)")
+# plt.ylabel("|B| (nT)")
+# plt.legend()
+#
+# plt.figure()
+# plt.plot(posicion[idx, 0] / 3390, proton_density, label="swia")
+# plt.plot(x, HpRho[pi:pf], label="simulación")
+# plt.axvline(x=R[0], color="k", linestyle="--", label="cruce MAVEN")
+# plt.axvline(x=1.26, color="C3", linestyle="--", label="MPB simulacion")
+# plt.ylim(ymax=30)
+# plt.xlabel("x (RM)")
+# plt.ylabel("Densidad de protones")
+# plt.legend()
+#
+# plt.show()
 
 # Descomentar esto si quiero seleccionar la MPB de la simu
 

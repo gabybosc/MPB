@@ -41,16 +41,16 @@ OpRho = reordenados[:, 21]
 OP = reordenados[:, 25]
 CO2pRho = reordenados[:, 26]
 CO2P = reordenados[:, 30]
-J = reordenados[:, -3:] * 1000
+J = reordenados[:, -3:] * 1000  # J en volumen
 
 inicio_MPB = donde(pos[:, 0], 1.2)
 fin_MPB = donde(pos[:, 0], 1.36)
 inicio_BS = donde(pos[:, 0], 1.67)
 fin_BS = donde(pos[:, 0], 1.72)
 
-B_MPB = reordenados[inicio_MPB:fin_MPB, 7:10]
-J_MPB = reordenados[inicio_MPB:fin_MPB, -3:] * 1000
-
+B_MPB = B[inicio_MPB:fin_MPB, :]
+J_MPB = J[inicio_MPB:fin_MPB, :]  # nA/m²
+x_MPB = x[inicio_MPB:fin_MPB]
 # MVA:
 
 M_ij = Mij(B_MPB)
@@ -106,6 +106,11 @@ print(f"Bup = {B_upstream} \n Bdown = {B_downstream}\nomega = {omega}")
 
 q_e = 1.6e-19  # C
 m_p = 1.6e-27  # kg
+mu0 = 4e-7 * np.pi  # T m / A
+
+
+normal_MVA = [0.920, -0.302, 0.251]
+j_salto = np.cross(normal_MVA, (B_upstream-B_downstream)*1e-6) / mu0  # mA/m2
 
 # plt.plot(j)
 # plt.plot(J)
@@ -160,7 +165,7 @@ plt.legend()
 plt.xlabel("x (RM)")
 # plt.ylim((0, 10))
 
-plt.figure()
-plt.plot(x, v_i)
+# plt.figure()
+# plt.plot(x, v_i)
 
 plt.show()

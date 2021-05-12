@@ -120,17 +120,22 @@ x = posicion_MSE[idx, 0]
 y = posicion_MSE[idx, 1]
 
 coordenadas = {0: "x", 1: "y", 2: "z"}
+
+Ehall_norma = np.linalg.norm(Ehall_MSE[idx, :], axis=1)
+Ecv_norma = np.linalg.norm(Ecv_MSE[idx, :], axis=1)
+
 # Campo B y Corrientes
+
 
 fig, axs = plt.subplots(2, 3)
 
 for i in range(3):
     sc = axs[0, i].scatter(
-        x, y, c=B_MSE[idx, i], vmin=-250, vmax=250, s=35, cmap="coolwarm",
+        x, y, c=B_MSE[idx, i], vmin=-75, vmax=75, s=35, cmap="coolwarm",
     )
     axs[0, i].set_xlim([0, 2])
     axs[0, i].set_ylim([-1, 1])
-    axs[0, i].set_title(f"Z=0, B{coordenadas[i]}")
+    axs[0, i].set_title(f"Z=0, B{coordenadas[i]} ")
     plt.setp(axs[0, i].get_xticklabels(), visible=False)
     if i > 0:
         plt.setp(axs[0, i].get_yticklabels(), visible=False)
@@ -138,7 +143,7 @@ for i in range(3):
         axs[0, i].set_ylabel("Y MSE (RM)")
 
     sc2 = axs[1, i].scatter(
-        x, y, c=J_MSE[idx, i], vmin=-0.5, vmax=0.5, s=35, cmap="coolwarm",
+        x, y, c=J_MSE[idx, i], vmin=-0.25, vmax=0.25, s=35, cmap="coolwarm",
     )
     axs[1, i].set_xlabel("X MSE (RM)")
     axs[1, i].set_title(f"Z=0, J{coordenadas[i]}")
@@ -200,9 +205,6 @@ plt.show(block=False)
 
 # Norma de Ecv/Ehall
 
-Ehall_norma = np.linalg.norm(Ehall_MSE[idx, :], axis=1)
-Ecv_norma = np.linalg.norm(Ecv_MSE[idx, :], axis=1)
-
 plt.figure()
 plt.scatter(
     x, y, c=np.log10(Ecv_norma / Ehall_norma), vmin=-9, vmax=9, s=35, cmap="coolwarm",
@@ -219,4 +221,8 @@ plt.show(block=False)
 
 plt.figure()
 plt.scatter(x, y, c=P_e[idx])
+plt.title("P_e en Z=0")
+plt.xlabel("X MSE (Rm)")
+plt.ylabel("Y MSE (Rm)")
+plt.colorbar()
 plt.show()

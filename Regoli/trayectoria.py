@@ -264,20 +264,27 @@ B_upstream = np.mean(B[inicio_up:fin_up], axis=0)
 B_downstream = np.mean(B[inicio_down:fin_down], axis=0)
 J_s = np.cross(n2, (B_upstream - B_downstream)) / mu0  # nA/m
 
-J_integrado = np.trapz(J[inicio_MPB:fin_MPB, 0], x[inicio_MPB:fin_MPB])
-# Integramos el J de la simulación en x para obtener un Js
+J_integrado_x = np.trapz(J[inicio_MPB:fin_MPB, 0], x[inicio_MPB:fin_MPB] * 3390e3)  # uA/m
+J_integrado_y = np.trapz(J[inicio_MPB:fin_MPB, 0], y[inicio_MPB:fin_MPB] * 3390e3)  # uA/m
+J_integrado_z = np.trapz(J[inicio_MPB:fin_MPB, 0], z[inicio_MPB:fin_MPB] * 3390e3)  # uA/m
 
-# plt.figure()
+J_integrado = np.array([J_integrado_x, J_integrado_y, J_integrado_z]) * 1e-3  # mA/m
+np.linalg.norm(J_integrado)
+
+# Integramos el J de la simulación en x para obtener un Js
+# pero esto no sirve! La trayectoria no está en x
+
+plt.figure()
 # plt.plot(x, np.linalg.norm(J_integrado, axis=1) * 1e-3)
-# plt.axvline(x=R[0], color="k", linestyle="--", label="cruce MAVEN")
-# plt.axvline(x=1.26, color="C3", linestyle="--", label="MPB simulacion")
-# plt.axhline(y=np.linalg.norm(J_s * 1e-6), color="C1", label="J = n x (Bu-Bd)")
-# plt.axhline(y=np.linalg.norm(j_maven), color="C2", label="J = n x (Bu-Bd)")
-# plt.xlim(xmin=1)
-# plt.xlabel("x MSO (RM)")
-# plt.ylabel("J_s  (mA/m)")
-# plt.legend()
-# plt.show()
+plt.axvline(x=R[0], color="k", linestyle="--", label="cruce MAVEN")
+plt.axvline(x=1.26, color="C3", linestyle="--", label="MPB simulacion")
+plt.axhline(y=np.linalg.norm(J_s * 1e-6), color="C1", label="J = n x (Bu-Bd)")
+plt.axhline(y=np.linalg.norm(j_maven), color="C2", label="J = n x (Bu-Bd)")
+plt.xlim(xmin=1)
+plt.xlabel("x MSO (RM)")
+plt.ylabel("J_s  (mA/m)")
+plt.legend()
+plt.show()
 
 
 plt.figure()
@@ -287,7 +294,7 @@ plt.axvline(x=1.26, color="C3", linestyle="--", label="MPB simulacion")
 plt.axhline(y=np.linalg.norm(J_s / x23), color="C1", label="J = n x (Bu-Bd) / h (simu)")
 plt.ylim(ymax=100)
 plt.xlabel("x (RM)")
-plt.ylabel("j_v (nA/m²)")
+plt.ylabel("j_v (nA/m³)")
 plt.legend()
 plt.show()
 

@@ -84,7 +84,9 @@ def importar_mag(year, month, day, ti, tf):
     t_cut = t[inicio:fin]
     B_cut = B[inicio:fin]
     posicion_cut = posicion[inicio:fin]
-    return mag, t_cut, B_cut, posicion_cut
+    mag_cut = mag[inicio:fin]
+    
+    return mag_cut, t_cut, B_cut, posicion_cut
 
 
 # ######################################################################## SWEA
