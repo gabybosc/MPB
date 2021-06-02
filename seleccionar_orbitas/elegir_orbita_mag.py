@@ -24,7 +24,7 @@ day = date_orbit.strftime("%d")
 doy = date_orbit.strftime("%j")
 
 # path = '../../../MAVEN/mag_1s/2016/03/' #path a los datos
-path = "../../../datos/MAG_1s/"
+path = "../../../datos/MAG_1s/2016/"
 datos = np.loadtxt(
     path + f"mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts", skiprows=148
 )  # lee todo y me da todo
