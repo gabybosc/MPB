@@ -5,29 +5,6 @@ electric field, -v × B, can be used as a proxy for E."""
 
 import numpy as np
 
-
-def delta_ij(i, j):
-    if i == j:
-        delta = 1
-    else:
-        delta = 0
-
-    return delta
-
-
-def Kij(B, m):
-    """Calcula la matriz Kij para el vector m-ésimo de campo B."""
-    P_ij = np.zeros((3, 3))
-    for i in range(3):  # para las tres coordenadas
-        for j in range(3):
-            P_ij[i, j] = (
-                delta_ij(i, j) - B[m, i] * B[m, j] / np.linalg.norm(B[m, :]) ** 2
-            )
-
-    K_ij = np.linalg.norm(B[m, :]) ** 2 * P_ij
-    return K_ij
-
-
 t = [
     0.00,
     4.38,
@@ -173,14 +150,35 @@ N = [
     17.86,
 ]
 
+
+def delta_ij(i, j):
+    if i == j:
+        delta = 1
+    else:
+        delta = 0
+
+    return delta
+
+
+def Kij(B, m):
+    """Calcula la matriz Kij para el vector m-ésimo de campo B."""
+    P_ij = np.zeros((3, 3))
+    for i in range(3):  # para las tres coordenadas
+        for j in range(3):
+            P_ij[i, j] = (
+                delta_ij(i, j) - B[m, i] * B[m, j] / np.linalg.norm(B[m, :]) ** 2
+            )
+
+    K_ij = np.linalg.norm(B[m, :]) ** 2 * P_ij
+    return K_ij
+
+
 B = np.transpose([Bx, By, Bz])
 v = np.transpose([vx, vy, vz])
 
-for m in range(len(B)):
-    np.mean(Kij(B, m) * v[m, :])
+K0 = np.mean([Kij(B, m) for m in range(len(B))], axis=0)  # tiene que ser una matriz
+KK = np.mean([np.dot(Kij(B, m), v[m, :]) for m in range(len(B))], axis=0)
 
+v_HT = np.dot(np.linalg.inv(K0), KK)
 
-K0 = np.mean([Kij(B, m) for m in range(len(B))])
-KK = np.mean([Kij(B, m) * v[m, :] for m in range(len(B))], axis=(0, 2))
-
-v_HT = KK / K0
+print(v_HT)
