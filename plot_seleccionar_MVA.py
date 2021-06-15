@@ -20,6 +20,7 @@ np.set_printoptions(precision=4)
 
 year, month, day, doy = fechas()
 mag, t, B, posicion = importar_mag_1s(year, month, day, 0.1, 24)
+
 plt.plot(t, np.linalg.norm(B, axis=1))
 plt.ylim([0, 70])
 plt.show()
@@ -28,7 +29,7 @@ ti, tf = tiempos()
 mag, t, B, posicion = importar_mag_1s(year, month, day, ti, tf)
 swea, t_swea, energia, flux_plot = importar_swea(year, month, day, ti, tf)
 swia, t_swia, i_density, i_temp, vel_mso = importar_swia(year, month, day, ti, tf)
-lpw, t_lpw, e_density = importar_lpw(year, month, day, ti, tf)
+# lpw, t_lpw, e_density = importar_lpw(year, month, day, ti, tf)
 
 B_norm = np.linalg.norm(B, axis=1)
 
@@ -97,16 +98,14 @@ while not happy:
         plt.plot(t_swia, i_density)
         ax7.grid()
 
-        ax6 = plt.subplot2grid((3, 2), (2, 1), sharex=ax1)
-        ax6.set_ylabel("Densidad total \n de e- (cm⁻³)")
-        ax6.set_xlabel("Tiempo (hdec)")
-        plt.semilogy(t_lpw, e_density)
-        ax6.grid()
+        # ax6 = plt.subplot2grid((3, 2), (2, 1), sharex=ax1)
+        # ax6.set_ylabel("Densidad total \n de e- (cm⁻³)")
+        # ax6.set_xlabel("Tiempo (hdec)")
+        # plt.semilogy(t_lpw, e_density)
+        # ax6.grid()
 
         fig.canvas.mpl_connect("pick_event", onpick1)
-        multi = MultiCursor(
-            fig.canvas, (ax1, ax3, ax4, ax5, ax6, ax7), color="black", lw=1
-        )
+        multi = MultiCursor(fig.canvas, (ax1, ax3, ax4, ax5, ax7), color="black", lw=1)
 
         zoom_ok = False
         print("\nSpacebar when ready to click:\n")

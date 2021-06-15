@@ -47,7 +47,7 @@ def hodograma(B1, B2, B3):
     ax2.grid()
     ax1.tick_params(axis="both", which="major", labelsize=14)
     ax2.tick_params(axis="both", which="major", labelsize=14)
-    plt.suptitle("MAVEN MAG MVA 10-10-2015", fontsize=18)
+    # plt.suptitle("MAVEN MAG MVA 10-10-2015", fontsize=18)
     plt.legend(fontsize=16)
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
 

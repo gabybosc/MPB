@@ -4,6 +4,10 @@ lpw, swea y swia de la fecha que quiera.
 El problema es que no puede asegurarse de que existan los archivos antes porque
 la página no tira 404. Si tira 404, acá está la solución:
 https://stackoverflow.com/questions/20387246/checking-file-exists-before-download-using-head
+creo que sería mejor que baje el mes entero, si bien ocupa más espacio y tiempo,
+ya que no necesita el nombre exacto del archivo.
+A veces el problema es que el archivo se llama "_r02" o algo así y por eso no
+sirve.
 """
 
 import urllib.request

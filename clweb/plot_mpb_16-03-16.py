@@ -130,7 +130,7 @@ axz1.plot(tiempo_mag, B[:, 1], label="By")
 axz1.plot(tiempo_mag, B[:, 2], label="Bz")
 plt.setp(axz1.get_xticklabels(), visible=False)
 axz1.set_ylabel("B components (nT)", fontsize=16)
-axz1.set_title(f"MAVEN MAG 2016 March 16th", fontsize=18)
+axz1.set_title("MAVEN MAG 2016 March 16th", fontsize=18)
 
 axz2 = plt.subplot2grid((2, 1), (1, 0), sharex=axz1)
 axz2.xaxis.set_major_formatter(xfmt)
@@ -201,7 +201,7 @@ def regiones(ax, tiempo_mag, tm1, tm4, tm_up, tm_down, tbs, tmpr):
     )  # MPR
 
 
-########La fig de la tesis pero sin LPW
+#  ####### La fig de la tesis pero sin LPW
 fig = plt.figure(
     2, figsize=(8, 30)
 )  # Lo bueno de esta forma es que puedo hacer que solo algunos compartan eje
@@ -237,7 +237,6 @@ ax4.xaxis.set_major_formatter(xfmt)
 ax4.set_ylabel("Diff energy flux \n of the SW e- \n (cm⁻² sr⁻¹ s⁻¹)")
 for i in range(len(energias)):
     plt.semilogy(tiempo_swea, JE_cut[i], label=f"{energias[i]} eV")
-
 
 ax5 = plt.subplot2grid((5, 1), (4, 0), sharex=ax1)
 ax5.xaxis.set_major_formatter(xfmt)

@@ -85,7 +85,7 @@ def importar_mag(year, month, day, ti, tf):
     B_cut = B[inicio:fin]
     posicion_cut = posicion[inicio:fin]
     mag_cut = mag[inicio:fin]
-    
+
     return mag_cut, t_cut, B_cut, posicion_cut
 
 
@@ -218,6 +218,38 @@ def importar_lpw(year, month, day, ti, tf):
     e_density_cut = e_density[inicio:fin]
 
     return lpw, t_cut, e_density_cut
+
+
+###########################
+def importar_static(year, month, day, ti, tf):
+    date_orbit = dt.date(int(year), int(month), int(day))
+    year = date_orbit.strftime("%Y")
+    month = date_orbit.strftime("%m")
+    day = date_orbit.strftime("%d")
+
+    if gethostname() == "magneto2":
+        path = f"../../../../media/gabybosc/datos/STATIC/"
+    elif gethostname() == "gabybosc":
+        path = "../../datos/STATIC/"
+    else:
+        path = f"../../../datos/STATIC/"
+
+    static = cdf.CDF(path + f"mvn_sta_l2_c6-32e64m_{year}{month}{day}_v02_r01.cdf")
+
+    t_unix = static.varget("time_unix")
+    mass = static.varget("mass_arr")
+    energy = static.varget("energy")
+
+    t = unix_to_decimal(t_unix)
+
+    inicio = donde(t, ti)
+    fin = donde(t, tf)
+
+    t_cut = t[inicio:fin]
+    mass_cut = mass[inicio:fin]
+    energy_cut = energy[inicio:fin]
+
+    return static, t_cut, mass_cut, energy_cut
 
 
 ###########################

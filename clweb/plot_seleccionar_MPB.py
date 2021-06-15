@@ -1,11 +1,17 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import MultiCursor
-from importar_datos import importar_mag, importar_lpw, importar_swea, importar_swia
+from importar_datos import (
+    importar_mag,
+    importar_lpw,
+    importar_swea,
+    importar_swia,
+    importar_static,
+)
 import sys
 
 sys.path.append("..")
-from funciones import find_nearest, Bpara_Bperp
+from funciones import find_nearest, Bpara_Bperp, fechas, tiempos, donde
 from funciones_plot import onpick1
 
 
@@ -17,41 +23,30 @@ Usa los datos de baja resolución para calcular el B_para y B_perp
 
 np.set_printoptions(precision=4)
 
-year, month, day, doy = 2016, "03", 16, 76  # fechas()
-ti, tf = 17.5, 18.5  # tiempos()
-# path = f'../../../datos/clweb/{year}-{month}-{day}/'
-path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
+year, month, day, doy = 2016, "03", 16, 76
+ti, tf = 18, 19  #  tiempos()
 
 mag, t, B, posicion = importar_mag(year, month, day, ti, tf)
 Bnorm = np.linalg.norm(B, axis=1)
-mag_low = np.loadtxt(path + "mag_1s.sts", skiprows=160)
-tlow = mag_low[:, 6]  # el dia decimal
-tlow = (tlow - int(doy)) * 24  # para que me de sobre la cantidad de horas
-
-Mlow = np.size(tlow)  # el numero de datos
-# el campo
-Blow = np.zeros((Mlow, 3))
-for i in range(7, 10):
-    Blow[:, i - 7] = mag_low[:, i]
-
-B_para, B_perp_norm, t_plot = Bpara_Bperp(Blow, tlow, t[0], t[-1])
 
 
-# ##############################################################################################SWEA
+# ###################################################################SWEA
 
 swea, t_swea, energias = importar_swea(year, month, day, ti, tf)
 energy = swea[:, 7]
 JE_total = swea[:, -1]
 
-inicio_swea = np.where(t_swea == find_nearest(t_swea, ti))[0][0]
-fin_swea = np.where(t_swea == find_nearest(t_swea, tf))[0][0]
-# ##############################################################################################SWIA
+inicio_swea = donde(t_swea, ti)  # debería ser 0
+fin_swea = donde(t_swea, tf)
+# ######################################################################## SWIA
 
 swia, t_swia, density = importar_swia(year, month, day, ti, tf)
 
-# ############################################################################################## LPW
+# ######################################################################### LPW
 lpw, t_lpw, e_density = importar_lpw(year, month, day, ti, tf)
 
+# ####################################################################### STATIC
+static, t_static, mass, counts = importar_static(year, month, day, ti, tf)
 
 index = np.array((int(year), int(day)))
 
@@ -90,7 +85,9 @@ while not happy:
 
         ax4 = plt.subplot2grid((3, 2), (0, 1), sharex=ax1)
         for energia in energias:
-            index = np.where(energy == find_nearest(energy, energia))[0]
+            index = np.where(energy == find_nearest(energy, energia))[
+                0
+            ]  # no cambiarlo a donde()! Me tiene que dar un array, no un escalar.
             JE = JE_total[index]
             plt.semilogy(
                 t_swea[inicio_swea:fin_swea],
@@ -104,9 +101,10 @@ while not happy:
         plt.plot(t_swia, density)
 
         ax6 = plt.subplot2grid((3, 2), (2, 1), sharex=ax1)
-        ax6.set_ylabel("Densidad total \n de e- (cm⁻³)")
+        ax6.set_ylabel("Cuentas de \n masa (cm⁻³)")
         ax6.set_xlabel("Tiempo (hdec)")
-        plt.semilogy(t_lpw, e_density)
+        ax6.scatter(t, mass, marker="s", c=np.log(counts), cmap="inferno")
+        ax6.set_yscale("log")
 
         for ax in [ax1, ax2, ax4, ax5]:
             plt.setp(ax.get_xticklabels(), visible=False)

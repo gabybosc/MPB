@@ -1,6 +1,8 @@
 """
 descarga los archivos de mag low res
-El problema es que no puede asegurarse de que existan los archivos antes porque la página no tira 404. (Si tira 404, acá está la solución https://stackoverflow.com/questions/20387246/checking-file-exists-before-download-using-head)
+El problema es que no puede asegurarse de que existan los archivos antes porque
+la página no tira 404. (Si tira 404, acá está la solución
+https://stackoverflow.com/questions/20387246/checking-file-exists-before-download-using-head)
 """
 
 import urllib.request

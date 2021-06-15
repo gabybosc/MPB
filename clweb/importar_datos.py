@@ -53,28 +53,36 @@ def importar_swea(year, month, day, ti, tf):
 
     swea = np.loadtxt(path + "SWEA.asc")
 
+    """
+    Los datos de SWEA se ven de la siguiente manera: para cada tiempo hay muchos
+    valores de JE y de energía. Por eso sólo recorto el tiempo y dejo el JE entero
+    y en tal caso en el script principal lo recorto.
+    """
+
     t_swea = np.unique(swea[:, 3] + swea[:, 4] / 60 + swea[:, 5] / 3600)  # hdec
+    # al tomar "unique" estoy borrando los t que se repiten para las diferentes energias
 
     energias = [50 + i * 50 for i in range(3)]
 
-    energy = swea[:, 7]
-    JE_total = swea[:, -1]
-
     inicio = donde(t_swea, ti)
-    fin = donde(t_swea, tf)
+    fin = donde(t_swea, tf)  # este corte no sirve para JE ni para energy!!
 
     t_cut = t_swea[inicio:fin]
 
-    idx = []
-    JE = []
-    JE_cut = []
-    for energia in energias:
-        idx.append(donde(energy, energia))
-    for i in range(len(idx)):
-        JE.append(JE_total[idx[i]])
-        JE_cut.append(JE[i][inicio:fin])
+    energy = swea[:, 7]
+    JE_total = swea[:, -1]
+    #
+    # for energia in energias:
+    #     index = donde(energy, energia)
+    #     JE = JE_total[index]
+    #     plt.semilogy(
+    #         t_swea[inicio_swea:fin_swea],
+    #         JE[inicio_swea:fin_swea],
+    #         label=f"{energia} eV",
+    #     )
+    #
 
-    return (swea, t_cut, energias, JE_cut)
+    return swea, t_cut, energias
 
 
 # #########################################################################SWIA
@@ -182,6 +190,27 @@ def importar_lpw(year, month, day, ti, tf):
     e_density_cut = lpw[inicio:fin, -1]
 
     return lpw, t_cut, e_density_cut
+
+
+######################
+def importar_static(year, month, day, ti, tf):
+    if gethostname() == "magneto2":
+        path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
+    else:
+        path = f"../../../datos/clweb/{year}-{month}-{day}/"
+
+    static = np.loadtxt(path + "STATIC.asc")
+
+    t = static[:, 3] + static[:, 4] / 60 + static[:, 5] / 3600
+
+    inicio = donde(t, ti)
+    fin = donde(t, tf)
+
+    t_cut = t[inicio:fin]
+    mass = static[inicio:fin, 7]
+    counts = static[inicio:fin, -1]
+
+    return static, t_cut, mass, counts
 
 
 # #################################### tiempos t1t2t3t4
