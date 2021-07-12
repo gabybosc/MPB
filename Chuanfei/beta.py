@@ -4,9 +4,9 @@ import matplotlib.pyplot as plt
 # import sys
 
 
-path = "../../../datos/simulacion_leonardo/"
-reordenados = np.load(
-    path + "recorte_zcero.npy"
+path = "../../../datos/simulacion_chuanfei/"
+datos = np.loadtxt(
+    path + "Z=0_HallOn.gz"
 )  # todos los datos ordenados con y,z menores a 1 RM
 
 # sys.path.append("..")
@@ -24,39 +24,37 @@ mu0 = 4e-7 * np.pi  # T m / A
 mp = 1.67e-27  # proton mass, kg
 g = 3.7  # Mars surface gravity, m/s²
 
+x = datos[:, 0]  # RM
+y = datos[:, 1]
 
-x = reordenados[:, 0]
-y = reordenados[:, 1]
-z = reordenados[:, 2]
-rho = reordenados[:, 3]
-B = reordenados[:, 7:10]
-J = reordenados[:, -3:]
+velocidad_i = datos[:, 7:10]  # km/s
 
-velocidad_plasma = reordenados[:, 4:7]  # km/s
-velocidad_i = reordenados[:, 12:15]
+B = datos[:, 10:13]  # nT
+J = datos[:, 22:25]  # ua/m2
+grad_p = datos[:, 25:]  # nPa/m
 
-HpRho = reordenados[:, 11]
-O2pRho = reordenados[:, 16]
-OpRho = reordenados[:, 21]
-CO2pRho = reordenados[:, 26]
+Pe = datos[:, 16]  # nPa
+P_termica = datos[:, 17]  # nPa
+HP = datos[:, 18]  # nPa
+OP = datos[:, 19]  # nPa
+O2P = datos[:, 20]  # nPa
+CO2P = datos[:, 21]  # nPa
 
-# Presiones
-Ptermica = reordenados[:, 10]  # nPa
-HP = reordenados[:, 15]
-O2P = reordenados[:, 20]
-OP = reordenados[:, 25]
-CO2P = reordenados[:, 30]
+rho = datos[:, 2]
+HpRho = datos[:, 3]  # Mp/cc
+OpRho = datos[:, 4]
+O2pRho = datos[:, 5]
+CO2pRho = datos[:, 6]
 
 P_heavy = OP + O2P + CO2P
 P_B = np.linalg.norm(B, axis=1) ** 2 * 1e-9 / (2 * mu0)
-Pe = Ptermica - CO2P - HP - OP - O2P
 P_ram = 1.67e-6 * HpRho * velocidad_i[:, 0] ** 2  # nPa
 
-beta = Ptermica / P_B
+beta = P_termica / P_B
 
-beta_str = (Ptermica + P_ram) / P_B
+beta_str = (P_termica + P_ram) / P_B
 
-mach = P_ram / Ptermica
+mach = P_ram / P_termica
 
 rho_heavies = OpRho + O2pRho + CO2pRho
 density_ratio = HpRho / rho_heavies
@@ -135,7 +133,7 @@ axs[1].legend()
 plt.setp(axs[1].get_yticklabels(), visible=False)
 
 sc = axs[2].scatter(
-    x, y, c=np.log10(Ptermica * 1e-9), vmin=-12, vmax=-9, s=35, cmap="inferno",
+    x, y, c=np.log10(P_termica * 1e-9), vmin=-12, vmax=-9, s=35, cmap="inferno",
 )
 axs[2].plot(X_BS, Y_BS, label="BS")
 axs[2].plot(X1, Y1, label="MPB", c="C2")

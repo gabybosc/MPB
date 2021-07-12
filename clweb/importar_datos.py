@@ -59,7 +59,9 @@ def importar_swea(year, month, day, ti, tf):
     y en tal caso en el script principal lo recorto.
     """
 
-    t_swea = np.unique(swea[:, 3] + swea[:, 4] / 60 + swea[:, 5] / 3600)  # hdec
+    t_swea, idx = np.unique(
+        swea[:, 3] + swea[:, 4] / 60 + swea[:, 5] / 3600, return_index=True
+    )  # hdec
     # al tomar "unique" estoy borrando los t que se repiten para las diferentes energias
 
     energias = [50 + i * 50 for i in range(3)]
@@ -68,19 +70,6 @@ def importar_swea(year, month, day, ti, tf):
     fin = donde(t_swea, tf)  # este corte no sirve para JE ni para energy!!
 
     t_cut = t_swea[inicio:fin]
-
-    energy = swea[:, 7]
-    JE_total = swea[:, -1]
-    #
-    # for energia in energias:
-    #     index = donde(energy, energia)
-    #     JE = JE_total[index]
-    #     plt.semilogy(
-    #         t_swea[inicio_swea:fin_swea],
-    #         JE[inicio_swea:fin_swea],
-    #         label=f"{energia} eV",
-    #     )
-    #
 
     return swea, t_cut, energias
 
@@ -94,7 +83,10 @@ def importar_swia(year, month, day, ti, tf):
     else:
         path = f"../../../datos/clweb/{year}-{month}-{day}/"
 
-    swia = np.loadtxt(path + "SWIA.asc")
+    if os.path.isfile(path + "SWICA.asc"):  # si no existe uno llamado SWICA, usa SWIA
+        swia = np.loadtxt(path + "SWICA.asc")
+    else:
+        swia = np.loadtxt(path + "SWIA.asc")
 
     t = swia[:, 3] + swia[:, 4] / 60 + swia[:, 5] / 3600  # hdec
 
@@ -102,9 +94,11 @@ def importar_swia(year, month, day, ti, tf):
     fin = donde(t, tf)
 
     t_cut = t[inicio:fin]
-    density_cut = swia[inicio:fin, -1]
+    density_cut = swia[inicio:fin, 6]
+    vel_cut = swia[inicio:fin, 7:10]
+    vel_norm = swia[inicio:fin, -1]
 
-    return swia, t_cut, density_cut
+    return swia, t_cut, density_cut, vel_cut, vel_norm
 
 
 def importar_swicfa(year, month, day, ti, tf):
@@ -126,27 +120,6 @@ def importar_swicfa(year, month, day, ti, tf):
 
 
 # ######################################################################## SWIA
-
-
-def importar_swia_vel(year, month, day, ti, tf):
-
-    if gethostname() == "magneto2":
-        path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
-    else:
-        path = f"../../../datos/clweb/{year}-{month}-{day}/"
-
-    swia = np.loadtxt(path + "SWIA_vel.asc")
-
-    t = swia[:, 3] + swia[:, 4] / 60 + swia[:, 5] / 3600  # hdec
-
-    inicio = donde(t, ti)
-    fin = donde(t, tf)
-
-    t_cut = t[inicio:fin]
-    density_cut = swia[inicio:fin, 6]
-    vel_cut = swia[inicio:fin, 7:10]
-
-    return swia, t_cut, density_cut, vel_cut
 
 
 def importar_vel_swica(year, month, day, ti, tf):
@@ -214,24 +187,15 @@ def importar_static(year, month, day, ti, tf):
 
 
 # #################################### tiempos t1t2t3t4
-def importar_t1t2t3t4(year, doy, hour):
-    fila = input("Qué fila es en el archivo MPB?\n")
-    hoja_parametros, hoja_MVA, hoja_Bootstrap, hoja_Ajuste = importar_gdocs()
+def importar_t1t2t3t4(year, month, day, hour):
+    fila, hoja_parametros, hoja_MVA, hoja_Bootstrap, hoja_Ajuste = importar_fila(
+        year, month, day, hour
+    )
+    # hoja_parametros, hoja_MVA, hoja_Bootstrap, hoja_Ajuste = importar_gdocs()
     t1 = float(hoja_parametros.cell(fila, 6).value)  # ojo que cuenta desde 1 no desde 0
     t2 = float(hoja_parametros.cell(fila, 7).value)
     t3 = float(hoja_parametros.cell(fila, 8).value)
     t4 = float(hoja_parametros.cell(fila, 9).value)
-
-    """si quiero importarlo del .txt hay que descomentar lo siguiente"""
-    # datos = np.loadtxt("../outputs/t1t2t3t4.txt")
-    # fecha = datos[:, 0:2].astype(int)
-    # hora = datos[:, 2].astype(int)
-    # fecha_in = [int(year), int(doy)]
-    # for j in range(len(datos)):
-    #     if all(fecha[j, 0:2]) == all(fecha_in):
-    #         if hora[j] == hour or hora[j] == hour + 1 or hora[j] == hour - 1:
-    #             idx = j
-    # t1, t2, t3, t4 = datos[idx, 2:]
 
     return t1, t2, t3, t4
 
@@ -255,3 +219,44 @@ def importar_gdocs():
     hoja_Ajuste = client.open("MPB").worksheet("Ajuste")
 
     return hoja_parametros, hoja_MVA, hoja_Bootstrap, hoja_Ajuste
+
+
+###########
+def importar_fila(year, month, day, hora):
+    hoja_parametros, hoja_MVA, hoja_Bootstrap, hoja_Ajuste = importar_gdocs()
+
+    meses = {
+        "Jan": "01",
+        "Feb": "02",
+        "Mar": "03",
+        "Apr": "04",
+        "May": "05",
+        "Jun": "06",
+        "Jul": "07",
+        "Aug": "08",
+        "Sep": "09",
+        "Oct": "10",
+        "Nov": "11",
+        "Dec": "12",
+    }
+    fecha = hoja_parametros.col_values(1)[3:]
+    hh = hoja_parametros.col_values(2)[3:]
+
+    fila = None
+
+    for i in range(len(fecha)):
+        dd, mm, yy = fecha[i].split()
+        mes = meses[mm]
+        if (
+            yy == str(year)
+            and mes == month
+            and int(dd) == int(day)
+            and int(hh[i]) == int(hora)
+        ):
+            fila = i + 4
+            break
+
+    if fila is None:
+        print("no encuentro la fila")
+
+    return fila, hoja_parametros, hoja_MVA, hoja_Bootstrap, hoja_Ajuste

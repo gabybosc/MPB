@@ -3,6 +3,7 @@ import datetime as dt
 from funciones import donde, unix_to_decimal
 import cdflib as cdf
 import gspread
+import os
 from oauth2client.service_account import ServiceAccountCredentials
 from socket import gethostname
 
@@ -132,16 +133,25 @@ def importar_swia(year, month, day, ti, tf):
     day = date_orbit.strftime("%d")
 
     if gethostname() == "magneto2":
-        path = f"../../../../media/gabybosc/datos/SWIA/"
+        path = "../../../../media/gabybosc/datos/SWIA/"
     elif gethostname() == "gabybosc":
         path = "../../datos/SWIA/"
     else:
-        path = f"../../../datos/SWIA/"
+        path = "../../../datos/SWIA/"
 
-    swia = cdf.CDF(path + f"mvn_swi_l2_onboardsvymom_{year}{month}{day}_v01_r01.cdf")
+    if os.path.isfile(path + f"mvn_swi_l2_coarsearc3d_{year}{month}{day}_v01_r01.cdf"):
+        # si no existe SWICA, usa los onboard
+        swia = cdf.CDF(
+            path + f"mvn_swi_l2_coarsearc3d_{year}{month}{day}_v01_r01_orig.cdf"
+        )
+    else:
+        swia = cdf.CDF(
+            path + f"mvn_swi_l2_onboardsvymom_{year}{month}{day}_v01_r01.cdf"
+        )
 
     t_unix = swia.varget("time_unix")
     density = swia.varget("density")  # cm⁻³
+    # creo que en los datos de PDS, SWICA no tiene estos ya calculados (son justamente los moments)
     temperature = swia.varget("temperature_mso")  # eV
     vel_mso_xyz = swia.varget("velocity_mso")  # km/s
 
@@ -253,9 +263,9 @@ def importar_static(year, month, day, ti, tf):
 
 
 ###########################
-def importar_t1t2t3t4(year, month, day, doy, hour):
+def importar_t1t2t3t4(year, month, day, hour):
     fila, hoja_parametros, hoja_MVA, hoja_Bootstrap, hoja_Ajuste = importar_fila(
-        year, month, day, doy, hour
+        year, month, day, hour
     )
     # hoja_parametros, hoja_MVA, hoja_Bootstrap, hoja_Ajuste = importar_gdocs()
     t1 = float(hoja_parametros.cell(fila, 6).value)  # ojo que cuenta desde 1 no desde 0
@@ -298,7 +308,7 @@ def importar_gdocs():
 
 
 ###########
-def importar_fila(year, month, day, doy, hora):
+def importar_fila(year, month, day, hora):
     hoja_parametros, hoja_MVA, hoja_Bootstrap, hoja_Ajuste = importar_gdocs()
 
     meses = {
