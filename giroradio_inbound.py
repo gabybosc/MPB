@@ -65,8 +65,6 @@ paso = int(len(B) / len(velocidad))
 B_diezmado = B[::paso]
 
 # ahora que están recortadas las convierto en lo que busco: la intensidad de B y la v perp
-B_norm = np.linalg.norm(B, axis=1)
-
 B_medio = np.mean(B_diezmado, axis=0)
 B_medio_normalizado = B_medio / np.linalg.norm(B_medio)
 

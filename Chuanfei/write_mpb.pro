@@ -5,15 +5,18 @@
 ;OpUx OpUy OpUz OpP CO2pRho CO2pUx CO2pUy CO2pUz CO2pP jx
 ;jy jz gradpex gradpey gradpez gradper b1x b1y b1z
 
-filename='../z=0_HallOff.out'
+filename='../z=0_HallOn_new2.out'
 npict=10
 .r getpict
 xmn =0 & xmx=2 & !x.range=[xmn,xmx]
-ymn =-1 & ymx=1 & !y.range=[ymn,ymx]
+ymn =-0.1 & ymx=0.1 & !y.range=[ymn,ymx]
 
 xx =x(*,0,0) & yy=x(*,0,1)
 rho = w(*,0,0) & HpRho = w(*,0,9) & OpRho = w(*,0,19) & O2pRho = w(*,0,14) & CO2pRho = w(*,0,24)
 vel_Hx = w(*,0,10) & vel_Hy = w(*,0,11) & vel_Hz = w(*,0,12)
+vel_Ox = w(*,0,20) & vel_Oy = w(*, 0, 21) & vel_Oz = w(*, 0, 22)
+vel_O2x = w(*,0,15) & vel_O2y = w(*, 0, 16) & vel_O2z = w(*, 0, 17)
+vel_CO2x = w(*,0,25) & vel_CO2y = w(*, 0, 26) & vel_CO2z = w(*, 0, 27)
 Bx = w(*,0,4) & By = w(*,0,5) & Bz = w(*,0,6)
 b1x = w(*,0,36) & b1y = w(*,0,37) & b1z = w(*,0,38)
 Pe = w(*,0,7) & Pp = w(*,0,8) & PH = w(*,0,13) & PO2 = w(*,0,18) & PO = w(*,0,23) & PCO2 = w(*,0,28)
@@ -25,6 +28,9 @@ p = where(xx gt xmn and xx lt xmx and yy gt ymn and yy lt ymx)
 xxx = xx(p) & yyy = yy(p)
 rrho = rho(p) & Hrho = HpRho(p) & Orho = OpRho(p) & O2rho = O2pRho(p) & CO2rho = CO2pRho(p)
 vx = vel_Hx(p) & vy = vel_Hy(p) & vz = vel_Hz(p)
+vxO = vel_Ox(p) & vyO = vel_Oy(p) & vzO = vel_Oz(p)
+vxO2 = vel_O2x(p) & vyO2 = vel_O2y(p) & vzO2 = vel_O2z(p)
+vxCO2 = vel_CO2x(p) & vyCO2 = vel_CO2y(p) & vzCO2 = vel_CO2z(p)
 Bbx = Bx(p) & Bby = By(p) & Bbz = Bz(p)
 bb1x = b1x(p) & bb1y = b1y(p) & bb1z = b1z(p)
 ppe = Pe(p) & ppp = Pp(p) & pph = PH(p) & ppO = PO(p) & ppO2 = PO2(p) & ppCO2 = PCO2(p)
@@ -59,4 +65,16 @@ close,1
 
 openw,1,'outputs/grad_p.csv'
 for i=0,N-1 do printf,1,eepx(i),eepy(i),eepz(i)
+close,1
+
+openw, 1, 'outputs/velocidad_O.csv'
+for i=0,N-1 do printf,1,vxO(i),vyO(i),vzO(i)
+close,1
+
+openw, 1, 'outputs/velocidad_O2.csv'
+for i=0,N-1 do printf,1,vxO2(i),vyO2(i),vzO2(i)
+close,1
+
+openw, 1, 'outputs/velocidad_CO2.csv'
+for i=0,N-1 do printf,1,vxCO2(i),vyCO2(i),vzCO2(i)
 close,1
