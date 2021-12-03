@@ -77,57 +77,17 @@ def importar_swea(year, month, day, ti, tf):
     return (swea, t_cut, energias, JE_cut)
 
 
-# #########################################################################SWIA
-
-
-def importar_swia(year, month, day, ti, tf):
-    if gethostname() == "magneto2":
-        path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
-    else:
-        path = f"../../../datos/clweb/{year}-{month}-{day}/"
-
-    swia = np.loadtxt(path + "SWIA.asc")
-
-    t = swia[:, 3] + swia[:, 4] / 60 + swia[:, 5] / 3600  # hdec
-
-    inicio = donde(t, ti)
-    fin = donde(t, tf)
-
-    t_cut = t[inicio:fin]
-    density_cut = swia[inicio:fin, -1]
-
-    return swia, t_cut, density_cut
-
-
-def importar_swicfa(year, month, day, ti, tf):
-    if gethostname() == "magneto2":
-        path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
-    else:
-        path = f"../../../datos/clweb/{year}-{month}-{day}/"
-
-    swica = np.loadtxt(path + "SWICA.asc")
-    swifa = np.loadtxt(path + "SWIFA.asc")
-
-    density_c = swica[:, -1]
-    density_f = swifa[:, -1]
-
-    t_c = swica[:, 3] + swica[:, 4] / 60 + swica[:, 5] / 3600  # hdec
-    t_f = swifa[:, 3] + swifa[:, 4] / 60 + swifa[:, 5] / 3600  # hdec
-
-    return t_c, t_f, density_c, density_f
-
-
 # ######################################################################## SWIA
 
 
-def importar_swia_vel(year, month, day, ti, tf):
+def importar_swica(year, month, day, ti, tf):
 
     if gethostname() == "magneto2":
         path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
     else:
         path = f"../../../datos/clweb/{year}-{month}-{day}/"
 
-    swia = np.loadtxt(path + "SWIA_vel.asc")
+    swia = np.loadtxt(path + "SWICA.asc")
 
     t = swia[:, 3] + swia[:, 4] / 60 + swia[:, 5] / 3600  # hdec
 
@@ -141,14 +101,14 @@ def importar_swia_vel(year, month, day, ti, tf):
     return swia, t_cut, density_cut, vel_cut
 
 
-def importar_vel_swica(year, month, day, ti, tf):
+def importar_swifa(year, month, day, ti, tf):
 
     if gethostname() == "magneto2":
         path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
     else:
         path = f"../../../datos/clweb/{year}-{month}-{day}/"
 
-    swia = np.loadtxt(path + "SW_vel.asc")
+    swia = np.loadtxt(path + "SWIFA.asc")
 
     t = swia[:, 3] + swia[:, 4] / 60 + swia[:, 5] / 3600  # hdec
 
@@ -156,10 +116,10 @@ def importar_vel_swica(year, month, day, ti, tf):
     fin = donde(t, tf)
 
     t_cut = t[inicio:fin]
-    vel_cut = swia[inicio:fin, 6:10]
-    vel_norm_cut = swia[inicio:fin, -1]
+    density_cut = swia[inicio:fin, 6]
+    vel_cut = swia[inicio:fin, 7:10]
 
-    return swia, t_cut, vel_cut, vel_norm_cut
+    return swia, t_cut, density_cut, vel_cut
 
 
 # ########################################################################## LPW
@@ -179,16 +139,18 @@ def importar_lpw(year, month, day, ti, tf):
     fin = donde(t, tf)
 
     t_cut = t[inicio:fin]
-    e_density_cut = lpw[inicio:fin, -1]
+    e_density_cut = lpw[inicio:fin, 6]
+    flag = lpw[inicio:fin, -1]
 
-    return lpw, t_cut, e_density_cut
+    return lpw, t_cut, e_density_cut, flag
 
 
 # #################################### tiempos t1t2t3t4
 def importar_t1t2t3t4(year, doy, hour):
     fila = input("Qué fila es en el archivo MPB?\n")
     hoja_parametros, hoja_MVA, hoja_Bootstrap, hoja_Ajuste = importar_gdocs()
-    t1 = float(hoja_parametros.cell(fila, 6).value)  # ojo que cuenta desde 1 no desde 0
+    # ojo que cuenta desde 1 no desde 0
+    t1 = float(hoja_parametros.cell(fila, 6).value)
     t2 = float(hoja_parametros.cell(fila, 7).value)
     t3 = float(hoja_parametros.cell(fila, 8).value)
     t4 = float(hoja_parametros.cell(fila, 9).value)

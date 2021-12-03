@@ -17,6 +17,7 @@ vel_Hx = w(*,0,10) & vel_Hy = w(*,0,11) & vel_Hz = w(*,0,12)
 vel_Ox = w(*,0,20) & vel_Oy = w(*, 0, 21) & vel_Oz = w(*, 0, 22)
 vel_O2x = w(*,0,15) & vel_O2y = w(*, 0, 16) & vel_O2z = w(*, 0, 17)
 vel_CO2x = w(*,0,25) & vel_CO2y = w(*, 0, 26) & vel_CO2z = w(*, 0, 27)
+vel_ex = w(*,0,1) & vel_ey = w(*, 0, 2) & vel_ez = w(*, 0, 3)
 Bx = w(*,0,4) & By = w(*,0,5) & Bz = w(*,0,6)
 b1x = w(*,0,36) & b1y = w(*,0,37) & b1z = w(*,0,38)
 Pe = w(*,0,7) & Pp = w(*,0,8) & PH = w(*,0,13) & PO2 = w(*,0,18) & PO = w(*,0,23) & PCO2 = w(*,0,28)
@@ -31,6 +32,7 @@ vx = vel_Hx(p) & vy = vel_Hy(p) & vz = vel_Hz(p)
 vxO = vel_Ox(p) & vyO = vel_Oy(p) & vzO = vel_Oz(p)
 vxO2 = vel_O2x(p) & vyO2 = vel_O2y(p) & vzO2 = vel_O2z(p)
 vxCO2 = vel_CO2x(p) & vyCO2 = vel_CO2y(p) & vzCO2 = vel_CO2z(p)
+vex = vel_ex(p) & vey = vel_ey(p) & vez = vel_ez(p)
 Bbx = Bx(p) & Bby = By(p) & Bbz = Bz(p)
 bb1x = b1x(p) & bb1y = b1y(p) & bb1z = b1z(p)
 ppe = Pe(p) & ppp = Pp(p) & pph = PH(p) & ppO = PO(p) & ppO2 = PO2(p) & ppCO2 = PCO2(p)
@@ -49,6 +51,10 @@ close,1
 
 openw,1,'outputs/velocidad_h.csv'
 for i=0,N-1 do printf,1,vx(i),vy(i),vz(i)
+close,1
+
+openw,1,'outputs/velocidad_e.csv'
+for i=0,N-1 do printf,1,vex(i),vey(i),vez(i)
 close,1
 
 openw,1,'outputs/campo.csv'

@@ -179,9 +179,10 @@ def importar_lpw(year, month, day, ti, tf):
     fin = donde(t, tf)
 
     t_cut = t[inicio:fin]
-    e_density_cut = lpw[inicio:fin, -1]
+    e_density_cut = lpw[inicio:fin, 6]
+    flag = lpw[inicio:fin, -1]
 
-    return lpw, t_cut, e_density_cut
+    return lpw, t_cut, e_density_cut, flag
 
 
 # #################################### tiempos t1t2t3t4

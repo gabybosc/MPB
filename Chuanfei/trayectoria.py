@@ -51,7 +51,7 @@ B_off = datos_Off[1000:1250, 15:18]
 
 velocidad_plasma = datos[:, 12:15]
 velocidad_H = datos[:, 21:24]
-J = datos[:, -3:]
+J = datos[:, -3:]  # uA/m2
 
 J_off = datos_Off[1000:1250, -3:]
 

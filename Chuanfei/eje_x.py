@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import MultiCursor
-from sklearn.linear_model import LinearRegression
 import sys
 
 sys.path.append("..")
@@ -233,60 +232,36 @@ plt.show()
 
 
 """
-Giroradio
-Habría que probar usando la v térmica en lugar de la v total que me da la simu
-Pero el problema es que v térmica no es un vector
-Puedo proyectar v_th en v_total y después hacer el v_perp pero vuelvo a tener el
-problema de que la v total está mayoritariamente en la dirección de B
+Giroradio térmico
 """
+v_th = np.sqrt(
+    np.mean(presion["H+"][MPB_inicio:MPB_fin], axis=0)
+    * 1e-21
+    / (np.mean(densities["H+"][MPB_inicio:MPB_fin], axis=0) * mp)
+)  # km/s
 
-v_th_norm = np.sqrt(presion["H+"] * 1e-21 / (densities["H+"] * mp))  # km/s
+B_medio = np.mean(B_hr[MPB_inicio:MPB_fin], axis=0)
 
-v_normalizado = np.array(
-    [
-        velocities["H+"][i, :] / np.linalg.norm(velocities["H+"][i, :])
-        for i in range(len(velocities["H+"]))
-    ]
-)
+rg = mp * np.linalg.norm(v_th) / (e_SI * np.linalg.norm(B_medio)) * 1e9  # km
 
-v_th = np.array([v_th_norm[i] * v_normalizado[i, :] for i in range(len(v_th_norm))])
-
-B_medio = np.mean(B_on, axis=0)
-B_medio_normalizado = B_medio / np.linalg.norm(B_medio)
-
-dot = np.dot(v_th, B_medio_normalizado)
-N = np.zeros((len(dot), len(B_medio)))
-
-for i in range(len(N)):
-    N[i, :] = dot[i] * B_medio_normalizado
-
-v_perp = np.mean(v_th - N, axis=0)  # v perp B
-
-# el giroradio entonces:
-rg = mp * np.linalg.norm(v_perp) / (e_SI * np.linalg.norm(B_medio)) * 1e9  # km
-
-print(f"El radio de Larmor calculado usando v_th es {rg:1.3g} km")
-
+print(f"El giroradio térmico es {rg:1.3g} km")
 
 # punto a punto
-N = np.zeros((len(dot), len(B_medio)))
-rg_pp = np.zeros(len(B_on))
-for i in range(len(B_on) - paso):
-    B_norm = B_on[i, :] / np.linalg.norm(B_on[i, :])
-    dot_rg = np.dot(velocities["H+"][i, :], B_norm)
-    v_perp = velocities["H+"][i, :] - dot_rg  # v perp B
-    rg_pp[i] = mp * np.linalg.norm(v_perp) / (e_SI * np.linalg.norm(B_on)) * 1e9  # km
+v_th = np.sqrt(presion["H+"] * 1e-21 / (densities["H+"] * mp))  # km/s
 
+rg = [
+    mp * v_th[i] / (e_SI * np.linalg.norm(B_on[i, :])) * 1e9 for i in range(len(B_on))
+]  # km
 
 fig, ax = plt.subplots()
 ax2 = ax.twinx()
 
-ax.plot(x, rg_pp, ".")
+ax.plot(x, rg, ".")
 ax.set_ylabel("proton gyroradius (km)")
 ax2.set_ylabel("proton gyroradius (RM)")
 
-# ax.set_ylim([50, 250])
-# ax2.set_ylim([50 / 3390, 250 / 3390])
+ax.set_ylim([0, 250])
+ax2.set_ylim([0 / 3390, 250 / 3390])
 # set an invisible artist to twin axes
 # to prevent falling back to initial values on rescale events
 ax2.plot([], [])
@@ -295,6 +270,7 @@ ax.set_xlim([1.1, 1.7])
 
 ax.grid()
 plt.show()
+
 
 # plots
 

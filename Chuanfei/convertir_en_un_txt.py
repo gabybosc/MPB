@@ -9,6 +9,7 @@ path = "../../../datos/simulacion_chuanfei/"
 posicion = np.loadtxt(path + "salidas_idl/posicion.csv")  # r1, r2 (x, y o z)
 densidades = np.loadtxt(path + "salidas_idl/rho.csv")  # rho, Hrho, Orho, O2rho, CO2rho
 velocidad_h = np.loadtxt(path + "salidas_idl/velocidad_h.csv")  # Hvx Hvy Hvz
+velocidad_e = np.loadtxt(path + "salidas_idl/velocidad_e.csv")  # Hvx Hvy Hvz
 velocidad_O = np.loadtxt(path + "salidas_idl/velocidad_O.csv")  # Hvx Hvy Hvz
 velocidad_O2 = np.loadtxt(path + "salidas_idl/velocidad_O2.csv")  # Hvx Hvy Hvz
 velocidad_CO2 = np.loadtxt(path + "salidas_idl/velocidad_CO2.csv")  # Hvx Hvy Hvz
@@ -35,6 +36,7 @@ arr = np.hstack(
         velocidad_O,
         velocidad_O2,
         velocidad_CO2,
+        velocidad_e,
     )
 )
 

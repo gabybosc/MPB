@@ -160,12 +160,15 @@ def importar_lpw(year, month, day, ti, tf):
     fin = donde(t, tf)
 
     t_cut = t[inicio:fin]
-    e_density_cut = lpw[inicio:fin, -1]
+    e_density_cut = lpw[inicio:fin, 6]
+    flag = lpw[inicio:fin, -1]
 
-    return lpw, t_cut, e_density_cut
+    return lpw, t_cut, e_density_cut, flag
 
 
 ######################
+
+
 def importar_static(year, month, day, ti, tf):
     if gethostname() == "magneto2":
         path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
@@ -259,4 +262,5 @@ def importar_fila(year, month, day, hora):
     if fila is None:
         print("no encuentro la fila")
 
+    return fila, hoja_parametros, hoja_MVA, hoja_Bootstrap, hoja_Ajuste
     return fila, hoja_parametros, hoja_MVA, hoja_Bootstrap, hoja_Ajuste
