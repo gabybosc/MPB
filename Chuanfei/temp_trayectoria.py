@@ -1,10 +1,11 @@
-from importar_datos import importar_mag, importar_swica, importar_lpw
+from importar_datos import importar_mag, importar_swica, importar_lpw, importar_STATIC
 from matplotlib.widgets import MultiCursor
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.dates as md
 import matplotlib.pyplot as plt
 from cycler import cycler
 import numpy as np
+import pandas as pd
 import sys
 
 sys.path.append("..")
@@ -71,6 +72,9 @@ velocidad = {
 
 # Datos de MAVEN
 mag, t, B_mag, posicion = importar_mag(2016, "03", 16, 17.7, 18.5)
+STATIC, t_static, H_density, O_density, O2_density, CO2_density = importar_STATIC(
+    2016, "03", 16, 17.7, 18.5
+)
 
 # Datos del análisis de MAVEN
 R = [1.082, -0.064, 0.515]
@@ -115,6 +119,9 @@ tiempo_mag = np.array([np.datetime64(datenum(year, month, day, x)) for x in t_cu
 tiempo_simu = np.array([np.datetime64(datenum(year, month, day, x)) for x in t_simu])
 tiempo_swia = np.array([np.datetime64(datenum(year, month, day, x)) for x in t_swia])
 tiempo_lpw = np.array([np.datetime64(datenum(year, month, day, x)) for x in t_lpw])
+tiempo_static = np.array(
+    [np.datetime64(datenum(year, month, day, x)) for x in t_static]
+)
 
 
 idx_flag = [i for i in range(len(flag)) if flag[i] > 50]
@@ -132,15 +139,15 @@ tt = donde(t_cut, t1)
 ff = donde(t_cut, t4)
 # ancho = np.dot(posicion_cut[tt] - posicion_cut[ff], normal)
 
-j_media = np.mean(J[ii:jj]) * 1e3
+j_media = np.mean(np.linalg.norm(J, axis=1)[ii:jj]) * 1e3
 
 ii = donde(t_simu, ti_simu)
 jj = donde(t_simu, tf_simu)
 i_menos = donde(t_simu, ti_simu - 0.0125)
 j_mas = donde(t_simu, tf_simu + 0.0125)
 
-Bup = np.mean(B[jj:j_mas], axis=0) * 1e-9
-Bdown = np.mean(B[i_menos:ii], axis=0) * 1e-9
+Bdown = np.mean(B[jj:j_mas], axis=0) * 1e-9
+Bup = np.mean(B[i_menos:ii], axis=0) * 1e-9
 J_salto = 1 / (mu0 * ancho_mpb * 1e3) * np.cross(normal, Bup - Bdown) * 1e9
 
 print(f"el ancho de la MPB de la simu es {np.abs(ancho_mpb):.3g} km")
@@ -158,8 +165,13 @@ density_mean = [
 
 ion_length = 2.28e07 / np.sqrt(density_mean) * 1e-5  # km
 
-print(f"la longitud inercial de iones es {np.mean(ion_length[ii:jj]):.3g} ")
+print(
+    f"la longitud inercial de iones en la zona Upstream es {np.mean(ion_length[ii:jj]):.3g} km"
+)
 
+# recorto los puntos de e_density que son malos
+densidades_malas = [A for A in range(len(e_density)) if e_density[A] < 1]
+e_density[densidades_malas] = np.nan  # van a aparecer en blanco estos puntos
 """
 Ahora vienen los plots
 """
@@ -204,7 +216,7 @@ ax3.set_ylabel("SW proton \n velocity (km/s)")
 
 ax4 = plt.subplot2grid((5, 1), (3, 0), sharex=ax1)
 ax4.xaxis.set_major_formatter(xfmt)
-ax4.semilogy(tiempo_lpw[idx_flag], e_density[idx_flag])
+ax4.semilogy(tiempo_lpw, e_density)
 ax4.semilogy(tiempo_simu, densities["e-"])
 ax4.set_ylabel("Electron \n density (cm⁻³)")
 
@@ -248,10 +260,13 @@ plt.plot(t_simu, J * 1e3)
 plt.plot(t_simu, np.linalg.norm(J, axis=1) * 1e3)
 plt.axvspan(xmin=ti_simu, xmax=tf_simu, color="m", alpha=0.2)
 plt.axvspan(xmin=t1, xmax=t4, color="k", alpha=0.2)
-plt.axhline(y=-34, color="C0", linestyle="--")
-plt.axhline(y=-233, color="C1", linestyle="--")
-plt.axhline(y=-153, color="C2", linestyle="--")
-plt.legend(["x", "y", "z", "norm"])
+plt.axvline(x=t2, color="k")
+plt.axvline(x=t3, color="k")
+# plt.axhline(y=-34, color="C0", linestyle="--")
+# plt.axhline(y=-233, color="C1", linestyle="--")
+# plt.axhline(y=-153, color="C2", linestyle="--")
+# plt.axhline(y=238, color="C3", linestyle="--")
+plt.legend(["x", "y", "z", "norm", "simu", "maven"])
 plt.ylabel("J (nA/m2)")
 plt.xlabel("t (hdec)")
 plt.title("Corriente en volumen. La línea punteada es el cálculo de MAVEN")
@@ -300,6 +315,36 @@ ax5.set_xlabel("x (RM)")
 ax5.legend(["x", "y", "z", "MPB"])
 
 
+plt.show()
+
+
+fig = plt.figure()
+fig.subplots_adjust(
+    top=0.95, bottom=0.1, left=0.12, right=0.95, hspace=0.0, wspace=0.15
+)
+plt.xticks(rotation=25)
+xfmt = md.DateFormatter("%H:%M")
+
+ax1 = plt.gca()
+ax1 = plt.subplot2grid((1, 1), (0, 0))
+ax1.xaxis.set_major_formatter(xfmt)
+ax1.semilogy(tiempo_static, H_density, ".", label="H")
+ax1.semilogy(tiempo_static, O_density, ".", label="O")
+ax1.semilogy(tiempo_static, O2_density, ".", label="O2")
+ax1.semilogy(tiempo_static, CO2_density, ".", label="CO2")
+ax1.semilogy(tiempo_simu, densities["H+"], c="C0", label="H simu")
+ax1.semilogy(tiempo_simu, densities["O+"], c="C1", label="O simu")
+ax1.semilogy(tiempo_simu, densities["O2+"], c="C2", label="O2 simu")
+ax1.semilogy(tiempo_simu, densities["CO2+"], c="C3", label="CO2 simu")
+ax1.legend(loc="upper left")
+ax1.axvspan(
+    xmin=tiempo_mag[donde(t_cut, ti_simu)],
+    xmax=tiempo_mag[donde(t_cut, tf_simu)],
+    facecolor="k",
+    alpha=0.2,
+)
+ax1.set_ylim(ymin=0.1, ymax=1e5)
+ax1.grid()
 plt.show()
 
 
@@ -491,7 +536,5 @@ ax2.plot([], [])
 ax.set_xlabel("X (RM)")
 # ax.set_xlim([1.15, 1.6])
 
-ax.grid()
-plt.show()
 ax.grid()
 plt.show()

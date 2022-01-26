@@ -327,3 +327,5 @@ def ancho(x, B):
     multi = MultiCursor(fig.canvas, (ax1, ax2), color="black", lw=1)
     plt.show()
     plt.show()
+    plt.show()
+    plt.show()

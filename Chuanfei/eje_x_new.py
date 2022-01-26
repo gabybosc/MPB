@@ -242,6 +242,12 @@ MPR = np.mean(B_norm[donde(x, 1.16) : donde(x, 1.174)])
 MPB_inicio = donde(coef[0] + x * coef[1], MPR)
 MPB_fin = donde(x, 1.22)
 
+EH_mean = np.mean(np.linalg.norm(Ehall_hr[MPB_inicio:MPB_fin], axis=1))
+F_hall = np.cross(J_hr[MPB_inicio:MPB_fin], B_hr[MPB_inicio:MPB_fin])
+print(f"mean Ehall = {EH_mean * 1e3} mV/m")
+print(f"mean derived hall force = {np.mean(F_hall *1e-15, axis=0)} N/m³")
+
+
 plt.figure()
 
 
@@ -260,13 +266,13 @@ plt.show()
 ancho_mpb = (x[MPB_fin] - x[MPB_inicio]) * 3390  # km
 print(f"ancho de la mpb = {ancho_mpb:.3g} km")
 
-j_media = np.mean(J_hr[MPB_inicio:MPB_fin]) * 1e3
+j_media = np.mean(np.linalg.norm(J_hr, axis=1)[MPB_inicio:MPB_fin]) * 1e3
 print(f"la corriente media en la MPB de la simu es {np.abs(j_media):.3g} nA/m²")
 
 # normal = [0.920, -0.302, 0.251]
 normal = [1, 0, 0]
-Bup = np.mean(B_hr[donde(x, 1.16) : donde(x, 1.174)], axis=0) * 1e-9
-Bdown = np.mean(B_hr[donde(x, 1.22) : donde(x, 1.234)], axis=0) * 1e-9
+Bdown = np.mean(B_hr[donde(x, 1.16) : donde(x, 1.174)], axis=0) * 1e-9
+Bup = np.mean(B_hr[donde(x, 1.22) : donde(x, 1.234)], axis=0) * 1e-9
 J_salto = 1 / (mu0 * ancho_mpb * 1e3) * np.cross(normal, Bup - Bdown) * 1e9
 
 print(
@@ -280,6 +286,12 @@ density_mean_hr = [
 ]
 
 ion_length = 2.28e07 / np.sqrt(density_mean_hr) * 1e-5  # km
+
+ii = donde(x, 1.22)
+jj = donde(x, 1.234)
+print(
+    f"la longitud inercial de iones en la zona upstream es {np.mean(ion_length[ii:jj]):.3g} km"
+)
 
 density_mean_lr = [
     np.mean(densities_lr["H+"][i : i + paso])
@@ -530,6 +542,8 @@ plt.title("E Hall components")
 plt.legend(["x", "y", "z", "MPB"])
 plt.grid()
 plt.ylim([-1, 4])
+plt.xlim([1.15, 1.6])
+plt.show()
 plt.xlim([1.15, 1.6])
 plt.show()
 plt.xlim([1.15, 1.6])

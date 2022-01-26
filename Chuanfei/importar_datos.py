@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import os
 import sys
 import gspread
@@ -143,6 +144,32 @@ def importar_lpw(year, month, day, ti, tf):
     flag = lpw[inicio:fin, -1]
 
     return lpw, t_cut, e_density_cut, flag
+
+
+# ################################################3 STATIC (solo el de Chris F.)
+
+
+def importar_STATIC(year, month, day, ti, tf):
+
+    STATIC = pd.read_csv("../../../datos/STATIC/STATIC_Ni_2016-03-16.txt")
+
+    t_hdec = []
+    for t_UTC in STATIC["Time [UTC]"]:
+        (dia, hora) = t_UTC.split("/")
+        (h, m, s) = hora.split(":")
+        t_hdec.append(int(h) + int(m) / 60 + int(s) / 3600)
+
+    t = np.array(t_hdec)
+    inicio = donde(t, ti)
+    fin = donde(t, tf)
+
+    t_cut = t[inicio:fin]
+    H_density = STATIC["Density H+ [/cc]"][inicio:fin]
+    O_density = STATIC["Density O+ [/cc]"][inicio:fin]
+    O2_density = STATIC["Density O2+ [/cc]"][inicio:fin]
+    CO2_density = STATIC["Density CO2+ [/cc]"][inicio:fin]
+
+    return STATIC, t_cut, H_density, O_density, O2_density, CO2_density
 
 
 # #################################### tiempos t1t2t3t4

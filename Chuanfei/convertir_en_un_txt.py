@@ -49,4 +49,4 @@ zona_interes = arr
 reordenados = np.array(sorted(zona_interes, key=lambda f: f[0]))
 
 
-np.savetxt(path + "filename.gz", reordenados)
+np.savetxt(path + "y=0_HallOn_new1.gz", reordenados)

@@ -6,6 +6,11 @@ from matplotlib.widgets import RectangleSelector
 from matplotlib.lines import Line2D
 from funciones import array_datenums
 from pandas.plotting import register_matplotlib_converters
+import scipy.interpolate
+from scipy.stats import multivariate_normal
+import seaborn as sns
+import numpy.ma as ma
+
 
 register_matplotlib_converters()
 
@@ -117,6 +122,21 @@ def onpick1(event):
         ind = event.ind
         print("X=" + str(np.take(xdata, ind)[0]))  # Print X point
         # print('Y='+str(np.take(ydata, ind)[0])) # Print Y point
+
+
+def plot_2d(x, y, z, zmin, zmax, colormap="inferno", method="linear"):
+    xy = np.column_stack([x.flat, y.flat])  # Create a (N, 2) array of (x, y) pairs.
+    # Interpolate and generate heatmap:
+    grid_x, grid_y = np.mgrid[x.min() : x.max() : 1000j, y.min() : y.max() : 1000j]
+
+    # interpolation method can be linear or cubic
+    grid_z = scipy.interpolate.griddata(xy, z, (grid_x, grid_y), method=method)
+    # [pcolormesh with missing values?](https://stackoverflow.com/a/31687006/395857)
+
+    plt.pcolormesh(
+        grid_x, grid_y, ma.masked_invalid(grid_z), cmap=colormap, vmin=zmin, vmax=zmax
+    )
+    plt.colorbar()
 
 
 def plot_datetime(

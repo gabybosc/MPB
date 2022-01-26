@@ -9,7 +9,7 @@ filename='../z=0_HallOn_new2.out'
 npict=10
 .r getpict
 xmn =0 & xmx=2 & !x.range=[xmn,xmx]
-ymn =-0.1 & ymx=0.1 & !y.range=[ymn,ymx]
+ymn =-1 & ymx=1 & !y.range=[ymn,ymx]
 
 xx =x(*,0,0) & yy=x(*,0,1)
 rho = w(*,0,0) & HpRho = w(*,0,9) & OpRho = w(*,0,19) & O2pRho = w(*,0,14) & CO2pRho = w(*,0,24)
