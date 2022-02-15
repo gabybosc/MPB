@@ -119,33 +119,6 @@ for ion in ["H", "O", "O2", "CO2"]:
     for i in range(3):
         v_plus[:, i] += densidad_z[ion] * velocidad_z[ion][:, i] / densidad_z["e"]
 
-xx = x[donde(x, 1) : donde(x, 1.3)]  # recorto para los x entre 1 y 1.3
-yy = y[donde(x, 1) : donde(x, 1.3)]
-zz = z[donde(x, 1) : donde(x, 1.3)]
-Y = [j for j in yy if np.abs(j) < 0.5]  # recorto donde y está entre -0.5 y 0.5
-X = [xx[j] for j in range(len(yy)) if np.abs(yy[j]) < 0.5]
-Z = [zz[j] for j in range(len(yy)) if np.abs(yy[j]) < 0.5]
-
-
-def recortar(x, y, arr):
-    a = arr[donde(x, 1) : donde(x, 1.3)]
-    s = np.array([a[j] for j in range(len(y)) if np.abs(y[j]) < 0.5])
-    return s
-
-
-vzH = recortar(x, yy, velocidad_z["H"])
-vyH = recortar(x, yy, velocidad_y["H"])
-vze = recortar(x, yy, velocidad_z["e"])
-vye = recortar(x, yy, velocidad_y["e"])
-By = recortar(x, yy, B_y)
-Bz = recortar(x, yy, B_z)
-Jy = recortar(x, yy, J_y)
-Jz = recortar(x, yy, J_z)
-rhoH = recortar(x, yy, densidad["H"])
-rhoe = recortar(x, yy, densidad["e"])
-
-dif_vel_z = rhoH * vzH - rhoe * vze
-dif_vel_y = rhoH * vyH - rhoe * vye
 # v_SI = v_plus * 1e3  # m/s
 # B_SI = B_z * 1e-9  # T
 # n_SI = densidad_z["H"] * 1e6  # 1/m3
@@ -174,15 +147,15 @@ r1 = L0 / (1 + e * np.cos(theta))
 X1 = x0 + r1 * np.cos(theta)
 Y1 = r1 * np.sin(theta)
 
-# plt.figure()
-# plot_2d(x, y, beta_z, 0, 2, "coolwarm")
-# plt.plot(X1, Y1, c="k")
-# plt.title("beta in z=0")
-# plt.xlabel("x (RM)")
-# plt.ylabel("y (RM)")
-# plt.xlim([1, 1.6])
-# plt.ylim([-1, 1])
-# plt.show()
+plt.figure()
+plot_2d(x, y, beta_z, 0, 2, "coolwarm")
+plt.plot(X1, Y1, c="k")
+plt.title("beta in z=0")
+plt.xlabel("x (RM)")
+plt.ylabel("y (RM)")
+plt.xlim([1, 1.6])
+plt.ylim([-1, 1])
+plt.show()
 
 
 def subplot_2d(
@@ -208,14 +181,16 @@ def subplot_2d(
 fig, ax = plt.subplots(2, 2)
 subplot_2d(x, y, beta_z, 0, 2, ax, 0, 0, "beta z=0", "coolwarm")
 subplot_2d(x, y, beta_str_z, 0, 2, ax, 0, 1, "beta* z=0", "coolwarm")
-for i in np.arange(0, len(Bz), 5):
+for i in np.linspace(0, 12800, 258):
+    i = int(i)
     for k in [0, 1]:
-        ax[0, k].quiver(X[i], Y[i], Bz[i, 0], Bz[i, 1], color="k", alpha=0.5)
+        ax[0, k].quiver(x[i], y[i], B_z[i, 0], B_z[i, 1], color="k", alpha=0.5)
 subplot_2d(x, z, beta_y, 0, 2, ax, 1, 0, "beta y=0", "coolwarm")
 subplot_2d(x, z, beta_str_y, 0, 2, ax, 1, 1, "beta* y=0", "coolwarm")
-for i in np.arange(0, len(Bz), 5):
+for i in np.linspace(0, 12800, 258):
+    i = int(i)
     for k in [0, 1]:
-        ax[1, k].quiver(X[i], Z[i], By[i, 0], By[i, 1], color="k", alpha=0.5)
+        ax[1, k].quiver(x[i], z[i], B_y[i, 0], B_y[i, 2], color="k", alpha=0.5)
 for i in [0, 1]:
     plt.setp(ax[0, i].get_xticklabels(), visible=False)
 for i in [0, 1]:
@@ -228,24 +203,28 @@ ax[1, 0].set_xlabel("x (RM)")
 ax[1, 1].set_xlabel("x (RM)")
 plt.show()
 
+x = np.arange(0, 2.2, 0.2)
+y = np.arange(0, 2.2, 0.2)
+
+X, Y = np.meshgrid(x, y)
+
+
 # Corrientes
 fig, ax = plt.subplots(2, 3)
 subplot_2d(x, z, J_y[:, 0] * 1e3, -100, 100, ax, 0, 0, "Jx y=0", "coolwarm")
 subplot_2d(x, z, J_y[:, 1] * 1e3, -100, 100, ax, 0, 1, "Jy y=0", "coolwarm")
 subplot_2d(x, z, J_y[:, 2] * 1e3, -100, 100, ax, 0, 2, "Jz y=0", "coolwarm")
-for i in np.arange(0, len(Jz), 5):
+for i in np.linspace(0, 12800, 258):
+    i = int(i)
     for k in [0, 1, 2]:
-        ax[0, k].quiver(
-            X[i], Z[i], dif_vel_y[i, 0], dif_vel_y[i, 2], color="k", alpha=0.5
-        )
+        ax[0, k].quiver(x[i], z[i], J_y[i, 0], J_y[i, 2], color="k", alpha=0.5)
 subplot_2d(x, y, J_z[:, 0] * 1e3, -100, 100, ax, 1, 0, "Jx z=0", "coolwarm")
 subplot_2d(x, y, J_z[:, 1] * 1e3, -100, 100, ax, 1, 1, "Jy z=0", "coolwarm")
 subplot_2d(x, y, J_z[:, 2] * 1e3, -100, 100, ax, 1, 2, "Jz z=0", "coolwarm")
-for i in np.arange(0, len(Jz), 5):
+for i in np.linspace(0, 12800, 258):
+    i = int(i)
     for k in [0, 1, 2]:
-        ax[1, k].quiver(
-            X[i], Y[i], dif_vel_z[i, 0], dif_vel_z[i, 1], color="k", alpha=0.5
-        )
+        ax[1, k].quiver(x[i], y[i], J_z[i, 0], J_z[i, 1], color="k", alpha=0.5)
 for i in [0, 1, 2]:
     plt.setp(ax[0, i].get_xticklabels(), visible=False)
     ax[1, i].set_xlabel("x (RM)")
@@ -261,17 +240,31 @@ plt.show()
 
 
 # densidad
-
 fig, ax = plt.subplots(2, 2)
 subplot_2d(x, y, densidad_z["H"], 0, 20, ax, 0, 0, "H z=0", "inferno")
 subplot_2d(x, y, densidad_z["e"], 0, 20, ax, 0, 1, "e- z=0", "inferno")
 subplot_2d(x, z, densidad_y["H"], 0, 20, ax, 1, 0, "H y=0", "inferno")
 subplot_2d(x, z, densidad_y["e"], 0, 20, ax, 1, 1, "e- y=0", "inferno")
-for i in np.arange(0, len(vzH), 5):
-    ax[0, 0].quiver(X[i], Y[i], vzH[i, 0], vzH[i, 1], color="k", alpha=0.5)
-    ax[0, 1].quiver(X[i], Y[i], vze[i, 0], vze[i, 1], color="k", alpha=0.5)
-    ax[1, 0].quiver(X[i], Z[i], vyH[i, 0], vyH[i, 2], color="k", alpha=0.5)
-    ax[1, 1].quiver(X[i], Z[i], vye[i, 0], vye[i, 2], color="k", alpha=0.5)
+for i in np.linspace(0, 12800, 258):
+    i = int(i)
+    ax[0, 0].quiver(
+        x[i], y[i], velocidad_z["H"][i, 0], velocidad_z["H"][i, 1], color="k", alpha=0.5
+    )
+for i in np.linspace(0, 12800, 258):
+    i = int(i)
+    ax[0, 1].quiver(
+        x[i], y[i], velocidad_z["e"][i, 0], velocidad_z["e"][i, 1], color="k", alpha=0.5
+    )
+for i in np.linspace(0, 12800, 258):
+    i = int(i)
+    ax[1, 0].quiver(
+        x[i], z[i], velocidad_y["H"][i, 0], velocidad_y["H"][i, 2], color="k", alpha=0.5
+    )
+for i in np.linspace(0, 12800, 258):
+    i = int(i)
+    ax[1, 1].quiver(
+        x[i], z[i], velocidad_y["e"][i, 0], velocidad_y["e"][i, 2], color="k", alpha=0.5
+    )
 for i in [0, 1]:
     plt.setp(ax[0, i].get_xticklabels(), visible=False)
 for i in [0, 1]:
@@ -283,21 +276,6 @@ ax[1, 1].set_xlabel("x (RM)")
 cbar_ax = fig.add_axes([0.9, 0.1, 0.04, 0.8])  # [left, bottom, width, height]
 fig.colorbar(cm.ScalarMappable(norm=Normalize(0, 20), cmap="inferno"), cax=cbar_ax)
 plt.show()
-
-dif_vel_z = vzH - vze
-dif_vel_y = vyH - vye
-fig, ax = plt.subplots(1, 1)
-plot_2d(x, y, J_z[:, 2] * 1e3, -100, 100, "coolwarm")
-plt.plot(X1, Y1, c="k")
-for i in np.arange(0, len(Jz), 5):
-    ax.quiver(X[i], Y[i], dif_vel_z[i, 0], dif_vel_z[i, 1], color="k", alpha=0.5)
-plt.title("Jz in z=0")
-plt.xlabel("x (RM)")
-plt.ylabel("y (RM)")
-plt.xlim([1, 1.3])
-plt.ylim([-0.5, 0.5])
-plt.show()
-
 
 # Normas
 # fig, ax = plt.subplots(2, 2)
