@@ -1,6 +1,11 @@
 import numpy as np
+from socket import gethostname
 
-path = "../../../datos/simulacion_chuanfei/"
+
+if gethostname() == "magneto2":
+    path = f"../../../../../media/gabybosc/datos/Chuanfei/"
+elif gethostname() == "gabybosc":
+    path = "../../../datos/simulacion_chuanfei/"
 # variables = np.loadtxt(path + "variables.txt")
 
 

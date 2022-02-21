@@ -157,11 +157,26 @@ dif_vel_y = rhoH * vyH - rhoe * vye
 # )
 # Ep = np.array([-1 / (e_SI * n_SI[i]) * grad_p_SI[i, :] for i in range(len(grad_p))])
 
-# MPB
+# MPB MAVEN
+x0 = 0.78
+e = 0.9
+R = [1.082, -0.064, 0.515]
+
+theta = np.linspace(0, np.pi * 2, 100)
+
+r0 = R - np.array([x0, 0, 0])
+theta0 = np.arccos(r0[0] / np.linalg.norm(r0))
+
+L0 = np.linalg.norm(r0) * (1 + e * np.cos(theta0))
+r1 = L0 / (1 + e * np.cos(theta))
+
+X1_M = x0 + r1 * np.cos(theta)
+Y1_M = r1 * np.sin(theta)
+
+# beta = 1
 x0 = 0.5
 e = 0.9
 
-# R = [1.082, -0.064, 0.515]
 R = [1.2, 0, 0]  # fit de la MPB simulada
 theta = np.linspace(0, np.pi * 2, 100)
 
@@ -173,16 +188,6 @@ r1 = L0 / (1 + e * np.cos(theta))
 
 X1 = x0 + r1 * np.cos(theta)
 Y1 = r1 * np.sin(theta)
-
-# plt.figure()
-# plot_2d(x, y, beta_z, 0, 2, "coolwarm")
-# plt.plot(X1, Y1, c="k")
-# plt.title("beta in z=0")
-# plt.xlabel("x (RM)")
-# plt.ylabel("y (RM)")
-# plt.xlim([1, 1.6])
-# plt.ylim([-1, 1])
-# plt.show()
 
 
 def subplot_2d(
@@ -198,9 +203,10 @@ def subplot_2d(
     ax[i, j].pcolormesh(
         grid_x, grid_y, ma.masked_invalid(grid_z), cmap=colormap, vmin=zmin, vmax=zmax
     )
-    ax[i, j].plot(X1, Y1, c="k", linestyle="--")
-    ax[i, j].set_xlim([1.1, 1.3])
-    ax[i, j].set_ylim([-0.5, 0.5])
+    ax[i, j].plot(X1, Y1, c="k", linestyle="--", label="beta=1")
+    ax[i, j].plot(X1_M, Y1_M, c="k", linestyle="-", label="MAVEN")
+    ax[i, j].set_xlim([1.15, 1.2])
+    ax[i, j].set_ylim([-0.025, 0.025])
     ax[i, j].set_title(titulo)
 
 
