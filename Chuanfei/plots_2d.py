@@ -11,8 +11,8 @@ from matplotlib.colors import Normalize
 sns.set()
 
 path = "../../../datos/simulacion_chuanfei/"
-datos_y = np.loadtxt(path + "y=0_HallOn_new2.gz")
-datos_z = np.loadtxt(path + "z=0_HallOn_new2.gz")
+datos_y0 = np.loadtxt(path + "y=0_HallOn_new2.gz")
+datos_z0 = np.loadtxt(path + "z=0_HallOn_new2.gz")
 
 sys.path.append("..")
 from funciones import donde, angulo
@@ -31,125 +31,146 @@ g = 3.7  # Mars surface gravity, m/s²
 e_SI = 1.6e-19  # C
 
 # vectores
-x = datos_y[:, 0]  # RM
-y = datos_z[:, 1]  # RM
-z = datos_y[:, 1]  # RM
+x = datos_y0[:, 0]  # RM
+y = datos_z0[:, 1]  # RM
+z = datos_y0[:, 1]  # RM
 
-B_y = datos_y[:, 10:13]  # nT
-b1_y = datos_y[:, 13:16]  # nT
-J_y = datos_y[:, 22:25]  # ua/m2
+B_y0 = datos_y0[:, 10:13]  # nT
+b1_y0 = datos_y0[:, 13:16]  # nT
+J_y0 = datos_y0[:, 22:25]  # ua/m2
 
-B_z = datos_z[:, 10:13]  # nT
-b1_z = datos_z[:, 13:16]  # nT
-J_z = datos_z[:, 22:25]  # ua/m2
+B_z0 = datos_z0[:, 10:13]  # nT
+b1_z0 = datos_z0[:, 13:16]  # nT
+J_z0 = datos_z0[:, 22:25]  # ua/m2
 
-presion_y = {
-    "e": datos_y[:, 16],
-    "H": datos_y[:, 18],
-    "O": datos_y[:, 19],
-    "O2": datos_y[:, 20],
-    "CO2": datos_y[:, 21],
+presion_y0 = {
+    "e": datos_y0[:, 16],
+    "H": datos_y0[:, 18],
+    "O": datos_y0[:, 19],
+    "O2": datos_y0[:, 20],
+    "CO2": datos_y0[:, 21],
 }  # nPa
-densidad_y = {
-    "e": datos_y[:, 2],
-    "H": datos_y[:, 3],
-    "O": datos_y[:, 4],
-    "O2": datos_y[:, 5],
-    "CO2": datos_y[:, 6],
+densidad_y0 = {
+    "e": datos_y0[:, 2],
+    "H": datos_y0[:, 3],
+    "O": datos_y0[:, 4],
+    "O2": datos_y0[:, 5],
+    "CO2": datos_y0[:, 6],
 }  # Mp/cc
-velocidad_y = {
-    "H": datos_y[:, 7:10],
-    "O": datos_y[:, 28:31],
-    "O2": datos_y[:, 31:34],
-    "CO2": datos_y[:, 34:37],
-    "e": datos_y[:, 37:],
+velocidad_y0 = {
+    "H": datos_y0[:, 7:10],
+    "O": datos_y0[:, 28:31],
+    "O2": datos_y0[:, 31:34],
+    "CO2": datos_y0[:, 34:37],
+    "e": datos_y0[:, 37:],
 }  # km/s
 
-presion_z = {
-    "e": datos_z[:, 16],
-    "H": datos_z[:, 18],
-    "O": datos_z[:, 19],
-    "O2": datos_z[:, 20],
-    "CO2": datos_z[:, 21],
+presion_z0 = {
+    "e": datos_z0[:, 16],
+    "H": datos_z0[:, 18],
+    "O": datos_z0[:, 19],
+    "O2": datos_z0[:, 20],
+    "CO2": datos_z0[:, 21],
 }  # nPa
-densidad_z = {
-    "e": datos_z[:, 2],
-    "H": datos_z[:, 3],
-    "O": datos_z[:, 4],
-    "O2": datos_z[:, 5],
-    "CO2": datos_z[:, 6],
+densidad_z0 = {
+    "e": datos_z0[:, 2],
+    "H": datos_z0[:, 3],
+    "O": datos_z0[:, 4],
+    "O2": datos_z0[:, 5],
+    "CO2": datos_z0[:, 6],
 }  # Mp/cc
-velocidad_z = {
-    "H": datos_z[:, 7:10],
-    "O": datos_z[:, 28:31],
-    "O2": datos_z[:, 31:34],
-    "CO2": datos_z[:, 34:37],
-    "e": datos_z[:, 37:],
+velocidad_z0 = {
+    "H": datos_z0[:, 7:10],
+    "O": datos_z0[:, 28:31],
+    "O2": datos_z0[:, 31:34],
+    "CO2": datos_z0[:, 34:37],
+    "e": datos_z0[:, 37:],
 }  # km/s
 
-P_heavy_z = presion_z["O"] + presion_z["O2"] + presion_z["CO2"]
-P_mag_z = np.linalg.norm(b1_z, axis=1) ** 2 * 1e-9 / (2 * mu0)  # sin corticales
-P_mag_cort_z = np.linalg.norm(B_z, axis=1) ** 2 * 1e-9 / (2 * mu0)  # con corticales
-P_dyn_z = 1.67e-6 * densidad_z["H"] * velocidad_z["H"][:, 0] ** 2  # nPa
-P_total_z = P_heavy_z + P_mag_z + presion_z["e"] + P_dyn_z + presion_z["H"]
+P_heavy_z0 = presion_z0["O"] + presion_z0["O2"] + presion_z0["CO2"]
+P_mag_z0 = np.linalg.norm(b1_z0, axis=1) ** 2 * 1e-9 / (2 * mu0)  # sin corticales
+P_mag_cort_z0 = np.linalg.norm(B_z0, axis=1) ** 2 * 1e-9 / (2 * mu0)  # con corticales
+P_dyn_z0 = 1.67e-6 * densidad_z0["H"] * velocidad_z0["H"][:, 0] ** 2  # nPa
+P_total_z0 = P_heavy_z0 + P_mag_z0 + presion_z0["e"] + P_dyn_z0 + presion_z0["H"]
 
-beta_z = (P_heavy_z + presion_z["H"]) / P_mag_z
-beta_str_z = (P_heavy_z + presion_z["H"] + P_dyn_z) / P_mag_z
+beta_z0 = (P_heavy_z0 + presion_z0["H"]) / P_mag_z0
+beta_str_z0 = (P_heavy_z0 + presion_z0["H"] + P_dyn_z0) / P_mag_z0
 
-P_heavy_y = presion_y["O"] + presion_y["O2"] + presion_y["CO2"]
-P_mag_y = np.linalg.norm(b1_y, axis=1) ** 2 * 1e-9 / (2 * mu0)  # sin corticales
-P_mag_cort_y = np.linalg.norm(B_y, axis=1) ** 2 * 1e-9 / (2 * mu0)  # con corticales
-P_dyn_y = 1.67e-6 * densidad_y["H"] * velocidad_y["H"][:, 0] ** 2  # nPa
-P_total_y = P_heavy_y + P_mag_y + presion_y["e"] + P_dyn_y + presion_y["H"]
+P_heavy_y0 = presion_y0["O"] + presion_y0["O2"] + presion_y0["CO2"]
+P_mag_y0 = np.linalg.norm(b1_y0, axis=1) ** 2 * 1e-9 / (2 * mu0)  # sin corticales
+P_mag_cort_y0 = np.linalg.norm(B_y0, axis=1) ** 2 * 1e-9 / (2 * mu0)  # con corticales
+P_dyn_y0 = 1.67e-6 * densidad_y0["H"] * velocidad_y0["H"][:, 0] ** 2  # nPa
+P_total_y0 = P_heavy_y0 + P_mag_y0 + presion_y0["e"] + P_dyn_y0 + presion_y0["H"]
 
-beta_y = (P_heavy_y + presion_y["H"]) / P_mag_y
-beta_str_y = (P_heavy_y + presion_y["H"] + P_dyn_y) / P_mag_y
+beta_y0 = (P_heavy_y0 + presion_y0["H"]) / P_mag_y0
+beta_str_y0 = (P_heavy_y0 + presion_y0["H"] + P_dyn_y0) / P_mag_y0
 
-# beta_cort = (P_heavy + presion_z["H"]) / P_mag_cort
-# beta_str_cort = (P_heavy + presion_z["H"] + P_dyn) / P_mag_cort
+# beta_cort = (P_heavy + presion_z0["H"]) / P_mag_cort
+# beta_str_cort = (P_heavy + presion_z0["H"] + P_dyn) / P_mag_cort
 
-densidad_z_heavies = densidad_z["O"] + densidad_z["O2"] + densidad_z["CO2"]
-density_ratio = densidad_z["H"] / densidad_z_heavies
-mass_ratio = densidad_z["H"] / (
-    densidad_z["O"] * 16 + densidad_z["O2"] * 32 + densidad_z["CO2"] * 44
+densidad_z0_heavies = densidad_z0["O"] + densidad_z0["O2"] + densidad_z0["CO2"]
+density_ratio = densidad_z0["H"] / densidad_z0_heavies
+mass_ratio = densidad_z0["H"] / (
+    densidad_z0["O"] * 16 + densidad_z0["O2"] * 32 + densidad_z0["CO2"] * 44
 )
 
 v_plus = np.zeros((len(x), 3))
 for ion in ["H", "O", "O2", "CO2"]:
     for i in range(3):
-        v_plus[:, i] += densidad_z[ion] * velocidad_z[ion][:, i] / densidad_z["e"]
+        v_plus[:, i] += densidad_z0[ion] * velocidad_z0[ion][:, i] / densidad_z0["e"]
 
-xx = x[donde(x, 1) : donde(x, 1.3)]  # recorto para los x entre 1 y 1.3
-yy = y[donde(x, 1) : donde(x, 1.3)]
-zz = z[donde(x, 1) : donde(x, 1.3)]
-Y = [j for j in yy if np.abs(j) < 0.5]  # recorto donde y está entre -0.5 y 0.5
-X = [xx[j] for j in range(len(yy)) if np.abs(yy[j]) < 0.5]
-Z = [zz[j] for j in range(len(yy)) if np.abs(yy[j]) < 0.5]
+# xx = x[donde(x, 1) : donde(x, 1.3)]  # recorto para los x entre 1 y 1.3
+# zz = z[donde(x, 1) : donde(x, 1.3)]
+# Y = [j for j in yy if np.abs(j) < 0.5]  # recorto donde y está entre -0.5 y 0.5
+# X = [xx[j] for j in range(len(yy)) if np.abs(yy[j]) < 0.5]
+# Z = [zz[j] for j in range(len(yy)) if np.abs(yy[j]) < 0.5]
 
 
 def recortar(x, y, arr):
-    a = arr[donde(x, 1) : donde(x, 1.3)]
-    s = np.array([a[j] for j in range(len(y)) if np.abs(y[j]) < 0.5])
+    a = arr[donde(x, 1.1) : donde(x, 1.3)]
+    s = np.array([a[j] for j in range(len(y)) if np.abs(y[j]) < 0.1])
     return s
 
 
-vzH = recortar(x, yy, velocidad_z["H"])
-vyH = recortar(x, yy, velocidad_y["H"])
-vze = recortar(x, yy, velocidad_z["e"])
-vye = recortar(x, yy, velocidad_y["e"])
-By = recortar(x, yy, B_y)
-Bz = recortar(x, yy, B_z)
-Jy = recortar(x, yy, J_y)
-Jz = recortar(x, yy, J_z)
-rhoH = recortar(x, yy, densidad["H"])
-rhoe = recortar(x, yy, densidad["e"])
+yy = y[donde(x, 1.1) : donde(x, 1.3)]
+zz = z[donde(x, 1.1) : donde(x, 1.3)]  # yy y zz son iguales
+X = recortar(x, yy, x)
+Y = recortar(x, zz, y)
+Z = recortar(x, yy, z)
+vz0H = recortar(x, yy, velocidad_z0["H"])
+vy0H = recortar(x, zz, velocidad_y0["H"])
+vz0e = recortar(x, yy, velocidad_z0["e"])
+vy0e = recortar(x, zz, velocidad_y0["e"])
+By0 = recortar(x, zz, B_y0)
+Bz0 = recortar(x, yy, B_z0)
+Jy0 = recortar(x, zz, J_y0)
+Jz0 = recortar(x, yy, J_z0)
+rhoH_y0 = recortar(x, zz, densidad_y0["H"])
+rhoe_y0 = recortar(x, zz, densidad_y0["e"])
+rhoH_z0 = recortar(x, yy, densidad_z0["H"])
+rhoe_z0 = recortar(x, yy, densidad_z0["e"])
 
-dif_vel_z = rhoH * vzH - rhoe * vze
-dif_vel_y = rhoH * vyH - rhoe * vye
+
+dif_vel_z0 = np.array(
+    [rhoe_z0[i] * vz0e[i, :] - rhoH_z0[i] * vz0H[i, :] for i in range(len(vz0e))]
+)
+dif_vel_y0 = np.array(
+    [rhoe_y0[i] * vy0e[i, :] - rhoH_y0[i] * vy0H[i, :] for i in range(len(vy0e))]
+)
+
+# Ehall_z0 = np.array(
+#     [
+#         1 / (e_SI * rhoH_z0[i] * 1e6) * np.cross(Jz[i] * 1e-6, Bz[i] * 1e-9) * 1e-3
+#         for i in range(len(Bz))
+#     ]
+# )
+#
+# plt.plot(X, Ehall_z0)
+# plt.show()
 # v_SI = v_plus * 1e3  # m/s
-# B_SI = B_z * 1e-9  # T
-# n_SI = densidad_z["H"] * 1e6  # 1/m3
-# J_SI = J_z * 1e-6  # A/m2
+# B_SI = B_z0 * 1e-9  # T
+# n_SI = densidad_z0["H"] * 1e6  # 1/m3
+# J_SI = J_z0 * 1e-6  # A/m2
 # grad_p_SI = grad_p * 1e-9
 # Ecv = np.array([-np.cross(v_SI[i], B_SI[i]) for i in range(len(B))])  # V/m
 # Ehall = np.array(
@@ -157,6 +178,7 @@ dif_vel_y = rhoH * vyH - rhoe * vye
 # )
 # Ep = np.array([-1 / (e_SI * n_SI[i]) * grad_p_SI[i, :] for i in range(len(grad_p))])
 
+<<<<<<< HEAD
 # MPB MAVEN
 x0 = 0.78
 e = 0.9
@@ -173,6 +195,8 @@ r1 = L0 / (1 + e * np.cos(theta))
 X1_M = x0 + r1 * np.cos(theta)
 Y1_M = r1 * np.sin(theta)
 
+=======
+>>>>>>> 7529d56eecf0fe534f12cd99a77c0070904e7f9b
 # beta = 1
 x0 = 0.5
 e = 0.9
@@ -189,6 +213,25 @@ r1 = L0 / (1 + e * np.cos(theta))
 X1 = x0 + r1 * np.cos(theta)
 Y1 = r1 * np.sin(theta)
 
+<<<<<<< HEAD
+=======
+# MPB Maven
+x0 = 0.5
+e = 0.9
+
+R = [1.082, -0.064, 0.515]
+theta = np.linspace(0, np.pi * 2, 100)
+
+r0 = R - np.array([x0, 0, 0])
+theta0 = np.arccos(r0[0] / np.linalg.norm(r0))
+
+L0 = np.linalg.norm(r0) * (1 + e * np.cos(theta0))
+r1 = L0 / (1 + e * np.cos(theta))
+
+X1_M = x0 + r1 * np.cos(theta)
+Y1_M = r1 * np.sin(theta)
+
+>>>>>>> 7529d56eecf0fe534f12cd99a77c0070904e7f9b
 
 def subplot_2d(
     x, y, z, zmin, zmax, ax, i, j, titulo, colormap="inferno", method="linear"
@@ -205,79 +248,94 @@ def subplot_2d(
     )
     ax[i, j].plot(X1, Y1, c="k", linestyle="--", label="beta=1")
     ax[i, j].plot(X1_M, Y1_M, c="k", linestyle="-", label="MAVEN")
+<<<<<<< HEAD
     ax[i, j].set_xlim([1.15, 1.2])
     ax[i, j].set_ylim([-0.025, 0.025])
+=======
+    ax[i, j].set_xlim([1.1, 1.3])
+    ax[i, j].set_ylim([-0.1, 0.1])
+>>>>>>> 7529d56eecf0fe534f12cd99a77c0070904e7f9b
     ax[i, j].set_title(titulo)
 
 
-# betas
-fig, ax = plt.subplots(2, 2)
-subplot_2d(x, y, beta_z, 0, 2, ax, 0, 0, "beta z=0", "coolwarm")
-subplot_2d(x, y, beta_str_z, 0, 2, ax, 0, 1, "beta* z=0", "coolwarm")
-for i in np.arange(0, len(Bz), 5):
-    for k in [0, 1]:
-        ax[0, k].quiver(X[i], Y[i], Bz[i, 0], Bz[i, 1], color="k", alpha=0.5)
-subplot_2d(x, z, beta_y, 0, 2, ax, 1, 0, "beta y=0", "coolwarm")
-subplot_2d(x, z, beta_str_y, 0, 2, ax, 1, 1, "beta* y=0", "coolwarm")
-for i in np.arange(0, len(Bz), 5):
-    for k in [0, 1]:
-        ax[1, k].quiver(X[i], Z[i], By[i, 0], By[i, 1], color="k", alpha=0.5)
-for i in [0, 1]:
-    plt.setp(ax[0, i].get_xticklabels(), visible=False)
-for i in [0, 1]:
-    plt.setp(ax[i, 1].get_yticklabels(), visible=False)
-cbar_ax = fig.add_axes([0.9, 0.1, 0.04, 0.8])  # [left, bottom, width, height]
-fig.colorbar(cm.ScalarMappable(norm=Normalize(0, 2), cmap="coolwarm"), cax=cbar_ax)
-ax[0, 0].set_ylabel("y (RM)")
-ax[1, 0].set_ylabel("z (RM)")
-ax[1, 0].set_xlabel("x (RM)")
-ax[1, 1].set_xlabel("x (RM)")
-plt.show()
-
-# Corrientes
-fig, ax = plt.subplots(2, 3)
-subplot_2d(x, z, J_y[:, 0] * 1e3, -100, 100, ax, 0, 0, "Jx y=0", "coolwarm")
-subplot_2d(x, z, J_y[:, 1] * 1e3, -100, 100, ax, 0, 1, "Jy y=0", "coolwarm")
-subplot_2d(x, z, J_y[:, 2] * 1e3, -100, 100, ax, 0, 2, "Jz y=0", "coolwarm")
-for i in np.arange(0, len(Jz), 5):
-    for k in [0, 1, 2]:
-        ax[0, k].quiver(
-            X[i], Z[i], dif_vel_y[i, 0], dif_vel_y[i, 2], color="k", alpha=0.5
-        )
-subplot_2d(x, y, J_z[:, 0] * 1e3, -100, 100, ax, 1, 0, "Jx z=0", "coolwarm")
-subplot_2d(x, y, J_z[:, 1] * 1e3, -100, 100, ax, 1, 1, "Jy z=0", "coolwarm")
-subplot_2d(x, y, J_z[:, 2] * 1e3, -100, 100, ax, 1, 2, "Jz z=0", "coolwarm")
-for i in np.arange(0, len(Jz), 5):
-    for k in [0, 1, 2]:
-        ax[1, k].quiver(
-            X[i], Y[i], dif_vel_z[i, 0], dif_vel_z[i, 1], color="k", alpha=0.5
-        )
-for i in [0, 1, 2]:
-    plt.setp(ax[0, i].get_xticklabels(), visible=False)
-    ax[1, i].set_xlabel("x (RM)")
-for i in [0, 1]:
-    plt.setp(ax[i, 1].get_yticklabels(), visible=False)
-    plt.setp(ax[i, 2].get_yticklabels(), visible=False)
-ax[0, 0].set_ylabel("z (RM)")
-ax[1, 0].set_ylabel("y (RM)")
-
-cbar_ax = fig.add_axes([0.9, 0.1, 0.04, 0.85])  # [left, bottom, width, height]
-fig.colorbar(cm.ScalarMappable(norm=Normalize(-100, 100), cmap="coolwarm"), cax=cbar_ax)
-plt.show()
+#
+# # betas
+# fig, ax = plt.subplots(2, 2)
+# subplot_2d(x, y, beta_z0, 0, 2, ax, 0, 0, "beta z=0", "coolwarm")
+# subplot_2d(x, y, beta_str_z0, 0, 2, ax, 0, 1, "beta* z=0", "coolwarm")
+# for i in np.arange(0, len(Bz), 5):
+#     for k in [0, 1]:
+#         ax[0, k].quiver(X[i], Y[i], Bz[i, 0], Bz[i, 1], color="k", alpha=0.5)
+# subplot_2d(x, z, beta_y0, 0, 2, ax, 1, 0, "beta y=0", "coolwarm")
+# subplot_2d(x, z, beta_str_y0, 0, 2, ax, 1, 1, "beta* y=0", "coolwarm")
+# for i in np.arange(0, len(Bz), 5):
+#     for k in [0, 1]:
+#         ax[1, k].quiver(X[i], Z[i], By[i, 0], By[i, 1], color="k", alpha=0.5)
+# for i in [0, 1]:
+#     plt.setp(ax[0, i].get_xticklabels(), visible=False)
+# for i in [0, 1]:
+#     plt.setp(ax[i, 1].get_yticklabels(), visible=False)
+# cbar_ax = fig.add_axes([0.9, 0.1, 0.04, 0.8])  # [left, bottom, width, height]
+# fig.colorbar(cm.ScalarMappable(norm=Normalize(0, 2), cmap="coolwarm"), cax=cbar_ax)
+# ax[0, 0].set_ylabel("y (RM)")
+# ax[1, 0].set_ylabel("z (RM)")
+# ax[1, 0].set_xlabel("x (RM)")
+# ax[1, 1].set_xlabel("x (RM)")
+# plt.show()
+#
+# # Corrientes
+# fig, ax = plt.subplots(2, 3)
+# subplot_2d(x, z, J_y0[:, 0] * 1e3, -100, 100, ax, 0, 0, "Jx y=0", "coolwarm")
+# subplot_2d(x, z, J_y0[:, 1] * 1e3, -100, 100, ax, 0, 1, "Jy y=0", "coolwarm")
+# subplot_2d(x, z, J_y0[:, 2] * 1e3, -100, 100, ax, 0, 2, "Jz y=0", "coolwarm")
+# for i in np.arange(0, len(Jz), 5):
+#     for k in [0, 1, 2]:
+#         ax[0, k].quiver(
+#             X[i], Z[i], dif_vel_y0[i, 0], dif_vel_y0[i, 2], color="k", alpha=0.5
+#         )
+# subplot_2d(x, y, J_z0[:, 0] * 1e3, -100, 100, ax, 1, 0, "Jx z=0", "coolwarm")
+# subplot_2d(x, y, J_z0[:, 1] * 1e3, -100, 100, ax, 1, 1, "Jy z=0", "coolwarm")
+# subplot_2d(x, y, J_z0[:, 2] * 1e3, -100, 100, ax, 1, 2, "Jz z=0", "coolwarm")
+# for i in np.arange(0, len(Jz), 5):
+#     for k in [0, 1, 2]:
+#         ax[1, k].quiver(
+#             X[i], Y[i], dif_vel_z0[i, 0], dif_vel_z0[i, 1], color="k", alpha=0.5
+#         )
+# for i in [0, 1, 2]:
+#     plt.setp(ax[0, i].get_xticklabels(), visible=False)
+#     ax[1, i].set_xlabel("x (RM)")
+# for i in [0, 1]:
+#     plt.setp(ax[i, 1].get_yticklabels(), visible=False)
+#     plt.setp(ax[i, 2].get_yticklabels(), visible=False)
+# ax[0, 0].set_ylabel("z (RM)")
+# ax[1, 0].set_ylabel("y (RM)")
+#
+# cbar_ax = fig.add_axes([0.9, 0.1, 0.04, 0.85])  # [left, bottom, width, height]
+# fig.colorbar(cm.ScalarMappable(norm=Normalize(-100, 100), cmap="coolwarm"), cax=cbar_ax)
+# plt.show()
 
 
 # densidad
 
+fig, ax = plt.subplots(1, 1)
+for i in np.arange(0, len(X), 5):
+    ax.quiver(X[i], Y[i], vz0H[i, 0], vz0H[i, 1], scale=500, color="k", alpha=0.5)
+ax.set_xlim([1.1, 1.3])
+ax.set_ylim([-0.1, 0.1])
+ax.set_title("v_H_z0")
+plt.show()
+
 fig, ax = plt.subplots(2, 2)
-subplot_2d(x, y, densidad_z["H"], 0, 20, ax, 0, 0, "H z=0", "inferno")
-subplot_2d(x, y, densidad_z["e"], 0, 20, ax, 0, 1, "e- z=0", "inferno")
-subplot_2d(x, z, densidad_y["H"], 0, 20, ax, 1, 0, "H y=0", "inferno")
-subplot_2d(x, z, densidad_y["e"], 0, 20, ax, 1, 1, "e- y=0", "inferno")
-for i in np.arange(0, len(vzH), 5):
-    ax[0, 0].quiver(X[i], Y[i], vzH[i, 0], vzH[i, 1], color="k", alpha=0.5)
-    ax[0, 1].quiver(X[i], Y[i], vze[i, 0], vze[i, 1], color="k", alpha=0.5)
-    ax[1, 0].quiver(X[i], Z[i], vyH[i, 0], vyH[i, 2], color="k", alpha=0.5)
-    ax[1, 1].quiver(X[i], Z[i], vye[i, 0], vye[i, 2], color="k", alpha=0.5)
+subplot_2d(x, y, densidad_z0["H"], 0, 20, ax, 0, 0, "H z=0", "inferno")
+subplot_2d(x, y, densidad_z0["e"], 0, 20, ax, 0, 1, "e- z=0", "inferno")
+subplot_2d(x, z, densidad_y0["H"], 0, 20, ax, 1, 0, "H y=0", "inferno")
+subplot_2d(x, z, densidad_y0["e"], 0, 20, ax, 1, 1, "e- y=0", "inferno")
+for i in np.arange(0, len(X), 5):
+    # for i in range(len(X)):
+    ax[0, 0].quiver(X[i], Y[i], vz0H[i, 0], vz0H[i, 1], scale=500, color="k", alpha=0.5)
+    ax[0, 1].quiver(X[i], Y[i], vz0e[i, 0], vz0e[i, 1], scale=500, color="k", alpha=0.5)
+    ax[1, 0].quiver(X[i], Z[i], vy0H[i, 0], vy0H[i, 2], scale=500, color="k", alpha=0.5)
+    ax[1, 1].quiver(X[i], Z[i], vy0e[i, 0], vy0e[i, 2], scale=500, color="k", alpha=0.5)
 for i in [0, 1]:
     plt.setp(ax[0, i].get_xticklabels(), visible=False)
 for i in [0, 1]:
@@ -290,18 +348,35 @@ cbar_ax = fig.add_axes([0.9, 0.1, 0.04, 0.8])  # [left, bottom, width, height]
 fig.colorbar(cm.ScalarMappable(norm=Normalize(0, 20), cmap="inferno"), cax=cbar_ax)
 plt.show()
 
-dif_vel_z = vzH - vze
-dif_vel_y = vyH - vye
-fig, ax = plt.subplots(1, 1)
-plot_2d(x, y, J_z[:, 2] * 1e3, -100, 100, "coolwarm")
+dif_vel_z0 = vz0H - vz0e
+dif_vel_y0 = vy0H - vy0e
+dv_H = np.array([rhoH_z0[i] * vz0H[i, :] for i in range(len(rhoH_z0))])
+dv_e = np.array([rhoe_z0[i] * vz0e[i, :] for i in range(len(rhoH_z0))])
+dv_Hy = np.array([rhoH_y0[i] * vy0H[i, :] for i in range(len(rhoH_z0))])
+dv_ey = np.array([rhoe_y0[i] * vy0e[i, :] for i in range(len(rhoH_z0))])
+fig, ax = plt.subplots(2, 2)
+subplot_2d(x, y, densidad_z0["H"], 0, 20, ax, 0, 0, "H")
+subplot_2d(x, y, densidad_z0["e"], 0, 20, ax, 1, 0, "e")
+subplot_2d(x, y, densidad_y0["H"], 0, 20, ax, 0, 1, "H y=0")
+subplot_2d(x, y, densidad_y0["e"], 0, 20, ax, 1, 1, "e y=0")
 plt.plot(X1, Y1, c="k")
-for i in np.arange(0, len(Jz), 5):
-    ax.quiver(X[i], Y[i], dif_vel_z[i, 0], dif_vel_z[i, 1], color="k", alpha=0.5)
-plt.title("Jz in z=0")
-plt.xlabel("x (RM)")
-plt.ylabel("y (RM)")
-plt.xlim([1, 1.3])
-plt.ylim([-0.5, 0.5])
+for i in np.arange(0, len(X), 5):
+    ax[0, 0].quiver(
+        X[i], Y[i], dv_H[i, 0], dv_H[i, 1], scale=5000, color="k", alpha=0.5
+    )
+    ax[1, 0].quiver(
+        X[i], Y[i], dv_e[i, 0], dv_e[i, 1], scale=5000, color="k", alpha=0.5
+    )
+    ax[0, 1].quiver(
+        X[i], Y[i], dv_Hy[i, 0], dv_Hy[i, 1], scale=5000, color="k", alpha=0.5
+    )
+    ax[1, 1].quiver(
+        X[i], Y[i], dv_ey[i, 0], dv_ey[i, 1], scale=5000, color="k", alpha=0.5
+    )
+for i in [0, 1]:
+    plt.setp(ax[0, i].get_xticklabels(), visible=False)
+for i in [0, 1]:
+    plt.setp(ax[i, 1].get_yticklabels(), visible=False)
 plt.show()
 
 
@@ -350,4 +425,17 @@ plt.show()
 # plt.ylabel("z (RM)")
 # plt.xlim([1, 1.6])
 # plt.ylim([-1, 1])
+# plt.show()
+# plt.ylabel("z (RM)")
+# plt.xlim([1, 1.6])
+# plt.ylim([-1, 1])
+# plt.show()
+# plt.show()
+# plt.xlim([1, 1.6])
+# plt.ylim([-1, 1])
+# plt.show()
+# plt.ylabel("z (RM)")
+# plt.xlim([1, 1.6])
+# plt.ylim([-1, 1])
+# plt.show()
 # plt.show()
