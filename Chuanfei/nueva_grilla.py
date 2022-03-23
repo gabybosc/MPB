@@ -110,13 +110,25 @@ Jy0 = recortar(x, zz, J_y0)
 Jz0 = recortar(x, yy, J_z0)
 rhoH_y0 = recortar(x, zz, densidad_y0["H"])
 rhoe_y0 = recortar(x, zz, densidad_y0["e"])
+rhoheavies_y0 = recortar(
+    x, zz, densidad_y0["O"] + densidad_y0["O2"] + densidad_y0["O2"]
+)
 rhoH_z0 = recortar(x, yy, densidad_z0["H"])
 rhoe_z0 = recortar(x, yy, densidad_z0["e"])
+rhoheavies_z0 = recortar(
+    x, yy, densidad_z0["O"] + densidad_z0["O2"] + densidad_z0["O2"]
+)
+PH_y0 = recortar(x, zz, presion_y0["H"])
+Pe_y0 = recortar(x, zz, presion_y0["e"])
+Pheavies_y0 = recortar(x, zz, presion_y0["O"] + presion_y0["O2"] + presion_y0["CO2"])
+PH_z0 = recortar(x, yy, presion_z0["H"])
+Pe_z0 = recortar(x, yy, presion_z0["e"])
+Pheavies_z0 = recortar(x, yy, presion_z0["O"] + presion_z0["O2"] + presion_z0["CO2"])
 
 # defino la grilla
 
 
-def regrid(X, Y, z, Nx=50, Ny=50, model="linear"):
+def regrid(X, Y, z, Nx=20, Ny=20, model="linear"):
     """
     X, Y son las coordenadas de la grilla, z es el valor en cada punto,
     Nx, Ny es el nuevo tamaño de grilla
@@ -130,52 +142,75 @@ def regrid(X, Y, z, Nx=50, Ny=50, model="linear"):
     return out
 
 
-v_regrid_xl = regrid(X, Y, vz0H[:, 0], model="linear")
-v_regrid_xg = regrid(X, Y, vz0H[:, 0], model="gaussian")
-v_regrid_yl = regrid(X, Y, vz0H[:, 1], model="linear")
-v_regrid_yg = regrid(X, Y, vz0H[:, 1], model="gaussian")
-rho_regrid = regrid(X, Y, rhoH_z0, model="gaussian")
-
-plt.figure()
-plt.imshow(v_regrid_yl)
-plt.figure()
-plt.imshow(v_regrid_yg)
-plt.show()
+"""
+Antes de hacer un regrid nuevo hay que testear los modelos y ver cuál reproduce
+bien lo que tenemos en el scatter.
+"""
 
 
-nueva_grilla = np.column_stack(
-    [x.flat, y.flat]
-)  # Create a (N, 2) array of (x, y) pairs.
-new_grid_x, new_grid_y = np.mgrid[
-    min(X) : max(X) : 50j, min(Y) : max(Y) : 50j
-]  # grilla de 50x50
+def comparacion(x, y, z, modelo):
+    reg = regrid(x, y, z, 50, 50, model=modelo)
+    fig, ax = plt.subplots(1, 2)
+    ax[0].imshow(reg, origin="lower", extent=(min(x), max(x), min(y), max(y)))
+    ax[1].scatter(x, y, c=z)
+    plt.show()
+
+
+# comparacion(X, Z, rhoheavies_y0, "linear")
+# comparacion(X, Z, rhoheavies_y0, "gaussian")
+
+
+"""
+Estos ya están chequeados
+"""
+regrid_z0 = {
+    "Bx": regrid(X, Y, Bz0[:, 0], model="linear"),
+    "By": regrid(X, Y, Bz0[:, 1], model="gaussian"),
+    "vHx": regrid(X, Y, vz0H[:, 0], model="linear"),
+    "vHy": regrid(X, Y, vz0H[:, 1], model="gaussian"),
+    "vex": regrid(X, Y, vz0e[:, 0], model="linear"),
+    "vey": regrid(X, Y, vz0e[:, 1], model="linear"),
+    "rhoH": regrid(X, Y, rhoH_z0, Nx=100, Ny=100, model="gaussian"),
+    "rhoe": regrid(X, Y, rhoe_z0, Nx=100, Ny=100, model="gaussian"),
+    "rhoheavies": regrid(X, Y, rhoheavies_z0, Nx=100, Ny=100, model="linear"),
+    "PH": regrid(X, Y, PH_z0, model="linear"),
+    "Pe": regrid(X, Y, Pe_z0, model="linear"),
+    "Pheavies": regrid(X, Y, Pheavies_z0, model="gaussian"),
+}
+
+regrid_y0 = {
+    "Bx": regrid(X, Z, By0[:, 0], model="linear"),
+    "Bz": regrid(X, Z, By0[:, 2], model="gaussian"),
+    "vHx": regrid(X, Z, vy0H[:, 0], model="linear"),
+    "vHz": regrid(X, Z, vy0H[:, 2], model="gaussian"),
+    "vex": regrid(X, Z, vy0e[:, 0], model="linear"),
+    "vez": regrid(X, Z, vy0e[:, 2], model="gaussian"),
+    "rhoH": regrid(X, Z, rhoH_y0, model="gaussian"),
+    "rhoe": regrid(X, Z, rhoe_y0, model="gaussian"),
+    "rhoheavies": regrid(X, Z, rhoheavies_y0, model="linear"),
+    "PH": regrid(X, Z, PH_y0, model="linear"),
+    "Pe": regrid(X, Z, Pe_y0, model="linear"),
+    "Pheavies": regrid(X, Z, Pheavies_y0, model="gaussian"),
+}
+
+
+grid_x_bg, grid_y_bg = np.mgrid[
+    min(X) : max(X) : 100j, min(Y) : max(Y) : 100j
+]  # grilla de 100x100 para los fondos
+grid_x_quiver, grid_y_quiver = np.mgrid[
+    min(X) : max(X) : 20j, min(Y) : max(Y) : 20j
+]  # grilla de 20x20 para los quiver
 fig, ax = plt.subplots(1, 1)
-cf = ax.pcolormesh(new_grid_x, new_grid_y, np.transpose(rho_regrid))
-for i in np.arange(0, 50):
+cf = ax.pcolormesh(grid_x_bg, grid_y_bg, np.transpose(regrid_z0["rhoH"]))
+for i in np.arange(0, len(regrid_z0["vHx"])):
     ax.quiver(
-        new_grid_x[i],
-        new_grid_y[i],
-        v_regrid_xl.flatten()[i],
-        v_regrid_yg.flatten()[i],
+        grid_x_quiver[i],
+        grid_y_quiver[i],
+        regrid_z0["vHx"].flatten()[i],
+        regrid_z0["vHy"].flatten()[i],
         scale=5000,
         color="k",
         alpha=0.5,
     )
-fig.colorbar(cf, cmap="inferno")
-
-xy = np.column_stack([X.flat, Y.flat])  # Create a (N, 2) array of (x, y) pairs.
-# Interpolate and generate heatmap:
-grid_x, grid_y = np.mgrid[min(X) : max(X) : 1000j, min(Y) : max(Y) : 1000j]
-
-# interpolation method can be linear or cubic
-grid_z = scipy.interpolate.griddata(xy, rhoH_z0, (grid_x, grid_y), method="linear")
-fig, ax = plt.subplots(1, 1)
-cf = ax.pcolormesh(grid_x, grid_y, ma.masked_invalid(grid_z),)
-# ax.set_title(titulo)
-for i in np.arange(0, len(X), 5):
-    # for i in range(len(X)):
-    ax.quiver(X[i], Y[i], vz0H[i, 0], vz0H[i, 1], scale=5000, color="k", alpha=0.5)
-ax.set_xlim([1.1, 1.3])
-ax.set_ylim([-0.1, 0.1])
 fig.colorbar(cf, cmap="inferno")
 plt.show()
