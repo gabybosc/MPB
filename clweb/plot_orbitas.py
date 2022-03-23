@@ -6,7 +6,7 @@ sys.path.append("..")
 from funciones import fechas, find_nearest_inicial, find_nearest_final, tiempos
 
 """
-Hace la fig2 del poster de la AGU2019
+Hace la fig2 del poster de la AGU2019, que es una proyección en 2D de la órbita
 """
 
 
@@ -40,7 +40,8 @@ def datos():
 
 
 def datos_fijos(year, month, day, ti, tf):
-    path = f"../../../datos/clweb/{year}-{month}-{day}/"  # path a los datos desde la laptop
+    # path a los datos desde la laptop
+    path = f"../../../datos/clweb/{year}-{month}-{day}/"
     mag = np.loadtxt(path + "MAG.asc")
 
     M = len(mag[:, 0])  # el numero de datos
@@ -129,4 +130,4 @@ orbitas(posicion_cut, year, month, day)
 
 plt.legend()
 plt.show(block=False)
-plt.savefig(f"../outputs/figs_MPB/Orbitas.png", dpi=200)
+# plt.savefig("../outputs/figs_MPB/Orbitas.png", dpi=200)
