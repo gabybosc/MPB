@@ -90,21 +90,22 @@ while not happy:
         ax3.set_ylabel("|B| (nT)")
         ax3.set_xlabel("Tiempo (hdec)")
 
-        ax5 = plt.subplot2grid((3, 2), (0, 1), sharex=ax1)
-        ax5.set_ylabel("Energia", picker=True)  # , bbox=dict(facecolor='red'))
-        plt.setp(ax5.get_xticklabels(), visible=False)
-        im = plt.imshow(
-            flux_plot,
-            aspect="auto",
-            origin="lower",
-            extent=(t_swea[0], t_swea[-1], energia[-1], energia[0]),
-            cmap="inferno",
-            norm=LogNorm(vmin=1e4, vmax=1e9),
-        )
-        divider = make_axes_locatable(ax5)
-        cax = divider.append_axes("top", size="7%", pad="1%")
-        cb = plt.colorbar(im, cax=cax, orientation="horizontal")
-        cax.xaxis.set_ticks_position("top")
+        ax5 = plt.subplot2grid((3, 2), (2, 1), sharex=ax1)
+        if swea != 0:
+            ax5.set_ylabel("Energia", picker=True)  # , bbox=dict(facecolor='red'))
+            plt.setp(ax5.get_xticklabels(), visible=False)
+            im = plt.imshow(
+                flux_plot,
+                aspect="auto",
+                origin="lower",
+                extent=(t_swea[0], t_swea[-1], energia[-1], energia[0]),
+                cmap="inferno",
+                norm=LogNorm(vmin=1e4, vmax=1e9),
+            )
+            divider = make_axes_locatable(ax5)
+            cax = divider.append_axes("top", size="7%", pad="1%")
+            cb = plt.colorbar(im, cax=cax, orientation="horizontal")
+            cax.xaxis.set_ticks_position("top")
 
         ax7 = plt.subplot2grid((3, 2), (1, 1), sharex=ax1)
         plt.setp(ax7.get_xticklabels(), visible=False)
@@ -112,7 +113,7 @@ while not happy:
         plt.plot(t_swia, i_density)
         ax7.grid()
 
-        ax6 = plt.subplot2grid((3, 2), (2, 1), sharex=ax1)
+        ax6 = plt.subplot2grid((3, 2), (0, 1), sharex=ax1)
         # ax6.set_ylabel("Densidad total \n de e- (cm⁻³)")
         ax6.set_xlabel("Tiempo (hdec)")
         plt.semilogy(t_lpw, e_density)

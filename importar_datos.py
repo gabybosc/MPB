@@ -4,6 +4,7 @@ from funciones import donde, unix_to_decimal
 import cdflib as cdf
 import gspread
 import os
+from pathlib import Path
 from oauth2client.service_account import ServiceAccountCredentials
 from socket import gethostname
 
@@ -104,26 +105,63 @@ def importar_swea(year, month, day, ti, tf):
     else:
         path = f"../../../datos/SWEA/"
 
-    swea = cdf.CDF(path + f"/mvn_swe_l2_svyspec_{year}{month}{day}_v04_r01.cdf")
+    # chequea que el archivo no está vacío
+    if (
+        Path(path + f"/mvn_swe_l2_svyspec_{year}{month}{day}_v04_r01.cdf")
+        .stat()
+        .st_size
+        > 1000
+    ):
 
-    flux_all = swea.varget("diff_en_fluxes")
-    energia = swea.varget("energy")
-    t_unix = swea.varget("time_unix")
+        swea = cdf.CDF(path + f"/mvn_swe_l2_svyspec_{year}{month}{day}_v04_r01.cdf")
 
-    t = unix_to_decimal(t_unix)
+        flux_all = swea.varget("diff_en_fluxes")
+        energia = swea.varget("energy")
+        t_unix = swea.varget("time_unix")
 
-    inicio = donde(t, ti)
-    fin = donde(t, tf)
+        t = unix_to_decimal(t_unix)
 
-    t_cut = t[inicio:fin]
+        inicio = donde(t, ti)
+        fin = donde(t, tf)
 
-    flux = flux_all[inicio:fin]
-    flux_plot = np.transpose(flux)[::-1]
+        t_cut = t[inicio:fin]
+
+        flux = flux_all[inicio:fin]
+        flux_plot = np.transpose(flux)[::-1]
+
+    else:
+        print("swea vacío")
+        swea, t_cut, energia, flux_plot = 0, 0, 0, 0
 
     return swea, t_cut, energia, flux_plot
 
 
 # ######################################################################## SWIA
+
+
+def importar_swica(year, month, day, ti, tf):
+    date_orbit = dt.date(int(year), int(month), int(day))
+    year = date_orbit.strftime("%Y")
+    month = date_orbit.strftime("%m")
+    day = date_orbit.strftime("%d")
+
+    if gethostname() == "magneto2":
+        path = "../../../../media/gabybosc/datos/SWIA/"
+    elif gethostname() == "gabybosc":
+        path = "../../datos/SWIA/"
+    else:
+        path = "../../../datos/SWIA/"
+
+    if os.path.isfile(path + f"mvn_swi_l2_coarsearc3d_{year}{month}{day}_v01_r01.cdf"):
+        # si no existe SWICA, usa los onboard
+        swia = cdf.CDF(path + f"mvn_swi_l2_coarsearc3d_{year}{month}{day}_v01_r01.cdf")
+    else:
+        swia = cdf.CDF(
+            path + f"mvn_swi_l2_onboardsvymom_{year}{month}{day}_v01_r01.cdf"
+        )
+
+    t_unix = swia.varget("time_unix")
+    # en los datos de PDS tiene diff en flux, energy, etc pero no tiene los moments
 
 
 def importar_swia(year, month, day, ti, tf):
@@ -139,19 +177,10 @@ def importar_swia(year, month, day, ti, tf):
     else:
         path = "../../../datos/SWIA/"
 
-    if os.path.isfile(path + f"mvn_swi_l2_coarsearc3d_{year}{month}{day}_v01_r01.cdf"):
-        # si no existe SWICA, usa los onboard
-        swia = cdf.CDF(
-            path + f"mvn_swi_l2_coarsearc3d_{year}{month}{day}_v01_r01_orig.cdf"
-        )
-    else:
-        swia = cdf.CDF(
-            path + f"mvn_swi_l2_onboardsvymom_{year}{month}{day}_v01_r01.cdf"
-        )
+    swia = cdf.CDF(path + f"mvn_swi_l2_onboardsvymom_{year}{month}{day}_v01_r01.cdf")
 
     t_unix = swia.varget("time_unix")
     density = swia.varget("density")  # cm⁻³
-    # creo que en los datos de PDS, SWICA no tiene estos ya calculados (son justamente los moments)
     temperature = swia.varget("temperature_mso")  # eV
     vel_mso_xyz = swia.varget("velocity_mso")  # km/s
 
