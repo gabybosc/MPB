@@ -9,7 +9,7 @@ import sys
 sys.path.append("..")
 
 from funciones_plot import equal_axes, onpick1, hodograma
-from funciones import diezmar, donde, Mij, angulo
+from funciones import diezmar, donde, Mij, angulo, ancho_mpb
 
 # Simulación
 path = "../../../datos/simulacion_chuanfei/"
@@ -290,8 +290,8 @@ plt.show()
 """
 Cálculo de J = n x (Bu-Bd)
 """
-#
-# x23 = (x2 - x3) * 3390e3  # ancho en m
+
+# x23 = (x2 - x3) * 3390e3  # esto no es el ancho posta, debería proyectar sobre la normal
 # ancho_updown = 0.015 * 13000 / 3390
 #
 # inicio_up = donde(x, x1 + ancho_updown)
