@@ -206,7 +206,6 @@ dif_vel_y0 = np.array(
 # )
 # Ep = np.array([-1 / (e_SI * n_SI[i]) * grad_p_SI[i, :] for i in range(len(grad_p))])
 
-<<<<<<< HEAD
 # MPB MAVEN
 x0 = 0.78
 e = 0.9
@@ -223,8 +222,7 @@ r1 = L0 / (1 + e * np.cos(theta))
 X1_M = x0 + r1 * np.cos(theta)
 Y1_M = r1 * np.sin(theta)
 
-=======
->>>>>>> 7529d56eecf0fe534f12cd99a77c0070904e7f9b
+
 # beta = 1
 x0 = 0.5
 e = 0.9
@@ -241,25 +239,6 @@ r1 = L0 / (1 + e * np.cos(theta))
 X1 = x0 + r1 * np.cos(theta)
 Y1 = r1 * np.sin(theta)
 
-<<<<<<< HEAD
-=======
-# MPB Maven
-x0 = 0.5
-e = 0.9
-
-R = [1.082, -0.064, 0.515]
-theta = np.linspace(0, np.pi * 2, 100)
-
-r0 = R - np.array([x0, 0, 0])
-theta0 = np.arccos(r0[0] / np.linalg.norm(r0))
-
-L0 = np.linalg.norm(r0) * (1 + e * np.cos(theta0))
-r1 = L0 / (1 + e * np.cos(theta))
-
-X1_M = x0 + r1 * np.cos(theta)
-Y1_M = r1 * np.sin(theta)
-
->>>>>>> 7529d56eecf0fe534f12cd99a77c0070904e7f9b
 
 def subplot_2d(
     x, y, z, zmin, zmax, ax, i, j, titulo, colormap="inferno", method="linear"
@@ -276,18 +255,10 @@ def subplot_2d(
     )
     ax[i, j].plot(X1, Y1, c="k", linestyle="--", label="beta=1")
     ax[i, j].plot(X1_M, Y1_M, c="k", linestyle="-", label="MAVEN")
-<<<<<<< HEAD
-<<<<<<< HEAD
+
     ax[i, j].set_xlim([1.15, 1.2])
     ax[i, j].set_ylim([-0.025, 0.025])
-=======
-    ax[i, j].set_xlim([1.1, 1.3])
-    ax[i, j].set_ylim([-0.1, 0.1])
->>>>>>> 7529d56eecf0fe534f12cd99a77c0070904e7f9b
-=======
-    ax[i, j].set_xlim([1.0, 2])
-    ax[i, j].set_ylim([-0.5, 0.5])
->>>>>>> c31297a26424d93e1e00d0f1765a0fd6f647cb97
+
     ax[i, j].set_title(titulo)
 
 

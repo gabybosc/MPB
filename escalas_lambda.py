@@ -18,7 +18,7 @@ from importar_datos import importar_t1t2t3t4, importar_mag
 year, month, day, doy = fechas()
 hora = input("Hora en HH\n")
 
-tiempos = importar_t1t2t3t4(year, month, day, doy, int(hora))
+tiempos = importar_t1t2t3t4(year, month, day, int(hora))
 
 # ti = float(input('Tiempo inicial del barrido\n'))
 # tf = float(input('Tiempo final del barrido\n'))

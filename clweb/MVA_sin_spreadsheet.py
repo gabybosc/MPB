@@ -36,7 +36,6 @@ np.set_printoptions(precision=4)
 
 
 def MVA(year, month, day, ti_MVA, tf_MVA):
-    date_entry = f"{year}-{month}-{day}"
 
     mag, t, B, posicion = importar_mag(year, month, day, ti_MVA, tf_MVA)
     # ya los importa cortados a los datos, entonces no hace falta que haga el cut yo

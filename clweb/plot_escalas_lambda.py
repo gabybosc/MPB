@@ -8,6 +8,7 @@ from matplotlib.widgets import MultiCursor
 import matplotlib.dates as md
 import os
 import sys
+from socket import gethostname
 
 sys.path.append("..")
 
@@ -35,7 +36,17 @@ for i in range(len(tiempos_txt)):
 timestamps = array_datenums(year, month, day, tiempos)  # lo convierto a datenum
 
 # path = '../../../MAVEN/mag_1s/2016/03/' #path a los datos desde la desktop
-path = f"../../../datos/clweb/{year}-{month}-{day}/"  # path a los datos desde la laptop
+if len(str(int(hora))) == 1:
+    t_f = "0" + str(int(hora))
+else:
+    t_f = int(hora)
+
+# if gethostname() == "magneto2":
+path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{hora}/"
+if not os.path.exists(path):  # si no existe, usa int(tf)
+    path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
+
+# path = f"../../../datos/clweb/{year}-{month}-{day}/"  # path a los datos desde la laptop
 if os.path.isfile(path + "mag_filtrado.txt"):
     mag = np.loadtxt(path + "mag_filtrado.txt", skiprows=2)
     M = len(mag[:, 0])  # el numero de datos

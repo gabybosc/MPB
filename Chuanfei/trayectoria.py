@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 from matplotlib.widgets import MultiCursor
-from importar_datos import importar_mag, importar_swia
+from importar_datos import importar_mag, importar_swica
 import sys
 
 sys.path.append("..")
@@ -19,7 +19,7 @@ datos_new = np.loadtxt(path + "sat_trajectory_HallOn_new2.sat", skiprows=2)
 
 # Datos de MAVEN
 mag, t, B_mag, posicion = importar_mag(2016, "03", 16, 17.85, 19)
-swia, t_swia, proton_density = importar_swia(2016, "03", 16, 17.85, 19)
+swia, t_swia, proton_density = importar_swica(2016, "03", 16, 17.85, 19)
 
 """
 Mismos análisis pero para los datos sobre la trayectoria de la nave
@@ -290,17 +290,17 @@ plt.show()
 """
 Cálculo de J = n x (Bu-Bd)
 """
-#
-# x23 = (x2 - x3) * 3390e3  # ancho en m
-# ancho_updown = 0.015 * 13000 / 3390
-#
-# inicio_up = donde(x, x1 + ancho_updown)
-# fin_up = donde(x, x1)
-# inicio_down = donde(x, x4)
-# fin_down = donde(x, x4 - ancho_updown)
-# inicio_MPB = donde(x, x2)
-# fin_MPB = donde(x, x3)
-#
+
+x23 = (x2 - x3) * 3390e3  # ancho en m  # ojo que esto no es a lo largo de la normal!
+ancho_updown = 0.015 * 13000 / 3390
+
+inicio_up = donde(x, x1 + ancho_updown)
+fin_up = donde(x, x1)
+inicio_down = donde(x, x4)
+fin_down = donde(x, x4 - ancho_updown)
+inicio_MPB = donde(x, x2)
+fin_MPB = donde(x, x3)
+
 # n2 = [0.856, -0.066, 0.512]
 # B_upstream = np.mean(B[inicio_up:fin_up], axis=0)
 # B_downstream = np.mean(B[inicio_down:fin_down], axis=0)
