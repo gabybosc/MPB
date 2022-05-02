@@ -9,7 +9,7 @@ import sys
 sys.path.append("..")
 
 from funciones_plot import equal_axes, onpick1, hodograma
-from funciones import diezmar, donde, Mij, angulo
+from funciones import diezmar, donde, Mij, angulo, ancho_mpb
 
 # Simulación
 path = "../../../datos/simulacion_chuanfei/"
@@ -291,6 +291,7 @@ plt.show()
 Cálculo de J = n x (Bu-Bd)
 """
 
+<<<<<<< HEAD
 x23 = (x2 - x3) * 3390e3  # ancho en m  # ojo que esto no es a lo largo de la normal!
 ancho_updown = 0.015 * 13000 / 3390
 
@@ -301,6 +302,18 @@ fin_down = donde(x, x4 - ancho_updown)
 inicio_MPB = donde(x, x2)
 fin_MPB = donde(x, x3)
 
+=======
+# x23 = (x2 - x3) * 3390e3  # esto no es el ancho posta, debería proyectar sobre la normal
+# ancho_updown = 0.015 * 13000 / 3390
+#
+# inicio_up = donde(x, x1 + ancho_updown)
+# fin_up = donde(x, x1)
+# inicio_down = donde(x, x4)
+# fin_down = donde(x, x4 - ancho_updown)
+# inicio_MPB = donde(x, x2)
+# fin_MPB = donde(x, x3)
+#
+>>>>>>> afa8b5e7b12384158cdb0e5f459729114ff46af8
 # n2 = [0.856, -0.066, 0.512]
 # B_upstream = np.mean(B[inicio_up:fin_up], axis=0)
 # B_downstream = np.mean(B[inicio_down:fin_down], axis=0)

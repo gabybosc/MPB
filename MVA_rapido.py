@@ -4,7 +4,6 @@ from importar_datos import importar_t1t2t3t4, importar_mag, importar_swea, impor
 from funciones import (
     fechas,
     tiempos,
-    SZA,
     error,
     donde,
     Mij,

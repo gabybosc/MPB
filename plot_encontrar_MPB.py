@@ -57,7 +57,7 @@ index = np.array((int(year), doy))
 happy = False
 val = False
 while not happy:
-    while val == False:
+    while val is False:
         plt.clf()  # clear figure
         fig = plt.figure(
             1, constrained_layout=True
