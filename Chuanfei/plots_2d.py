@@ -206,8 +206,10 @@ dif_vel_y0 = np.array(
 # )
 # Ep = np.array([-1 / (e_SI * n_SI[i]) * grad_p_SI[i, :] for i in range(len(grad_p))])
 
-# beta = 1
-x0 = 0.5
+# MPB MAVEN
+
+x0 = 0.78
+
 e = 0.9
 
 R = [1.2, 0, 0]  # fit de la MPB simulada
@@ -222,7 +224,9 @@ r1 = L0 / (1 + e * np.cos(theta))
 X1 = x0 + r1 * np.cos(theta)
 Y1 = r1 * np.sin(theta)
 
-# MPB Maven
+
+# beta = 1
+
 x0 = 0.5
 e = 0.9
 
@@ -256,6 +260,7 @@ def subplot_2d(
     ax[i, j].plot(X1_M, Y1_M, c="k", linestyle="-", label="MAVEN")
     ax[i, j].set_xlim([1.0, 2])
     ax[i, j].set_ylim([-0.5, 0.5])
+
     ax[i, j].set_title(titulo)
 
 
