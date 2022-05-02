@@ -206,23 +206,6 @@ dif_vel_y0 = np.array(
 # )
 # Ep = np.array([-1 / (e_SI * n_SI[i]) * grad_p_SI[i, :] for i in range(len(grad_p))])
 
-# MPB MAVEN
-x0 = 0.78
-e = 0.9
-R = [1.082, -0.064, 0.515]
-
-theta = np.linspace(0, np.pi * 2, 100)
-
-r0 = R - np.array([x0, 0, 0])
-theta0 = np.arccos(r0[0] / np.linalg.norm(r0))
-
-L0 = np.linalg.norm(r0) * (1 + e * np.cos(theta0))
-r1 = L0 / (1 + e * np.cos(theta))
-
-X1_M = x0 + r1 * np.cos(theta)
-Y1_M = r1 * np.sin(theta)
-
-
 # beta = 1
 x0 = 0.5
 e = 0.9
@@ -238,6 +221,22 @@ r1 = L0 / (1 + e * np.cos(theta))
 
 X1 = x0 + r1 * np.cos(theta)
 Y1 = r1 * np.sin(theta)
+
+# MPB Maven
+x0 = 0.5
+e = 0.9
+
+R = [1.082, -0.064, 0.515]
+theta = np.linspace(0, np.pi * 2, 100)
+
+r0 = R - np.array([x0, 0, 0])
+theta0 = np.arccos(r0[0] / np.linalg.norm(r0))
+
+L0 = np.linalg.norm(r0) * (1 + e * np.cos(theta0))
+r1 = L0 / (1 + e * np.cos(theta))
+
+X1_M = x0 + r1 * np.cos(theta)
+Y1_M = r1 * np.sin(theta)
 
 
 def subplot_2d(
@@ -255,10 +254,8 @@ def subplot_2d(
     )
     ax[i, j].plot(X1, Y1, c="k", linestyle="--", label="beta=1")
     ax[i, j].plot(X1_M, Y1_M, c="k", linestyle="-", label="MAVEN")
-
-    ax[i, j].set_xlim([1.15, 1.2])
-    ax[i, j].set_ylim([-0.025, 0.025])
-
+    ax[i, j].set_xlim([1.0, 2])
+    ax[i, j].set_ylim([-0.5, 0.5])
     ax[i, j].set_title(titulo)
 
 
@@ -267,10 +264,10 @@ fig, ax = plt.subplots(1, 2)
 xy = np.column_stack([x.flat, y.flat])  # Create a (N, 2) array of (x, y) pairs.
 grid_x, grid_y = np.mgrid[x.min() : x.max() : 1000j, y.min() : y.max() : 1000j]
 grid_0 = scipy.interpolate.griddata(
-    xy, np.log(beta_z0), (grid_x, grid_y), method="linear"
+    xy, np.log(beta_str_z0), (grid_x, grid_y), method="linear"
 )
 grid_1 = scipy.interpolate.griddata(
-    xy, np.log(beta_y0), (grid_x, grid_y), method="linear"
+    xy, np.log(beta_str_y0), (grid_x, grid_y), method="linear"
 )
 
 for i in [0, 1]:
@@ -282,71 +279,117 @@ for i in [0, 1]:
 ax[0].pcolormesh(
     grid_x, grid_y, ma.masked_invalid(grid_0), cmap="coolwarm", vmin=-4, vmax=4
 )
-ax[0].set_title(r"log($\beta$) z=0")
+ax[0].set_title(r"Z=0 log($\beta*$)")
 ax[1].pcolormesh(
     grid_x, grid_y, ma.masked_invalid(grid_1), cmap="coolwarm", vmin=-4, vmax=4
 )
-ax[1].set_title(r"log($\beta$) y=0")
+ax[1].set_title(r"Y=0 log($\beta*$)")
 ax[0].set_aspect("equal", "box")
 ax[1].set_aspect("equal", "box")
 cbar_ax = fig.add_axes([0.9, 0.1, 0.04, 0.8])  # [left, bottom, width, height]
 fig.colorbar(cm.ScalarMappable(norm=Normalize(-4, 4), cmap="coolwarm"), cax=cbar_ax)
-ax[0].set_ylabel("y (RM)")
-ax[0].set_xlabel("x (RM)")
-ax[1].set_ylabel("z (RM)")
-ax[1].set_xlabel("x (RM)")
+ax[0].set_ylabel(r"y (R$_M$)")
+ax[0].set_xlabel(r"x (R$_M$)")
+ax[1].set_ylabel(r"z (R$_M$)")
+ax[1].set_xlabel(r"x (R$_M$)")
+figure = plt.gcf()  # get current figure
+figure.set_size_inches(9, 6)
+plt.savefig("../../../Dropbox/Paper2/beta_2d.png", dpi=600)
 plt.show()
+
 
 # Campo B
 fig, ax = plt.subplots(2, 3)
-subplot_2d(x, z, b1_y0[:, 0], -50, 50, ax, 0, 0, "Bx y=0", "coolwarm")
-subplot_2d(x, z, b1_y0[:, 1], -50, 50, ax, 0, 1, "By y=0", "coolwarm")
-subplot_2d(x, z, b1_y0[:, 2], -50, 50, ax, 0, 2, "Bz y=0", "coolwarm")
+subplot_2d(x, z, B_y0[:, 0], -50, 50, ax, 0, 0, r"Y=0 B$_x$", "coolwarm")
+subplot_2d(x, z, B_y0[:, 1], -50, 50, ax, 0, 1, r"Y=0 B$_y$", "coolwarm")
+subplot_2d(x, z, B_y0[:, 2], -50, 50, ax, 0, 2, r"Y=0 B$_z$", "coolwarm")
 
-subplot_2d(x, y, b1_z0[:, 0], -50, 50, ax, 1, 0, "Bx z=0", "coolwarm")
-subplot_2d(x, y, b1_z0[:, 1], -50, 50, ax, 1, 1, "By z=0", "coolwarm")
-subplot_2d(x, y, b1_z0[:, 2], -50, 50, ax, 1, 2, "Bz z=0", "coolwarm")
+subplot_2d(x, y, B_z0[:, 0], -50, 50, ax, 1, 0, r"Z=0 B$_x$", "coolwarm")
+subplot_2d(x, y, B_z0[:, 1], -50, 50, ax, 1, 1, r"Z=0 B$_y$", "coolwarm")
+subplot_2d(x, y, B_z0[:, 2], -50, 50, ax, 1, 2, r"Z=0 B$_z$", "coolwarm")
 for i in [0, 1, 2]:
     plt.setp(ax[0, i].get_xticklabels(), visible=False)
-    ax[1, i].set_xlabel("x (RM)")
+    ax[1, i].set_xlabel(r"x (R$_M$)")
     ax[0, i].set_aspect("equal", "box")
     ax[1, i].set_aspect("equal", "box")
 for i in [0, 1]:
     plt.setp(ax[i, 1].get_yticklabels(), visible=False)
     plt.setp(ax[i, 2].get_yticklabels(), visible=False)
-ax[0, 0].set_ylabel("z (RM)")
-ax[1, 0].set_ylabel("y (RM)")
+ax[0, 0].set_ylabel(r"z (R$_M$)")
+ax[1, 0].set_ylabel(r"y (R$_M$)")
 
 cbar_ax = fig.add_axes([0.9, 0.1, 0.04, 0.85])  # [left, bottom, width, height]
-fig.colorbar(cm.ScalarMappable(norm=Normalize(-50, 50), cmap="coolwarm"), cax=cbar_ax)
+cb = fig.colorbar(
+    cm.ScalarMappable(norm=Normalize(-50, 50), cmap="coolwarm"), cax=cbar_ax
+)
+cb.ax.set_title("B (nT)")
+figure = plt.gcf()  # get current figure
+figure.set_size_inches(9, 6)
+# when saving, specify the DPI
+plt.savefig("../../../Dropbox/Paper2/B_2d.png", dpi=600)
 plt.show()
 
 
 # densidad
 
 fig, ax = plt.subplots(2, 3)
-subplot_2d(x, y, densidad_z0["H"], 0, 20, ax, 0, 0, "H+ density z=0", "inferno")
+subplot_2d(x, y, densidad_z0["H"], 0, 20, ax, 1, 0, "Z=0 H⁺ dens.", "inferno")
 subplot_2d(
-    x, y, densidad_z0["heavies"], 0, 20, ax, 0, 1, "heavies density z=0", "inferno"
+    x, y, densidad_z0["heavies"], 0, 20, ax, 1, 1, "Z=0 heavy ion dens.", "inferno"
 )
-subplot_2d(x, y, densidad_z0["e"], 0, 20, ax, 0, 2, "e density z=0", "inferno")
-subplot_2d(x, z, densidad_y0["H"], 0, 20, ax, 1, 0, "H+ density y=0", "inferno")
+subplot_2d(x, y, densidad_z0["e"], 0, 20, ax, 1, 2, "Z=0 e⁻ dens.", "inferno")
+subplot_2d(x, z, densidad_y0["H"], 0, 20, ax, 0, 0, "Y=0 H⁺ dens.", "inferno")
 subplot_2d(
-    x, z, densidad_y0["heavies"], 0, 20, ax, 1, 1, "heavies density y=0", "inferno"
+    x, z, densidad_y0["heavies"], 0, 20, ax, 0, 1, "Y=0 heavy ion dens.", "inferno"
 )
-subplot_2d(x, z, densidad_y0["e"], 0, 20, ax, 1, 2, "e density y=0", "inferno")
-for i in [0, 1]:
+subplot_2d(x, z, densidad_y0["e"], 0, 20, ax, 0, 2, "Y=0 e⁻ dens.", "inferno")
+for i in [0, 1, 2]:
+    for j in [0, 1]:
+        plt.setp(ax[j, i].get_yticklabels(), visible=False)
     plt.setp(ax[0, i].get_xticklabels(), visible=False)
-    plt.setp(ax[i, 1].get_yticklabels(), visible=False)
     ax[0, i].set_aspect("equal", "box")
     ax[1, i].set_aspect("equal", "box")
-ax[0, 0].set_ylabel("y (RM)")
-ax[1, 0].set_ylabel("z (RM)")
-ax[1, 0].set_xlabel("x (RM)")
-ax[1, 1].set_xlabel("x (RM)")
-cbar_ax = fig.add_axes([0.85, 0.1, 0.04, 0.8])  # [left, bottom, width, height]
-fig.colorbar(cm.ScalarMappable(norm=Normalize(0, 20), cmap="inferno"), cax=cbar_ax)
+ax[0, 0].set_ylabel(r"y (R$_M$)")
+ax[1, 0].set_ylabel(r"z (R$_M$)")
+ax[1, 0].set_xlabel(r"x (R$_M$)")
+ax[1, 1].set_xlabel(r"x (R$_M$)")
+ax[1, 2].set_xlabel(r"x (R$_M$)")
+cbar_ax = fig.add_axes([0.9, 0.1, 0.04, 0.8])  # [left, bottom, width, height]
+cb = fig.colorbar(cm.ScalarMappable(norm=Normalize(0, 20), cmap="inferno"), cax=cbar_ax)
+cb.ax.set_title("dens. (cm⁻³)")
+figure = plt.gcf()  # get current figure
+figure.set_size_inches(9, 6)
+# when saving, specify the DPI
+plt.savefig("../../../Dropbox/Paper2/dens_2d.png", dpi=600)
 plt.show()
+
+
+# #  en escala log
+# fig, ax = plt.subplots(2, 3)
+# subplot_2d(x, y, np.log(densidad_z0["H"]), 0, 20, ax, 0, 0, "Z=0 H⁺ dens.", "inferno")
+# subplot_2d(
+#     x, y, np.log(densidad_z0["heavies"]), 0, 20, ax, 0, 1, "Z=0 heavy ion dens.", "inferno"
+# )
+# subplot_2d(x, y, np.log(densidad_z0["e"]), 0, 20, ax, 0, 2, "Z=0 e⁻ dens.", "inferno")
+# subplot_2d(x, z, np.log(densidad_y0["H"]), 0, 20, ax, 1, 0, "Y=0 H⁺ dens.", "inferno")
+# subplot_2d(
+#     x, z, np.log(densidad_y0["heavies"]), 0, 20, ax, 1, 1, "Y=0 heavy ion dens.", "inferno"
+# )
+# subplot_2d(x, z, np.log(densidad_y0["e"]), 0, 20, ax, 1, 2, "Y=0 e⁻ dens.", "inferno")
+# for i in [0, 1, 2]:
+#     for j in [0, 1]:
+#         plt.setp(ax[j, i].get_yticklabels(), visible=False)
+#     plt.setp(ax[0, i].get_xticklabels(), visible=False)
+#     ax[0, i].set_aspect("equal", "box")
+#     ax[1, i].set_aspect("equal", "box")
+# ax[0, 0].set_ylabel(r"y (R$_M$)")
+# ax[1, 0].set_ylabel(r"z (R$_M$)")
+# ax[1, 0].set_xlabel(r"x (R$_M$)")
+# ax[1, 1].set_xlabel(r"x (R$_M$)")
+# cbar_ax = fig.add_axes([0.9, 0.1, 0.04, 0.8])  # [left, bottom, width, height]
+# cb = fig.colorbar(cm.ScalarMappable(norm=Normalize(-1, 1), cmap="inferno"), cax=cbar_ax)
+# cb.ax.set_title("dens. (cm⁻³)")
+# plt.show()
 
 
 #
@@ -432,6 +475,10 @@ plt.show()
 # # plt.quiver(1.2, 0.3, -0.0005, 0.05)
 # plt.title("beta in y=0")
 # plt.xlabel("x (RM)")
+# plt.ylabel("z (RM)")
+# plt.xlim([1, 1.6])
+# plt.ylim([-1, 1])
+# plt.show()
 # plt.ylabel("z (RM)")
 # plt.xlim([1, 1.6])
 # plt.ylim([-1, 1])
