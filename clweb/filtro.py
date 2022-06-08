@@ -21,7 +21,7 @@ year, month, day, doy = fechas()
 # year, month, day, doy = 2016, "03", 16, 76
 hora = input("hora\n")
 
-path = f"../../../datos/clweb/{year}-{month}-{day}/{hora}/"  # path a los datos desde la laptop
+path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{hora}/"  # path a los datos desde la laptop
 mag = np.loadtxt(path + "MAG.asc")
 
 hh = mag[:, 3]

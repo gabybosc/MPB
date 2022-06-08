@@ -19,13 +19,10 @@ q_e = 1.602e-19  # carga del electrón en C
 year, month, day, doy = fechas()
 ti = int(input("Hora del cruce (HH)\n"))
 tf = ti + 1
-in_out = input("Inbound? (y/n)\n")
-if in_out == "n":
-    print("este no sirve!")
-    exit()
+
 
 fila, hoja_parametros, hoja_MVA, hoja_Bootstrap, hoja_Ajuste = importar_fila(
-    year, month, day, doy, ti
+    year, month, day, ti
 )
 normal = [
     float(hoja_MVA.cell(fila, 16).value),
@@ -40,7 +37,7 @@ t4 = float(hoja_parametros.cell(fila, 9).value)
 
 mag, t_mag_entero, B_entero, posicion = importar_mag_1s(year, month, day, ti, tf)
 swia, t_swia_entero, density, temperature, vel_mso_xyz = importar_swia(
-    year, month, day, ti, tf
+    year, month, day, ti - 0.3, tf
 )
 
 """
@@ -106,14 +103,27 @@ Longitud inercial
 """
 density_mean = np.zeros(fin_swia - inicio_swia)  # upstream
 paso = 20  # cada paso son 4 segundos.
-for i in range(fin_swia - inicio_swia):
-    density_mean[i] = np.mean(
-        density[inicio_swia + i - paso : inicio_swia + i]
-    )  # toma desde atrás del ti así no se mete en la MPB nunca
+if inicio_swia - paso > 0:  # si no se cumple, va a calcularlo mal
+    for i in range(fin_swia - inicio_swia):
+        density_mean[i] = np.mean(
+            density[inicio_swia + i - paso : inicio_swia + i]
+        )  # toma desde atrás del ti así no se mete en la MPB nunca
 
-ion_length = 2.28e07 / np.sqrt(np.mean(density_mean)) * 1e-5  # km
-ion_min = 2.28e07 / np.sqrt(max(density_mean)) * 1e-5  # km
-ion_max = 2.28e07 / np.sqrt(min(density_mean)) * 1e-5  # km
-print(
-    f"La longitud inercial de iones es {ion_length:1.3g} km (entre {ion_min:1.3g} y {ion_max:1.3g})"
-)
+    ion_length = 2.28e07 / np.sqrt(np.mean(density_mean)) * 1e-5  # km
+    ion_min = 2.28e07 / np.sqrt(max(density_mean)) * 1e-5  # km
+    ion_max = 2.28e07 / np.sqrt(min(density_mean)) * 1e-5  # km
+    print(
+        f"La longitud inercial de iones es {ion_length:1.3g} km (entre {ion_min:1.3g} y {ion_max:1.3g})"
+    )
+
+##########
+# guarda en la spreadsheet
+
+hoja_MVA.update_acell(f"AA{fila}", f"{ion_length:1.3g}")
+hoja_MVA.update_acell(f"AB{fila}", f"{rg:1.3g}")
+
+hoja_Bootstrap.update_acell(f"Q{fila}", f"{ion_length:1.3g}")
+hoja_Bootstrap.update_acell(f"R{fila}", f"{rg:1.3g}")
+
+hoja_Ajuste.update_acell(f"Q{fila}", f"{ion_length:1.3g}")
+hoja_Ajuste.update_acell(f"R{fila}", f"{rg:1.3g}")

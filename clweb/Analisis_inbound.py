@@ -27,8 +27,8 @@ calcula la corriente
 
 
 year, month, day, doy = fechas()
-ti, tf = tiempos("Región de análisis (no MVA)")
 ti_MVA, tf_MVA = tiempos("Intervalo del MVA")
+ti, tf = ti_MVA - 0.5, tf_MVA + 0.5
 
 print(
     "Si tira error de que no encuentra el path, hay que abrir una vez el disco manualmente para que lo monte"

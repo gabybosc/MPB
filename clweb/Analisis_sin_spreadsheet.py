@@ -25,9 +25,9 @@ calcula el ancho de la mpb
 calcula la corriente
 """
 
-year, month, day, doy = 2016, "03", "03", "063"  # fechas()
-ti, tf = 1.5, 2.5  # tiempos("Región de análisis (no MVA)")
+year, month, day, doy = fechas()
 ti_MVA, tf_MVA = tiempos("Intervalo del MVA")
+ti, tf = ti_MVA - 0.5, tf_MVA + 0.5  # tiempos("Región de análisis (no MVA)")
 
 mag, t, B, posicion = importar_mag(year, month, day, ti, tf)
 lpw, t_lpw, e_density, flag = importar_lpw(year, month, day, ti, tf)

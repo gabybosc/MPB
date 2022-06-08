@@ -176,110 +176,110 @@ plt.show(block=False)
 ##########
 # Parámetros
 
-hoja_parametros.update_acell(f"Z{fila}", f"{omega*180/np.pi:.3g}")
-hoja_parametros.update_acell(f"S{fila}", f"{np.linalg.norm(v_media):.3g}")
+# hoja_parametros.update_acell(f"Z{fila}", f"{omega*180/np.pi:.3g}")
+# hoja_parametros.update_acell(f"S{fila}", f"{np.linalg.norm(v_media):.3g}")
+#
+# cell_vel = hoja_parametros.range(f"P{fila}:R{fila}")
+# for i, cell in enumerate(cell_vel):
+#     cell.value = round(v_media[i], 2)
+# hoja_parametros.update_cells(cell_vel)
+#
+# cell_Bup = hoja_parametros.range(f"T{fila}:V{fila}")
+# for i, cell in enumerate(cell_Bup):
+#     cell.value = round(B_upstream[i], 2)
+# hoja_parametros.update_cells(cell_Bup)
+#
+# cell_Bdown = hoja_parametros.range(f"W{fila}:Y{fila}")
+# for i, cell in enumerate(cell_Bdown):
+#     cell.value = round(B_downstream[i], 2)
+# hoja_parametros.update_cells(cell_Bdown)
+#
+#
+# # La hoja del MVA
+#
+# hoja_mva.update_acell(f"W{fila}", f"{angulo_v_mva * 180/np.pi:.3g}")
+# hoja_mva.update_acell(f"X{fila}", f"{angulo_B_mva * 180/np.pi:.3g}")
+# hoja_mva.update_acell(f"Y{fila}", f"{np.linalg.norm(x_23_MVA):.3g}")
+# hoja_mva.update_acell(f"Z{fila}", f"{np.linalg.norm(x_14_MVA):.3g}")
+# # hoja_mva.update_acell(f'AA{fila}', f'{:.3g}')
+# # hoja_mva.update_acell(f'AB{fila}', f'{:.3g}')
+#
+# hoja_mva.update_acell(f"AF{fila}", f"{np.linalg.norm(J_s_MVA)*1E-6:.3g}")
+# hoja_mva.update_acell(f"AJ{fila}", f"{np.linalg.norm(J_v_MVA):.3g}")
+# hoja_mva.update_acell(f"AK{fila}", f"{np.linalg.norm(fuerza_mva):.3g}")
+# hoja_mva.update_acell(f"AO{fila}", f"{np.linalg.norm(E_Hall)*1E3:.3g}")  # mV/m
+#
+# cell_Js = hoja_mva.range(f"AC{fila}:AE{fila}")
+# for i, cell in enumerate(cell_Js):
+#     cell.value = round(J_s_MVA[i] * 1e-6, 3)
+# hoja_mva.update_cells(cell_Js)
+#
+# cell_Jv = hoja_mva.range(f"AG{fila}:AI{fila}")
+# for i, cell in enumerate(cell_Jv):
+#     cell.value = round(J_v_MVA[i], 3)
+# hoja_mva.update_cells(cell_Jv)
+#
+# cell_EH = hoja_mva.range(f"AL{fila}:AN{fila}")
+# for i, cell in enumerate(cell_EH):
+#     cell.value = round(E_Hall[i] * 1e3, 3)
+# hoja_mva.update_cells(cell_EH)
 
-cell_vel = hoja_parametros.range(f"P{fila}:R{fila}")
-for i, cell in enumerate(cell_vel):
-    cell.value = round(v_media[i], 2)
-hoja_parametros.update_cells(cell_vel)
+# # La hoja del bootstrap
 
-cell_Bup = hoja_parametros.range(f"T{fila}:V{fila}")
-for i, cell in enumerate(cell_Bup):
-    cell.value = round(B_upstream[i], 2)
-hoja_parametros.update_cells(cell_Bup)
-
-cell_Bdown = hoja_parametros.range(f"W{fila}:Y{fila}")
-for i, cell in enumerate(cell_Bdown):
-    cell.value = round(B_downstream[i], 2)
-hoja_parametros.update_cells(cell_Bdown)
-
-
-# La hoja del MVA
-
-hoja_mva.update_acell(f"W{fila}", f"{angulo_v_mva * 180/np.pi:.3g}")
-hoja_mva.update_acell(f"X{fila}", f"{angulo_B_mva * 180/np.pi:.3g}")
-hoja_mva.update_acell(f"Y{fila}", f"{np.linalg.norm(x_23_MVA):.3g}")
-hoja_mva.update_acell(f"Z{fila}", f"{np.linalg.norm(x_14_MVA):.3g}")
-# hoja_mva.update_acell(f'AA{fila}', f'{:.3g}')
-# hoja_mva.update_acell(f'AB{fila}', f'{:.3g}')
-
-hoja_mva.update_acell(f"AF{fila}", f"{np.linalg.norm(J_s_MVA)*1E-6:.3g}")
-hoja_mva.update_acell(f"AJ{fila}", f"{np.linalg.norm(J_v_MVA):.3g}")
-hoja_mva.update_acell(f"AK{fila}", f"{np.linalg.norm(fuerza_mva):.3g}")
-hoja_mva.update_acell(f"AO{fila}", f"{np.linalg.norm(E_Hall)*1E3:.3g}")  # mV/m
-
-cell_Js = hoja_mva.range(f"AC{fila}:AE{fila}")
-for i, cell in enumerate(cell_Js):
-    cell.value = round(J_s_MVA[i] * 1e-6, 3)
-hoja_mva.update_cells(cell_Js)
-
-cell_Jv = hoja_mva.range(f"AG{fila}:AI{fila}")
-for i, cell in enumerate(cell_Jv):
-    cell.value = round(J_v_MVA[i], 3)
-hoja_mva.update_cells(cell_Jv)
-
-cell_EH = hoja_mva.range(f"AL{fila}:AN{fila}")
-for i, cell in enumerate(cell_EH):
-    cell.value = round(E_Hall[i] * 1e3, 3)
-hoja_mva.update_cells(cell_EH)
-
-# La hoja del bootstrap
-
-hoja_boot.update_acell(f"M{fila}", f"{angulo_v_boot * 180/np.pi:.3g}")
-hoja_boot.update_acell(f"N{fila}", f"{angulo_B_boot * 180/np.pi:.3g}")
-hoja_boot.update_acell(f"O{fila}", f"{np.linalg.norm(x_23_boot):.3g}")
-hoja_boot.update_acell(f"P{fila}", f"{np.linalg.norm(x_14_boot):.3g}")
-# hoja_boot.update_acell(f'Q{fila}', f'{:.3g}')
-# hoja_boot.update_acell(f'R{fila}', f'{:.3g}')
-
-hoja_boot.update_acell(f"V{fila}", f"{np.linalg.norm(J_s_boot)*1E-6:.3g}")
-hoja_boot.update_acell(f"Z{fila}", f"{np.linalg.norm(J_v_boot):.3g}")
-hoja_boot.update_acell(f"AA{fila}", f"{np.linalg.norm(fuerza_boot):.3g}")
-hoja_boot.update_acell(f"AE{fila}", f"{np.linalg.norm(E_Hall_boot)*1E3:.3g}")
-
-cell_Js = hoja_boot.range(f"S{fila}:U{fila}")
-for i, cell in enumerate(cell_Js):
-    cell.value = round(J_s_boot[i] * 1e-6, 3)
-hoja_boot.update_cells(cell_Js)
-
-cell_Jv = hoja_boot.range(f"W{fila}:Y{fila}")
-for i, cell in enumerate(cell_Jv):
-    cell.value = round(J_v_boot[i], 3)
-hoja_boot.update_cells(cell_Jv)
-
-cell_EH = hoja_boot.range(f"AB{fila}:AD{fila}")
-for i, cell in enumerate(cell_EH):
-    cell.value = round(E_Hall_boot[i] * 1e3, 3)
-hoja_boot.update_cells(cell_EH)
-
-
-# La hoja del ajuste
-
-hoja_fit.update_acell(f"J{fila}", f"{angulo_mva * 180/np.pi:.3g}")
-hoja_fit.update_acell(f"M{fila}", f"{angulo_v_fit * 180/np.pi:.3g}")
-hoja_fit.update_acell(f"N{fila}", f"{angulo_B_fit * 180/np.pi:.3g}")
-hoja_fit.update_acell(f"O{fila}", f"{np.linalg.norm(x_23_fit):.3g}")
-hoja_fit.update_acell(f"P{fila}", f"{np.linalg.norm(x_14_fit):.3g}")
-# hoja_fit.update_acell(f'Q{fila}', f'{:.3g}')
-# hoja_fit.update_acell(f'R{fila}', f'{:.3g}')
-
-hoja_fit.update_acell(f"V{fila}", f"{np.linalg.norm(J_s_fit)*1E-6:.3g}")
-hoja_fit.update_acell(f"Z{fila}", f"{np.linalg.norm(J_v_fit):.3g}")
-hoja_fit.update_acell(f"AA{fila}", f"{np.linalg.norm(fuerza_fit):.3g}")
-hoja_fit.update_acell(f"AE{fila}", f"{np.linalg.norm(E_Hall_fit)*1E3:.3g}")
-
-cell_Js = hoja_fit.range(f"S{fila}:U{fila}")
-for i, cell in enumerate(cell_Js):
-    cell.value = round(J_s_fit[i] * 1e-6, 3)
-hoja_fit.update_cells(cell_Js)
-
-cell_Jv = hoja_fit.range(f"W{fila}:Y{fila}")
-for i, cell in enumerate(cell_Jv):
-    cell.value = round(J_v_fit[i], 3)
-hoja_fit.update_cells(cell_Jv)
-
-cell_EH = hoja_fit.range(f"AB{fila}:AD{fila}")
-for i, cell in enumerate(cell_EH):
-    cell.value = round(E_Hall_fit[i] * 1e3, 3)
-hoja_fit.update_cells(cell_EH)
+# hoja_boot.update_acell(f"M{fila}", f"{angulo_v_boot * 180/np.pi:.3g}")
+# hoja_boot.update_acell(f"N{fila}", f"{angulo_B_boot * 180/np.pi:.3g}")
+# hoja_boot.update_acell(f"O{fila}", f"{np.linalg.norm(x_23_boot):.3g}")
+# hoja_boot.update_acell(f"P{fila}", f"{np.linalg.norm(x_14_boot):.3g}")
+# # hoja_boot.update_acell(f'Q{fila}', f'{:.3g}')
+# # hoja_boot.update_acell(f'R{fila}', f'{:.3g}')
+#
+# hoja_boot.update_acell(f"V{fila}", f"{np.linalg.norm(J_s_boot)*1E-6:.3g}")
+# hoja_boot.update_acell(f"Z{fila}", f"{np.linalg.norm(J_v_boot):.3g}")
+# hoja_boot.update_acell(f"AA{fila}", f"{np.linalg.norm(fuerza_boot):.3g}")
+# hoja_boot.update_acell(f"AE{fila}", f"{np.linalg.norm(E_Hall_boot)*1E3:.3g}")
+#
+# cell_Js = hoja_boot.range(f"S{fila}:U{fila}")
+# for i, cell in enumerate(cell_Js):
+#     cell.value = round(J_s_boot[i] * 1e-6, 3)
+# hoja_boot.update_cells(cell_Js)
+#
+# cell_Jv = hoja_boot.range(f"W{fila}:Y{fila}")
+# for i, cell in enumerate(cell_Jv):
+#     cell.value = round(J_v_boot[i], 3)
+# hoja_boot.update_cells(cell_Jv)
+#
+# cell_EH = hoja_boot.range(f"AB{fila}:AD{fila}")
+# for i, cell in enumerate(cell_EH):
+#     cell.value = round(E_Hall_boot[i] * 1e3, 3)
+# hoja_boot.update_cells(cell_EH)
+#
+#
+# # La hoja del ajuste
+#
+# hoja_fit.update_acell(f"J{fila}", f"{angulo_mva * 180/np.pi:.3g}")
+# hoja_fit.update_acell(f"M{fila}", f"{angulo_v_fit * 180/np.pi:.3g}")
+# hoja_fit.update_acell(f"N{fila}", f"{angulo_B_fit * 180/np.pi:.3g}")
+# hoja_fit.update_acell(f"O{fila}", f"{np.linalg.norm(x_23_fit):.3g}")
+# hoja_fit.update_acell(f"P{fila}", f"{np.linalg.norm(x_14_fit):.3g}")
+# # hoja_fit.update_acell(f'Q{fila}', f'{:.3g}')
+# # hoja_fit.update_acell(f'R{fila}', f'{:.3g}')
+#
+# hoja_fit.update_acell(f"V{fila}", f"{np.linalg.norm(J_s_fit)*1E-6:.3g}")
+# hoja_fit.update_acell(f"Z{fila}", f"{np.linalg.norm(J_v_fit):.3g}")
+# hoja_fit.update_acell(f"AA{fila}", f"{np.linalg.norm(fuerza_fit):.3g}")
+# hoja_fit.update_acell(f"AE{fila}", f"{np.linalg.norm(E_Hall_fit)*1E3:.3g}")
+#
+# cell_Js = hoja_fit.range(f"S{fila}:U{fila}")
+# for i, cell in enumerate(cell_Js):
+#     cell.value = round(J_s_fit[i] * 1e-6, 3)
+# hoja_fit.update_cells(cell_Js)
+#
+# cell_Jv = hoja_fit.range(f"W{fila}:Y{fila}")
+# for i, cell in enumerate(cell_Jv):
+#     cell.value = round(J_v_fit[i], 3)
+# hoja_fit.update_cells(cell_Jv)
+#
+# cell_EH = hoja_fit.range(f"AB{fila}:AD{fila}")
+# for i, cell in enumerate(cell_EH):
+#     cell.value = round(E_Hall_fit[i] * 1e3, 3)
+# hoja_fit.update_cells(cell_EH)
