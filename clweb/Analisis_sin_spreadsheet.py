@@ -181,10 +181,22 @@ tmag_diezmado = t[idx]
 B_cut = B[idx]
 posicion_cut = posicion[idx]
 
-#magnetofunda:
+# magnetofunda:
 
 ti_funda = donde(tmag_diezmado, t1-0.16)
 tf_funda = donde(tmag_diezmado, t1)
+
+# # normal del BS
+# ti_up = donde(t, UTC_to_hdec("18:00:00"))
+# tf_up = donde(t, UTC_to_hdec("18:01:30"))
+# ti_down = donde(t, UTC_to_hdec("18:03:00"))
+# tf_down = donde(t, UTC_to_hdec("18:04:30"))
+# B_down = B[ti_down:tf_down]
+# B_up = B[ti_up:tf_up]
+# B_BS = B[tf_up:ti_down]
+# ncop = normal_coplanar(np.mean(B_up, axis=0), np.mean(B_down, axis=0))
+# angulo_B_BS = angulo(ncop, np.mean(B_BS, axis=0))
+# print(angulo_B_BS * 180 / np.pi)
 ####################
 
 
@@ -214,5 +226,9 @@ print(
 print(
     f"El |Ecv| medio en la magnetofunda es {np.mean(E_convective_norm[ti_funda:tf_funda]):1.3g} mV/m"
     )  # en mV/m
-print(f"el campo de hall en la MPB es {E_Hall * 1e3} mV/m, {np.linalg.norm(E_Hall * 1e3):1.3g} mV/m")
-print(f"Eh / Ecv = {np.linalg.norm(E_Hall * 1e3)/np.mean(E_convective_norm[ti_funda:tf_funda])}")
+print(
+    f"el campo de hall en la MPB es {E_Hall * 1e3} mV/m, {np.linalg.norm(E_Hall * 1e3):1.3g} mV/m")
+print(
+    f"Eh / Ecv = {np.linalg.norm(E_Hall * 1e3)/np.mean(E_convective_norm[ti_funda:tf_funda])}")
+    f"Eh / Ecv = {np.linalg.norm(E_Hall * 1e3)/np.mean(E_convective_norm[ti_funda:tf_funda])}"
+)

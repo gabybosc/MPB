@@ -192,18 +192,23 @@ plt.grid()
 plt.show()
 
 # plots
+plt.rcParams["axes.prop_cycle"] = cycler(
+    "color",
+    ["#1b9e77", "#d95f02", "#7570b3", "#e7298a", "#66a61e", "#e6ab02", "#cdcdcd"],
+)
 
 plt.rcParams.update({"font.size": 11})
 plt.figure()
-ax1 = plt.subplot2grid((4, 1), (0, 0))
-ax4 = plt.subplot2grid((4, 1), (1, 0))
-ax5 = plt.subplot2grid((4, 1), (2, 0))
-ax6 = plt.subplot2grid((4, 1), (3, 0))
+ax1 = plt.subplot2grid((5, 1), (0, 0))
+ax4 = plt.subplot2grid((5, 1), (1, 0))
+ax5 = plt.subplot2grid((5, 1), (2, 0))
+ax6 = plt.subplot2grid((5, 1), (3, 0))
+ax2 = plt.subplot2grid((5, 1), (4, 0))
 
 plt.subplots_adjust(hspace=0.0)
 
-for ax in [ax1, ax4, ax5, ax6]:
-    ax.set_xlim([1.15, 1.3])
+for ax in [ax1, ax2, ax4, ax5, ax6]:
+    ax.set_xlim([1.3, 1.15])
     ax.axvspan(xmin=ti_up, xmax=x[MPB_inicio], facecolor="#428AE0", alpha=0.4)  # down
     ax.axvspan(
         xmin=x[MPB_inicio], xmax=x[MPB_fin], facecolor="#79B953", alpha=0.4
@@ -211,7 +216,10 @@ for ax in [ax1, ax4, ax5, ax6]:
     ax.axvspan(xmin=x[MPB_fin], xmax=tf_down, facecolor="#FE6779", alpha=0.4)  # up
 
     ax.grid()
-ax1.legend(["Downstream", "MPB", "Upstream"], loc="upper right")
+ax1.legend(
+    ["Downstream from MPB\n(MPR)", "MPB", "Upstream from MPB\n(Magnetosheath)"],
+    loc="upper left",
+)
 
 ax1.plot(x, np.linalg.norm(B, axis=1), c="C3")
 plt.setp(ax1.get_xticklabels(), visible=False)
@@ -228,7 +236,7 @@ ax4.plot(x, np.linalg.norm(J, axis=1) * 1e3, label="|J|")
 plt.setp(ax4.get_xticklabels(), visible=False)
 ax4.set_ylabel("J (nA/m²)")
 ax4.set_ylim([-120, 120])
-ax4.legend(loc="upper right")
+ax4.legend(loc="upper left")
 
 ax5.plot(x, np.linalg.norm(Ecv, axis=1) * 1e3, label=r"E$_{cv}$", c="C3")
 ax5.plot(x, np.linalg.norm(Ehall, axis=1) * 1e3, label=r"E$_H$", c="C4")
@@ -236,15 +244,33 @@ ax5.plot(x, np.linalg.norm(Ep, axis=1) * 1e3, label=r"E$_p$", c="C5")
 ax5.set_ylabel("E (mV/m)")
 ax5.set_ylim([-0.5, 5])
 plt.setp(ax5.get_xticklabels(), visible=False)
-ax5.legend(loc="upper right", prop={"size": 10})
+ax5.legend(loc="upper left", prop={"size": 10})
 
 ax6.plot(x, Ehall * 1e3)
 ax6.set_ylabel(r"E$_H$ (mV/m)")
-ax6.set_xlabel(r"X ($R_M$)")
-ax6.legend(["x", "y", "z"], loc="upper right", prop={"size": 10})
+ax6.legend([r"E$_x$", r"E$_y$", r"E$_z$"], loc="upper left", prop={"size": 10})
+plt.setp(ax6.get_xticklabels(), visible=False)
 ax6.set_ylim([-1.1, 4.5])
 
+ax2.plot(x, presion["H+"], label="th H+")
+ax2.plot(x, presion["e-"], label="th e-")
+ax2.plot(x, P_heavy, label="th heavies")
+ax2.plot(x, P_B, label="Magnetic")
+ax2.plot(x, P_ram, label="Dynamic")
+ax2.plot(x, P_total, label="Total")
+ax2.set_ylim([-0.1, 0.95])
+ax2.set_ylabel("Pressure (nPa)")
+ax2.set_xlabel(r"X ($R_M$)")
+ax2.legend(loc="upper left", prop={"size": 10})
 
+ax1.text(1.155, 40, "a)")
+ax4.text(1.155, 95, "b)")
+ax5.text(1.155, 4, "c)")
+ax6.text(1.155, 3.8, "d)")
+ax2.text(1.155, 0.8, "e)")
+
+# ax2.annotate('to Sun', xy=(0, -0.4), xycoords='axes fraction', xytext=(0.1, -0.4),
+# arrowprops=dict(arrowstyle="->", color='k'))
 figure = plt.gcf()  # get current figure
 figure.set_size_inches(8, 9)
 # when saving, specify the DPI
@@ -386,6 +412,11 @@ plt.xticks(rotation=25)
 xfmt = md.DateFormatter("%H:%M")
 
 ax2 = plt.gca()
+
+ax2 = plt.subplot2grid((1, 1), (0, 0))
+ax2.xaxis.set_major_formatter(xfmt)
+plt.plot(tiempo_mag, np.linalg.norm(B_cut, axis=1), c="C0")
+plt.ylabel("|B| (nT)")
 
 ax2 = plt.subplot2grid((4, 1), (0, 0))
 ax2.xaxis.set_major_formatter(xfmt)
@@ -531,6 +562,14 @@ plt.show()
 #
 # marte(x_bs, yz_bs, x_mpb, yz_mpb)
 # orbitas(posicion_cut, year, month, day, puntos)
+#
+# plt.show(block=False)
+# # plt.savefig(f"../../../Dropbox/AGU2021/orbita.png", dpi=300)
+# marte(x_bs, yz_bs, x_mpb, yz_mpb)
+# orbitas(posicion_cut, year, month, day, puntos)
+#
+# plt.show(block=False)
+# # plt.savefig(f"../../../Dropbox/AGU2021/orbita.png", dpi=300)
 #
 # plt.show(block=False)
 # # plt.savefig(f"../../../Dropbox/AGU2021/orbita.png", dpi=300)
