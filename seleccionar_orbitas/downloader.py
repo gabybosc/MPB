@@ -30,7 +30,7 @@ for j in range(len(fechas)):
         path = f"../../../../../media/gabybosc/datos/"
     else:
         path = "../../../datos/"
-    # mag_hires = f"https://pds-ppi.igpp.ucla.edu/ditdos/download?id=pds://PPI/maven.mag.calibrated/data/ss/highres/{year}/{month}/mvn_mag_l2_{year}{doy}ss_{year}{month}{day}_v01_r01.sts"
+    mag_hires = f"https://pds-ppi.igpp.ucla.edu/ditdos/download?id=pds://PPI/maven.mag.calibrated/data/ss/highres/{year}/{month}/mvn_mag_l2_{year}{doy}ss_{year}{month}{day}_v01_r01.sts"
 
     swea = f"https://pds-ppi.igpp.ucla.edu/ditdos/download?id=pds://PPI/maven.swea.calibrated/data/svy_spec/{year}/{month}/mvn_swe_l2_svyspec_{year}{month}{day}_v04_r01.cdf"
 
@@ -42,24 +42,24 @@ for j in range(len(fechas)):
 
     # swifa = f"https://pds-ppi.igpp.ucla.edu/ditdos/download?id=pds://PPI/maven.swia.calibrated/data/fine_arc_3d/{year}/{month}/mvn_swi_l2_finearc3d_{year}{month}{day}_v01_r01.cdf"
 
-    # with urllib.request.urlopen(mag_hires) as response, open(
-    #     path+f"MAG_hires/mvn_mag_l2_{year}{doy}ss_{year}{month}{day}_v01_r01.sts",
-    #     "wb",
+    with urllib.request.urlopen(mag_hires) as response, open(
+        path + f"MAG_hires/mvn_mag_l2_{year}{doy}ss_{year}{month}{day}_v01_r01.sts",
+        "wb",
+    ) as out_file:
+        shutil.copyfileobj(response, out_file)
+    print(f"mag dia {doy} listo")
+
+    # with urllib.request.urlopen(swea) as response, open(
+    #     path + f"SWEA/mvn_swe_l2_svyspec_{year}{month}{day}_v04_r01.cdf", "wb"
     # ) as out_file:
     #     shutil.copyfileobj(response, out_file)
-    # print(f"mag dia {doy} listo")
-
-    with urllib.request.urlopen(swea) as response, open(
-        path + f"SWEA/mvn_swe_l2_svyspec_{year}{month}{day}_v04_r01.cdf", "wb"
-    ) as out_file:
-        shutil.copyfileobj(response, out_file)
-    print(f"swea dia {doy} listo")
-
-    with urllib.request.urlopen(swia_mom) as response, open(
-        path + f"SWIA/mvn_swi_l2_onboardsvymom_{year}{month}{day}_v01_r01.cdf", "wb",
-    ) as out_file:
-        shutil.copyfileobj(response, out_file)
-    print(f"swia (onboard) dia {doy} listo")
+    # print(f"swea dia {doy} listo")
+    #
+    # with urllib.request.urlopen(swia_mom) as response, open(
+    #     path + f"SWIA/mvn_swi_l2_onboardsvymom_{year}{month}{day}_v01_r01.cdf", "wb",
+    # ) as out_file:
+    #     shutil.copyfileobj(response, out_file)
+    # print(f"swia (onboard) dia {doy} listo")
 
     # with urllib.request.urlopen(swica) as response, open(
     #     path + f"SWIA/mvn_swi_l2_coarsearc3d_{year}{month}{day}_v01_r01.cdf", "wb",
@@ -73,10 +73,10 @@ for j in range(len(fechas)):
     #     shutil.copyfileobj(response, out_file)
     # print(f"swifa dia {doy} listo")
 
-    with urllib.request.urlopen(lpw) as response, open(
-        path + f"LPW/mvn_lpw_l2_lpnt_{year}{month}{day}_v03_r02.cdf", "wb"
-    ) as out_file:
-        shutil.copyfileobj(response, out_file)
-    print(f"lpw dia {doy} listo")
+    # with urllib.request.urlopen(lpw) as response, open(
+    #     path + f"LPW/mvn_lpw_l2_lpnt_{year}{month}{day}_v03_r02.cdf", "wb"
+    # ) as out_file:
+    #     shutil.copyfileobj(response, out_file)
+    # print(f"lpw dia {doy} listo")
 
     print(f"voy {int(j/len(fechas)*100)}%")

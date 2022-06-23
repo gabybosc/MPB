@@ -10,11 +10,29 @@ from funciones import donde
 
 
 def importar_mag(year, month, day, ti, tf):
+    # no estoy segura de que usar int(ti)/int(tf) sea buena idea, pero veremos
+    if len(str(int(ti))) == 1:
+        t_i = "0" + str(int(ti))
+    else:
+        t_i = int(ti)
+
+    if len(str(int(tf))) == 1:
+        t_f = "0" + str(int(tf))
+    else:
+        t_f = int(tf)
 
     if gethostname() == "magneto2":
-        path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
+        path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_i}/"
+        if not os.path.exists(path):  # si no existe, usa int(tf)
+            path = (
+                f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_f}/"
+            )
     else:
-        path = f"../../../datos/clweb/{year}-{month}-{day}/"
+        path = f"../../../datos/clweb/{year}-{month}-{day}/{t_i}/"
+        if not os.path.exists(path):
+            path = (
+                f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_f}/"
+            )
 
     if os.path.isfile(path + "mag_filtrado.txt"):
         mag = np.loadtxt(path + "mag_filtrado.txt", skiprows=2)
@@ -46,10 +64,28 @@ def importar_mag(year, month, day, ti, tf):
 
 
 def importar_swea(year, month, day, ti, tf):
-    if gethostname() == "magneto2":
-        path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
+    if len(str(int(ti))) == 1:
+        t_i = "0" + str(int(ti))
     else:
-        path = f"../../../datos/clweb/{year}-{month}-{day}/"
+        t_i = int(ti)
+
+    if len(str(int(tf))) == 1:
+        t_f = "0" + str(int(tf))
+    else:
+        t_f = int(tf)
+
+    if gethostname() == "magneto2":
+        path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_i}/"
+        if not os.path.exists(path):  # si no existe, usa int(tf)
+            path = (
+                f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_f}/"
+            )
+    else:
+        path = f"../../../datos/clweb/{year}-{month}-{day}/{t_i}/"
+        if not os.path.exists(path):
+            path = (
+                f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_f}/"
+            )
 
     swea = np.loadtxt(path + "SWEA.asc")
 
@@ -78,10 +114,29 @@ def importar_swea(year, month, day, ti, tf):
 
 
 def importar_swia(year, month, day, ti, tf):
-    if gethostname() == "magneto2":
-        path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
+
+    if len(str(int(ti))) == 1:
+        t_i = "0" + str(int(ti))
     else:
-        path = f"../../../datos/clweb/{year}-{month}-{day}/"
+        t_i = int(ti)
+
+    if len(str(int(tf))) == 1:
+        t_f = "0" + str(int(tf))
+    else:
+        t_f = int(tf)
+
+    if gethostname() == "magneto2":
+        path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_i}/"
+        if not os.path.exists(path):  # si no existe, usa int(tf)
+            path = (
+                f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_f}/"
+            )
+    else:
+        path = f"../../../datos/clweb/{year}-{month}-{day}/{t_i}/"
+        if not os.path.exists(path):
+            path = (
+                f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_f}/"
+            )
 
     if os.path.isfile(path + "SWICA.asc"):  # si no existe uno llamado SWICA, usa SWIA
         swia = np.loadtxt(path + "SWICA.asc")
@@ -102,10 +157,28 @@ def importar_swia(year, month, day, ti, tf):
 
 
 def importar_swicfa(year, month, day, ti, tf):
-    if gethostname() == "magneto2":
-        path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
+
+    if len(str(int(ti))) == 1:
+        t_i = "0" + str(int(ti))
     else:
-        path = f"../../../datos/clweb/{year}-{month}-{day}/"
+        t_i = int(ti)
+
+    if len(str(int(tf))) == 1:
+        t_f = "0" + str(int(tf))
+    else:
+        t_f = int(tf)
+    if gethostname() == "magneto2":
+        path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_i}/"
+        if not os.path.exists(path):  # si no existe, usa int(tf)
+            path = (
+                f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_f}/"
+            )
+    else:
+        path = f"../../../datos/clweb/{year}-{month}-{day}/{t_i}/"
+        if not os.path.exists(path):
+            path = (
+                f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_f}/"
+            )
 
     swica = np.loadtxt(path + "SWICA.asc")
     swifa = np.loadtxt(path + "SWIFA.asc")
@@ -124,10 +197,28 @@ def importar_swicfa(year, month, day, ti, tf):
 
 def importar_vel_swica(year, month, day, ti, tf):
 
-    if gethostname() == "magneto2":
-        path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
+    if len(str(int(ti))) == 1:
+        t_i = "0" + str(int(ti))
     else:
-        path = f"../../../datos/clweb/{year}-{month}-{day}/"
+        t_i = int(ti)
+
+    if len(str(int(tf))) == 1:
+        t_f = "0" + str(int(tf))
+    else:
+        t_f = int(tf)
+
+    if gethostname() == "magneto2":
+        path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_i}/"
+        if not os.path.exists(path):  # si no existe, usa int(tf)
+            path = (
+                f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_f}/"
+            )
+    else:
+        path = f"../../../datos/clweb/{year}-{month}-{day}/{t_i}/"
+        if not os.path.exists(path):
+            path = (
+                f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_f}/"
+            )
 
     swia = np.loadtxt(path + "SW_vel.asc")
 
@@ -147,10 +238,29 @@ def importar_vel_swica(year, month, day, ti, tf):
 
 
 def importar_lpw(year, month, day, ti, tf):
-    if gethostname() == "magneto2":
-        path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
+
+    if len(str(int(ti))) == 1:
+        t_i = "0" + str(int(ti))
     else:
-        path = f"../../../datos/clweb/{year}-{month}-{day}/"
+        t_i = int(ti)
+
+    if len(str(int(tf))) == 1:
+        t_f = "0" + str(int(tf))
+    else:
+        t_f = int(tf)
+
+    if gethostname() == "magneto2":
+        path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_i}/"
+        if not os.path.exists(path):  # si no existe, usa int(t_f)
+            path = (
+                f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_f}/"
+            )
+    else:
+        path = f"../../../datos/clweb/{year}-{month}-{day}/{t_i}/"
+        if not os.path.exists(path):
+            path = (
+                f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_f}/"
+            )
 
     lpw = np.loadtxt(path + "LPW.asc")
 
@@ -170,10 +280,29 @@ def importar_lpw(year, month, day, ti, tf):
 
 
 def importar_static(year, month, day, ti, tf):
-    if gethostname() == "magneto2":
-        path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
+
+    if len(str(int(ti))) == 1:
+        t_i = "0" + str(int(ti))
     else:
-        path = f"../../../datos/clweb/{year}-{month}-{day}/"
+        t_i = int(ti)
+
+    if len(str(int(tf))) == 1:
+        t_f = "0" + str(int(tf))
+    else:
+        t_f = int(tf)
+
+    if gethostname() == "magneto2":
+        path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_i}/"
+        if not os.path.exists(path):  # si no existe, usa t_f
+            path = (
+                f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_f}/"
+            )
+    else:
+        path = f"../../../datos/clweb/{year}-{month}-{day}/{t_i}/"
+        if not os.path.exists(path):
+            path = (
+                f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_f}/"
+            )
 
     static = np.loadtxt(path + "STATIC.asc")
 
@@ -262,5 +391,4 @@ def importar_fila(year, month, day, hora):
     if fila is None:
         print("no encuentro la fila")
 
-    return fila, hoja_parametros, hoja_MVA, hoja_Bootstrap, hoja_Ajuste
     return fila, hoja_parametros, hoja_MVA, hoja_Bootstrap, hoja_Ajuste

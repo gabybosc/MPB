@@ -169,13 +169,13 @@ E_Hall_boot = np.cross(J_v_boot * 1e-9, B[inicio_down, :] * 1e-9) / (q_e * n_e) 
 plt.show(block=False)
 
 
-############
-# #Ahora guardamos todo en la spreadsheet
-#
-#
-# ##########
-# #Parámetros
-#
+###########
+# Ahora guardamos todo en la spreadsheet
+
+
+##########
+# Parámetros
+
 # hoja_parametros.update_acell(f"Z{fila}", f"{omega*180/np.pi:.3g}")
 # hoja_parametros.update_acell(f"S{fila}", f"{np.linalg.norm(v_media):.3g}")
 #
@@ -223,9 +223,9 @@ plt.show(block=False)
 # for i, cell in enumerate(cell_EH):
 #     cell.value = round(E_Hall[i] * 1e3, 3)
 # hoja_mva.update_cells(cell_EH)
-#
+
 # # La hoja del bootstrap
-#
+
 # hoja_boot.update_acell(f"M{fila}", f"{angulo_v_boot * 180/np.pi:.3g}")
 # hoja_boot.update_acell(f"N{fila}", f"{angulo_B_boot * 180/np.pi:.3g}")
 # hoja_boot.update_acell(f"O{fila}", f"{np.linalg.norm(x_23_boot):.3g}")

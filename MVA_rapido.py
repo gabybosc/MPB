@@ -9,6 +9,7 @@ from funciones import (
     donde,
     Mij,
     Bpara_Bperp,
+    SZA,
 )
 from funciones_metodos import (
     ajuste_conico,
@@ -27,10 +28,10 @@ Hace el MVA y nada más. Es para correr rápido buscando la hoja de corriente.
 
 np.set_printoptions(precision=4)
 
-year, month, day, doy = fechas()
+year, month, day, doy = 2016, "03", 20, 80  # fechas()
 # ti_MVA = input("hora aproximada\n")
 ti_MVA, tf_MVA = tiempos()
-t1, t2, t3, t4 = importar_t1t2t3t4(year, month, day, doy, int(ti_MVA))
+t1, t2, t3, t4 = importar_t1t2t3t4(year, month, day, int(ti_MVA))
 
 
 mag, t, B, posicion = importar_mag(year, month, day, t1 - 0.5, t4 + 0.5)
@@ -81,8 +82,9 @@ B_norm_medio = np.linalg.norm(B_medio_vectorial)
 
 hodograma(B1, B2, B3)
 
+plt.show(block=False)
 # el error
-phi, delta_B3 = error(lamb, B_cut, len(B_cut), x)
+phi, delta_B3 = error(lamb, B_cut, x)
 
 ###############
 # fit
@@ -101,9 +103,7 @@ B3_fit = np.dot(B_cut, normal_fit)
 # Bootstrap
 
 N_boot = 1000
-normal_boot, phi_boot, delta_B3_boot, out, out_phi = bootstrap(
-    N_boot, B_cut, len(B_cut)
-)
+normal_boot, phi_boot, delta_B3_boot, out, out_phi = bootstrap(N_boot, B_cut)
 
 muB, sigmaB, mu31, sigma31, mu32, sigma32 = plot_bootstrap(out, out_phi)
 
@@ -140,7 +140,7 @@ swia, t_swia, density, temp, vel = importar_swia(year, month, day, t1 - 0.5, t4 
 
 plt.clf()  # clear figure
 fig = plt.figure(
-    1, constrained_layout=True
+    4, constrained_layout=True
 )  # Lo bueno de esta forma es que puedo hacer que solo algunos compartan eje
 fig.subplots_adjust(
     top=0.93, bottom=0.07, left=0.05, right=0.95, hspace=0.005, wspace=0.15

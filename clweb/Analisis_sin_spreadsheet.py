@@ -1,10 +1,8 @@
 import numpy as np
-import matplotlib.pyplot as plt
 import sys
 from MVA_sin_spreadsheet import MVA, ajuste, normal_coplanar
 from importar_datos import importar_mag, importar_lpw
-import datetime as dt
-import cdflib as cdf
+import matplotlib.pyplot as plt
 
 sys.path.append("..")
 
@@ -12,13 +10,9 @@ from funciones import (
     angulo,
     ancho_mpb,
     corrientes,
-    diezmar,
-    donde,
     find_nearest,
     find_nearest_final,
     find_nearest_inicial,
-    UTC_to_hdec,
-    unix_to_decimal,
     fechas,
     tiempos,
 )
@@ -31,65 +25,12 @@ calcula el ancho de la mpb
 calcula la corriente
 """
 
-
-def importar_swia(year, month, day, ti, tf):
-    date_orbit = dt.date(int(year), int(month), int(day))
-    year = date_orbit.strftime("%Y")
-    month = date_orbit.strftime("%m")
-    day = date_orbit.strftime("%d")
-
-    # if gethostname() == "magneto2":
-    #     path = f"../../../../media/gabybosc/datos/SWIA/"
-    # elif gethostname() == "gabybosc":
-    #     path = "../../datos/SWIA/"
-    # else:
-    path = f"../../../datos/SWIA/"
-
-    swia = cdf.CDF(path + f"mvn_swi_l2_onboardsvymom_{year}{month}{day}_v01_r01.cdf")
-
-    t_unix = swia.varget("time_unix")
-    density = swia.varget("density")  # cm⁻³
-    temperature = swia.varget("temperature_mso")  # eV
-    vel_mso_xyz = swia.varget("velocity_mso")  # km/s
-
-    t_swia = unix_to_decimal(t_unix)
-    inicio = donde(t_swia, ti)
-    fin = donde(t_swia, tf)
-
-    t_cut = t_swia[inicio:fin]
-    density_cut = density[inicio:fin]
-    temperature_cut = temperature[inicio:fin]
-    vel_mso_cut = vel_mso_xyz[inicio:fin]  # km/s
-
-    return swia, t_cut, density_cut, temperature_cut, vel_mso_cut
-
-
 year, month, day, doy = fechas()
-# ti, tf = tiempos("Región de análisis (no MVA)")
-# ti_MVA, tf_MVA = tiempos("Intervalo del MVA")
-
-# year, month, day, doy = 2016, "03", 16, 76
-# ti_MVA, tf_MVA = UTC_to_hdec("18:13:33"), UTC_to_hdec("18:14:06")
-# ti, tf = UTC_to_hdec("17:55:00"), UTC_to_hdec("18:30:00")
-
-# year, month, day, doy = 2015, 10, 10, #doy
-# ti_MVA, tf_MVA = 12.675,12.68444444
-# ti, tf = 12.4, 12.9
-# year, month, day, doy = 2015, 10, 12, 285
-ti_MVA, tf_MVA = 19.31666667, 19.32388889
-ti, tf = 19.15, 19.45
-# year, month, day, doy = 2016, 04, 05, #doy
-# ti_MVA, tf_MVA = 5.271388889,5.278611111
-# ti, tf = 5.15, 5.45
-# year, month, day, doy = 2016, 03, 31, #doy
-# ti_MVA, tf_MVA = 13.07388889,13.08055556
-# ti, tf = 12.45, 13.15
+ti_MVA, tf_MVA = tiempos("Intervalo del MVA")
+ti, tf = ti_MVA - 0.5, tf_MVA + 0.5  # tiempos("Región de análisis (no MVA)")
 
 mag, t, B, posicion = importar_mag(year, month, day, ti, tf)
-lpw, t_lpw, e_density = importar_lpw(year, month, day, ti, tf)
-swia, t_swia, density, temperature, vel_mso = importar_swia(
-    year, month, day, ti, tf
-)
+lpw, t_lpw, e_density, flag = importar_lpw(year, month, day, ti, tf)
 x3, B_cut, t_cut, posicion_cut = MVA(year, month, day, ti_MVA, tf_MVA)
 normal_ajuste, t1, t2, t3, t4 = ajuste(year, month, day, doy, ti_MVA, tf_MVA)
 
@@ -172,6 +113,7 @@ E_Hall = np.cross(J_v_MVA * 1e-9, B[inicio_down, :] * 1e-9) / (q_e * n_e)  # V/m
 E_Hall_fit = np.cross(J_v_fit * 1e-9, B[inicio_down, :] * 1e-9) / (q_e * n_e)  # V/m
 E_Hall_boot = np.cross(J_v_boot * 1e-9, B[inicio_down, :] * 1e-9) / (q_e * n_e)  # V/m
 
+<<<<<<< HEAD
 
 # plt.show()
 
@@ -232,3 +174,6 @@ print(
     f"Eh / Ecv = {np.linalg.norm(E_Hall * 1e3)/np.mean(E_convective_norm[ti_funda:tf_funda])}")
     f"Eh / Ecv = {np.linalg.norm(E_Hall * 1e3)/np.mean(E_convective_norm[ti_funda:tf_funda])}"
 )
+=======
+plt.show()
+>>>>>>> 8653956476607fa659965ad09b0da17d46ce9e7b

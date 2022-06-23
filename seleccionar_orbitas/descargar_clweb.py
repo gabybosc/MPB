@@ -13,28 +13,33 @@ se guardan las cosas en ese orden.
 """
 
 year, month, day, doy = fechas()
+hour = input("hora HH\n")
 
 MAG = "http://clweb.irap.omp.eu/cl/boscoboinik/work/obj3.asc"
 SWICA = "http://clweb.irap.omp.eu/cl/boscoboinik/work/obj4.asc"
 SWIFA = "http://clweb.irap.omp.eu/cl/boscoboinik/work/obj5.asc"
-SWEA = "http://clweb.irap.omp.eu/cl/boscoboinik/work/obj6_Panel01_MAVEN_SWEA_P12_SC1.asc"
+SWEA = (
+    "http://clweb.irap.omp.eu/cl/boscoboinik/work/obj6_Panel01_MAVEN_SWEA_P12_SC1.asc"
+)
 LPW = "http://clweb.irap.omp.eu/cl/boscoboinik/work/obj7.asc"
-STATIC = "http://clweb.irap.omp.eu/cl/boscoboinik/work/obj8_Panel01_MAVEN_STATIC_P12_SC1.asc"
+STATIC = (
+    "http://clweb.irap.omp.eu/cl/boscoboinik/work/obj8_Panel01_MAVEN_STATIC_P12_SC1.asc"
+)
 
-path = f"../../../datos/clweb/{year}-{month}-{day}/"
+path = f"../../../datos/clweb/{year}-{month}-{day}/{hour}/"
 
 if not os.path.exists(path):  # crea el directorio si no existe
     os.makedirs(path)
 
-names = ['MAG', 'SWICA', 'SWIFA', 'SWEA', 'LPW', 'STATIC']
+names = ["MAG", "SWICA", "SWIFA", "SWEA", "LPW", "STATIC"]
 lst = [MAG, SWICA, SWIFA, SWEA, LPW, STATIC]
 for i, site_url in enumerate(lst):
     s = requests.Session()
-    print('request')
-    user = 'boscoboinik'
+    print("request")
+    user = "boscoboinik"
     password = "Maven2014"
     response = s.get(site_url, auth=HTTPBasicAuth(user, password))
-    print('response')
+    print("response")
 
     open(path + f"{names[i]}.asc", "wb").write(response.content)
-    print('guardar')
+    print("guardar")

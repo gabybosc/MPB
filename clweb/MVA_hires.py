@@ -2,7 +2,7 @@ import numpy as np
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import sys
-from importar_datos import importar_mag
+from importar_datos import importar_mag, importar_fila
 
 sys.path.append("..")
 from funciones import (
@@ -60,25 +60,12 @@ def acceso_spreadsheet():
     return hoja_parametros, hoja_mva, hoja_boot, hoja_fit, fecha_sheet, hora_sheet
 
 
-def que_linea(date_entry, fecha_sheet, hora_sheet, hoja_mva, t1):
-    if date_entry in fecha_sheet and str(int(t1)) in hora_sheet:
-        listaA = [a for a, fechas in enumerate(fecha_sheet) if fechas == date_entry]
-        listaB = [b for b, horas in enumerate(hora_sheet) if horas == str(int(t1))]
-        idx = list(set(listaA).intersection(listaB))[0]
-        nr = idx + 1
-    else:
-        nr = next_available_row(hoja_mva)
-
-    return nr
-
-
 def poner_fecha(hoja, nr, fecha, hora):
     hoja.update_acell(f"A{nr}", f"{fecha}")
     hoja.update_acell(f"B{nr}", f"{hora}")
 
 
 def MVA(year, month, day, ti_MVA, tf_MVA):
-    date_entry = f"{year}-{month}-{day}"
 
     mag, t, B, posicion = importar_mag(year, month, day, ti_MVA, tf_MVA)
 
@@ -135,10 +122,10 @@ def MVA(year, month, day, ti_MVA, tf_MVA):
 
     B_norm_medio = np.linalg.norm(B_medio_vectorial)
 
-    hodograma(B1, B2, B3, date_entry)
+    hodograma(B1, B2, B3)
 
     # el error
-    phi, delta_B3 = error(lamb, B, M, x)
+    phi, delta_B3 = error(lamb, B, x)
     if phi[2, 1] > phi[2, 0]:
         error_normal = phi[2, 1] * 180 / np.pi
     else:
@@ -147,19 +134,10 @@ def MVA(year, month, day, ti_MVA, tf_MVA):
     print("Fin del MVA.")
 
     # ######update la hoja de los parámetros
-    (
-        hoja_parametros,
-        hoja_mva,
-        hoja_boot,
-        hoja_fit,
-        fecha_sheet,
-        hora_sheet,
-    ) = acceso_spreadsheet()
 
-    nr = que_linea(date_entry, fecha_sheet, hora_sheet, hoja_mva, int(ti_MVA))
-    hojas = [hoja_parametros, hoja_mva, hoja_boot, hoja_fit]
-    for hoja in hojas:  # pone la fecha en todas las hojas
-        poner_fecha(hoja, nr, date_entry, int(ti_MVA))
+    nr, hoja_parametros, hoja_mva, hoja_boot, hoja_fit = importar_fila(
+        year, month, day, int(ti_MVA)
+    )
 
     hoja_parametros.update_acell(f"D{nr}", f"{SZA:.3g}")
     hoja_parametros.update_acell(f"E{nr}", f"{int(altitud)}")
@@ -216,14 +194,9 @@ def ajuste(year, month, day, doy, ti_MVA, tf_MVA, nr):
     B3_fit = np.dot(B, normal_ajuste)
     print("Fin del ajuste. ")
 
-    (
-        hoja_parametros,
-        hoja_mva,
-        hoja_boot,
-        hoja_fit,
-        fecha_sheet,
-        hora_sheet,
-    ) = acceso_spreadsheet()
+    nr, hoja_parametros, hoja_mva, hoja_boot, hoja_fit = importar_fila(
+        year, month, day, int(ti_MVA)
+    )
 
     cell_times = hoja_parametros.range(f"F{nr}:I{nr}")
     for i, cell in enumerate(cell_times):
@@ -246,7 +219,7 @@ def ajuste(year, month, day, doy, ti_MVA, tf_MVA, nr):
 
 
 def bootstrap_completo(B, M, nr, N=1000):
-    normal_boot, phi, delta_B3, out, out_phi = bootstrap(N, B, M)
+    normal_boot, phi, delta_B3, out, out_phi = bootstrap(N, B)
 
     muB, sigmaB, mu31, sigma31, mu32, sigma32 = plot_bootstrap(out, out_phi)
 

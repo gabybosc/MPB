@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 from matplotlib.widgets import MultiCursor
-from importar_datos import importar_mag, importar_swia
+from importar_datos import importar_mag, importar_swica
 import sys
 
 sys.path.append("..")
@@ -19,7 +19,7 @@ datos_new = np.loadtxt(path + "sat_trajectory_HallOn_new2.sat", skiprows=2)
 
 # Datos de MAVEN
 mag, t, B_mag, posicion = importar_mag(2016, "03", 16, 17.85, 19)
-swia, t_swia, proton_density = importar_swia(2016, "03", 16, 17.85, 19)
+swia, t_swia, proton_density = importar_swica(2016, "03", 16, 17.85, 19)
 
 """
 Mismos análisis pero para los datos sobre la trayectoria de la nave

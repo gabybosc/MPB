@@ -1,8 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from MVA_hires import MVA, ajuste, acceso_spreadsheet, bootstrap_completo
+from MVA_hires import MVA, ajuste, bootstrap_completo
 import sys
-from importar_datos import importar_mag, importar_lpw
+from importar_datos import importar_mag, importar_lpw, importar_fila
 
 sys.path.append("..")
 
@@ -27,15 +27,15 @@ calcula la corriente
 
 
 year, month, day, doy = fechas()
-ti, tf = tiempos("Región de análisis (no MVA)")
 ti_MVA, tf_MVA = tiempos("Intervalo del MVA")
+ti, tf = ti_MVA - 0.5, tf_MVA + 0.5
 
 print(
     "Si tira error de que no encuentra el path, hay que abrir una vez el disco manualmente para que lo monte"
 )
 
 mag, t, B, posicion = importar_mag(year, month, day, ti, tf)
-lpw, t_lpw, e_density = importar_lpw(year, month, day, ti, tf)
+lpw, t_lpw, e_density, flag = importar_lpw(year, month, day, ti, tf)
 x3, B_cut, t_cut, posicion_cut, nr = MVA(year, month, day, ti_MVA, tf_MVA)
 normal_ajuste, t1, t2, t3, t4 = ajuste(year, month, day, doy, ti_MVA, tf_MVA, nr)
 
@@ -121,14 +121,9 @@ E_Hall_fit = np.cross(J_v_fit * 1e-9, B[inicio_down, :] * 1e-9) / (q_e * n_e)  #
 E_Hall_boot = np.cross(J_v_boot * 1e-9, B[inicio_down, :] * 1e-9) / (q_e * n_e)  # V/m
 
 
-(
-    hoja_parametros,
-    hoja_mva,
-    hoja_boot,
-    hoja_fit,
-    fecha_sheet,
-    hora_sheet,
-) = acceso_spreadsheet()
+nr, hoja_parametros, hoja_mva, hoja_boot, hoja_fit = importar_fila(
+    year, month, day, int(ti_MVA)
+)
 
 date_entry = f"{year}-{month}-{day}"
 
