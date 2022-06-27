@@ -132,7 +132,7 @@ def bootstrap(N, B_cut):
 
 def normal_fit(posicion, index, x0=0.78, e=0.9):
     """conica que toma los parámetros de Vignes y devuelve la normal
-    para plotear usar ajuste_conico """
+    para plotear usar ajuste_conico SÓLO SIRVE SI ES UN PARABOLOIDE"""
     theta = np.linspace(0, np.pi * 3 / 4, 100)
     phi = np.linspace(0, 2 * np.pi, 100)
     THETA, PHI = np.meshgrid(theta, phi)

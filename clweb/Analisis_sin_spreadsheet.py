@@ -15,6 +15,7 @@ from funciones import (
     find_nearest_inicial,
     fechas,
     tiempos,
+    donde,
 )
 from funciones_metodos import bootstrap
 
@@ -76,12 +77,12 @@ x_14_boot, x_23_boot = ancho_mpb(t1, t2, t3, t4, normal_boot, v_media)
 ###########
 # análisis de corrientes
 
-inicio_up = np.where(t == find_nearest_inicial(t, t1 - 0.015))[0][0]
-fin_up = np.where(t == find_nearest_final(t, t1))[0][0]
+inicio_up = donde(t, t1 - 0.015)
+fin_up = donde(t, t1)
 B_upstream = np.mean(B[inicio_up:fin_up, :], axis=0)  # nT
 
-inicio_down = np.where(t == find_nearest_inicial(t, t4))[0][0]
-fin_down = np.where(t == find_nearest_final(t, t4 + 0.015))[0][0]
+inicio_down = donde(t, t4)
+fin_down = donde(t, t4 + 0.015)
 B_downstream = np.mean(B[inicio_down:fin_down, :], axis=0)  # nT
 
 n_coplanar = normal_coplanar(B_upstream, B_downstream)
@@ -112,68 +113,3 @@ q_e = 1.6e-19  # carga electron #C
 E_Hall = np.cross(J_v_MVA * 1e-9, B[inicio_down, :] * 1e-9) / (q_e * n_e)  # V/m
 E_Hall_fit = np.cross(J_v_fit * 1e-9, B[inicio_down, :] * 1e-9) / (q_e * n_e)  # V/m
 E_Hall_boot = np.cross(J_v_boot * 1e-9, B[inicio_down, :] * 1e-9) / (q_e * n_e)  # V/m
-
-<<<<<<< HEAD
-
-# plt.show()
-
-idx = diezmar(t, t_swia)
-
-tmag_diezmado = t[idx]
-B_cut = B[idx]
-posicion_cut = posicion[idx]
-
-# magnetofunda:
-
-ti_funda = donde(tmag_diezmado, t1-0.16)
-tf_funda = donde(tmag_diezmado, t1)
-
-# # normal del BS
-# ti_up = donde(t, UTC_to_hdec("18:00:00"))
-# tf_up = donde(t, UTC_to_hdec("18:01:30"))
-# ti_down = donde(t, UTC_to_hdec("18:03:00"))
-# tf_down = donde(t, UTC_to_hdec("18:04:30"))
-# B_down = B[ti_down:tf_down]
-# B_up = B[ti_up:tf_up]
-# B_BS = B[tf_up:ti_down]
-# ncop = normal_coplanar(np.mean(B_up, axis=0), np.mean(B_down, axis=0))
-# angulo_B_BS = angulo(ncop, np.mean(B_BS, axis=0))
-# print(angulo_B_BS * 180 / np.pi)
-####################
-
-
-B_avg = np.empty((len(idx), 3))
-v_maven = np.empty((len(idx), 3))
-v_planet = np.empty((len(idx), 3))
-
-
-for i in range(len(idx)):
-    B_avg[i, :] = np.mean(B_cut[i : i + 30, :], axis=0)
-    v_maven[i, :] = (
-        (posicion_cut[ti_funda + 1, :] - posicion_cut[ti_funda, :])
-        / (tmag_diezmado[ti_funda + 1] - tmag_diezmado[ti_funda])
-        / 3600
-    )  # en km/s
-for i in range(len(idx)):
-    v_planet[i, :] = np.nanmean(
-        vel_mso[i : i + 30, :] + v_maven[i : i + 30, :], axis=0
-    )  # km/s
-
-E_convective = np.cross(-v_planet * 1e3, B_avg * 1e-9) * 1e3  # mV/m
-E_convective_norm = np.linalg.norm(E_convective, axis=1)  # mV/m
-
-print(
-    f"El Ecv medio en la magnetofunda es {np.mean(E_convective[ti_funda:tf_funda] * 1e3, axis=0)} mV/m"
-)
-print(
-    f"El |Ecv| medio en la magnetofunda es {np.mean(E_convective_norm[ti_funda:tf_funda]):1.3g} mV/m"
-    )  # en mV/m
-print(
-    f"el campo de hall en la MPB es {E_Hall * 1e3} mV/m, {np.linalg.norm(E_Hall * 1e3):1.3g} mV/m")
-print(
-    f"Eh / Ecv = {np.linalg.norm(E_Hall * 1e3)/np.mean(E_convective_norm[ti_funda:tf_funda])}")
-    f"Eh / Ecv = {np.linalg.norm(E_Hall * 1e3)/np.mean(E_convective_norm[ti_funda:tf_funda])}"
-)
-=======
-plt.show()
->>>>>>> 8653956476607fa659965ad09b0da17d46ce9e7b

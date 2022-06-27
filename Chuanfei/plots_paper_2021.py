@@ -281,7 +281,7 @@ plt.savefig("../../../Dropbox/Paper2/simulación_ejex.png", dpi=300)
 Trayectoria temporal
 """
 path = "../../../datos/simulacion_chuanfei/"
-datos_enteros = np.loadtxt(path + "sat_trajectory_HallOn_new2.sat", skiprows=2)
+datos_enteros = np.loadtxt(path + "nueva_simu/sat_HallOn_2022_highRes.sat", skiprows=2)
 
 # Datos de la simulación
 pi = 1000
@@ -482,6 +482,109 @@ plt.savefig("../../../Dropbox/Paper2/MAVEN_vs_simu_log.png", dpi=600)
 plt.show()
 
 
+#######
+"""
+Comparación de la simu original vs la que tiene ajustados los datos de swia
+"""
+# datos_viejos = np.loadtxt(path + "sat_trajectory_HallOn_new2.sat", skiprows=2)
+# datos_viej = datos_viejos[pi:pf]
+#
+# x_viej = datos_viej[:, 8]
+# y_viej = datos_viej[:, 9]
+# z_viej = datos_viej[:, 10]
+#
+# B_viej = datos_viej[:, 15:18]  # nT
+# b1_viej = datos_viej[:, 40:43]
+# J_viej = datos_viej[:, -3:]  # uA/m2
+#
+# presion_viej = {
+#     "e-": datos_viej[:, 18],
+#     "H+": datos_viej[:, 24],
+#     "O+": datos_viej[:, 34],
+#     "O2+": datos_viej[:, 29],
+#     "CO2+": datos_viej[:, 39],
+# }  # nPa
+#
+# densities_viej = {
+#     "e-": datos_viej[:, 11],
+#     "H+": datos_viej[:, 20],
+#     "O+": datos_viej[:, 30],
+#     "O2+": datos_viej[:, 25],
+#     "CO2+": datos_viej[:, 35],
+# }  # mp/cc
+#
+# velocidad_viej = {
+#     "H+": datos_viej[:, 12:15],
+#     "O+": datos_viej[:, 31:34],
+#     "O2+": datos_viej[:, 26:29],
+#     "CO2+": datos_viej[:, 36:39],
+# }  # km/s
+# fig = plt.figure()
+# fig.subplots_adjust(
+#     top=0.95, bottom=0.1, left=0.12, right=0.95, hspace=0.0, wspace=0.15
+# )
+# plt.xticks(rotation=25)
+# xfmt = md.DateFormatter("%H:%M")
+#
+# ax2 = plt.subplot2grid((4, 1), (0, 0))
+# ax2.xaxis.set_major_formatter(xfmt)
+# plt.plot(tiempo_simu, np.linalg.norm(B_tray, axis=1), c="C0", label="nuevo")
+# plt.plot(tiempo_simu, np.linalg.norm(B_viej, axis=1), c="C1", label="viejo")
+# plt.ylabel("|B| (nT)")
+# ax2.set_title(f"MAVEN MAG LPW SWIA STATIC {year}-{month}-{day}")
+#
+# ax1 = plt.subplot2grid((4, 1), (3, 0), sharex=ax2)
+# ax1.xaxis.set_major_formatter(xfmt)
+# ax1.semilogy(tiempo_simu, densities_tray["O+"], c="C1", linestyle="--", label="nuevo")
+# ax1.semilogy(tiempo_simu, densities_tray["O2+"], c="C2", linestyle="--")
+# ax1.semilogy(tiempo_simu, densities_tray["CO2+"], c="C3", linestyle="--")
+# ax1.semilogy(tiempo_simu, densities_viej["O+"], c="C1", label="viejo")
+# ax1.semilogy(tiempo_simu, densities_viej["O2+"], c="C2")
+# ax1.semilogy(tiempo_simu, densities_viej["CO2+"], c="C3")
+# ax1.legend(loc="upper left")
+# ax1.set_ylim(ymin=0.1, ymax=1e5)
+# ax1.set_ylabel("H⁺ and heavies\ndensities (cm⁻³)")
+# ax1.set_xlabel("Time (UTC)")
+#
+# ax4 = plt.subplot2grid((4, 1), (1, 0), sharex=ax2)
+# ax4.xaxis.set_major_formatter(xfmt)
+# ax4.semilogy(tiempo_simu, densities_tray["e-"], c="C0")
+# ax4.semilogy(tiempo_simu, densities_viej["e-"], c="C1")
+# ax4.set_ylabel("Electron \n density (cm⁻³)")
+#
+# ax5 = plt.subplot2grid((4, 1), (2, 0), sharex=ax2)
+# ax5.xaxis.set_major_formatter(xfmt)
+# plt.semilogy(tiempo_simu, densities_tray["H+"], c="C0")
+# plt.semilogy(tiempo_simu, densities_viej["H+"], c="C1")
+# ax5.set_ylim(ymin=1)
+# ax5.set_ylabel("SW ion \n density (cm⁻³)")
+# # ax5.xaxis.set_label_coords(-0.05, -0.05)
+#
+# for ax in [ax1, ax2, ax4, ax5]:
+#     ax.axvspan(
+#         xmin=tiempo_mag[donde(t_cut, ti_simu)],
+#         xmax=tiempo_mag[donde(t_cut, tf_simu)],
+#         facecolor="#79B953",
+#         alpha=0.4,
+#     )
+#     ax.axvspan(
+#         xmin=tiempo_mag[donde(t_cut, t1)],
+#         xmax=tiempo_mag[donde(t_cut, t4)],
+#         facecolor="k",
+#         alpha=0.5,
+#     )
+#
+#     ax.set_xlim(tiempo_mag[12000], tiempo_mag[-17000])
+#     ax.grid()
+#
+# for ax in [ax2, ax5, ax4]:
+#     plt.setp(ax.get_xticklabels(), visible=False)
+#     ax.legend()
+#
+# figure = plt.gcf()  # get current figure
+# figure.set_size_inches(8, 9)
+# plt.savefig("../../../Dropbox/Paper2/simu_nueva_vs_vieja.png", dpi=600)
+# plt.show()
 # el plot de la órbita
 
 

@@ -30,9 +30,7 @@ def importar_mag(year, month, day, ti, tf):
     else:
         path = f"../../../datos/clweb/{year}-{month}-{day}/{t_i}/"
         if not os.path.exists(path):
-            path = (
-                f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_f}/"
-            )
+            path = f"../../../../../home/gabybosc/datos/clweb/{year}-{month}-{day}/"
 
     if os.path.isfile(path + "mag_filtrado.txt"):
         mag = np.loadtxt(path + "mag_filtrado.txt", skiprows=2)
