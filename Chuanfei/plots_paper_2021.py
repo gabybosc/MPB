@@ -24,7 +24,7 @@ plt.rcParams["axes.prop_cycle"] = cycler(
 )
 
 path = "../../../datos/simulacion_chuanfei/"
-datos = np.loadtxt(path + "ejex_new2_+.gz")  # high resolution
+datos = np.loadtxt(path + "nueva_simu/ejex_nuevasimu+.gz")  # high resolution
 
 mu0 = 4e-7 * np.pi  # T m / A
 mp = 1.67e-27  # proton mass, kg
@@ -235,7 +235,7 @@ ax4.plot(x, J[:, 2] * 1e3, label=r"J$_z$")
 ax4.plot(x, np.linalg.norm(J, axis=1) * 1e3, label="|J|")
 plt.setp(ax4.get_xticklabels(), visible=False)
 ax4.set_ylabel("J (nA/m²)")
-ax4.set_ylim([-120, 120])
+ax4.set_ylim([-220, 220])
 ax4.legend(loc="upper left")
 
 ax5.plot(x, np.linalg.norm(Ecv, axis=1) * 1e3, label=r"E$_{cv}$", c="C3")
@@ -258,7 +258,7 @@ ax2.plot(x, P_heavy, label="th heavies")
 ax2.plot(x, P_B, label="Magnetic")
 ax2.plot(x, P_ram, label="Dynamic")
 ax2.plot(x, P_total, label="Total")
-ax2.set_ylim([-0.1, 0.95])
+ax2.set_ylim([-0.1, 1.3])
 ax2.set_ylabel("Pressure (nPa)")
 ax2.set_xlabel(r"X ($R_M$)")
 ax2.legend(loc="upper left", prop={"size": 10})
@@ -269,13 +269,14 @@ ax5.text(1.155, 4, "c)")
 ax6.text(1.155, 3.8, "d)")
 ax2.text(1.155, 0.8, "e)")
 
+
 # ax2.annotate('to Sun', xy=(0, -0.4), xycoords='axes fraction', xytext=(0.1, -0.4),
 # arrowprops=dict(arrowstyle="->", color='k'))
 figure = plt.gcf()  # get current figure
 figure.set_size_inches(8, 9)
 # when saving, specify the DPI
 plt.savefig("../../../Dropbox/Paper2/simulación_ejex.png", dpi=300)
-
+# plt.show()
 
 """
 Trayectoria temporal
@@ -356,7 +357,7 @@ STATIC, t_static, H_density, O_density, O2_density, CO2_density = importar_STATI
 )
 
 # los valores estos los elegi mirando los gráficos de la función ancho
-ti_simu = t_simu[donde(x_tray, 1.15)]
+ti_simu = t_simu[donde(x_tray, 1.14)]
 tf_simu = t_simu[donde(x_tray, 1.01)]
 
 ii = donde(t_simu, ti_simu)
@@ -436,7 +437,7 @@ ax1.semilogy(tiempo_simu, densities_tray["O+"], c="C1")
 ax1.semilogy(tiempo_simu, densities_tray["O2+"], c="C2")
 ax1.semilogy(tiempo_simu, densities_tray["CO2+"], c="C3")
 ax1.legend(loc="upper left")
-ax1.set_ylim(ymin=0.1, ymax=1e5)
+ax1.set_ylim(ymin=0.1, ymax=2e5)
 ax1.set_ylabel("H⁺ and heavies\ndensities (cm⁻³)")
 ax1.set_xlabel("Time (UTC)")
 
@@ -450,7 +451,7 @@ ax5 = plt.subplot2grid((4, 1), (2, 0), sharex=ax2)
 ax5.xaxis.set_major_formatter(xfmt)
 plt.semilogy(tiempo_swia, proton_density, c="C0")
 plt.semilogy(tiempo_simu, densities_tray["H+"], c="C1")
-ax5.set_ylim(ymin=1)
+ax5.set_ylim(ymin=0.8)
 ax5.set_ylabel("SW ion \n density (cm⁻³)")
 # ax5.xaxis.set_label_coords(-0.05, -0.05)
 
@@ -483,9 +484,9 @@ plt.show()
 
 
 #######
-"""
-Comparación de la simu original vs la que tiene ajustados los datos de swia
-"""
+# """
+# Comparación de la simu original vs la que tiene ajustados los datos de swia
+# """
 # datos_viejos = np.loadtxt(path + "sat_trajectory_HallOn_new2.sat", skiprows=2)
 # datos_viej = datos_viejos[pi:pf]
 #
@@ -528,17 +529,17 @@ Comparación de la simu original vs la que tiene ajustados los datos de swia
 #
 # ax2 = plt.subplot2grid((4, 1), (0, 0))
 # ax2.xaxis.set_major_formatter(xfmt)
-# plt.plot(tiempo_simu, np.linalg.norm(B_tray, axis=1), c="C0", label="nuevo")
-# plt.plot(tiempo_simu, np.linalg.norm(B_viej, axis=1), c="C1", label="viejo")
+# plt.plot(tiempo_simu, np.linalg.norm(B_tray, axis=1), c="C0", label="new")
+# plt.plot(tiempo_simu, np.linalg.norm(B_viej, axis=1), c="C1", label="old")
 # plt.ylabel("|B| (nT)")
 # ax2.set_title(f"MAVEN MAG LPW SWIA STATIC {year}-{month}-{day}")
 #
 # ax1 = plt.subplot2grid((4, 1), (3, 0), sharex=ax2)
 # ax1.xaxis.set_major_formatter(xfmt)
-# ax1.semilogy(tiempo_simu, densities_tray["O+"], c="C1", linestyle="--", label="nuevo")
+# ax1.semilogy(tiempo_simu, densities_tray["O+"], c="C1", linestyle="--", label="new")
 # ax1.semilogy(tiempo_simu, densities_tray["O2+"], c="C2", linestyle="--")
 # ax1.semilogy(tiempo_simu, densities_tray["CO2+"], c="C3", linestyle="--")
-# ax1.semilogy(tiempo_simu, densities_viej["O+"], c="C1", label="viejo")
+# ax1.semilogy(tiempo_simu, densities_viej["O+"], c="C1", label="old")
 # ax1.semilogy(tiempo_simu, densities_viej["O2+"], c="C2")
 # ax1.semilogy(tiempo_simu, densities_viej["CO2+"], c="C3")
 # ax1.legend(loc="upper left")
@@ -585,9 +586,8 @@ Comparación de la simu original vs la que tiene ajustados los datos de swia
 # figure.set_size_inches(8, 9)
 # plt.savefig("../../../Dropbox/Paper2/simu_nueva_vs_vieja.png", dpi=600)
 # plt.show()
-# el plot de la órbita
 
-
+# # el plot de la órbita
 # def datos_fijos(year, month, day, ti, tf):
 #     # path a los datos desde la laptop
 #     path = f"../../../datos/clweb/{year}-{month}-{day}/"

@@ -15,6 +15,7 @@ OpRho OpUx OpUy OpUz OpP CO2pRho CO2pUx CO2pUy CO2pUz CO2pP b1x b1y b1z e jx jy 
 """
 
 """
+Antes de usar este tengo que usar convertir_en_un_txt.py
 Recorte de numpy
 """
 
@@ -42,8 +43,8 @@ Recorte de numpy
 
 
 # si ya estoy en el eje x y sólo quiero seguir cortando
-val = np.loadtxt(path + "file.gz")
+val = np.loadtxt(path + "nueva_simu/ejex.gz")
 
 zcero = np.array([val[i, :] for i in range(len(val)) if 0 <= val[i, 1] <= 0.05])
 reordenados = np.array(sorted(zcero, key=lambda f: f[0]))
-np.savetxt(path + "file_+.gz", reordenados)
+np.savetxt(path + "nueva_simu/ejex+.gz", reordenados)

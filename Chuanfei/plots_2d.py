@@ -5,14 +5,19 @@ import scipy.interpolate
 from scipy.stats import multivariate_normal
 import seaborn as sns
 import numpy.ma as ma
+from mpl_toolkits.axes_grid1 import make_axes_locatable, ImageGrid, AxesGrid
 import matplotlib.cm as cm
 from matplotlib.colors import Normalize
 
 sns.set()
 
-path = "../../../datos/simulacion_chuanfei/"
-datos_y0 = np.loadtxt(path + "y=0_HallOn_new2.gz")
-datos_z0 = np.loadtxt(path + "z=0_HallOn_new2.gz")
+path = "../../../datos/simulacion_chuanfei/nueva_simu/"
+datos_y0 = np.loadtxt(path + "y=0.gz")
+datos_z0 = np.loadtxt(path + "z=0.gz")
+
+# path = "../../../datos/simulacion_chuanfei/"
+# datos_y0 = np.loadtxt(path + "y=0_HallOn_new2.gz")
+# datos_z0 = np.loadtxt(path + "z=0_HallOn_new2.gz")
 
 sys.path.append("..")
 from funciones import donde, angulo
@@ -206,13 +211,12 @@ dif_vel_y0 = np.array(
 # )
 # Ep = np.array([-1 / (e_SI * n_SI[i]) * grad_p_SI[i, :] for i in range(len(grad_p))])
 
-# MPB MAVEN
-
-x0 = 0.78
+# beta = 1
+x0 = 0.5
 
 e = 0.9
 
-R = [1.2, 0, 0]  # fit de la MPB simulada
+R = [1.19, 0, 0]  # la standoff distance en x que tiene beta
 theta = np.linspace(0, np.pi * 2, 100)
 
 r0 = R - np.array([x0, 0, 0])
@@ -225,147 +229,140 @@ X1 = x0 + r1 * np.cos(theta)
 Y1 = r1 * np.sin(theta)
 
 
-# beta = 1
-
-x0 = 0.5
+# MAVEN
+x0 = 0.78
 e = 0.9
 
-R = [1.082, -0.064, 0.515]
-theta = np.linspace(0, np.pi * 2, 100)
-
-r0 = R - np.array([x0, 0, 0])
-theta0 = np.arccos(r0[0] / np.linalg.norm(r0))
-
-L0 = np.linalg.norm(r0) * (1 + e * np.cos(theta0))
+L0 = 0.87  # el L obtenido en mi tesis de lic
 r1 = L0 / (1 + e * np.cos(theta))
 
 X1_M = x0 + r1 * np.cos(theta)
 Y1_M = r1 * np.sin(theta)
 
 
-def subplot_2d(
-    x, y, z, zmin, zmax, ax, i, j, titulo, colormap="inferno", method="linear"
-):
-    xy = np.column_stack([x.flat, y.flat])  # Create a (N, 2) array of (x, y) pairs.
-    # Interpolate and generate heatmap:
-    grid_x, grid_y = np.mgrid[x.min() : x.max() : 1000j, y.min() : y.max() : 1000j]
-
-    # interpolation method can be linear or cubic
-    grid_z = scipy.interpolate.griddata(xy, z, (grid_x, grid_y), method=method)
-
-    ax[i, j].pcolormesh(
+def data(i, xy, z, grid_x, grid_y, zmin, zmax, metodo="linear", colormap="coolwarm"):
+    grid_z = scipy.interpolate.griddata(xy, z, (grid_x, grid_y), method=metodo)
+    grid[i].pcolormesh(
         grid_x, grid_y, ma.masked_invalid(grid_z), cmap=colormap, vmin=zmin, vmax=zmax
     )
-    ax[i, j].plot(X1, Y1, c="k", linestyle="--", label="beta=1")
-    ax[i, j].plot(X1_M, Y1_M, c="k", linestyle="-", label="MAVEN")
-    ax[i, j].set_xlim([1.0, 2])
-    ax[i, j].set_ylim([-0.5, 0.5])
+    grid[i].set_aspect("equal", "box")
+    grid[i].set_xlim([1.0, 2])
+    grid[i].set_ylim([-0.5, 0.5])
+    grid[i].plot(X1, Y1, c="k", linestyle="--", label="beta=1")
+    grid[i].plot(X1_M, Y1_M, c="k", linestyle="-", label="MAVEN")
 
-    ax[i, j].set_title(titulo)
 
-
-# betas
-fig, ax = plt.subplots(1, 2)
 xy = np.column_stack([x.flat, y.flat])  # Create a (N, 2) array of (x, y) pairs.
 grid_x, grid_y = np.mgrid[x.min() : x.max() : 1000j, y.min() : y.max() : 1000j]
-grid_0 = scipy.interpolate.griddata(
-    xy, np.log(beta_str_z0), (grid_x, grid_y), method="linear"
-)
-grid_1 = scipy.interpolate.griddata(
-    xy, np.log(beta_str_y0), (grid_x, grid_y), method="linear"
+
+# betas  # ojo que hay que escribir a mano el eje z(RM)
+figure = plt.figure(1, (1.0, 2.0))
+grid = AxesGrid(
+    figure,
+    111,  # similar to subplot(142)
+    nrows_ncols=(1, 2),
+    axes_pad=0.5,
+    share_all=True,
+    label_mode="L",
+    cbar_location="right",
+    cbar_mode="single",
 )
 
-for i in [0, 1]:
-    ax[i].plot(X1, Y1, c="k", linestyle="--", label="beta=1")
-    ax[i].plot(X1_M, Y1_M, c="k", linestyle="-", label="MAVEN")
-    ax[i].set_xlim([1.0, 2])
-    ax[i].set_ylim([-0.5, 0.5])
+data(0, xy, np.log(beta_str_z0), grid_x, grid_y, -4, 4)
+data(1, xy, np.log(beta_str_y0), grid_x, grid_y, -4, 4)
 
-ax[0].pcolormesh(
-    grid_x, grid_y, ma.masked_invalid(grid_0), cmap="coolwarm", vmin=-4, vmax=4
+grid[0].set_title(r"Z=0 log($\beta*$)")
+grid[1].set_title(r"Y=0 log($\beta*$)")
+grid[0].set_ylabel(r"y (R$_M$)")
+grid[0].set_xlabel(r"x (R$_M$)")
+grid[1].set_xlabel(r"x (R$_M$)")
+
+figure.colorbar(
+    cm.ScalarMappable(norm=Normalize(-4, 4), cmap="coolwarm"), cax=grid.cbar_axes[0]
 )
-ax[0].set_title(r"Z=0 log($\beta*$)")
-ax[1].pcolormesh(
-    grid_x, grid_y, ma.masked_invalid(grid_1), cmap="coolwarm", vmin=-4, vmax=4
-)
-ax[1].set_title(r"Y=0 log($\beta*$)")
-ax[0].set_aspect("equal", "box")
-ax[1].set_aspect("equal", "box")
-cbar_ax = fig.add_axes([0.9, 0.1, 0.04, 0.8])  # [left, bottom, width, height]
-fig.colorbar(cm.ScalarMappable(norm=Normalize(-4, 4), cmap="coolwarm"), cax=cbar_ax)
-ax[0].set_ylabel(r"y (R$_M$)")
-ax[0].set_xlabel(r"x (R$_M$)")
-ax[1].set_ylabel(r"z (R$_M$)")
-ax[1].set_xlabel(r"x (R$_M$)")
-figure = plt.gcf()  # get current figure
+
 figure.set_size_inches(9, 6)
-plt.savefig("../../../Dropbox/Paper2/beta_2d.png", dpi=600)
+# plt.savefig("../../../Dropbox/Paper2/beta_2d.png", dpi=600)
 plt.show()
 
 
 # Campo B
-fig, ax = plt.subplots(2, 3)
-subplot_2d(x, z, B_y0[:, 0], -50, 50, ax, 0, 0, r"Y=0 B$_x$", "coolwarm")
-subplot_2d(x, z, B_y0[:, 1], -50, 50, ax, 0, 1, r"Y=0 B$_y$", "coolwarm")
-subplot_2d(x, z, B_y0[:, 2], -50, 50, ax, 0, 2, r"Y=0 B$_z$", "coolwarm")
 
-subplot_2d(x, y, B_z0[:, 0], -50, 50, ax, 1, 0, r"Z=0 B$_x$", "coolwarm")
-subplot_2d(x, y, B_z0[:, 1], -50, 50, ax, 1, 1, r"Z=0 B$_y$", "coolwarm")
-subplot_2d(x, y, B_z0[:, 2], -50, 50, ax, 1, 2, r"Z=0 B$_z$", "coolwarm")
-for i in [0, 1, 2]:
-    plt.setp(ax[0, i].get_xticklabels(), visible=False)
-    ax[1, i].set_xlabel(r"x (R$_M$)")
-    ax[0, i].set_aspect("equal", "box")
-    ax[1, i].set_aspect("equal", "box")
-for i in [0, 1]:
-    plt.setp(ax[i, 1].get_yticklabels(), visible=False)
-    plt.setp(ax[i, 2].get_yticklabels(), visible=False)
-ax[0, 0].set_ylabel(r"z (R$_M$)")
-ax[1, 0].set_ylabel(r"y (R$_M$)")
+fig = plt.figure(1, (2.0, 3.0))
+grid = AxesGrid(
+    fig,
+    111,  # similar to subplot(142)
+    nrows_ncols=(2, 3),
+    axes_pad=0.22,
+    share_all=True,
+    label_mode="L",
+    cbar_location="right",
+    cbar_mode="single",
+)
 
-cbar_ax = fig.add_axes([0.9, 0.1, 0.04, 0.85])  # [left, bottom, width, height]
-cb = fig.colorbar(
-    cm.ScalarMappable(norm=Normalize(-50, 50), cmap="coolwarm"), cax=cbar_ax
+data(0, xy, B_z0[:, 0], grid_x, grid_y, -50, 50)  # r"Z=0 B$_x$", "coolwarm")
+data(1, xy, B_z0[:, 1], grid_x, grid_y, -50, 50)  # r"Z=0 B$_y$", "coolwarm")
+data(2, xy, B_z0[:, 2], grid_x, grid_y, -50, 50)  # r"Z=0 B$_z$", "coolwarm")
+data(3, xy, B_y0[:, 0], grid_x, grid_y, -50, 50)  # r"Y=0 B$_x$", "coolwarm")
+data(4, xy, B_y0[:, 1], grid_x, grid_y, -50, 50)  # r"Y=0 B$_y$", "coolwarm")
+data(5, xy, B_y0[:, 2], grid_x, grid_y, -50, 50)  # r"Y=0 B$_z$", "coolwarm")
+for i in [3, 4, 5]:
+    grid[i].set_xlabel(r"x (R$_M$)")
+grid[0].set_ylabel(r"y (R$_M$)")
+grid[3].set_ylabel(r"z (R$_M$)")
+grid[0].set_title(r"B$_x$ Z=0")
+grid[1].set_title(r"B$_y$ Z=0")
+grid[2].set_title(r"B$_z$ Z=0")
+grid[3].set_title(r"B$_x$ Y=0")
+grid[4].set_title(r"B$_y$ Y=0")
+grid[5].set_title(r"B$_z$ Y=0")
+
+cb = figure.colorbar(
+    cm.ScalarMappable(norm=Normalize(-50, 50), cmap="coolwarm"), cax=grid.cbar_axes[0]
 )
 cb.ax.set_title("B (nT)")
-figure = plt.gcf()  # get current figure
+
 figure.set_size_inches(9, 6)
 # when saving, specify the DPI
-plt.savefig("../../../Dropbox/Paper2/B_2d.png", dpi=600)
+# plt.savefig("../../../Dropbox/Paper2/B_2d.png", dpi=600)
 plt.show()
 
 
 # densidad
 
-fig, ax = plt.subplots(2, 3)
-subplot_2d(x, y, densidad_z0["H"], 0, 20, ax, 1, 0, "Z=0 H⁺ dens.", "inferno")
-subplot_2d(
-    x, y, densidad_z0["heavies"], 0, 20, ax, 1, 1, "Z=0 heavy ion dens.", "inferno"
+fig = plt.figure(1, (2.0, 3.0))
+grid = AxesGrid(
+    fig,
+    111,  # similar to subplot(142)
+    nrows_ncols=(2, 3),
+    axes_pad=0.22,
+    share_all=True,
+    label_mode="L",
+    cbar_location="right",
+    cbar_mode="single",
 )
-subplot_2d(x, y, densidad_z0["e"], 0, 20, ax, 1, 2, "Z=0 e⁻ dens.", "inferno")
-subplot_2d(x, z, densidad_y0["H"], 0, 20, ax, 0, 0, "Y=0 H⁺ dens.", "inferno")
-subplot_2d(
-    x, z, densidad_y0["heavies"], 0, 20, ax, 0, 1, "Y=0 heavy ion dens.", "inferno"
+
+data(0, xy, densidad_z0["H"], grid_x, grid_y, 0, 20, colormap="inferno")
+data(1, xy, densidad_z0["heavies"], grid_x, grid_y, 0, 20, colormap="inferno")
+data(2, xy, densidad_z0["e"], grid_x, grid_y, 0, 20, colormap="inferno")
+data(3, xy, densidad_y0["H"], grid_x, grid_y, 0, 20, colormap="inferno")
+data(4, xy, densidad_y0["heavies"], grid_x, grid_y, 0, 20, colormap="inferno")
+data(5, xy, densidad_y0["e"], grid_x, grid_y, 0, 20, colormap="inferno")
+for i in [3, 4, 5]:
+    grid[i].set_xlabel(r"x (R$_M$)")
+grid[0].set_ylabel(r"y (R$_M$)")
+grid[3].set_ylabel(r"z (R$_M$)")
+grid[0].set_title(r"H$^+$ dens. Z=0", fontsize=10)
+grid[1].set_title(r"heavy ion dens. Z=0", fontsize=10)
+grid[2].set_title(r"e$^-$ dens. Z=0", fontsize=10)
+grid[3].set_title(r"H$^+$ dens. Y=0", fontsize=10)
+grid[4].set_title(r"heavy ion dens. Y=0", fontsize=10)
+grid[5].set_title(r"e$^-$ dens. Y=0", fontsize=10)
+
+cb = figure.colorbar(
+    cm.ScalarMappable(norm=Normalize(0, 20), cmap="inferno"), cax=grid.cbar_axes[0]
 )
-subplot_2d(x, z, densidad_y0["e"], 0, 20, ax, 0, 2, "Y=0 e⁻ dens.", "inferno")
-for i in [0, 1, 2]:
-    for j in [0, 1]:
-        plt.setp(ax[j, i].get_yticklabels(), visible=False)
-    plt.setp(ax[0, i].get_xticklabels(), visible=False)
-    ax[0, i].set_aspect("equal", "box")
-    ax[1, i].set_aspect("equal", "box")
-ax[0, 0].set_ylabel(r"z (R$_M$)")
-ax[1, 0].set_ylabel(r"y (R$_M$)")
-ax[1, 0].set_xlabel(r"x (R$_M$)")
-ax[1, 1].set_xlabel(r"x (R$_M$)")
-ax[1, 2].set_xlabel(r"x (R$_M$)")
-cbar_ax = fig.add_axes([0.9, 0.1, 0.04, 0.8])  # [left, bottom, width, height]
-cb = fig.colorbar(cm.ScalarMappable(norm=Normalize(0, 20), cmap="inferno"), cax=cbar_ax)
-cb.ax.set_title("dens. (cm⁻³)")
-figure = plt.gcf()  # get current figure
-figure.set_size_inches(9, 6)
-# when saving, specify the DPI
-plt.savefig("../../../Dropbox/Paper2/dens_2d.png", dpi=600)
+cb.ax.set_title("dens.\n(cm⁻³)", fontsize=10)
 plt.show()
 
 
@@ -490,5 +487,10 @@ plt.show()
 # plt.show()
 # plt.ylabel("z (RM)")
 # plt.xlim([1, 1.6])
+# plt.ylim([-1, 1])
+# plt.show()
+# plt.xlim([1, 1.6])
+# plt.ylim([-1, 1])
+# plt.show()
 # plt.ylim([-1, 1])
 # plt.show()

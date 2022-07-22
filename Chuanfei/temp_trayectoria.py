@@ -13,8 +13,8 @@ sys.path.append("..")
 from funciones_plot import equal_axes, onpick1
 from funciones import donde, datenum
 
-path = "../../../datos/simulacion_chuanfei/"
-datos_enteros = np.loadtxt(path + "sat_trajectory_HallOn_new2.sat", skiprows=2)
+path = "../../../datos/simulacion_chuanfei/nueva_simu/"
+datos_enteros = np.loadtxt(path + "sat_HallOn_2022_highRes.sat", skiprows=2)
 
 """
 Mismos análisis pero para los datos sobre la trayectoria de la nave en función
@@ -67,6 +67,7 @@ velocidad = {
     "O+": datos[:, 31:34],
     "O2+": datos[:, 26:29],
     "CO2+": datos[:, 36:39],
+    "e-": datos[:, 39:42],
 }  # km/s
 
 
@@ -100,7 +101,7 @@ t_simu = np.linspace(t_cut[0], t_cut[-1], len(r_simu))
 
 
 # los valores estos los elegi mirando los gráficos de la función ancho
-ti_simu = t_simu[donde(x, 1.15)]
+ti_simu = t_simu[donde(x, 1.14)]
 tf_simu = t_simu[donde(x, 1.01)]
 
 ii = donde(t_simu, ti_simu)
@@ -149,6 +150,13 @@ j_mas = donde(t_simu, tf_simu + 0.0125)
 Bdown = np.mean(B[jj:j_mas], axis=0) * 1e-9
 Bup = np.mean(B[i_menos:ii], axis=0) * 1e-9
 J_salto = 1 / (mu0 * ancho_mpb * 1e3) * np.cross(normal, Bup - Bdown) * 1e9
+
+# B_up = np.linalg.norm(np.mean(B[i_menos:ii], axis=0))
+# ve_up = np.linalg.norm(np.mean(velocidad["e-"][i_menos:ii], axis=0))
+# vp_up = np.linalg.norm(np.mean(velocidad["H+"][i_menos:ii], axis=0))
+# n_up = np.linalg.norm(np.mean(densities["H+"][i_menos:ii], axis=0))
+#
+# print(f"Bup = {B_up}, ve = {ve_up}, vp = {vp_up}, n = {n_up}")
 
 print(f"el ancho de la MPB de la simu es {np.abs(ancho_mpb):.3g} km")
 print(f"la corriente media en la MPB de la simu es {np.abs(j_media):.3g} nA/m²")

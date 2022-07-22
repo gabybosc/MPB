@@ -30,7 +30,7 @@ def importar_mag(year, month, day, ti, tf):
     else:
         path = f"../../../datos/clweb/{year}-{month}-{day}/{t_i}/"
         if not os.path.exists(path):
-            path = f"../../../../../home/gabybosc/datos/clweb/{year}-{month}-{day}/"
+            path = f"../../../datos/clweb/{year}-{month}-{day}/{t_f}/"
 
     if os.path.isfile(path + "mag_filtrado.txt"):
         mag = np.loadtxt(path + "mag_filtrado.txt", skiprows=2)
@@ -132,9 +132,7 @@ def importar_swia(year, month, day, ti, tf):
     else:
         path = f"../../../datos/clweb/{year}-{month}-{day}/{t_i}/"
         if not os.path.exists(path):
-            path = (
-                f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_f}/"
-            )
+            path = f"../../../datos/clweb/{year}-{month}-{day}/{t_f}/"
 
     if os.path.isfile(path + "SWICA.asc"):  # si no existe uno llamado SWICA, usa SWIA
         swia = np.loadtxt(path + "SWICA.asc")
@@ -174,15 +172,13 @@ def importar_swicfa(year, month, day, ti, tf):
     else:
         path = f"../../../datos/clweb/{year}-{month}-{day}/{t_i}/"
         if not os.path.exists(path):
-            path = (
-                f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_f}/"
-            )
+            path = f"../../../datos/clweb/{year}-{month}-{day}/{t_f}/"
 
     swica = np.loadtxt(path + "SWICA.asc")
     swifa = np.loadtxt(path + "SWIFA.asc")
 
-    density_c = swica[:, -1]
-    density_f = swifa[:, -1]
+    density_c = swica[:, 6]
+    density_f = swifa[:, 6]
 
     t_c = swica[:, 3] + swica[:, 4] / 60 + swica[:, 5] / 3600  # hdec
     t_f = swifa[:, 3] + swifa[:, 4] / 60 + swifa[:, 5] / 3600  # hdec
@@ -256,9 +252,7 @@ def importar_lpw(year, month, day, ti, tf):
     else:
         path = f"../../../datos/clweb/{year}-{month}-{day}/{t_i}/"
         if not os.path.exists(path):
-            path = (
-                f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_f}/"
-            )
+            path = f"../../../datos/clweb/{year}-{month}-{day}/{t_f}/"
 
     lpw = np.loadtxt(path + "LPW.asc")
 

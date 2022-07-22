@@ -11,11 +11,22 @@ from funciones import donde
 
 
 def importar_mag(year, month, day, ti, tf):
+    if len(str(int(ti))) == 1:
+        t_i = "0" + str(int(ti))
+    else:
+        t_i = int(ti)
+
+    if len(str(int(tf))) == 1:
+        t_f = "0" + str(int(tf))
+    else:
+        t_f = int(tf)
 
     if gethostname() == "magneto2":
-        path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
+        path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_i}/"
     else:
-        path = f"../../../datos/clweb/{year}-{month}-{day}/"
+        path = f"../../../datos/clweb/{year}-{month}-{day}/{t_i}/"
+        if not os.path.exists(path):
+            path = f"../../../datos/clweb/{year}-{month}-{day}/{t_f}/"
 
     if os.path.isfile(path + "mag_filtrado.txt"):
         mag = np.loadtxt(path + "mag_filtrado.txt", skiprows=2)
@@ -47,10 +58,21 @@ def importar_mag(year, month, day, ti, tf):
 
 
 def importar_swea(year, month, day, ti, tf):
+    if len(str(int(ti))) == 1:
+        t_i = "0" + str(int(ti))
+    else:
+        t_i = int(ti)
+
+    if len(str(int(tf))) == 1:
+        t_f = "0" + str(int(tf))
+    else:
+        t_f = int(tf)
     if gethostname() == "magneto2":
         path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
     else:
-        path = f"../../../datos/clweb/{year}-{month}-{day}/"
+        path = f"../../../datos/clweb/{year}-{month}-{day}/{t_i}/"
+        if not os.path.exists(path):
+            path = f"../../../datos/clweb/{year}-{month}-{day}/{t_f}/"
 
     swea = np.loadtxt(path + "SWEA.asc")
 
@@ -82,11 +104,22 @@ def importar_swea(year, month, day, ti, tf):
 
 
 def importar_swica(year, month, day, ti, tf):
+    if len(str(int(ti))) == 1:
+        t_i = "0" + str(int(ti))
+    else:
+        t_i = int(ti)
+
+    if len(str(int(tf))) == 1:
+        t_f = "0" + str(int(tf))
+    else:
+        t_f = int(tf)
 
     if gethostname() == "magneto2":
         path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
     else:
-        path = f"../../../datos/clweb/{year}-{month}-{day}/"
+        path = f"../../../datos/clweb/{year}-{month}-{day}/{t_i}/"
+        if not os.path.exists(path):
+            path = f"../../../datos/clweb/{year}-{month}-{day}/{t_f}/"
 
     swia = np.loadtxt(path + "SWICA.asc")
 
@@ -127,10 +160,22 @@ def importar_swifa(year, month, day, ti, tf):
 
 
 def importar_lpw(year, month, day, ti, tf):
+    if len(str(int(ti))) == 1:
+        t_i = "0" + str(int(ti))
+    else:
+        t_i = int(ti)
+
+    if len(str(int(tf))) == 1:
+        t_f = "0" + str(int(tf))
+    else:
+        t_f = int(tf)
+
     if gethostname() == "magneto2":
         path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
     else:
-        path = f"../../../datos/clweb/{year}-{month}-{day}/"
+        path = f"../../../datos/clweb/{year}-{month}-{day}/{t_i}/"
+        if not os.path.exists(path):
+            path = f"../../../datos/clweb/{year}-{month}-{day}/{t_f}/"
 
     lpw = np.loadtxt(path + "LPW.asc")
 

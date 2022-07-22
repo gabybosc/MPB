@@ -14,7 +14,7 @@ plt.rcParams["axes.prop_cycle"] = cycler(
 )
 
 path = "../../../datos/simulacion_chuanfei/"
-datos = np.loadtxt(path + "ejex_new2_+.gz")  # high resolution
+datos = np.loadtxt(path + "nueva_simu/ejex_nuevasimu+.gz")  # high resolution
 
 mu0 = 4e-7 * np.pi  # T m / A
 mp = 1.67e-27  # proton mass, kg
@@ -86,23 +86,25 @@ for ion in ["O+", "O2+", "CO2+"]:
 
 """Ancho MPB: hay una función al fondo que uso para elegir los límites que
 tomé acá"""
+lim_sup = 1.20
+lim_inf = 1.175
 
-x_cut = x[donde(x, 1.174) : donde(x, 1.22)]
-B_cut = B_norm[donde(x, 1.174) : donde(x, 1.22)]
+x_cut = x[donde(x, lim_inf) : donde(x, lim_sup)]
+B_cut = B_norm[donde(x, lim_inf) : donde(x, lim_sup)]
 
 coef = np.polynomial.polynomial.polyfit(x_cut, B_cut, deg=1)
 
-MPR = np.mean(B_norm[donde(x, 1.16) : donde(x, 1.174)])
+MPR = np.mean(B_norm[donde(x, lim_inf - 0.015) : donde(x, lim_inf)])
 
 MPB_inicio = donde(coef[0] + x * coef[1], MPR)
-MPB_fin = donde(x, 1.22)
+MPB_fin = donde(x, lim_sup)
 
 plt.figure()
 plt.title("Campo magnético y ajuste")
 plt.plot(x, B_norm, ".")
 plt.plot(x, coef[0] + x * coef[1])
 plt.axhline(y=MPR, c="k")
-plt.axhline(y=B_norm[donde(x, 1.22)], c="k")
+plt.axhline(y=B_norm[donde(x, lim_sup)], c="k")
 plt.ylabel("|B|")
 plt.xlabel("x (RM)")
 plt.ylim(ymin=0)
@@ -116,10 +118,16 @@ print(f"ancho de la mpb = {ancho_mpb:.3g} km")
 EH_medio = np.mean(np.linalg.norm(Ehall[MPB_inicio:MPB_fin], axis=1)) * 1e3
 Ecv_medio = np.mean(np.linalg.norm(Ecv[MPB_inicio:MPB_fin], axis=1)) * 1e3
 Ep_medio = np.mean(np.linalg.norm(Ep[MPB_inicio:MPB_fin], axis=1)) * 1e3
+J_medio = np.mean(np.linalg.norm(J[MPB_inicio:MPB_fin], axis=1)) * 1e3
+normal = [1, 0, 0]
+Bdown = np.mean(B[donde(x, lim_inf - 0.015) : donde(x, lim_inf)], axis=0) * 1e-9
+Bup = np.mean(B[donde(x, lim_sup) : donde(x, lim_sup + 0.015)], axis=0) * 1e-9
+J_salto = 1 / (mu0 * ancho_mpb * 1e3) * np.cross(normal, Bup - Bdown) * 1e9
 
 print(
     f"EHall medio = {EH_medio} mV/m\nEcv medio = {Ecv_medio} mV/m\nEp medio = {Ep_medio} mV/m"
 )
+print(f"J medio = {J_medio} nA/m², J jump = {np.linalg.norm(J_salto)} nA/m²")
 
 # longitud inercial de protones
 paso = 20
@@ -325,7 +333,4 @@ def ancho(x, B):
     ax2.grid()
 
     multi = MultiCursor(fig.canvas, (ax1, ax2), color="black", lw=1)
-    plt.show()
-    plt.show()
-    plt.show()
     plt.show()

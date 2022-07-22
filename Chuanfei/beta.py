@@ -4,10 +4,8 @@ import matplotlib.pyplot as plt
 # import sys
 
 
-path = "../../../datos/simulacion_chuanfei/"
-datos = np.loadtxt(
-    path + "Z=0_HallOn.gz"
-)  # todos los datos ordenados con y,z menores a 1 RM
+path = "../../../datos/simulacion_chuanfei/nueva_simu/"
+datos = np.loadtxt(path + "z=0.gz")  # todos los datos ordenados con y,z menores a 1 RM
 
 # sys.path.append("..")
 # from funciones import donde
