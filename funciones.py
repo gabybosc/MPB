@@ -36,7 +36,7 @@ def deltaB(B):
     Bnorm = np.linalg.norm(B_medio)
 
     prod_interno = np.dot(B - B_medio, B_medio) / Bnorm
-    abs_deltaB_para = np.abs(prod_interno) / Bnorm  # |deltaB_para / B|
+    abs_deltaB_para = np.abs(prod_interno) / Bnorm  # |deltaB_para / B|, de Nx1
 
     N = np.zeros((len(prod_interno), len(B_medio)))
 
@@ -44,12 +44,15 @@ def deltaB(B):
         N[i, :] = prod_interno[i] * B_medio / Bnorm
         deltaB_perp = (B - B_medio) - N
         # y ahora necesito el valor abs de perp
-        abs_deltaB_perp = np.abs(deltaB_perp) / Bnorm
-
+        abs_deltaB_perp = np.abs(deltaB_perp) / Bnorm  # de Nx3
+    # ante dudas leer la tesis de lic
     return abs_deltaB_para, abs_deltaB_perp
 
 
 def Bpara_Bperp(B, t, ti, tf):
+    """
+    Devuelve Bpara Bperp y el tiempo para plotear
+    """
     j_inicial = donde(t, ti)
     j_final = donde(t, tf)
 
@@ -57,7 +60,7 @@ def Bpara_Bperp(B, t, ti, tf):
     B_para = np.zeros(j_final - j_inicial)
     B_perp = np.zeros((j_final - j_inicial, 3))
     B_perp_norm = np.zeros(j_final - j_inicial)
-    for j in range(j_inicial, j_final):
+    for j in range(j_inicial, j_final - 25):
         Mi = j
         Mf = j + 25
         M_delta = 12  # overlap de 12
@@ -74,7 +77,7 @@ def Bpara_Bperp(B, t, ti, tf):
 
 def corrientes(normal, Bup, Bdown, ancho_mpb):
     """Toma la normal, el campo up/downstream (en nT) y el ancho de la mpb (en km)
-    para calcular la corriente en superficie y la volumétrica"""
+    y devuelve j_s y j_v"""
     mu = 4 * np.pi * 1e-7  # Henry/m
     js = np.cross(normal, (Bup - Bdown)) / mu  # nA/m
     jv = js / (1000 * ancho_mpb)  # nA/m²

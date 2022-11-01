@@ -58,6 +58,40 @@ def importar_mag(year, month, day, ti, tf):
     return mag, t_cut, B_cut, posicion_cut
 
 
+###########################################################
+
+
+def importar_VEX_mag(year, month, day, ti, tf):
+    if gethostname() == "magneto2":
+        path = "../../../../../media/gabybosc/datos/clweb/"
+    else:
+        path = "../../../datos/clweb/"
+
+    if os.path.isfile(path + "mag_filtrado.txt"):
+        mag = np.loadtxt(path + "mag_filtrado.txt", skiprows=2)
+        B = mag[:, :3]
+        mag = np.loadtxt(path + "MAG.asc")
+
+    else:
+        mag = np.loadtxt(path + "VEX_MAG.asc")
+        B = mag[:, 6:9]
+
+    hh = mag[:, 3]
+    mm = mag[:, 4]
+    ss = mag[:, 5]
+
+    t = hh + mm / 60 + ss / 3600  # hdec
+    inicio = donde(t, ti)
+    fin = donde(t, tf)
+
+    t_cut = t[inicio:fin]
+    B_cut = B[inicio:fin]
+
+    if len(B_cut) != len(t_cut):
+        print("no tenemos la misma cantidad de datos t que de B")
+    return mag, t_cut, B_cut
+
+
 # #########################################################################SWEA
 
 
@@ -383,4 +417,5 @@ def importar_fila(year, month, day, hora):
     if fila is None:
         print("no encuentro la fila")
 
+    return fila, hoja_parametros, hoja_MVA, hoja_Bootstrap, hoja_Ajuste
     return fila, hoja_parametros, hoja_MVA, hoja_Bootstrap, hoja_Ajuste

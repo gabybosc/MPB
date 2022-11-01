@@ -300,6 +300,9 @@ Ecv = np.array([-np.cross(v_SI[i], B_SI[i]) for i in range(len(B))])  # V/m
 Ehall = np.array(
     [1 / (e_SI * n_SI[i]) * np.cross(J_SI[i], B_SI[i]) for i in range(len(B))]
 )
+EH_medio = np.mean(np.linalg.norm(Ehall[ii:jj], axis=1)) * 1e3
+print(f"EHall medio = {EH_medio:.3g} mV/m")
+
 
 plt.figure()
 ax4 = plt.subplot2grid((2, 1), (0, 0))

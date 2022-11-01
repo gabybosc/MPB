@@ -125,9 +125,9 @@ Bup = np.mean(B[donde(x, lim_sup) : donde(x, lim_sup + 0.015)], axis=0) * 1e-9
 J_salto = 1 / (mu0 * ancho_mpb * 1e3) * np.cross(normal, Bup - Bdown) * 1e9
 
 print(
-    f"EHall medio = {EH_medio} mV/m\nEcv medio = {Ecv_medio} mV/m\nEp medio = {Ep_medio} mV/m"
+    f"EHall medio = {EH_medio:.3g} mV/m\nEcv medio = {Ecv_medio:.3g} mV/m\nEp medio = {Ep_medio:.3g} mV/m"
 )
-print(f"J medio = {J_medio} nA/m², J jump = {np.linalg.norm(J_salto)} nA/m²")
+print(f"J medio = {J_medio:.3g} nA/m², J jump = {np.linalg.norm(J_salto):.3g} nA/m²")
 
 # longitud inercial de protones
 paso = 20
@@ -138,6 +138,9 @@ density_mean = [
 
 ion_length = 2.28e07 / np.sqrt(density_mean) * 1e-5  # km
 
+print(
+    f"la longitud inercial de iones en la zona Upstream es {np.mean(ion_length[donde(x, lim_sup) : donde(x, lim_sup + 0.015)]):.3g} km"
+)
 fig, ax = plt.subplots()
 ax2 = ax.twinx()
 
