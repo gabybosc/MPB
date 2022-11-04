@@ -5,7 +5,7 @@ import matplotlib.dates as md
 import matplotlib.pyplot as plt
 from cycler import cycler
 import numpy as np
-import pandas as pd
+from socket import gethostname
 import sys
 
 sys.path.append("..")
@@ -13,7 +13,12 @@ sys.path.append("..")
 from funciones_plot import equal_axes, onpick1
 from funciones import donde, datenum
 
-path = "../../../datos/simulacion_chuanfei/nueva_simu/"
+
+if gethostname() == "magneto2":
+    path = f"../../../../../media/gabybosc/datos/Chuanfei/"
+elif gethostname() == "gabybosc":
+    path = "../../../datos/simulacion_chuanfei/"
+
 datos_enteros = np.loadtxt(path + "sat_HallOn_2022_highRes.sat", skiprows=2)
 
 """
@@ -73,9 +78,9 @@ velocidad = {
 
 # Datos de MAVEN
 mag, t, B_mag, posicion = importar_mag(2016, "03", 16, 17.7, 18.5)
-STATIC, t_static, H_density, O_density, O2_density, CO2_density = importar_STATIC(
-    2016, "03", 16, 17.7, 18.5
-)
+# STATIC, t_static, H_density, O_density, O2_density, CO2_density = importar_STATIC(
+#     2016, "03", 16, 17.7, 18.5
+# )
 
 # Datos del análisis de MAVEN
 R = [1.082, -0.064, 0.515]
@@ -108,9 +113,9 @@ ii = donde(t_simu, ti_simu)
 jj = donde(t_simu, tf_simu)
 
 lpw, t_lpw, e_density, flag = importar_lpw(2016, "03", 16, t_cut[0], t_cut[-1])
-swia, t_swia, proton_density, sw_vel = importar_swica(
-    2016, "03", 16, t_cut[0], t_cut[-1]
-)
+# swia, t_swia, proton_density, sw_vel = importar_swica(
+#     2016, "03", 16, t_cut[0], t_cut[-1]
+# )
 
 year = 2016
 month = 3
@@ -118,11 +123,11 @@ day = 16
 
 tiempo_mag = np.array([np.datetime64(datenum(year, month, day, x)) for x in t_cut])
 tiempo_simu = np.array([np.datetime64(datenum(year, month, day, x)) for x in t_simu])
-tiempo_swia = np.array([np.datetime64(datenum(year, month, day, x)) for x in t_swia])
+# tiempo_swia = np.array([np.datetime64(datenum(year, month, day, x)) for x in t_swia])
 tiempo_lpw = np.array([np.datetime64(datenum(year, month, day, x)) for x in t_lpw])
-tiempo_static = np.array(
-    [np.datetime64(datenum(year, month, day, x)) for x in t_static]
-)
+# tiempo_static = np.array(
+#     [np.datetime64(datenum(year, month, day, x)) for x in t_static]
+# )
 
 
 idx_flag = [i for i in range(len(flag)) if flag[i] > 50]
@@ -218,7 +223,7 @@ plt.ylabel("|B| (nT)")
 
 ax3 = plt.subplot2grid((5, 1), (2, 0), sharex=ax1)
 ax3.xaxis.set_major_formatter(xfmt)
-ax3.plot(tiempo_swia, np.linalg.norm(sw_vel, axis=1))
+# ax3.plot(tiempo_swia, np.linalg.norm(sw_vel, axis=1))
 ax3.plot(tiempo_simu, np.linalg.norm(velocidad["H+"], axis=1))
 ax3.set_ylabel("SW proton \n velocity (km/s)")
 
@@ -230,7 +235,7 @@ ax4.set_ylabel("Electron \n density (cm⁻³)")
 
 ax5 = plt.subplot2grid((5, 1), (4, 0), sharex=ax1)
 ax5.xaxis.set_major_formatter(xfmt)
-plt.plot(tiempo_swia, proton_density)
+# plt.plot(tiempo_swia, proton_density)
 plt.plot(tiempo_simu, densities["H+"])
 ax5.set_ylabel("SW Proton \n density (cm⁻³)")
 ax5.set_xlabel("Time (UTC)")
@@ -339,10 +344,10 @@ xfmt = md.DateFormatter("%H:%M")
 ax1 = plt.gca()
 ax1 = plt.subplot2grid((1, 1), (0, 0))
 ax1.xaxis.set_major_formatter(xfmt)
-ax1.semilogy(tiempo_static, H_density, ".", label="H")
-ax1.semilogy(tiempo_static, O_density, ".", label="O")
-ax1.semilogy(tiempo_static, O2_density, ".", label="O2")
-ax1.semilogy(tiempo_static, CO2_density, ".", label="CO2")
+# ax1.semilogy(tiempo_static, H_density, ".", label="H")
+# ax1.semilogy(tiempo_static, O_density, ".", label="O")
+# ax1.semilogy(tiempo_static, O2_density, ".", label="O2")
+# ax1.semilogy(tiempo_static, CO2_density, ".", label="CO2")
 ax1.semilogy(tiempo_simu, densities["H+"], c="C0", label="H simu")
 ax1.semilogy(tiempo_simu, densities["O+"], c="C1", label="O simu")
 ax1.semilogy(tiempo_simu, densities["O2+"], c="C2", label="O2 simu")

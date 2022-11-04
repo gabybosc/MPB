@@ -14,25 +14,14 @@ sys.path.append("..")
 
 from funciones import find_nearest, array_datenums, fechas
 from funciones_plot import imshow_UTC, plot_datetime
+from importar_datos import importar_t1t2t3t4
 
 plt.ion()
 
 year, month, day, doy = fechas()
 hora = input("Hora (HH) \n")
 
-tiempos_txt = np.loadtxt("../outputs/t1t2t3t4.txt")
-for i in range(len(tiempos_txt)):
-    if (
-        int(year) == int(tiempos_txt[i, 0])
-        and int(doy) == int(tiempos_txt[i, 1])
-        and int(hora) == int(tiempos_txt[i, 2])
-    ):
-        tiempos = [
-            tiempos_txt[i, 2],
-            tiempos_txt[i, 3],
-            tiempos_txt[i, 4],
-            tiempos_txt[i, 5],
-        ]
+tiempos = importar_t1t2t3t4(year, month, day, int(hora))
 timestamps = array_datenums(year, month, day, tiempos)  # lo convierto a datenum
 
 # path = '../../../MAVEN/mag_1s/2016/03/' #path a los datos desde la desktop
@@ -113,9 +102,8 @@ plot_datetime(year, month, day, t_cut, B_cut, "red", "-", 1, 1)
 plt.ylabel("|B| (nT)")
 plt.xlabel("Tiempo UTC (hh:mm:ss)")
 
-fig = plt.figure(
-    3, constrained_layout=True
-)  # Lo bueno de esta forma es que puedo hacer que solo algunos compartan eje
+fig = plt.figure(3)
+# Lo bueno de esta forma es que puedo hacer que solo algunos compartan eje
 fig.subplots_adjust(
     top=0.93, bottom=0.07, left=0.05, right=0.95, hspace=0.005, wspace=0.15
 )

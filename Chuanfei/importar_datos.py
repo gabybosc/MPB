@@ -196,7 +196,12 @@ def importar_lpw(year, month, day, ti, tf):
 
 def importar_STATIC(year, month, day, ti, tf):
 
-    STATIC = pd.read_csv("../../../datos/STATIC/STATIC_Ni_2016-03-16.txt")
+    if gethostname() == "magneto2":
+        path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
+    else:
+        path = "../../../datos/STATIC/"
+
+    STATIC = pd.read_csv("STATIC_Ni_2016-03-16.txt")
 
     t_hdec = []
     for t_UTC in STATIC["Time [UTC]"]:
