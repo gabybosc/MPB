@@ -1,42 +1,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
-from glob import glob
+from importar_datos import importar_VEX_mag_AMDA
 
 sys.path.append("..")
-from funciones import (
-    donde,
-    fechas,
-    tiempos,
-    Mij,
-    error,
-)
+from funciones import donde, fechas, tiempos, Mij, error, corrientes
 from funciones_plot import hodograma
 
 
 np.set_printoptions(precision=4)
-
-
-def importar_VEX_mag_AMDA(year, month, day, ti, tf):
-    path = glob(f"../../../datos/VEX MAG/{day}{month}{year}/*.txt")
-    B = np.genfromtxt(path[0], usecols=[1, 2, 3])
-    tt = np.genfromtxt(path[0], usecols=0, dtype="str")
-    fecha = np.array([x.split("T") for x in tt])
-    hora = np.array([x.split(":") for x in fecha[:, 1]])
-    hh = np.array([int(x) for x in hora[:, 0]])
-    mm = np.array([int(x) for x in hora[:, 1]])
-    ss = np.array([float(x) for x in hora[:, 2]])
-    t = hh + mm / 60 + ss / 3600  # hdec
-    inicio = donde(t, ti)
-    fin = donde(t, tf)
-
-    t_cut = t[inicio:fin]
-    B_cut = B[inicio:fin]
-    return t_cut, B_cut
-
-
-year, month, day, doy = fechas()
-ti, tf = tiempos()
 
 
 def MVA(year, month, day, ti_MVA, tf_MVA):
@@ -85,9 +57,28 @@ def MVA(year, month, day, ti_MVA, tf_MVA):
     return x3, B, t
 
 
+# year, month, day, doy = fechas()
+# ti, tf = tiempos()s
+year, month, day = 2007, 11, 21
+# ti, tf = 2.26012, 2.26799
+ti = 2.26095222
+tf = 2.2667852777777777
 x3, B, t = MVA(year, month, day, ti, tf)
 plt.show()
 
+t1 = ti
+t4 = tf
+inicio_up = donde(t, t1 - 0.015)
+fin_up = donde(t, t1)
+B_upstream = np.mean(B[inicio_up:fin_up, :], axis=0)  # nT
+
+inicio_down = donde(t, t4)
+fin_down = donde(t, t4 + 0.015)
+B_downstream = np.mean(B[inicio_down:fin_down, :], axis=0)  # nT
+
+J_s_MVA, J_v_MVA = corrientes(x3, B_upstream, B_downstream, x_23_MVA)
+
+fuerza_mva = np.cross(J_v_MVA * 1e-9, B[inicio_down, :] * 1e-9)  # N/m^3 #en t4
 # buenas órbitas: SZA no tan alto, el campo en SW no es Bx
 # 21 nov 2007
 # 14 abr 2007
