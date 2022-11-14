@@ -1,5 +1,6 @@
 import numpy as np
 import sys
+from pathlib import Path
 from glob import glob
 
 sys.path.append("..")
@@ -30,21 +31,21 @@ def importar_VEX_mag_AMDA(year, month, day, ti, tf):
 
 def importar_MAG_pds(year, doy, ti, tf):
     path = f"../../../datos/VEX/{year}/VEX_MAG_{year}{doy}.tab"
+    if Path(path).stat().st_size > 1000:
+        B = np.genfromtxt(path, skip_header=1, usecols=[5, 6, 7])
+        pos = np.genfromtxt(path, skip_header=1, usecols=[8, 9, 10])
+        tt = np.genfromtxt(path, skip_header=1, usecols=0, dtype="str")
 
-    B = np.genfromtxt(path, skip_header=1, usecols=[5, 6, 7])
-    pos = np.genfromtxt(path, skip_header=1, usecols=[8, 9, 10])
-    tt = np.genfromtxt(path, skip_header=1, usecols=0, dtype="str")
+        fecha = np.array([x.split("T") for x in tt])
+        hora = np.array([x.split(":") for x in fecha[:, 1]])
+        hh = np.array([int(x) for x in hora[:, 0]])
+        mm = np.array([int(x) for x in hora[:, 1]])
+        ss = np.array([float(x) for x in hora[:, 2]])
+        t = hh + mm / 60 + ss / 3600  # hdec
 
-    fecha = np.array([x.split("T") for x in tt])
-    hora = np.array([x.split(":") for x in fecha[:, 1]])
-    hh = np.array([int(x) for x in hora[:, 0]])
-    mm = np.array([int(x) for x in hora[:, 1]])
-    ss = np.array([float(x) for x in hora[:, 2]])
-    t = hh + mm / 60 + ss / 3600  # hdec
+        inicio = donde(t, ti)
+        fin = donde(t, tf)
 
-    inicio = donde(t, ti)
-    fin = donde(t, tf)
-
-    t_cut = t[inicio:fin]
-    B_cut = B[inicio:fin]
+        t_cut = t[inicio:fin]
+        B_cut = B[inicio:fin]
     return t_cut, B_cut, pos
