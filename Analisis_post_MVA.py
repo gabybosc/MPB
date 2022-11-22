@@ -126,7 +126,7 @@ omega = np.arccos(
     / (np.linalg.norm(B_upstream) * np.linalg.norm(B_downstream))
 )
 
-mu = 4 * np.pi * 1e-7  # Henry/m
+mu = 4 * np.pi * 1e-7  # Tm/A
 
 J_s_MVA, J_v_MVA = corrientes(x3, B_upstream, B_downstream, np.linalg.norm(x_23_MVA))
 J_s_fit, J_v_fit = corrientes(

@@ -84,10 +84,11 @@ def importar_MAG(path):
         t = hh + mm / 60 + ss / 3600  # hdec
         doy = path.split("/")[-1].split("_")[-1].split(".")[0][4:]
 
-    return t, B, pos, doy
+        return t, B, pos, doy
 
 
 for i, j in enumerate(path):
+    print(j)
     t, B, pos, doy = importar_MAG(j)
 
     orbita = pos / 6050

@@ -77,12 +77,12 @@ def Bpara_Bperp(B, t, ti, tf):
 
 def corrientes(normal, Bup, Bdown, ancho_mpb):
     """Toma la normal, el campo up/downstream (en nT) y el ancho de la mpb (en km)
-    y devuelve j_s y j_v"""
+    y devuelve j_s y j_v en mA/m y nA/m²"""
     mu = 4 * np.pi * 1e-7  # Henry/m
     js = np.cross(normal, (Bup - Bdown)) / mu  # nA/m
     jv = js / (1000 * ancho_mpb)  # nA/m²
 
-    return js, jv
+    return js * 1e-6, jv
 
 
 def diezmar(largo, corto):

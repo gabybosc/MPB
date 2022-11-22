@@ -75,7 +75,7 @@ fin_swea = donde(t_swea, tf)
 
 # ######################################################################## SWIA
 
-swia, t_swia, density = importar_swia(year, month, day, ti, tf)
+swia, t_swia, density, vel_cut, vel_norm = importar_swia(year, month, day, ti, tf)
 
 # t_swica, t_swifa, density_swica, density_swifa = importar_swicfa(
 #     year, month, day, ti, tf
