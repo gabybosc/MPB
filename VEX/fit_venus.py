@@ -15,12 +15,27 @@ def altitude(SZA):
     return alt / 6050
 
 
-def fit():
+def fit_Xu():
+    """ Devuelve el fit de Xu 2021    """
     sza = np.linspace(0, np.pi, 100)
     alt = 1 + altitude(sza * 180 / np.pi)
 
     y_alt = np.array([alt[i] * np.sin(sza[i]) for i in range(len(alt))])
     x_alt = np.array([alt[i] * np.cos(sza[i]) for i in range(len(alt))])
+
+    yz = y_alt[x_alt >= 0]
+    xx = x_alt[x_alt >= 0]
+    return xx, yz
+
+
+def fit_R(R, sza):
+    """ Ajusta el fit de Xu 2021 para la posicion de la nave"""
+    a = (np.linalg.norm(R) - 1) * 6050 - 0.22 * sza - 389
+    sza_array = np.linspace(0, np.pi / 2, 100)
+    alt = 1 + (a + 0.22 * (sza_array * 180 / np.pi) + 389) / 6050
+
+    y_alt = np.array([alt[i] * np.sin(sza_array[i]) for i in range(len(alt))])
+    x_alt = np.array([alt[i] * np.cos(sza_array[i]) for i in range(len(alt))])
 
     yz = y_alt[x_alt >= 0]
     xx = x_alt[x_alt >= 0]

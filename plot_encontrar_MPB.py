@@ -19,16 +19,16 @@ Para eso, grafica |B|, BxByBz, swea, swia y lpw.
 
 np.set_printoptions(precision=4)
 
-# year, month, day, doy = fechas()
+year, month, day, doy = fechas()
 
-doy = int(input("sólo el doy en DDD \n"))
-year = 2016
-date_orbit = dt.datetime(year, 1, 1) + dt.timedelta(doy - 1)
-
-year = date_orbit.strftime("%Y")
-month = date_orbit.strftime("%m")
-day = date_orbit.strftime("%d")
-doy = date_orbit.strftime("%j")
+# doy = int(input("sólo el doy en DDD \n"))
+# year = 2016
+# date_orbit = dt.datetime(year, 1, 1) + dt.timedelta(doy - 1)
+#
+# year = date_orbit.strftime("%Y")
+# month = date_orbit.strftime("%m")
+# day = date_orbit.strftime("%d")
+# doy = date_orbit.strftime("%j")
 
 mag, t, B, posicion = importar_mag_1s(year, month, day, 0.1, 24)
 
