@@ -177,21 +177,32 @@ def importar_swia(year, month, day, ti, tf):
     else:
         path = "../../../datos/SWIA/"
 
-    swia = cdf.CDF(path + f"mvn_swi_l2_onboardsvymom_{year}{month}{day}_v01_r01.cdf")
 
-    t_unix = swia.varget("time_unix")
-    density = swia.varget("density")  # cm⁻³
-    temperature = swia.varget("temperature_mso")  # eV
-    vel_mso_xyz = swia.varget("velocity_mso")  # km/s
+    if (
+        Path(path + f"/mvn_swi_l2_onboardsvymom_{year}{month}{day}_v01_r01.cdf")
+        .stat()
+        .st_size
+        > 1000
+    ):
+        swia = cdf.CDF(path + f"mvn_swi_l2_onboardsvymom_{year}{month}{day}_v01_r01.cdf")
 
-    t_swia = unix_to_decimal(t_unix)
-    inicio = donde(t_swia, ti)
-    fin = donde(t_swia, tf)
+        t_unix = swia.varget("time_unix")
+        density = swia.varget("density")  # cm⁻³
+        temperature = swia.varget("temperature_mso")  # eV
+        vel_mso_xyz = swia.varget("velocity_mso")  # km/s
 
-    t_cut = t_swia[inicio:fin]
-    density_cut = density[inicio:fin]
-    temperature_cut = temperature[inicio:fin]
-    vel_mso_cut = vel_mso_xyz[inicio:fin]  # km/s
+        t_swia = unix_to_decimal(t_unix)
+        inicio = donde(t_swia, ti)
+        fin = donde(t_swia, tf)
+
+        t_cut = t_swia[inicio:fin]
+        density_cut = density[inicio:fin]
+        temperature_cut = temperature[inicio:fin]
+        vel_mso_cut = vel_mso_xyz[inicio:fin]  # km/s
+    
+    else:
+        print("swia vacío")
+        swia, t_cut,  density_cut, temperature_cut, vel_mso_cut = 0, 0, 0, 0, 0
 
     return swia, t_cut, density_cut, temperature_cut, vel_mso_cut
 
