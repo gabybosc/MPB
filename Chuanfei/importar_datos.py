@@ -21,7 +21,7 @@ def importar_mag(year, month, day, ti, tf):
     else:
         t_f = int(tf)
 
-    if gethostname() == "magneto2":
+    if gethostname() == "gbosco":
         path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_i}/"
     else:
         path = f"../../../datos/clweb/{year}-{month}-{day}/{t_i}/"
@@ -67,7 +67,7 @@ def importar_swea(year, month, day, ti, tf):
         t_f = "0" + str(int(tf))
     else:
         t_f = int(tf)
-    if gethostname() == "magneto2":
+    if gethostname() == "gbosco":
         path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
     else:
         path = f"../../../datos/clweb/{year}-{month}-{day}/{t_i}/"
@@ -114,7 +114,7 @@ def importar_swica(year, month, day, ti, tf):
     else:
         t_f = int(tf)
 
-    if gethostname() == "magneto2":
+    if gethostname() == "gbosco":
         path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
     else:
         path = f"../../../datos/clweb/{year}-{month}-{day}/{t_i}/"
@@ -137,7 +137,7 @@ def importar_swica(year, month, day, ti, tf):
 
 def importar_swifa(year, month, day, ti, tf):
 
-    if gethostname() == "magneto2":
+    if gethostname() == "gbosco":
         path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
     else:
         path = f"../../../datos/clweb/{year}-{month}-{day}/"
@@ -170,7 +170,7 @@ def importar_lpw(year, month, day, ti, tf):
     else:
         t_f = int(tf)
 
-    if gethostname() == "magneto2":
+    if gethostname() == "gbosco":
         path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
     else:
         path = f"../../../datos/clweb/{year}-{month}-{day}/{t_i}/"
@@ -196,7 +196,7 @@ def importar_lpw(year, month, day, ti, tf):
 
 def importar_STATIC(year, month, day, ti, tf):
 
-    if gethostname() == "magneto2":
+    if gethostname() == "gbosco":
         path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"
     else:
         path = "../../../datos/STATIC/"

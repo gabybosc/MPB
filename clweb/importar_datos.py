@@ -21,7 +21,7 @@ def importar_mag(year, month, day, ti, tf):
     else:
         t_f = int(tf)
 
-    if gethostname() == "magneto2":
+    if gethostname() == "gbosco":
         path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_i}/"
         if not os.path.exists(path):  # si no existe, usa int(tf)
             path = (
@@ -62,7 +62,7 @@ def importar_mag(year, month, day, ti, tf):
 
 
 def importar_VEX_mag(year, month, day, ti, tf):
-    if gethostname() == "magneto2":
+    if gethostname() == "gbosco":
         path = "../../../../../media/gabybosc/datos/clweb/"
     else:
         path = "../../../datos/clweb/"
@@ -106,7 +106,7 @@ def importar_swea(year, month, day, ti, tf):
     else:
         t_f = int(tf)
 
-    if gethostname() == "magneto2":
+    if gethostname() == "gbosco":
         path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_i}/"
         if not os.path.exists(path):  # si no existe, usa int(tf)
             path = (
@@ -157,7 +157,7 @@ def importar_swia(year, month, day, ti, tf):
     else:
         t_f = int(tf)
 
-    if gethostname() == "magneto2":
+    if gethostname() == "gbosco":
         path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_i}/"
         if not os.path.exists(path):  # si no existe, usa int(tf)
             path = (
@@ -197,7 +197,7 @@ def importar_swicfa(year, month, day, ti, tf):
         t_f = "0" + str(int(tf))
     else:
         t_f = int(tf)
-    if gethostname() == "magneto2":
+    if gethostname() == "gbosco":
         path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_i}/"
         if not os.path.exists(path):  # si no existe, usa int(tf)
             path = (
@@ -235,7 +235,7 @@ def importar_vel_swica(year, month, day, ti, tf):
     else:
         t_f = int(tf)
 
-    if gethostname() == "magneto2":
+    if gethostname() == "gbosco":
         path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_i}/"
         if not os.path.exists(path):  # si no existe, usa int(tf)
             path = (
@@ -277,7 +277,7 @@ def importar_lpw(year, month, day, ti, tf):
     else:
         t_f = int(tf)
 
-    if gethostname() == "magneto2":
+    if gethostname() == "gbosco":
         path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_i}/"
         if not os.path.exists(path):  # si no existe, usa int(t_f)
             path = (
@@ -317,7 +317,7 @@ def importar_static(year, month, day, ti, tf):
     else:
         t_f = int(tf)
 
-    if gethostname() == "magneto2":
+    if gethostname() == "gbosco":
         path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_i}/"
         if not os.path.exists(path):  # si no existe, usa t_f
             path = (

@@ -40,7 +40,7 @@ swia_onboard = f"https://pds-ppi.igpp.ucla.edu/ditdos/download?id=pds://PPI/mave
 # swifa = f"https://pds-ppi.igpp.ucla.edu/ditdos/download?id=pds://PPI/maven.swia.calibrated/data/fine_arc_3d/{year}/{month}/mvn_swi_l2_finearc3d_{year}{month}{day}_v01_r01.cdf"
 
 
-if gethostname() == "magneto2":
+if gethostname() == "gbosco":
     path = f"../../../../../media/gabybosc/datos/"
 else:
     path = "../../../datos/"

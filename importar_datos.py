@@ -17,7 +17,7 @@ def importar_mag_1s(year, month, day, ti, tf):
     day = date_orbit.strftime("%d")
     doy = date_orbit.strftime("%j")
 
-    if gethostname() == "magneto2":
+    if gethostname() == "gbosco":
         path = f"../../../../media/gabybosc/datos/MAG_1s/{year}/"
     elif gethostname() == "gabybosc":
         path = f"../../datos/MAG_1s/{year}/"
@@ -59,7 +59,7 @@ def importar_mag(year, month, day, ti, tf):
     day = date_orbit.strftime("%d")
     doy = date_orbit.strftime("%j")
 
-    if gethostname() == "magneto2":
+    if gethostname() == "gbosco":
         path = f"../../../../media/gabybosc/datos/MAG_hires/"
     elif gethostname() == "gabybosc":
         path = "../../datos/MAG_hires/"
@@ -98,7 +98,7 @@ def importar_swea(year, month, day, ti, tf):
     month = date_orbit.strftime("%m")
     day = date_orbit.strftime("%d")
 
-    if gethostname() == "magneto2":
+    if gethostname() == "gbosco":
         path = f"../../../../media/gabybosc/datos/SWEA/"
     elif gethostname() == "gabybosc":
         path = "../../datos/SWEA/"
@@ -145,7 +145,7 @@ def importar_swica(year, month, day, ti, tf):
     month = date_orbit.strftime("%m")
     day = date_orbit.strftime("%d")
 
-    if gethostname() == "magneto2":
+    if gethostname() == "gbosco":
         path = "../../../../media/gabybosc/datos/SWIA/"
     elif gethostname() == "gabybosc":
         path = "../../datos/SWIA/"
@@ -170,7 +170,7 @@ def importar_swia(year, month, day, ti, tf):
     month = date_orbit.strftime("%m")
     day = date_orbit.strftime("%d")
 
-    if gethostname() == "magneto2":
+    if gethostname() == "gbosco":
         path = "../../../../media/gabybosc/datos/SWIA/"
     elif gethostname() == "gabybosc":
         path = "../../datos/SWIA/"
@@ -203,7 +203,7 @@ def importar_swia(year, month, day, ti, tf):
 #     month = date_orbit.strftime("%m")
 #     day = date_orbit.strftime("%d")
 #
-#     if gethostname() == "magneto2":
+#     if gethostname() == "gbosco":
 #         path = f"../../../../media/gabybosc/datos/SWIA/"
 #     elif gethostname() == "gabybosc":
 #         path = "../../datos/SWIA/"
@@ -236,7 +236,7 @@ def importar_lpw(year, month, day, ti, tf):
     month = date_orbit.strftime("%m")
     day = date_orbit.strftime("%d")
 
-    if gethostname() == "magneto2":
+    if gethostname() == "gbosco":
         path = f"../../../../media/gabybosc/datos/LPW/"
     elif gethostname() == "gabybosc":
         path = "../../datos/LPW/"
@@ -266,7 +266,7 @@ def importar_static(year, month, day, ti, tf):
     month = date_orbit.strftime("%m")
     day = date_orbit.strftime("%d")
 
-    if gethostname() == "magneto2":
+    if gethostname() == "gbosco":
         path = f"../../../../media/gabybosc/datos/STATIC/"
     elif gethostname() == "gabybosc":
         path = "../../datos/STATIC/"
