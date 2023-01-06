@@ -23,3 +23,8 @@ mag, t, B, posicion = importar_mag_1s(year, month, day, 0.1, 24)
 
 
 # plt.show(block=False)
+
+with open("outputs/hora_grupo1.txt", "a") as file:
+    for l in np.unique(horas):
+        file.write(l)
+        file.write("\n")
