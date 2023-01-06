@@ -4,11 +4,11 @@ from matplotlib.widgets import MultiCursor
 from matplotlib.colors import LogNorm
 from funciones import Bpara_Bperp, fechas, tiempos, next_available_row
 from funciones_plot import onpick1
-from importar_datos import importar_mag_1s, importar_lpw, importar_swea, importar_swia
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import datetime as dt
+from importar_datos import importar_mag_1s, importar_lpw, importar_swea, importar_swia
 
 
 """

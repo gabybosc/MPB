@@ -14,12 +14,12 @@ year, month, day, doy = fechas()
 mag, t, B, posicion = importar_mag_1s(year, month, day, 0.1, 24)
 
 
-plt.figure()
-plot_datetime(year, month, day, t, np.linalg.norm(B, axis=1))
-plt.xlabel("t (UTC)")
-plt.ylabel("|B|")
-plt.ylim(ymin=0, ymax=70)
-plt.title("MAG lowres hdec")
+# plt.figure()
+# # plot_datetime(year, month, day, t, np.linalg.norm(B, axis=1))
+# plt.xlabel("t (UTC)")
+# plt.ylabel("|B|")
+# plt.ylim(ymin=0, ymax=70)
+# plt.title("MAG lowres hdec")
 
 
-plt.show(block=False)
+# plt.show(block=False)
