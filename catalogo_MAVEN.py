@@ -3,12 +3,12 @@ import csv as csv
 import pandas as pd
 from funciones import donde
 
-path = "../../Documents/"
-cyril = pd.read_csv(path + "CatalogoMAVEN_Cyril.csv")
+# path = "../../Documents/"
+cyril = pd.read_csv("CatalogoMAVEN_Cyril.csv")
 cyril.rename(
     columns={"yyyy-mm-dd HH:MM:SS": "date", "ThetaBn (deg)": "ThetaBn"}, inplace=True
 )
-halekas = pd.read_csv(path + "CatalogoMAVEN_Halekas.csv")
+halekas = pd.read_csv("CatalogoMAVEN_Halekas.csv")
 halekas.rename(columns={"Unnamed: 0": "date", "Pdyn_proton": "Pdyn"}, inplace=True)
 
 date_c = [fecha[:10] for fecha in cyril["date"]]
@@ -71,6 +71,7 @@ for i in range(len(nov2014)):
     if c < 20 or c > 70:  # los que son muy claramente quasipara o quasiperp
         l.append(i)
 
+print([date_c[lst_c[i]] + "/" + time_c[lst_c[i]] for i in l])
 
 """
 Podría elegir 10 valores random, que seguramente sean suficientemente espaciados en P.
@@ -81,3 +82,10 @@ Eso o mirar los 17 y elegir según la MPB más linda
 #     for i in l:
 #         h = float(halekas["Pdyn"][lst_c[nov2014[i]]])
 #         if
+
+vv = np.unique([date_c[lst_c[i]] for i in l])  # las fechas sin repetir
+
+with open("outputs/catalogo.txt", "a") as file:
+    for i in vv:
+        file.write(f"{i}")
+        file.write("\n")
