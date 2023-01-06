@@ -9,6 +9,7 @@ import urllib.request
 import shutil
 import numpy as np
 import datetime as dt
+import os as os
 
 np.set_printoptions(precision=4)
 
@@ -29,8 +30,12 @@ directory = f"../../../datos/MAG_1s/{year}/"
 for i in range(len(doy)):
     mag_1s = f"https://pds-ppi.igpp.ucla.edu/ditdos/download?id=pds://PPI/maven.mag.calibrated/data/ss/1sec/{year}/{month}/mvn_mag_l2_{year}{doy[i]}ss1s_{year}{month}{day[i]}_v01_r01.sts"
 
-    with urllib.request.urlopen(mag_1s) as response, open(
-        directory + f"mvn_mag_l2_{year}{doy[i]}ss1s_{year}{month}{day[i]}_v01_r01.sts",
-        "wb",
-    ) as out_file:
-        shutil.copyfileobj(response, out_file)
+    path = (
+        directory + f"mvn_mag_l2_{year}{doy[i]}ss1s_{year}{month}{day[i]}_v01_r01.sts"
+    )
+    if not os.path.isfile(path):  # si no está ya descargado
+        with urllib.request.urlopen(mag_1s) as response, open(
+            path,
+            "wb",
+        ) as out_file:
+            shutil.copyfileobj(response, out_file)

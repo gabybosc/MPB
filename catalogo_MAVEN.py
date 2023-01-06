@@ -17,6 +17,9 @@ time_c = [fecha[11:] for fecha in cyril["date"]]
 date_h = [fecha[:10] for fecha in halekas["date"]]
 time_h = [fecha[11:] for fecha in halekas["date"]]
 
+anio = input("año\n")
+mes = input("mes (MM)\n")
+
 """
 Las fechas de Cyril marcan el BS
 Las fechas de Halekas marcan el SW
@@ -56,7 +59,7 @@ nov2014 = []  # lista de índices de las listas lstc y lsth de noviembre
 for i, val in enumerate(lst_c):
     year = date_c[val].split("-")[0]
     month = date_c[val].split("-")[1]
-    if year == "2014" and month == "11":
+    if year == anio and month == mes:
         nov2014.append(i)
 
 # date_c[lst_c[nov2014[0]]] me da la fecha
@@ -71,21 +74,21 @@ for i in range(len(nov2014)):
     if c < 20 or c > 70:  # los que son muy claramente quasipara o quasiperp
         l.append(i)
 
-print([date_c[lst_c[i]] + "/" + time_c[lst_c[i]] for i in l])
-
-"""
-Podría elegir 10 valores random, que seguramente sean suficientemente espaciados en P.
-Eso o mirar los 17 y elegir según la MPB más linda
-"""
-
 # if len(l) > 10:
 #     for i in l:
 #         h = float(halekas["Pdyn"][lst_c[nov2014[i]]])
 #         if
 
-vv = np.unique([date_c[lst_c[i]] for i in l])  # las fechas sin repetir
+vv = np.unique([date_c[lst_c[nov2014[i]]] for i in l])  # las fechas sin repetir
 
-with open("outputs/catalogo.txt", "a") as file:
+"""
+Si son muchas, elige 10 random y después yo miro y buscando la MPB más linda elijo cuál :)
+"""
+
+if len(vv) > 10:
+    vv = np.random.choice(vv, 10)
+
+with open("outputs/catalogo_grupo2.txt", "a") as file:
     for i in vv:
         file.write(f"{i}")
         file.write("\n")

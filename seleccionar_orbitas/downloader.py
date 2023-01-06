@@ -11,46 +11,19 @@ import shutil
 import numpy as np
 import datetime as dt
 from socket import gethostname
+import os as os
 
-anio = 2016
 # fechas = np.arange(61, 92)  # np.loadtxt("outputs/fechas_MVA_2016.txt")
 
-lst = ["2016-01-08",
-"2016-01-13",
-"2016-01-07",
-"2016-01-24",
-"2016-01-18",
-"2016-01-31",
-"2016-01-11",
-"2016-01-14",
-"2016-01-26",
-"2016-01-19",
-"2016-01-05",
-"2016-01-29",
-"2016-01-11",
-"2016-01-02",
-"2016-01-15",
-"2016-01-16",
-"2016-01-03",
-"2016-01-03",
-"2016-01-05",
-"2016-01-07",
-"2016-01-13",
-"2016-01-15",
-"2016-01-07",
-"2016-01-15",
-"2016-01-16",
-"2016-01-18",]
+lst = np.genfromtxt("../outputs/catalogo_grupo1.txt", dtype="str")
 
-a = [int(x[-2:]) for x in lst]
-fechas = np.unique(a)
+# a = [int(x[-2:]) for x in lst]
+# fechas = np.unique(a)
 
-for j in range(len(fechas)):
-    doy = int(fechas[j])
+for j in lst:
+    year, month, day = j.split("-")
 
-    date_orbit = dt.datetime(anio, 1, 1) + dt.timedelta(
-        doy - 1
-    )  # para convertir el doty en date
+    date_orbit = dt.datetime(int(year), int(month), int(day))
 
     year = date_orbit.strftime("%Y")
     month = date_orbit.strftime("%m")
@@ -61,6 +34,9 @@ for j in range(len(fechas)):
         path = f"../../../../../media/gabybosc/datos/"
     else:
         path = "../../../datos/"
+
+    mag_1s = f"https://pds-ppi.igpp.ucla.edu/ditdos/download?id=pds://PPI/maven.mag.calibrated/data/ss/1sec/{year}/{month}/mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts"
+
     # mag_hires = f"https://pds-ppi.igpp.ucla.edu/ditdos/download?id=pds://PPI/maven.mag.calibrated/data/ss/highres/{year}/{month}/mvn_mag_l2_{year}{doy}ss_{year}{month}{day}_v01_r01.sts"
 
     swea = f"https://pds-ppi.igpp.ucla.edu/ditdos/download?id=pds://PPI/maven.swea.calibrated/data/svy_spec/{year}/{month}/mvn_swe_l2_svyspec_{year}{month}{day}_v04_r01.cdf"
@@ -73,41 +49,65 @@ for j in range(len(fechas)):
 
     # swifa = f"https://pds-ppi.igpp.ucla.edu/ditdos/download?id=pds://PPI/maven.swia.calibrated/data/fine_arc_3d/{year}/{month}/mvn_swi_l2_finearc3d_{year}{month}{day}_v01_r01.cdf"
 
-    # with urllib.request.urlopen(mag_hires) as response, open(
-    #     path + f"MAG_hires/mvn_mag_l2_{year}{doy}ss_{year}{month}{day}_v01_r01.sts",
-    #     "wb",
-    # ) as out_file:
-    #     shutil.copyfileobj(response, out_file)
-    # print(f"mag dia {doy} listo")
+    p_mag1s = (
+        path
+        + f"MAG_1s/{year}/mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts"
+    )
+    # p_maghr = (
+    #     path + f"MAG_hires/mvn_mag_l2_{year}{doy}ss_{year}{month}{day}_v01_r01.sts"
+    # )
+    p_swea = path + f"SWEA/mvn_swe_l2_svyspec_{year}{month}{day}_v04_r01.cdf"
+    p_swiamom = path + f"SWIA/mvn_swi_l2_onboardsvymom_{year}{month}{day}_v01_r01.cdf"
+    # p_swifa = path + f"SWIA/mvn_swi_l2_finearc3d_{year}{month}{day}_v01_r01.cdf"
+    # p_swica = path + f"SWIA/mvn_swi_l2_coarsearc3d_{year}{month}{day}_v01_r01.cdf"
+    p_lpw = path + f"LPW/mvn_lpw_l2_lpnt_{year}{month}{day}_v03_r02.cdf"
 
-    with urllib.request.urlopen(swea) as response, open(
-        path + f"SWEA/mvn_swe_l2_svyspec_{year}{month}{day}_v04_r01.cdf", "wb"
-    ) as out_file:
-        shutil.copyfileobj(response, out_file)
-    print(f"swea dia {doy} listo")
-    
-    with urllib.request.urlopen(swia_mom) as response, open(
-        path + f"SWIA/mvn_swi_l2_onboardsvymom_{year}{month}{day}_v01_r01.cdf", "wb",
-    ) as out_file:
-        shutil.copyfileobj(response, out_file)
-    print(f"swia (onboard) dia {doy} listo")
+    if not os.path.isfile(p_mag1s):
+        with urllib.request.urlopen(mag_1s) as response, open(
+            p_mag1s,
+            "wb",
+        ) as out_file:
+            shutil.copyfileobj(response, out_file)
+        print(f"mag dia {j} listo")
 
-    # with urllib.request.urlopen(swica) as response, open(
-    #     path + f"SWIA/mvn_swi_l2_coarsearc3d_{year}{month}{day}_v01_r01.cdf", "wb",
-    # ) as out_file:
-    #     shutil.copyfileobj(response, out_file)
-    # print(f"swica dia {doy} listo")
+    # if not os.path.isfile(p_maghr):
+    #     with urllib.request.urlopen(mag_hires) as response, open(
+    #         p_maghr,
+    #         "wb",
+    #     ) as out_file:
+    #         shutil.copyfileobj(response, out_file)
+    #     print(f"mag dia {j} listo")
 
-    # with urllib.request.urlopen(swifa) as response, open(
-    #     path+f"SWIA/mvn_swi_l2_finearc3d_{year}{month}{day}_v01_r01.cdf", "wb",
-    # ) as out_file:
-    #     shutil.copyfileobj(response, out_file)
-    # print(f"swifa dia {doy} listo")
+    if not os.path.isfile(p_swea):
+        with urllib.request.urlopen(swea) as response, open(p_swea, "wb") as out_file:
+            shutil.copyfileobj(response, out_file)
+        print(f"swea dia {j} listo")
 
-    with urllib.request.urlopen(lpw) as response, open(
-        path + f"LPW/mvn_lpw_l2_lpnt_{year}{month}{day}_v03_r02.cdf", "wb"
-    ) as out_file:
-        shutil.copyfileobj(response, out_file)
-    print(f"lpw dia {doy} listo")
+    if not os.path.isfile(p_swiamom):
+        with urllib.request.urlopen(swia_mom) as response, open(
+            p_swiamom,
+            "wb",
+        ) as out_file:
+            shutil.copyfileobj(response, out_file)
+        print(f"swia (onboard) dia {j} listo")
 
-    print(f"voy {int(j/len(fechas)*100)}%")
+    # if not os.path.isfile(p_swica):
+    #     with urllib.request.urlopen(swica) as response, open(
+    #         p_swica,
+    #         "wb",
+    #     ) as out_file:
+    #         shutil.copyfileobj(response, out_file)
+    #     print(f"swica dia {j} listo")
+
+    # if not os.path.isfile(p_swifa):
+    #     with urllib.request.urlopen(swifa) as response, open(
+    #         p_swifa,
+    #         "wb",
+    #     ) as out_file:
+    #         shutil.copyfileobj(response, out_file)
+    #     print(f"swifa dia {j} listo")
+
+    if not os.path.isfile(p_lpw):
+        with urllib.request.urlopen(lpw) as response, open(p_lpw, "wb") as out_file:
+            shutil.copyfileobj(response, out_file)
+        print(f"lpw dia {j} listo")
