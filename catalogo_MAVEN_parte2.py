@@ -45,7 +45,7 @@ for cat in catalogo:
                         if (
                             c < 20 or c > 70
                         ):  # los que son muy claramente quasipara o quasiperp
-                            l.append(fecha + "/" + hora)
+                            l.append(fecha + "\t" + hora)
 
 with open("outputs/hora_grupo1.txt", "a") as file:
     for i in l:

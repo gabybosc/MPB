@@ -177,14 +177,15 @@ def importar_swia(year, month, day, ti, tf):
     else:
         path = "../../../datos/SWIA/"
 
-
     if (
         Path(path + f"/mvn_swi_l2_onboardsvymom_{year}{month}{day}_v01_r01.cdf")
         .stat()
         .st_size
         > 1000
     ):
-        swia = cdf.CDF(path + f"mvn_swi_l2_onboardsvymom_{year}{month}{day}_v01_r01.cdf")
+        swia = cdf.CDF(
+            path + f"mvn_swi_l2_onboardsvymom_{year}{month}{day}_v01_r01.cdf"
+        )
 
         t_unix = swia.varget("time_unix")
         density = swia.varget("density")  # cm⁻³
@@ -199,10 +200,10 @@ def importar_swia(year, month, day, ti, tf):
         density_cut = density[inicio:fin]
         temperature_cut = temperature[inicio:fin]
         vel_mso_cut = vel_mso_xyz[inicio:fin]  # km/s
-    
+
     else:
         print("swia vacío")
-        swia, t_cut,  density_cut, temperature_cut, vel_mso_cut = 0, 0, 0, 0, 0
+        swia, t_cut, density_cut, temperature_cut, vel_mso_cut = 0, 0, 0, 0, 0
 
     return swia, t_cut, density_cut, temperature_cut, vel_mso_cut
 
@@ -254,18 +255,26 @@ def importar_lpw(year, month, day, ti, tf):
     else:
         path = f"../../../datos/LPW/"
 
-    lpw = cdf.CDF(path + f"mvn_lpw_l2_lpnt_{year}{month}{day}_v03_r02.cdf")
+    if (
+        Path(path + f"/mvn_lpw_l2_lpnt_{year}{month}{day}_v03_r02.cdf").stat().st_size
+        > 1000
+    ):
+        lpw = cdf.CDF(path + f"mvn_lpw_l2_lpnt_{year}{month}{day}_v03_r02.cdf")
 
-    t_unix = lpw.varget("time_unix")
-    e_density = lpw.varget("data")[:, 3]
+        t_unix = lpw.varget("time_unix")
+        e_density = lpw.varget("data")[:, 3]
 
-    t = unix_to_decimal(t_unix)
+        t = unix_to_decimal(t_unix)
 
-    inicio = donde(t, ti)
-    fin = donde(t, tf)
+        inicio = donde(t, ti)
+        fin = donde(t, tf)
 
-    t_cut = t[inicio:fin]
-    e_density_cut = e_density[inicio:fin]
+        t_cut = t[inicio:fin]
+        e_density_cut = e_density[inicio:fin]
+
+    else:
+        print("lpw vacío")
+        lpw, t_cut, e_density_cut = 0, 0, 0
 
     return lpw, t_cut, e_density_cut
 

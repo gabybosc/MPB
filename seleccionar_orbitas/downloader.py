@@ -15,7 +15,7 @@ import os as os
 
 # fechas = np.arange(61, 92)  # np.loadtxt("outputs/fechas_MVA_2016.txt")
 
-lst = np.genfromtxt("../outputs/catalogo_grupo1.txt", dtype="str")
+lst = np.genfromtxt("../outputs/catalogo_grupo2.txt", dtype="str")
 
 # a = [int(x[-2:]) for x in lst]
 # fechas = np.unique(a)
