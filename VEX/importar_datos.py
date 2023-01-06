@@ -8,8 +8,9 @@ from oauth2client.service_account import ServiceAccountCredentials
 from socket import gethostname
 
 
-sys.path.append("..")
-from funciones import donde, next_available_row
+sys.path.append("home/gabybosc/github/MPB/")
+print(sys.path)
+# from funciones import donde, next_available_row
 
 np.set_printoptions(precision=4)
 
