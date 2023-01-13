@@ -74,21 +74,30 @@ for i in range(len(nov2014)):
     if c < 20 or c > 70:  # los que son muy claramente quasipara o quasiperp
         l.append(i)
 
-# if len(l) > 10:
-#     for i in l:
-#         h = float(halekas["Pdyn"][lst_c[nov2014[i]]])
-#         if
-
-vv = np.unique([date_c[lst_c[nov2014[i]]] for i in l])  # las fechas sin repetir
-
 """
 Si son muchas, elige 10 random y después yo miro y buscando la MPB más linda elijo cuál :)
 """
 
-if len(vv) > 10:
-    vv = np.random.choice(vv, 10)
+# vv = np.unique([date_c[lst_c[nov2014[i]]] for i in l])  # las fechas sin repetir
+# if len(vv) > 10:
+#     vv = np.random.choice(vv, 10)
+
+
+"""
+Escribe un archivo con la fecha, hora, theta y pdyn
+"""
 
 with open("outputs/catalogo_grupo2.txt", "a") as file:
-    for i in vv:
-        file.write(f"{i}")
+    for i in l:
+        fec = date_c[lst_c[nov2014[i]]]
+        tim = time_c[lst_c[nov2014[i]]]
+        the = cyril["ThetaBn"][lst_c[nov2014[i]]]
+        pre = halekas["Pdyn"][lst_h[nov2014[i]]]
+        file.write(f"{fec}\t{tim}\t{the}\t{pre}")
         file.write("\n")
+
+
+# with open("outputs/catalogo_grupo2.txt", "a") as file:
+#     for i in vv:
+#         file.write(f"{i}")
+#         file.write("\n")
