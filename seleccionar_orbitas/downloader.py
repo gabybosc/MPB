@@ -1,9 +1,6 @@
 """
-descarga los archivos de mag hi res (pues si llegue hasta acá es porque ya vi los
-low res), lpw, swea y swia de la lista de fechas del año que le pida.
-El problema es que no puede asegurarse de que existan los archivos antes porque
-la página no tira 404. (Si tira 404, acá está la solución
-https://stackoverflow.com/questions/20387246/checking-file-exists-before-download-using-head)
+descarga los archivos de mag, lpw, swea y swia de la lista de fechas del año que le pida.
+chequea si ya lo tengo descargado para no hacerlo dos veces
 """
 
 import urllib.request
@@ -94,13 +91,13 @@ for j in lst:
     """
     Si el archivo no existe, lo descarga
     """
-    # if not os.path.isfile(p_mag1s):
-    #     with urllib.request.urlopen(mag_1s, data=) as response, open(
-    #         p_mag1s,
-    #         "wb",
-    #     ) as out_file:
-    #         shutil.copyfileobj(response, out_file)
-    #     print(f"mag dia {j} listo")
+    if not os.path.isfile(p_mag1s):
+        with urllib.request.urlopen(mag_1s) as response, open(
+            p_mag1s,
+            "wb",
+        ) as out_file:
+            shutil.copyfileobj(response, out_file)
+        print(f"mag dia {j} listo")
 
     # if not os.path.isfile(p_maghr):
     #     with urllib.request.urlopen(mag_hires) as response, open(

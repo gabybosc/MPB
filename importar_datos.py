@@ -178,14 +178,10 @@ def importar_swia(year, month, day, ti, tf):
         path = "../../../datos/SWIA/"
 
     if (
-        Path(path + f"/mvn_swi_l2_onboardsvymom_{year}{month}{day}_v01_r01.cdf")
-        .stat()
-        .st_size
+        Path(path + f"/mvn_swi_l2_onboardsvymom_{year}{month}{day}.cdf").stat().st_size
         > 1000
     ):
-        swia = cdf.CDF(
-            path + f"mvn_swi_l2_onboardsvymom_{year}{month}{day}_v01_r01.cdf"
-        )
+        swia = cdf.CDF(path + f"mvn_swi_l2_onboardsvymom_{year}{month}{day}.cdf")
 
         t_unix = swia.varget("time_unix")
         density = swia.varget("density")  # cm⁻³
@@ -255,11 +251,8 @@ def importar_lpw(year, month, day, ti, tf):
     else:
         path = f"../../../datos/LPW/"
 
-    if (
-        Path(path + f"/mvn_lpw_l2_lpnt_{year}{month}{day}_v03_r02.cdf").stat().st_size
-        > 1000
-    ):
-        lpw = cdf.CDF(path + f"mvn_lpw_l2_lpnt_{year}{month}{day}_v03_r02.cdf")
+    if Path(path + f"/mvn_lpw_l2_lpnt_{year}{month}{day}.cdf").stat().st_size > 1000:
+        lpw = cdf.CDF(path + f"mvn_lpw_l2_lpnt_{year}{month}{day}.cdf")
 
         t_unix = lpw.varget("time_unix")
         e_density = lpw.varget("data")[:, 3]

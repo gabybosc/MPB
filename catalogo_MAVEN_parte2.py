@@ -3,11 +3,13 @@ import csv as csv
 import pandas as pd
 from funciones import donde
 
-catalogo = np.genfromtxt("outputs/catalogo_grupo2.txt", dtype="str")
-fecha = np.genfromtxt("outputs/catalogo_grupo2.txt", dtype="str", usecols=0)
-hora = np.genfromtxt("outputs/catalogo_grupo2.txt", dtype="str", usecols=1)
-theta = np.genfromtxt("outputs/catalogo_grupo2.txt", dtype="float", usecols=2)
-pdyn = np.genfromtxt("outputs/catalogo_grupo2.txt", dtype="float", usecols=3)
+grupo = input("# grupo\n")
+
+catalogo = np.genfromtxt(f"outputs/catalogo_grupo{grupo}.txt", dtype="str")
+fecha = np.genfromtxt(f"outputs/catalogo_grupo{grupo}.txt", dtype="str", usecols=0)
+hora = np.genfromtxt(f"outputs/catalogo_grupo{grupo}.txt", dtype="str", usecols=1)
+theta = np.genfromtxt(f"outputs/catalogo_grupo{grupo}.txt", dtype="float", usecols=2)
+pdyn = np.genfromtxt(f"outputs/catalogo_grupo{grupo}.txt", dtype="float", usecols=3)
 
 """
 El catálogo es muy grande, entonces hace una subselección
@@ -16,7 +18,7 @@ El catálogo es muy grande, entonces hace una subselección
 idx_para = []
 for i in range(len(fecha)):
     ang = theta[i]
-    if ang < 20:
+    if ang < 30:
         idx_para.append(i)
 
 fecha_para = fecha[idx_para]
@@ -54,19 +56,22 @@ hora_final = hora_cut[idx_th]
 theta_final = theta_cut[idx_th]
 p_final = p_cut[idx_th]
 
+print(len(pdyn))
+print(len(p_para))
+print(len(p_final))
 """
 Los escribo en un archivo
 No olvidarse de agregar los para!!
 """
 
 # los perp
-with open("outputs/hoja_grupo2.txt", "a") as file:
+with open(f"outputs/hoja_grupo{grupo}.txt", "a") as file:
     for i in range(len(fecha_final)):
         file.write(f"{fecha_final[i]}\t{hora_final[i]}\t{theta_final[i]}\t{p_final[i]}")
         file.write("\n")
 
 # los para
-with open("outputs/hoja_grupo2.txt", "a") as file:
+with open(f"outputs/hoja_grupo{grupo}.txt", "a") as file:
     for i in range(len(fecha_para)):
         file.write(f"{fecha_para[i]}\t{hora_para[i]}\t{theta_para[i]}\t{p_para[i]}")
         file.write("\n")
