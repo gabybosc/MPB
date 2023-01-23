@@ -21,14 +21,21 @@ np.set_printoptions(precision=4)
 
 catalogo = np.genfromtxt("outputs/hoja_grupo2.txt", dtype="str")
 
-for i in range(len(catalogo)):
+i = 65
+
+for k in range(len(catalogo)):
+    i = int(input(f"linea (voy por {i})\n"))
 
     cat = catalogo[i]
     year, month, day = cat[0].split("-")
     t_bs = UTC_to_hdec(cat[1])
 
     ti = t_bs - 1.5  # mira +- 1.5h respecto del BS
+    if ti < 0:
+        ti = 0
     tf = t_bs + 1.5
+    if tf > 24:
+        tf = 24
 
     mag, t, B, posicion = importar_mag_1s(year, month, day, ti, tf)
     swea, t_swea, energia, flux_plot = importar_swea(year, month, day, ti, tf)
@@ -119,7 +126,7 @@ for i in range(len(catalogo)):
         val = plt.ginput(1)[0][0]
         print("Selected values: ", hdec_to_UTC(val))
 
-        print("Happy? Keyboard click for yes, mouse click for no.")
+        print("Happy? Keyboard click for yes, mouse click for no.\n")
         happy = plt.waitforbuttonpress()
 
     with open("outputs/grupo2.txt", "a") as file:

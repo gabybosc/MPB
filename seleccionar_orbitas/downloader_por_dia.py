@@ -84,11 +84,11 @@ p_mag1s = (
     path + f"MAG_1s/{year}/mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts"
 )
 p_maghr = path + f"MAG_hires/mvn_mag_l2_{year}{doy}ss_{year}{month}{day}_v01_r01.sts"
-p_swea = path + f"SWEA/mvn_swe_l2_svyspec_{year}{month}{day}_v04_r01.cdf"
-p_swiamom = path + f"SWIA/mvn_swi_l2_onboardsvymom_{year}{month}{day}_v01_r01.cdf"
-p_swifa = path + f"SWIA/mvn_swi_l2_finearc3d_{year}{month}{day}_v01_r01.cdf"
-p_swica = path + f"SWIA/mvn_swi_l2_coarsearc3d_{year}{month}{day}_v01_r01.cdf"
-p_lpw = path + f"LPW/mvn_lpw_l2_lpnt_{year}{month}{day}_v03_r02.cdf"
+p_swea = path + f"SWEA/mvn_swe_l2_svyspec_{year}{month}{day}.cdf"
+p_swiamom = path + f"SWIA/mvn_swi_l2_onboardsvymom_{year}{month}{day}.cdf"
+p_swifa = path + f"SWIA/mvn_swi_l2_finearc3d_{year}{month}{day}.cdf"
+p_swica = path + f"SWIA/mvn_swi_l2_coarsearc3d_{year}{month}{day}.cdf"
+p_lpw = path + f"LPW/mvn_lpw_l2_lpnt_{year}{month}{day}.cdf"
 
 
 if not os.path.isfile(p_mag1s):

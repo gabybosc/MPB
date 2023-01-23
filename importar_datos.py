@@ -106,14 +106,9 @@ def importar_swea(year, month, day, ti, tf):
         path = f"../../../datos/SWEA/"
 
     # chequea que el archivo no está vacío
-    if (
-        Path(path + f"/mvn_swe_l2_svyspec_{year}{month}{day}_v04_r01.cdf")
-        .stat()
-        .st_size
-        > 1000
-    ):
+    if Path(path + f"/mvn_swe_l2_svyspec_{year}{month}{day}.cdf").stat().st_size > 1000:
 
-        swea = cdf.CDF(path + f"/mvn_swe_l2_svyspec_{year}{month}{day}_v04_r01.cdf")
+        swea = cdf.CDF(path + f"/mvn_swe_l2_svyspec_{year}{month}{day}.cdf")
 
         flux_all = swea.varget("diff_en_fluxes")
         energia = swea.varget("energy")
@@ -152,13 +147,11 @@ def importar_swica(year, month, day, ti, tf):
     else:
         path = "../../../datos/SWIA/"
 
-    if os.path.isfile(path + f"mvn_swi_l2_coarsearc3d_{year}{month}{day}_v01_r01.cdf"):
+    if os.path.isfile(path + f"mvn_swi_l2_coarsearc3d_{year}{month}{day}.cdf"):
         # si no existe SWICA, usa los onboard
-        swia = cdf.CDF(path + f"mvn_swi_l2_coarsearc3d_{year}{month}{day}_v01_r01.cdf")
+        swia = cdf.CDF(path + f"mvn_swi_l2_coarsearc3d_{year}{month}{day}.cdf")
     else:
-        swia = cdf.CDF(
-            path + f"mvn_swi_l2_onboardsvymom_{year}{month}{day}_v01_r01.cdf"
-        )
+        swia = cdf.CDF(path + f"mvn_swi_l2_onboardsvymom_{year}{month}{day}.cdf")
 
     t_unix = swia.varget("time_unix")
     # en los datos de PDS tiene diff en flux, energy, etc pero no tiene los moments
