@@ -1,7 +1,8 @@
-import sys
 import os
 import requests
 from requests.auth import HTTPBasicAuth
+
+import sys
 
 sys.path.append("..")
 

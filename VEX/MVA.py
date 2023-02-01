@@ -6,7 +6,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 import matplotlib as mpl
 from cycler import cycler
 from importar_datos import importar_MAG_pds, importar_ELS_clweb, importar_fila
-from fit_venus import plot_orbita, fit
+from fit_venus import plot_orbita, fit_Xu
 from multiplot import multi_plot
 from update_parametros import (
     hoja_MVA_update,
@@ -119,7 +119,7 @@ fin_MVA = donde(t, 2.780409779)
 sza = SZA(pos, inicio_MVA)
 x3 = MVA(B[inicio_MVA:fin_MVA], year, month, day)
 
-xx, yz = fit()
+xx, yz = fit_Xu()
 pos_RV = pos / 6050
 orbita = np.sqrt(pos_RV[:, 1] ** 2 + pos_RV[:, 2] ** 2)
 

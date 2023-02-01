@@ -1,25 +1,8 @@
 import numpy as np
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
-from importar_datos import importar_MAG_pds, importar_ELS_clweb, importar_fila
-from fit_venus import plot_orbita, fit
-import sys
 
-sys.path.append("..")
-from funciones import (
-    donde,
-    fechas,
-    tiempos,
-    Mij,
-    error,
-    corrientes,
-    ancho_mpb,
-    Bpara_Bperp,
-    find_nearest,
-    next_available_row,
-    SZA,
-)
-from funciones_plot import hodograma, onpick1
+# import gspread
+# from oauth2client.service_account import ServiceAccountCredentials
+# from importar_datos import importar_MAG_pds, importar_ELS_clweb, importar_fila
 
 np.set_printoptions(precision=4)
 

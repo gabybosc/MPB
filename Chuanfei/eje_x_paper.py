@@ -27,6 +27,10 @@ Bx By Bz b1x b1y b1z Pe P HP OP
 O2P CO2P jx jy jz gradx grady gradz O_vx O_vy
 O_vz O2_vx O2_vy O2_vz CO2_vx CO2_vy CO2_vz
 """
+# el delta x
+# lst = []
+# for i in range(len(x)-1):
+#     lst.append(np.abs(x[i] - x[i+1]) * 3360)
 
 x = datos[:, 0]  # RM
 z = datos[:, 1]  # RM
