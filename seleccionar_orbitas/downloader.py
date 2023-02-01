@@ -12,7 +12,7 @@ import os as os
 
 # fechas = np.arange(61, 92)  # np.loadtxt("outputs/fechas_MVA_2016.txt")
 
-lst = np.genfromtxt("../outputs/hoja_grupo1.txt", dtype="str", usecols=0)
+lst = np.genfromtxt("../outputs/hoja_grupo4.txt", dtype="str", usecols=0)
 
 # a = [int(x[-2:]) for x in lst]
 # fechas = np.unique(a)

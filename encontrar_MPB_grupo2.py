@@ -14,17 +14,17 @@ import datetime as dt
 Le paso un día entero y elijo la órbita y luego marco la posición media de la MPB,
 Es en hdec porque si no el valor que devuelve es raro ya que lo saca del gráfico y está en xfmt
 Lo escribe en una nueva columna en el archivo que hice con catalogo_maven_parte2
-Para eso, grafica |B|, BxByBz, swea, swia y lpw.
+Para eso, grafica |B|, BxByBz, swea, swia y lpw.M   
 """
 
 np.set_printoptions(precision=4)
 
 catalogo = np.genfromtxt("outputs/hoja_grupo2.txt", dtype="str")
 
-i = 65
 
-for k in range(len(catalogo)):
-    i = int(input(f"linea (voy por {i})\n"))
+for i in range(133, len(catalogo)):
+    # i = int(input(f"linea (voy por {i})\n"))
+    print(i)
 
     cat = catalogo[i]
     year, month, day = cat[0].split("-")
@@ -32,7 +32,7 @@ for k in range(len(catalogo)):
 
     ti = t_bs - 1.5  # mira +- 1.5h respecto del BS
     if ti < 0:
-        ti = 0
+        ti = 0.2
     tf = t_bs + 1.5
     if tf > 24:
         tf = 24
@@ -69,6 +69,7 @@ for k in range(len(catalogo)):
         ax1.set_xlim([t[0], t[-1]])
         ax1.grid()
         ax1.legend()
+        ax1.set_title(f"{year}-{month}-{day}")
 
         ax2 = plt.subplot2grid((3, 2), (1, 0), sharex=ax1)
         ax2.plot(t, B)
@@ -80,6 +81,7 @@ for k in range(len(catalogo)):
         ax3 = plt.subplot2grid((3, 2), (2, 0), sharex=ax1)
         plt.plot(t, B_norm)
         ax3.grid()
+        ax3.axvline(x=t_bs, color="c")
         ax3.set_ylabel("|B| (nT)")
         ax3.set_xlabel("Tiempo (hdec)")
 
