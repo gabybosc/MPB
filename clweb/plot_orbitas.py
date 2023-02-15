@@ -75,7 +75,7 @@ def BS_MPB(L, e, x0):
     X1 = x0 + r1 * np.cos(THETA)
     Y1 = r1 * np.sin(THETA) * np.cos(PHI)
     Z1 = r1 * np.sin(THETA) * np.sin(PHI)
-    yz = np.sqrt(Y1 ** 2 + Z1 ** 2)
+    yz = np.sqrt(Y1**2 + Z1**2)
     return (X1, yz)
 
 
@@ -98,7 +98,7 @@ def orbitas(posicion, year, month, day):
     x = posicion[:, 0]
     y = posicion[:, 1]
     z = posicion[:, 2]
-    proyeccion = np.sqrt(y ** 2 + z ** 2)
+    proyeccion = np.sqrt(y**2 + z**2)
     fig = plt.gcf()
     ax = fig.gca()
     ax.plot(x, proyeccion, label=f"{day}-{month}-{year}")
@@ -110,23 +110,23 @@ marte(x_bs, yz_bs, x_mpb, yz_mpb)
 
 
 # t, posicion_cut, year, month, day = datos()
-t, posicion_cut, year, month, day = datos_fijos(2015, 10, 10, 12, 13)
-orbitas(posicion_cut, year, month, day)
+# t, posicion_cut, year, month, day = datos_fijos(2015, 10, 10, 12, 13)
+# orbitas(posicion_cut, year, month, day)
 
-t, posicion_cut, year, month, day = datos_fijos(2015, 10, 12, 18.75, 19.75)
-orbitas(posicion_cut, year, month, day)
+# t, posicion_cut, year, month, day = datos_fijos(2015, 10, 12, 18.75, 19.75)
+# orbitas(posicion_cut, year, month, day)
 
 t, posicion_cut, year, month, day = datos_fijos(2016, "03", 16, 17.5, 18.5)
 orbitas(posicion_cut, year, month, day)
 
-t, posicion_cut, year, month, day = datos_fijos(2016, "03", 31, 12.5, 13.5)
-orbitas(posicion_cut, year, month, day)
+# t, posicion_cut, year, month, day = datos_fijos(2016, "03", 31, 12.5, 13.5)
+# orbitas(posicion_cut, year, month, day)
 
-t, posicion_cut, year, month, day = datos_fijos(2016, "04", "05", 16, 17)
-orbitas(posicion_cut, year, month, day)
+# t, posicion_cut, year, month, day = datos_fijos(2016, "04", "05", 16, 17)
+# orbitas(posicion_cut, year, month, day)
 
-t, posicion_cut, year, month, day = datos_fijos(2017, 11, 24, 12, 13)
-orbitas(posicion_cut, year, month, day)
+# t, posicion_cut, year, month, day = datos_fijos(2017, 11, 24, 12, 13)
+# orbitas(posicion_cut, year, month, day)
 
 plt.legend()
 plt.show(block=False)

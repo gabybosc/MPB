@@ -51,6 +51,7 @@ fin_mag = donde(t_mag_entero, t1 - 0.05)
 inicio_swia = donde(t_swia_entero, t1 - 0.1)
 fin_swia = donde(t_swia_entero, t1 - 0.05)
 
+
 t_mag = t_mag_entero[inicio_mag:fin_mag]
 B = B_entero[inicio_mag:fin_mag] * 1e-9  # T
 
@@ -101,6 +102,9 @@ print(
 """
 Longitud inercial
 """
+inicio_swia = donde(t_swia_entero, 17.7)
+fin_swia = donde(t_swia_entero, 17.8)
+
 density_mean = np.zeros(fin_swia - inicio_swia)  # upstream
 paso = 20  # cada paso son 4 segundos.
 if inicio_swia - paso > 0:  # si no se cumple, va a calcularlo mal
@@ -119,11 +123,30 @@ if inicio_swia - paso > 0:  # si no se cumple, va a calcularlo mal
 ##########
 # guarda en la spreadsheet
 
-hoja_MVA.update_acell(f"AA{fila}", f"{ion_length:1.3g}")
-hoja_MVA.update_acell(f"AB{fila}", f"{rg:1.3g}")
+# hoja_MVA.update_acell(f"AA{fila}", f"{ion_length:1.3g}")
+# hoja_MVA.update_acell(f"AB{fila}", f"{rg:1.3g}")
 
-hoja_Bootstrap.update_acell(f"Q{fila}", f"{ion_length:1.3g}")
-hoja_Bootstrap.update_acell(f"R{fila}", f"{rg:1.3g}")
+# hoja_Bootstrap.update_acell(f"Q{fila}", f"{ion_length:1.3g}")
+# hoja_Bootstrap.update_acell(f"R{fila}", f"{rg:1.3g}")
 
-hoja_Ajuste.update_acell(f"Q{fila}", f"{ion_length:1.3g}")
-hoja_Ajuste.update_acell(f"R{fila}", f"{rg:1.3g}")
+# hoja_Ajuste.update_acell(f"Q{fila}", f"{ion_length:1.3g}")
+# hoja_Ajuste.update_acell(f"R{fila}", f"{rg:1.3g}")
+
+
+# en el SW
+inicio_sw = donde(t_swia_entero, 17.7)
+fin_sw = donde(t_swia_entero, 17.8)
+
+density_sw = np.zeros(fin_sw - inicio_sw)  # upstream
+paso = 20  # cada paso son 4 segundos.
+for i in range(fin_sw - inicio_sw):
+    density_sw[i] = np.mean(
+        density[inicio_sw + i : fin_sw + i]
+    )  # toma desde atrás del ti así no se mete en la MPB nunca
+
+ion_length = 2.28e07 / np.sqrt(np.mean(density_sw)) * 1e-5  # km
+ion_min = 2.28e07 / np.sqrt(max(density_sw)) * 1e-5  # km
+ion_max = 2.28e07 / np.sqrt(min(density_sw)) * 1e-5  # km
+print(
+    f"La longitud inercial de iones es {ion_length:1.3g} km (entre {ion_min:1.3g} y {ion_max:1.3g})"
+)
