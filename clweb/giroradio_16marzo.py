@@ -1,6 +1,7 @@
 from sys import exit
 import numpy as np
 from importar_datos import importar_mag, importar_swia, importar_fila
+import matplotlib.pyplot as plt
 
 np.set_printoptions(precision=4)
 import sys
@@ -29,44 +30,86 @@ normal = [0.920, -0.302, 0.251]
 t1, t2, t3, t4 = 18.2167, 18.2204, 18.235, 18.2476
 
 
-def importar_swia(ti, tf):
-    path = f"../../../datos/clweb/2016-03-16/"
+def importar_swica(ti, tf):
+    path = f"../../../datos/clweb/2016-03-16/momentos/"
 
-    swica_full = np.loadtxt(path + "densidad_swica_1-5000.asc")
-    swica = np.loadtxt(path + "densidad_swica_600-1400.asc")
-    swifa = np.loadtxt(path + "densidad_swifa_600-2000.asc")
+    dens_full = np.loadtxt(path + "dens_swica_1-5000.asc")
+    dens = np.loadtxt(path + "dens_swica_600-1400.asc")
+    temp_full = np.loadtxt(path + "temp_swica_1-5000.asc")
+    temp = np.loadtxt(path + "temp_swica_600-1400.asc")
+    vel_full = np.loadtxt(path + "vel_swica_1-5000.asc")
+    vel = np.loadtxt(path + "vel_swica_600-1400.asc")
 
-    t = swica[:, 3] + swica[:, 4] / 60 + swica[:, 5] / 3600  # hdec
+    t = dens[:, 3] + dens[:, 4] / 60 + dens[:, 5] / 3600  # hdec
 
     inicio = donde(t, ti)
     fin = donde(t, tf)
 
     t_cut = t[inicio:fin]
-    density_full = swica_full[inicio:fin, 6]
-    density_swica = swica[inicio:fin, 6]
-    density_swifa = swifa[inicio:fin, 6]
+    density_full = dens_full[inicio:fin, 6]
+    density = dens[inicio:fin, 6]
+    temperature_full = temp_full[inicio:fin, 6]
+    temperature = temp[inicio:fin, 6]
+    velocity_full = vel_full[inicio:fin, 6:]
+    velocity = vel[inicio:fin, 6:]
 
-    return t_cut, density_full, density_swica, density_swifa
+    return (
+        t_cut,
+        density_full,
+        density,
+        temperature_full,
+        temperature,
+        velocity_full,
+        velocity,
+    )
 
 
-# def importar_temp(ti, tf):
-#     path = "../../datos/temp_swica_ms.asc"
-#     swica = np.loadtxt(path)
+def importar_swifa(ti, tf):
+    path = f"../../../datos/clweb/2016-03-16/momentos/"
 
-#     t = swica[:, 3] + swica[:, 4] / 60 + swica[:, 5] / 3600
+    dens_full = np.loadtxt(path + "dens_swifa_1-5000.asc")
+    temp_full = np.loadtxt(path + "temp_swifa_1-5000.asc")
+    vel_full = np.loadtxt(path + "vel_swifa_1-5000.asc")
+    dens = np.loadtxt(path + "dens_swifa_600-2000.asc")
+    temp = np.loadtxt(path + "temp_swifa_600-2000.asc")
+    vel = np.loadtxt(path + "vel_swifa_600-2000.asc")
 
-#     inicio = donde(t, ti)
-#     fin = donde(t, tf)
+    t = dens[:, 3] + dens[:, 4] / 60 + dens[:, 5] / 3600  # hdec
 
-#     t_cut = t[inicio:fin]
-#     temp = swica[inicio:fin, -1]
+    inicio = donde(t, ti)
+    fin = donde(t, tf)
 
-#     return t_cut, temp
+    t_cut = t[inicio:fin]
+    density_full = dens_full[inicio:fin, 6]
+    density = dens[inicio:fin, 6]
+    temperature_full = temp_full[inicio:fin, 6]
+    temperature = temp[inicio:fin, 6]
+    velocity_full = vel_full[inicio:fin, 6:]
+    velocity = vel[inicio:fin, 6:]
+
+    return (
+        t_cut,
+        density_full,
+        density,
+        temperature_full,
+        temperature,
+        velocity_full,
+        velocity,
+    )
 
 
 mag, t_mag_entero, B_entero, posicion = importar_mag(year, month, day, ti, tf)
-t_swia_entero, density_full, density_swica, density_swifa = importar_swia(ti, tf)
-# plt.plot(t_swia_entero, density)
+(
+    t_swia_entero,
+    density_full,
+    density,
+    temperature_full,
+    temperature,
+    velocity_full,
+    velocity,
+) = importar_swica(ti, tf)
+# t_swifa_entero, density_full, density, temperature_full, temperature, velocity_full, velocity = importar_swifa(ti, tf)
+#  plt.plot(t_swia_entero, density)
 # plt.show()
 
 sw_i = 17.5
@@ -75,6 +118,15 @@ sw_f = 17.8
 ms_i = 18.08
 ms_f = 18.21
 
+plt.plot(t_swia_entero, density, label="recorte")
+plt.plot(t_swia_entero, density_full, label="full")
+plt.axvline(x=sw_i, c="k")
+plt.axvline(x=sw_f, c="k")
+plt.axvline(x=ms_f)
+plt.axvline(x=ms_f)
+plt.legend()
+plt.show()
+
 """
 giroradio: rg = mp * v_perp / (q_e * B)  en la región upstream
 where vperp is the component of the velocity perpendicular to the
@@ -82,153 +134,164 @@ direction of the magnetic field and B is the strength of the magnetic field
 """
 
 # primero diezmamos
-paso = int(len(B_entero) / len(density_swica))
-B = B_entero[::paso]
-t_mag = t_mag_entero[::paso]
+def diezmar(arr_grande, arr_chico):
+    """recorta el arr_grande para que tenga el largo del chico"""
+    paso = int(len(arr_grande) / len(arr_chico))
+    r = arr_grande[::paso]
+    return r
 
 
-for k in [(sw_i, sw_f), (ms_i, ms_f)]:
+def normalizar(vector):
+    r = vector / np.linalg.norm(vector)
+    return r
 
-    # selecciono las regiones:
-    mag_i = donde(t_mag, k[0])
-    mag_f = donde(t_mag, k[1])
-    swia_i = donde(t_swia_entero, k[0])
-    swia_f = donde(t_swia_entero, k[1])
-    # tt, temperature = importar_temp(ms_i, ms_f)
 
-    # # recorto
-    # B_cut = B[mag_i:mag_f] * 1e-9  # T
-    # velocidad = vel_mso_xyz[swia_i:swia_f]
+def proyeccion(v1, v2):
+    """proyecta v1 sobre v2"""
+    prod = np.dot(v1, v2)
+    N = np.zeros((len(prod), len(v2)))
 
-    # # ahora que están recortadas las convierto en lo que busco: la intensidad de B y la v perp
-    # B_medio = np.mean(B_cut, axis=0)
-    # B_medio_normalizado = B_medio / np.linalg.norm(B_medio)
+    for i in range(len(N)):
+        N[i, :] = prod[i] * v2
+    return N
 
-    # # proyecto la velocidad sobre B
-    # dot = np.dot(velocidad, B_medio_normalizado)
-    # N = np.zeros((len(dot), len(B_medio)))
 
-    # for i in range(len(N)):
-    #     N[i, :] = dot[i] * B_medio_normalizado
+def giroradio(B, velocidad):
+    # ahora que están recortadas las convierto en lo que busco: la intensidad de B y la v perp
+    B_medio = np.mean(B, axis=0)
+    B_medio_normalizado = normalizar(B_medio)
 
-    # v_perp = np.mean(velocidad - N, axis=0)
+    # proyecto la velocidad sobre B
+    N = proyeccion(velocidad, B_medio_normalizado)
 
-    # # el giroradio entonces:
-    # gf = mp / (q_e * np.linalg.norm(B_medio))  # girofreq
-    # rg = gf * np.linalg.norm(v_perp)
-    # rg_min = (
-    #     mp
-    #     * min(np.linalg.norm(velocidad - N, axis=1))
-    #     / (q_e * np.linalg.norm(B_medio))
-    # )
-    # rg_max = (
-    #     mp
-    #     * max(np.linalg.norm(velocidad - N, axis=1))
-    #     / (q_e * np.linalg.norm(B_medio))
-    # )
+    v_perp = np.mean(velocidad - N, axis=0)
 
-    # B_avg = np.empty((len(B_cut), 3))
-    # B_avg_normalized = np.empty((len(B_cut), 3))
-    # temp_para_xyz = np.empty((len(B_cut), 3))
+    # el giroradio entonces:
+    gf = mp / (q_e * np.linalg.norm(B_medio))  # girofreq
+    rg = gf * np.linalg.norm(v_perp)
+    rg_min = (
+        mp
+        * min(np.linalg.norm(velocidad - N, axis=1))
+        / (q_e * np.linalg.norm(B_medio))
+    )
+    rg_max = (
+        mp
+        * max(np.linalg.norm(velocidad - N, axis=1))
+        / (q_e * np.linalg.norm(B_medio))
+    )
 
-    # for i in range(len(B_cut) - 1):
-    #     B_avg[i, :] = np.mean(B_cut[i : i + 30, :], axis=0) * 1e-5  # lo paso a gauss
-    #     B_avg_normalized[i, :] = B_avg[i, :] / np.linalg.norm(
-    #         B_avg[i, :]
-    #     )  # adimensional
-    #     temp_para_xyz[i, :] = (
-    #         np.dot(B_avg_normalized[i, :], temperature[i, :]) * B_avg_normalized[i, :]
-    #     )  # eV
+    return rg
 
-    # temp_para = np.linalg.norm(temp_para_xyz, axis=1)  # eV
-    # temp_perp = np.linalg.norm(temperature - temp_para_xyz, axis=1)  # eV
 
-    # thermal_gyroradius = np.empty(swia_f - swia_i)
-    # for i in range(swia_f - swia_i):
-    #     thermal_gyroradius[i] = (
-    #         1.02e02
-    #         * np.sqrt(temp_perp[swia_i + i])
-    #         / np.linalg.norm(B_avg[swia_i + i, :])
-    #         * 1e-5
-    #     )  # km
+B = diezmar(B_entero, density)
+t_mag = diezmar(t_mag_entero, density)
+mag_i = donde(t_mag, ti)
+mag_f = donde(t_mag, tf)
+swia_i = donde(t_swia_entero, ti)
+swia_f = donde(t_swia_entero, tf)
+# recorto
+B_cut = B[mag_i:mag_f] * 1e-9  # T
+velocidad = velocity[swia_i:swia_f, :3]
 
-    # print(
-    #     f"thermal ion gyroradius mean = {np.nanmean(thermal_gyroradius, axis=0):1.3g} km"
-    # )  # nanmean ignora los nans
 
-    # if k[0] == sw_i:
-    #     print(
-    #         f"El radio de Larmor de iones SW es {rg:1.3g} km (entre {rg_min:1.3g} y {rg_max:1.3g})"
-    #     )
-    # if k[0] == ms_i:
-    #     print(
-    #         f"El radio de Larmor de iones MS es {rg:1.3g} km (entre {rg_min:1.3g} y {rg_max:1.3g})"
-    #     )
+rg = giroradio(t_mag, t_swia_entero, ti, tf, B, velocity)
+rg_full = giroradio(t_mag, t_swia_entero, ti, tf, B, velocity_full)
 
-    # if k[0] == sw_i:
-    #     print(f"La girofrecuencia de iones SW es {gf:1.3g} s⁻¹")
-    # if k[0] == ms_i:
-    #     print(f"La girofrecuencia de iones MS es {gf:1.3g} s⁻¹")
+print(f"gr MS 1-5000 eV = {rg_full} km")
+print(f"gr MS 600-1400 eV = {rg} km")
 
-    # """
-    # Proyectando en la normal:
-    # """
-    # # normal = np.array([0.920,-0.302,0.251])
-    # v_normal = np.dot(np.mean(velocidad, axis=0), normal)
 
-    # # el giroradio entonces:
-    # rg_normal = mp * np.linalg.norm(v_normal) / (q_e * np.linalg.norm(B_medio))
+def giroradio_termico(B, temp):
 
-    # if k[0] == sw_i:
-    #     print(
-    #         f"El radio de Larmor de iones SW con la velocidad proyectada en la normal es {rg_normal:1.3g} km"
-    #     )
-    # if k[0] == ms_i:
-    #     print(
-    #         f"El radio de Larmor de iones MS con la velocidad proyectada en la normal es {rg_normal:1.3g} km"
-    #     )
+    B_avg = np.array(
+        [np.mean(B[i : i + 30, :], axis=0) * 1e-5 for i in range(len(B) - 1)]
+    )
 
-    """
-    Longitud inercial
-    """
-    density_mean = np.zeros(swia_f - swia_i)  # upstream
-    paso = 20  # cada paso son 4 segundos.
-    if k[0] == sw_i:
-        if swia_i - paso > 0:  # si no se cumple, va a calcularlo mal
-            for i in range(swia_f - swia_i):
-                density_mean[i] = np.mean(
-                    density_swifa[swia_i + i - paso : swia_i + i]
-                )  # toma desde atrás del ti así no se mete en la MPB nunca
+    thermal_gyroradius = np.zeros(swia_f - swia_i)
+    for i in range(swia_f - swia_i):
+        thermal_gyroradius[i] = (
+            1.02e02
+            * np.sqrt(temp[swia_i + i])
+            / np.linalg.norm(B_avg[swia_i + i, :])
+            * 1e-5
+        )  # km
 
-            ion_length = 2.28e07 / np.sqrt(np.mean(density_mean)) * 1e-5  # km
-            ion_min = 2.28e07 / np.sqrt(max(density_mean)) * 1e-5  # km
-            ion_max = 2.28e07 / np.sqrt(min(density_mean)) * 1e-5  # km
-        print(
-            f"La longitud inercial de protones (sin alfa) SW es {ion_length:1.3g} km (entre {ion_min:1.3g} y {ion_max:1.3g})"
-        )
 
-    if k[0] == ms_i:
-        if swia_i - paso > 0:  # si no se cumple, va a calcularlo mal
-            for i in range(swia_f - swia_i):
-                density_mean[i] = np.mean(
-                    density_full[swia_i + i - paso : swia_i + i]
-                )  # toma desde atrás del ti así no se mete en la MPB nunca
+th_gr = giroradio_termico()
+print(
+    f"thermal ion gyroradius mean = {np.nanmean(th_gr, axis=0):1.3g} km"
+)  # nanmean ignora los nans
 
-            ion_length = 2.28e07 / np.sqrt(np.mean(density_mean)) * 1e-5  # km
-            ion_min = 2.28e07 / np.sqrt(max(density_mean)) * 1e-5  # km
-            ion_max = 2.28e07 / np.sqrt(min(density_mean)) * 1e-5  # km
-        print(
-            f"La longitud inercial de iones (protones + alfa) MS es {ion_length:1.3g} km (entre {ion_min:1.3g} y {ion_max:1.3g})"
-        )
-        if swia_i - paso > 0:  # si no se cumple, va a calcularlo mal
-            for i in range(swia_f - swia_i):
-                density_mean[i] = np.mean(
-                    density_swica[swia_i + i - paso : swia_i + i]
-                )  # toma desde atrás del ti así no se mete en la MPB nunca
+#     if k[0] == sw_i:
+#         print(
+#             f"El radio de Larmor de iones SW es {rg:1.3g} km (entre {rg_min:1.3g} y {rg_max:1.3g})"
+#         )
+#     # if k[0] == ms_i:
+#     #     print(
+#     #         f"El radio de Larmor de iones MS es {rg:1.3g} km (entre {rg_min:1.3g} y {rg_max:1.3g})"
+#     #     )
 
-            ion_length = 2.28e07 / np.sqrt(np.mean(density_mean)) * 1e-5  # km
-            ion_min = 2.28e07 / np.sqrt(max(density_mean)) * 1e-5  # km
-            ion_max = 2.28e07 / np.sqrt(min(density_mean)) * 1e-5  # km
-        print(
-            f"La longitud inercial de protones (sin alfa) MS es {ion_length:1.3g} km (entre {ion_min:1.3g} y {ion_max:1.3g})"
-        )
+#     # if k[0] == sw_i:
+#     #     print(f"La girofrecuencia de iones SW es {gf:1.3g} s⁻¹")
+#     # if k[0] == ms_i:
+#     #     print(f"La girofrecuencia de iones MS es {gf:1.3g} s⁻¹")
+
+#     # """
+#     # Proyectando en la normal:
+#     # """
+#     # # normal = np.array([0.920,-0.302,0.251])
+#     # v_normal = np.dot(np.mean(velocidad, axis=0), normal)
+
+#     # # el giroradio entonces:
+#     # rg_normal = mp * np.linalg.norm(v_normal) / (q_e * np.linalg.norm(B_medio))
+
+#     # if k[0] == sw_i:
+#     #     print(
+#     #         f"El radio de Larmor de iones SW con la velocidad proyectada en la normal es {rg_normal:1.3g} km"
+#     #     )
+#     # if k[0] == ms_i:
+#     #     print(
+#     #         f"El radio de Larmor de iones MS con la velocidad proyectada en la normal es {rg_normal:1.3g} km"
+#     #     )
+
+#     """
+#     Longitud inercial
+#     """
+#     # density_mean = np.zeros(swia_f - swia_i)  # upstream
+#     # paso = 20  # cada paso son 4 segundos.
+#     if k[0] == sw_i:
+#         density_mean = np.mean(density[swia_i:swia_f])
+#         ion_length = 2.28e07 / np.sqrt(density_mean) * 1e-5  # km
+#         print(f"La longitud inercial de protones (sin alfa) SW es {ion_length:1.3g} km")
+
+#         density_mean = np.mean(density_full[swia_i:swia_f])
+#         ion_length = 2.28e07 / np.sqrt(density_mean) * 1e-5  # km
+#         print(f"La longitud inercial de iones (prot + alfa) SW es {ion_length:1.3g} km")
+
+#     # if k[0] == ms_i:
+#     #     if swia_i - paso > 0:  # si no se cumple, va a calcularlo mal
+#     #         for i in range(swia_f - swia_i):
+#     #             density_mean[i] = np.mean(
+#     #                 density_full[swia_i + i - paso : swia_i + i]
+#     #             )  # toma desde atrás del ti así no se mete en la MPB nunca
+
+#     #         ion_length = 2.28e07 / np.sqrt(np.mean(density_mean)) * 1e-5  # km
+#     #         ion_min = 2.28e07 / np.sqrt(max(density_mean)) * 1e-5  # km
+#     #         ion_max = 2.28e07 / np.sqrt(min(density_mean)) * 1e-5  # km
+
+#     #     print(
+#     #         f"La longitud inercial de iones (protones + alfa) MS es {ion_length:1.3g} km (entre {ion_min:1.3g} y {ion_max:1.3g})"
+#     #     )
+#     #     if swia_i - paso > 0:  # si no se cumple, va a calcularlo mal
+#     #         for i in range(swia_f - swia_i):
+#     #             density_mean[i] = np.mean(
+#     #                 density[swia_i + i - paso : swia_i + i]
+#     #             )  # toma desde atrás del ti así no se mete en la MPB nunca
+
+#     #         ion_length = 2.28e07 / np.sqrt(np.mean(density_mean)) * 1e-5  # km
+#     #         ion_min = 2.28e07 / np.sqrt(max(density_mean)) * 1e-5  # km
+#     #         ion_max = 2.28e07 / np.sqrt(min(density_mean)) * 1e-5  # km
+
+#     print(
+#         f"La longitud inercial de protones (sin alfa) MS es {ion_length:1.3g} km (entre {ion_min:1.3g} y {ion_max:1.3g})"
+#     )
