@@ -9,6 +9,17 @@ from oauth2client.service_account import ServiceAccountCredentials
 from socket import gethostname
 
 
+def find_path(instrumento):
+    if gethostname() == "gbosco":
+        path = f"../../../../media/gabybosc/datos/{instrumento}/"
+    elif gethostname() == "gabybosc":
+        path = f"../../datos/{instrumento}/"
+    else:
+        path = f"../../../datos/{instrumento}/"
+
+    return path
+
+
 def importar_mag_1s(year, month, day, ti, tf):
     date_orbit = dt.date(int(year), int(month), int(day))
 
@@ -59,15 +70,10 @@ def importar_mag(year, month, day, ti, tf):
     day = date_orbit.strftime("%d")
     doy = date_orbit.strftime("%j")
 
-    if gethostname() == "gbosco":
-        path = f"../../../../media/gabybosc/datos/MAG_hires/"
-    elif gethostname() == "gabybosc":
-        path = "../../datos/MAG_hires/"
-    else:
-        path = f"../../../datos/MAG_hires/"
-
+    path = find_path("MAG_hires")
     mag = np.loadtxt(
-        path + f"mvn_mag_l2_{year}{doy}ss_{year}{month}{day}_v01_r01.sts", skiprows=160
+        path + f"mvn_mag_l2_{year}{doy}ss_{year}{month}{day}_v01_r01.sts",
+        skiprows=160,
     )
 
     hh = mag[:, 2]
@@ -98,17 +104,11 @@ def importar_swea(year, month, day, ti, tf):
     month = date_orbit.strftime("%m")
     day = date_orbit.strftime("%d")
 
-    if gethostname() == "gbosco":
-        path = f"../../../../media/gabybosc/datos/SWEA/"
-    elif gethostname() == "gabybosc":
-        path = "../../datos/SWEA/"
-    else:
-        path = f"../../../datos/SWEA/"
-
+    path = find_path("SWEA")
     # chequea que el archivo no está vacío
-    if Path(path + f"/mvn_swe_l2_svyspec_{year}{month}{day}.cdf").stat().st_size > 1000:
+    if Path(path + f"mvn_swe_l2_svyspec_{year}{month}{day}.cdf").stat().st_size > 1000:
 
-        swea = cdf.CDF(path + f"/mvn_swe_l2_svyspec_{year}{month}{day}.cdf")
+        swea = cdf.CDF(path + f"mvn_swe_l2_svyspec_{year}{month}{day}.cdf")
 
         flux_all = swea.varget("diff_en_fluxes")
         energia = swea.varget("energy")
@@ -140,12 +140,7 @@ def importar_swica(year, month, day, ti, tf):
     month = date_orbit.strftime("%m")
     day = date_orbit.strftime("%d")
 
-    if gethostname() == "gbosco":
-        path = "../../../../media/gabybosc/datos/SWIA/"
-    elif gethostname() == "gabybosc":
-        path = "../../datos/SWIA/"
-    else:
-        path = "../../../datos/SWIA/"
+    path = find_path("SWIA")
 
     if os.path.isfile(path + f"mvn_swi_l2_coarsearc3d_{year}{month}{day}.cdf"):
         # si no existe SWICA, usa los onboard
@@ -163,12 +158,7 @@ def importar_swia(year, month, day, ti, tf):
     month = date_orbit.strftime("%m")
     day = date_orbit.strftime("%d")
 
-    if gethostname() == "gbosco":
-        path = "../../../../media/gabybosc/datos/SWIA/"
-    elif gethostname() == "gabybosc":
-        path = "../../datos/SWIA/"
-    else:
-        path = "../../../datos/SWIA/"
+    path = find_path("SWIA")
 
     if (
         Path(path + f"/mvn_swi_l2_onboardsvymom_{year}{month}{day}.cdf").stat().st_size
@@ -204,12 +194,7 @@ def importar_swia(year, month, day, ti, tf):
 #     month = date_orbit.strftime("%m")
 #     day = date_orbit.strftime("%d")
 #
-#     if gethostname() == "gbosco":
-#         path = f"../../../../media/gabybosc/datos/SWIA/"
-#     elif gethostname() == "gabybosc":
-#         path = "../../datos/SWIA/"
-#     else:
-#         path = f"../../../datos/SWIA/"
+#     path = find_path("SWIA")
 #
 #     swica = cdf.CDF(path + f"mvn_swi_l2_coarsearc3d_{year}{month}{day}_v01_r01.cdf")
 #     swifa = cdf.CDF(path + f"mvn_swi_l2_finearc3d_{year}{month}{day}_v01_r01.cdf")
@@ -237,14 +222,9 @@ def importar_lpw(year, month, day, ti, tf):
     month = date_orbit.strftime("%m")
     day = date_orbit.strftime("%d")
 
-    if gethostname() == "gbosco":
-        path = f"../../../../media/gabybosc/datos/LPW/"
-    elif gethostname() == "gabybosc":
-        path = "../../datos/LPW/"
-    else:
-        path = f"../../../datos/LPW/"
+    path = find_path("LPW")
 
-    if Path(path + f"/mvn_lpw_l2_lpnt_{year}{month}{day}.cdf").stat().st_size > 1000:
+    if Path(path + f"mvn_lpw_l2_lpnt_{year}{month}{day}.cdf").stat().st_size > 1000:
         lpw = cdf.CDF(path + f"mvn_lpw_l2_lpnt_{year}{month}{day}.cdf")
 
         t_unix = lpw.varget("time_unix")
@@ -272,12 +252,7 @@ def importar_static(year, month, day, ti, tf):
     month = date_orbit.strftime("%m")
     day = date_orbit.strftime("%d")
 
-    if gethostname() == "gbosco":
-        path = f"../../../../media/gabybosc/datos/STATIC/"
-    elif gethostname() == "gabybosc":
-        path = "../../datos/STATIC/"
-    else:
-        path = f"../../../datos/STATIC/"
+    path = find_path("STATIC")
 
     static = cdf.CDF(path + f"mvn_sta_l2_c6-32e64m_{year}{month}{day}_v02_r01.cdf")
 

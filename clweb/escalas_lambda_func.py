@@ -6,6 +6,7 @@ sys.path.append("..")
 from funciones import (
     Mij,
     fechas,
+    autovectores,
     donde,
 )
 from importar_datos import importar_mag, importar_t1t2t3t4
@@ -27,22 +28,13 @@ def MVA(t, ti, tf, B):
 
     M_ij = Mij(B_cut)
 
-    [lamb, x] = np.linalg.eigh(M_ij)
-    idx = lamb.argsort()[::-1]
-    lamb = lamb[idx]
-    x = x[:, idx]
-    # ojo que me da las columnas en vez de las filas como autovectores: el av x1 = x[:,0]
-    x1 = x[:, 0]
-    x2 = x[:, 1]
-    x3 = x[:, 2]
-    if x3[0] < 0:  # si la normal aputna para adentro me la da vuelta
-        x3 = -x3
+    avec, lamb = autovectores(M_ij)
 
     cociente = lamb[1] / lamb[2]
 
-    B1 = np.dot(B_cut, x1)
-    B2 = np.dot(B_cut, x2)
-    B3 = np.dot(B_cut, x3)
+    B1 = np.dot(B, avec[0])
+    B2 = np.dot(B, avec[1])
+    B3 = np.dot(B, avec[2])
 
     return (cociente, B1, B2, B3, B_cut)
 

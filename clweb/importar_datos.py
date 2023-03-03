@@ -6,21 +6,10 @@ from oauth2client.service_account import ServiceAccountCredentials
 from socket import gethostname
 
 sys.path.append("..")
-from funciones import donde
+from funciones import donde, t_clweb
 
 
-def importar_mag(year, month, day, ti, tf):
-    # no estoy segura de que usar int(ti)/int(tf) sea buena idea, pero veremos
-    if len(str(int(ti))) == 1:
-        t_i = "0" + str(int(ti))
-    else:
-        t_i = int(ti)
-
-    if len(str(int(tf))) == 1:
-        t_f = "0" + str(int(tf))
-    else:
-        t_f = int(tf)
-
+def find_path(year, month, day, t_i, t_f):
     if gethostname() == "gbosco":
         path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_i}/"
         if not os.path.exists(path):  # si no existe, usa int(tf)
@@ -32,6 +21,28 @@ def importar_mag(year, month, day, ti, tf):
         if not os.path.exists(path):
             path = f"../../../datos/clweb/{year}-{month}-{day}/{t_f}/"
 
+    return path
+
+
+def tiempo_limite(ti, tf):
+    # no estoy segura de que usar int(ti)/int(tf) sea buena idea, pero veremos
+    if len(str(int(ti))) == 1:
+        t_i = "0" + str(int(ti))
+    else:
+        t_i = int(ti)
+
+    if len(str(int(tf))) == 1:
+        t_f = "0" + str(int(tf))
+    else:
+        t_f = int(tf)
+    return (t_i, t_f)
+
+
+def importar_mag(year, month, day, ti, tf):
+
+    t_i, t_f = tiempo_limite(ti, tf)
+    path = find_path(year, month, day, t_i, t_f)
+
     if os.path.isfile(path + "mag_filtrado.txt"):
         mag = np.loadtxt(path + "mag_filtrado.txt", skiprows=2)
         B = mag[:, :3]
@@ -41,11 +52,8 @@ def importar_mag(year, month, day, ti, tf):
         mag = np.loadtxt(path + "MAG.asc")
         B = mag[:, 6:9]
 
-    hh = mag[:, 3]
-    mm = mag[:, 4]
-    ss = mag[:, 5]
+    t = t_clweb(mag)
 
-    t = hh + mm / 60 + ss / 3600  # hdec
     inicio = donde(t, ti)
     fin = donde(t, tf)
 
@@ -76,11 +84,7 @@ def importar_VEX_mag(year, month, day, ti, tf):
         mag = np.loadtxt(path + "VEX_MAG.asc")
         B = mag[:, 6:9]
 
-    hh = mag[:, 3]
-    mm = mag[:, 4]
-    ss = mag[:, 5]
-
-    t = hh + mm / 60 + ss / 3600  # hdec
+    t = t_clweb(mag)  # hdec
     inicio = donde(t, ti)
     fin = donde(t, tf)
 
@@ -96,28 +100,8 @@ def importar_VEX_mag(year, month, day, ti, tf):
 
 
 def importar_swea(year, month, day, ti, tf):
-    if len(str(int(ti))) == 1:
-        t_i = "0" + str(int(ti))
-    else:
-        t_i = int(ti)
-
-    if len(str(int(tf))) == 1:
-        t_f = "0" + str(int(tf))
-    else:
-        t_f = int(tf)
-
-    if gethostname() == "gbosco":
-        path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_i}/"
-        if not os.path.exists(path):  # si no existe, usa int(tf)
-            path = (
-                f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_f}/"
-            )
-    else:
-        path = f"../../../datos/clweb/{year}-{month}-{day}/{t_i}/"
-        if not os.path.exists(path):
-            path = (
-                f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_f}/"
-            )
+    t_i, t_f = tiempo_limite(ti, tf)
+    path = find_path(year, month, day, t_i, t_f)
 
     swea = np.loadtxt(path + "SWEA.asc")
 
@@ -147,33 +131,15 @@ def importar_swea(year, month, day, ti, tf):
 
 def importar_swia(year, month, day, ti, tf):
 
-    if len(str(int(ti))) == 1:
-        t_i = "0" + str(int(ti))
-    else:
-        t_i = int(ti)
-
-    if len(str(int(tf))) == 1:
-        t_f = "0" + str(int(tf))
-    else:
-        t_f = int(tf)
-
-    if gethostname() == "gbosco":
-        path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_i}/"
-        if not os.path.exists(path):  # si no existe, usa int(tf)
-            path = (
-                f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_f}/"
-            )
-    else:
-        path = f"../../../datos/clweb/{year}-{month}-{day}/{t_i}/"
-        if not os.path.exists(path):
-            path = f"../../../datos/clweb/{year}-{month}-{day}/{t_f}/"
+    t_i, t_f = tiempo_limite(ti, tf)
+    path = find_path(year, month, day, t_i, t_f)
 
     if os.path.isfile(path + "SWICA.asc"):  # si no existe uno llamado SWICA, usa SWIA
         swia = np.loadtxt(path + "SWICA.asc")
     else:
         swia = np.loadtxt(path + "SWIA.asc")
 
-    t = swia[:, 3] + swia[:, 4] / 60 + swia[:, 5] / 3600  # hdec
+    t = t_clweb(swia)
 
     inicio = donde(t, ti)
     fin = donde(t, tf)
@@ -188,25 +154,8 @@ def importar_swia(year, month, day, ti, tf):
 
 def importar_swicfa(year, month, day, ti, tf):
 
-    if len(str(int(ti))) == 1:
-        t_i = "0" + str(int(ti))
-    else:
-        t_i = int(ti)
-
-    if len(str(int(tf))) == 1:
-        t_f = "0" + str(int(tf))
-    else:
-        t_f = int(tf)
-    if gethostname() == "gbosco":
-        path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_i}/"
-        if not os.path.exists(path):  # si no existe, usa int(tf)
-            path = (
-                f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_f}/"
-            )
-    else:
-        path = f"../../../datos/clweb/{year}-{month}-{day}/{t_i}/"
-        if not os.path.exists(path):
-            path = f"../../../datos/clweb/{year}-{month}-{day}/{t_f}/"
+    t_i, t_f = tiempo_limite(ti, tf)
+    path = find_path(year, month, day, t_i, t_f)
 
     swica = np.loadtxt(path + "SWICA.asc")
     swifa = np.loadtxt(path + "SWIFA.asc")
@@ -214,8 +163,8 @@ def importar_swicfa(year, month, day, ti, tf):
     density_c = swica[:, 6]
     density_f = swifa[:, 6]
 
-    t_c = swica[:, 3] + swica[:, 4] / 60 + swica[:, 5] / 3600  # hdec
-    t_f = swifa[:, 3] + swifa[:, 4] / 60 + swifa[:, 5] / 3600  # hdec
+    t_c = t_clweb(swica)
+    t_f = t_clweb(swifa)
 
     return t_c, t_f, density_c, density_f
 
@@ -225,32 +174,13 @@ def importar_swicfa(year, month, day, ti, tf):
 
 def importar_vel_swica(year, month, day, ti, tf):
 
-    if len(str(int(ti))) == 1:
-        t_i = "0" + str(int(ti))
-    else:
-        t_i = int(ti)
+    t_i, t_f = tiempo_limite(ti, tf)
 
-    if len(str(int(tf))) == 1:
-        t_f = "0" + str(int(tf))
-    else:
-        t_f = int(tf)
-
-    if gethostname() == "gbosco":
-        path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_i}/"
-        if not os.path.exists(path):  # si no existe, usa int(tf)
-            path = (
-                f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_f}/"
-            )
-    else:
-        path = f"../../../datos/clweb/{year}-{month}-{day}/{t_i}/"
-        if not os.path.exists(path):
-            path = (
-                f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_f}/"
-            )
+    path = find_path(year, month, day, t_i, t_f)
 
     swia = np.loadtxt(path + "SW_vel.asc")
 
-    t = swia[:, 3] + swia[:, 4] / 60 + swia[:, 5] / 3600  # hdec
+    t = t_clweb(swia)
 
     inicio = donde(t, ti)
     fin = donde(t, tf)
@@ -267,30 +197,13 @@ def importar_vel_swica(year, month, day, ti, tf):
 
 def importar_lpw(year, month, day, ti, tf):
 
-    if len(str(int(ti))) == 1:
-        t_i = "0" + str(int(ti))
-    else:
-        t_i = int(ti)
+    t_i, t_f = tiempo_limite(ti, tf)
 
-    if len(str(int(tf))) == 1:
-        t_f = "0" + str(int(tf))
-    else:
-        t_f = int(tf)
-
-    if gethostname() == "gbosco":
-        path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_i}/"
-        if not os.path.exists(path):  # si no existe, usa int(t_f)
-            path = (
-                f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_f}/"
-            )
-    else:
-        path = f"../../../datos/clweb/{year}-{month}-{day}/{t_i}/"
-        if not os.path.exists(path):
-            path = f"../../../datos/clweb/{year}-{month}-{day}/{t_f}/"
+    path = find_path(year, month, day, t_i, t_f)
 
     lpw = np.loadtxt(path + "LPW.asc")
 
-    t = lpw[:, 3] + lpw[:, 4] / 60 + lpw[:, 5] / 3600
+    t = t_clweb(lpw)
 
     inicio = donde(t, ti)
     fin = donde(t, tf)
@@ -307,32 +220,12 @@ def importar_lpw(year, month, day, ti, tf):
 
 def importar_static(year, month, day, ti, tf):
 
-    if len(str(int(ti))) == 1:
-        t_i = "0" + str(int(ti))
-    else:
-        t_i = int(ti)
-
-    if len(str(int(tf))) == 1:
-        t_f = "0" + str(int(tf))
-    else:
-        t_f = int(tf)
-
-    if gethostname() == "gbosco":
-        path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_i}/"
-        if not os.path.exists(path):  # si no existe, usa t_f
-            path = (
-                f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_f}/"
-            )
-    else:
-        path = f"../../../datos/clweb/{year}-{month}-{day}/{t_i}/"
-        if not os.path.exists(path):
-            path = (
-                f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{t_f}/"
-            )
+    t_i, t_f = tiempo_limite(ti, tf)
+    path = find_path(year, month, day, t_i, t_f)
 
     static = np.loadtxt(path + "STATIC.asc")
 
-    t = static[:, 3] + static[:, 4] / 60 + static[:, 5] / 3600
+    t = t_clweb(static)
 
     inicio = donde(t, ti)
     fin = donde(t, tf)

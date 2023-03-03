@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import sys
 
 sys.path.append("..")
-from funciones import fechas
+from funciones import fechas, t_clweb
 
 """
 Hace un filtro butterworth para quitar el ruido de la señal que es de aproximadamente 180 ms.
@@ -24,11 +24,7 @@ hora = input("hora\n")
 path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{hora}/"  # path a los datos desde la laptop
 mag = np.loadtxt(path + "MAG.asc")
 
-hh = mag[:, 3]
-mm = mag[:, 4]
-ss = mag[:, 5]
-
-t = hh + mm / 60 + ss / 3600  # hdec
+t = t_clweb(mag)
 
 M = np.size(t)  # el numero de datos
 
