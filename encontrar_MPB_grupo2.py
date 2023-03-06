@@ -15,19 +15,23 @@ Le paso un día entero y elijo la órbita y luego marco la posición media de la
 Es en hdec porque si no el valor que devuelve es raro ya que lo saca del gráfico y está en xfmt
 Lo escribe en una nueva columna en el archivo que hice con catalogo_maven_parte2
 Para eso, grafica |B|, BxByBz, swea, swia y lpw.M   
+
+Después de este correr after_encontrar
 """
 
 np.set_printoptions(precision=4)
 
-catalogo = np.genfromtxt("outputs/hoja_grupo2.txt", dtype="str")
+catalogo = np.genfromtxt("outputs/hoja_grupo4.txt", dtype="str")
+# ek grupo 4 está bastante bien distrubuido en ángulos
 
-
-for i in range(133, len(catalogo)):
-    # i = int(input(f"linea (voy por {i})\n"))
+for i in range(65, len(catalogo)):
     print(i)
 
     cat = catalogo[i]
     year, month, day = cat[0].split("-")
+
+    # if year == "2018" and month == "11":  # sólo quiero elegir de este mes
+    # if float(cat[2]) < 30:  # que agregue todos los casos quasiperp
     t_bs = UTC_to_hdec(cat[1])
 
     ti = t_bs - 1.5  # mira +- 1.5h respecto del BS
@@ -85,6 +89,10 @@ for i in range(133, len(catalogo)):
         ax3.set_ylabel("|B| (nT)")
         ax3.set_xlabel("Tiempo (hdec)")
 
+        if max(B_norm) > 70:
+            ax2.set_ylim([-50, 50])
+            ax3.set_ylim([0, 50])
+
         ax4 = plt.subplot2grid((3, 2), (0, 1), sharex=ax1)
         # ax6.set_ylabel("Densidad total \n de e- (cm⁻³)")
         plt.setp(ax4.get_xticklabels(), visible=False)
@@ -131,6 +139,6 @@ for i in range(133, len(catalogo)):
         print("Happy? Keyboard click for yes, mouse click for no.\n")
         happy = plt.waitforbuttonpress()
 
-    with open("outputs/grupo2.txt", "a") as file:
+    with open("outputs/grupo4.txt", "a") as file:
         file.write(f"{cat[0]}\t{cat[1]}\t{hdec_to_UTC(val)}\t{cat[2]}\t{cat[3]}")
         file.write("\n")
