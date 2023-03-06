@@ -11,14 +11,36 @@ Acá van las funciones que se relacionan con el MVA, el fit o el bootstrap
 """
 
 
-def ajuste_conico(posicion, index, orbita, x3, x0=0.78, e=0.9, L=0.96):
-    """conica que toma los parámetros de Vignes y devuelve la normal
-    para plotear usar normales.py"""
+def flechas(ax, inicio, fin, c="k", lth=0.5, lbl=None):
+    ax.quiver(
+        inicio[0],
+        inicio[1],
+        inicio[2],
+        fin[0],
+        fin[1],
+        fin[2],
+        color=c,
+        length=lth,
+        label=lbl,
+    )
+
+
+def planeta(ax):
+    u, v = np.mgrid[0 : 2 * np.pi : 20j, 0 : np.pi : 10j]
+    ax.plot_wireframe(
+        np.cos(u) * np.sin(v),
+        np.sin(u) * np.sin(v),
+        np.cos(v),
+        color="r",
+        linewidth=0.5,
+    )
+
+
+def ajuste_conico(R, x0=0.78, e=0.9):
     theta = np.linspace(0, np.pi * 3 / 4, 100)
     phi = np.linspace(0, 2 * np.pi, 100)
     THETA, PHI = np.meshgrid(theta, phi)
 
-    R = posicion[index, :] / 3390  # la posicion de la nave en RM
     # ###### Calculo mi propia elipse que pase por el punto.
     r0 = R - np.array([x0, 0, 0])
     theta0 = np.arccos(r0[0] / np.linalg.norm(r0))
@@ -26,6 +48,28 @@ def ajuste_conico(posicion, index, orbita, x3, x0=0.78, e=0.9, L=0.96):
     L0 = np.linalg.norm(r0) * (1 + e * np.cos(theta0))
     r1 = L0 / (1 + e * np.cos(THETA))
 
+    asc = L0 / (1 - e**2)  # semieje mayor
+    bsc = np.sqrt(asc * L0)
+    csc = e * asc - x0  # donde está centrada. Hay que ver el signo
+
+    norm_vignes = np.array(
+        [(R[0] + csc) * 2 / asc**2, R[1] * 2 / bsc**2, R[2] * 2 / bsc**2]
+    )
+    norm_vignes = norm_vignes / np.linalg.norm(norm_vignes)
+
+    X1 = x0 + r1 * np.cos(THETA)
+    Y1 = r1 * np.sin(THETA) * np.cos(PHI)
+    Z1 = r1 * np.sin(THETA) * np.sin(PHI)
+
+    return (X1, Y1, Z1, L0, norm_vignes)
+
+
+def ajuste_conico_plot(posicion, index, orbita, x3, x0=0.78, e=0.9):
+    """conica que toma los parámetros de Vignes y devuelve la normal
+    para plotear usar normales.py"""
+
+    R = posicion[index, :] / 3390  # la posicion de la nave en RM
+    X1, Y1, Z1, L0, norm_vignes = ajuste_conico(R)
     # ahora plotea
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1, projection="3d")
@@ -34,9 +78,6 @@ def ajuste_conico(posicion, index, orbita, x3, x0=0.78, e=0.9, L=0.96):
     ax.set_zlabel(r"$Z_{MSO} (R_m)$")
     ax.plot(orbita[:, 0], orbita[:, 1], orbita[:, 2], color="green", label="Órbita")
     ax.scatter(R[0], R[1], R[2], label="MAVEN", color="k", s=40)
-    X1 = x0 + r1 * np.cos(THETA)
-    Y1 = r1 * np.sin(THETA) * np.cos(PHI)
-    Z1 = r1 * np.sin(THETA) * np.sin(PHI)
     ax.plot_surface(
         X1,
         Y1,
@@ -48,46 +89,10 @@ def ajuste_conico(posicion, index, orbita, x3, x0=0.78, e=0.9, L=0.96):
         cmap=plt.get_cmap("Blues_r"),
     )
 
-    asc = L0 / (1 - e ** 2)  # semieje mayor
-    bsc = np.sqrt(asc * L0)
-    csc = e * asc - x0  # donde está centrada. Hay que ver el signo
+    flechas(ax, R, norm_vignes, c="b", lbl="Normal del Ajuste")
+    flechas(ax, R, x3, lbl="Normal del MVA")
 
-    norm_vignes = np.array(
-        [(R[0] + csc) * 2 / asc ** 2, R[1] * 2 / bsc ** 2, R[2] * 2 / bsc ** 2]
-    )
-    norm_vignes = norm_vignes / np.linalg.norm(norm_vignes)
-
-    ax.quiver(
-        R[0],
-        R[1],
-        R[2],
-        norm_vignes[0],
-        norm_vignes[1],
-        norm_vignes[2],
-        color="b",
-        length=0.5,
-        label="Normal del ajuste",
-    )
-    ax.quiver(
-        R[0],
-        R[1],
-        R[2],
-        x3[0],
-        x3[1],
-        x3[2],
-        color="k",
-        length=0.5,
-        label="Normal del MVA",
-    )
-
-    u, v = np.mgrid[0 : 2 * np.pi : 20j, 0 : np.pi : 10j]
-    ax.plot_wireframe(
-        np.cos(u) * np.sin(v),
-        np.sin(u) * np.sin(v),
-        np.cos(v),
-        color="r",
-        linewidth=0.5,
-    )
+    planeta(ax)
     ax.legend()
     set_axes_equal(ax)
 
@@ -130,32 +135,6 @@ def bootstrap(N, B_cut):
     return normal, phi, delta_B3, out, out_phi
 
 
-def normal_fit(posicion, index, x0=0.78, e=0.9):
-    """conica que toma los parámetros de Vignes y devuelve la normal
-    para plotear usar ajuste_conico SÓLO SIRVE SI ES UN PARABOLOIDE"""
-    theta = np.linspace(0, np.pi * 3 / 4, 100)
-    phi = np.linspace(0, 2 * np.pi, 100)
-    THETA, PHI = np.meshgrid(theta, phi)
-
-    R = posicion[index, :] / 3390  # la posicion de la nave en RM
-    # ###### Calculo mi propia elipse que pase por el punto.
-    r0 = R - np.array([x0, 0, 0])
-    theta0 = np.arccos(r0[0] / np.linalg.norm(r0))
-
-    L0 = np.linalg.norm(r0) * (1 + e * np.cos(theta0))
-
-    asc = L0 / (1 - e ** 2)  # semieje mayor
-    bsc = np.sqrt(asc * L0)
-    csc = e * asc - x0  # donde está centrada. Hay que ver el signo
-
-    norm_vignes = np.array(
-        [(R[0] + csc) * 2 / asc ** 2, R[1] * 2 / bsc ** 2, R[2] * 2 / bsc ** 2]
-    )  # la normal de vignes
-    norm_vignes = norm_vignes / np.linalg.norm(norm_vignes)  # normalizado
-
-    return norm_vignes, L0
-
-
 def plot_velocidades(X1, Y1, Z1, R, norm_vignes, x3, v_media, v_para, v_para_MVA):
     fig1 = plt.figure()
     ax1 = fig1.add_subplot(1, 1, 1, projection="3d")
@@ -168,64 +147,15 @@ def plot_velocidades(X1, Y1, Z1, R, norm_vignes, x3, v_media, v_para, v_para_MVA
     )
     ax1.scatter(R[0], R[1], R[2])
 
-    ax1.quiver(
-        R[0],
-        R[1],
-        R[2],
-        norm_vignes[0],
-        norm_vignes[1],
-        norm_vignes[2],
-        color="g",
-        length=0.5,
-        label="fit normal",
-    )
-    ax1.quiver(
-        R[0],
-        R[1],
-        R[2],
-        v_media[0],
-        v_media[1],
-        v_media[2],
-        color="b",
-        length=0.5,
-        label="velocity",
-    )
-    ax1.quiver(
-        R[0], R[1], R[2], x3[0], x3[1], x3[2], color="k", length=0.5, label="MVA normal"
-    )
-    ax1.quiver(
-        R[0],
-        R[1],
-        R[2],
-        v_para[0],
-        v_para[1],
-        v_para[2],
-        color="r",
-        length=0.5,
-        label="v parallel",
-    )
-    ax1.quiver(
-        R[0],
-        R[1],
-        R[2],
-        v_para_MVA[0],
-        v_para_MVA[1],
-        v_para_MVA[2],
-        color="m",
-        length=0.5,
-        label="v parallel MVA",
-    )
+    flechas(ax1, R, norm_vignes, c="b", lbl="Normal del Ajuste")
+    flechas(ax1, R, v_media, c="g", lbl="Velocidad")
+    flechas(ax1, R, x3, lbl="Normal del MVA")
+    flechas(ax1, R, v_para, c="r", lbl="vel paralela")
+    flechas(ax1, R, v_para_MVA, c="m", lbl="vel paralela MVA")
+
     ax1.legend()
 
-    u, v = np.mgrid[0 : 2 * np.pi : 20j, 0 : np.pi : 10j]
-    ax1.plot_wireframe(
-        np.cos(u) * np.sin(v),
-        np.sin(u) * np.sin(v),
-        np.cos(v),
-        color="r",
-        linewidth=0.5,
-    )
-
+    planeta(ax1)
     set_axes_equal(ax1)
 
 
@@ -242,71 +172,13 @@ def plot_FLorentz(X1, Y1, Z1, R, J_v, B_upstream, B_downstream, fuerza_mva, x3):
         X1, Y1, Z1, rstride=4, cstride=4, alpha=0.5, cmap=plt.get_cmap("Blues_r")
     )
 
-    u, v = np.mgrid[0 : 2 * np.pi : 20j, 0 : np.pi : 10j]
-    ax2.plot_wireframe(
-        np.cos(u) * np.sin(v),
-        np.sin(u) * np.sin(v),
-        np.cos(v),
-        color="r",
-        linewidth=0.5,
-    )
+    planeta(ax2)
 
-    ax2.quiver(
-        R[0],
-        R[1],
-        R[2],
-        J_v[0],
-        J_v[1],
-        J_v[2],
-        color="r",
-        length=1e-3,
-        label="Corriente en volumen",
-    )
-    ax2.quiver(
-        R[0],
-        R[1],
-        R[2],
-        B_upstream[0],
-        B_upstream[1],
-        B_upstream[2],
-        color="b",
-        length=1e-2,
-        label="B upstream",
-    )
-    ax2.quiver(
-        R[0],
-        R[1],
-        R[2],
-        B_downstream[0],
-        B_downstream[1],
-        B_downstream[2],
-        color="g",
-        length=1e-2,
-        label="B downstream",
-    )
-    ax2.quiver(
-        R[0],
-        R[1],
-        R[2],
-        fuerza_mva[0],
-        fuerza_mva[1],
-        fuerza_mva[2],
-        color="m",
-        length=2e13,
-        label="Fuerza MVA",
-    )
-    ax2.quiver(
-        R[0],
-        R[1],
-        R[2],
-        x3[0],
-        x3[1],
-        x3[2],
-        color="k",
-        length=0.5,
-        label="Normal del MVA",
-        linewidths=0.5,
-    )
+    flechas(ax2, R, J_v, c="b", lth=1e-3, lbl="J vol")
+    flechas(ax2, R, B_upstream, c="g", lth=1e-2, lbl="B upstream")
+    flechas(ax2, R, x3, lbl="Normal del MVA")
+    flechas(ax2, R, B_downstream, c="r", lth=1e-2, lbl="B downstream")
+    flechas(ax2, R, fuerza_mva, c="m", lth=2e13, lbl="Fuerza MVA")
 
     set_axes_equal(ax2)
     ax2.legend(loc="upper right", bbox_to_anchor=(1.1, 1.05))

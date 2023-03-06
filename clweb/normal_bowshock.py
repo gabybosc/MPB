@@ -12,9 +12,6 @@ from funciones import (
     ancho_mpb,
     corrientes,
     datenum,
-    find_nearest,
-    find_nearest_final,
-    find_nearest_inicial,
     fechas,
     tiempos,
     donde,
@@ -67,12 +64,12 @@ def normal_fit(posicion, x0=0.64, e=1.03):
 
     L0 = np.linalg.norm(r0) * (1 + e * np.cos(theta0))
 
-    asc = L0 / (e ** 2 - 1)
-    bsc = L0 / (e ** 2 - 1) ** (1 / 2)
-    csc = x0 + L0 * e / (e ** 2 - 1)
+    asc = L0 / (e**2 - 1)
+    bsc = L0 / (e**2 - 1) ** (1 / 2)
+    csc = x0 + L0 * e / (e**2 - 1)
 
     norm_vignes = np.array(
-        [(R[0] + csc) * 2 / asc ** 2, R[1] * 2 / bsc ** 2, R[2] * 2 / bsc ** 2]
+        [(R[0] + csc) * 2 / asc**2, R[1] * 2 / bsc**2, R[2] * 2 / bsc**2]
     )
     norm_vignes = norm_vignes / np.linalg.norm(norm_vignes)
 
@@ -106,7 +103,7 @@ x1 = x0 + r1 * np.cos(theta)
 y1 = r1 * np.sin(theta) * np.cos(phi)
 z1 = r1 * np.sin(theta) * np.sin(phi)
 
-plt.plot(x1, np.sqrt(y1 ** 2 + z1 ** 2))
+plt.plot(x1, np.sqrt(y1**2 + z1**2))
 plt.quiver(
     R[0],
     np.sqrt(R[1] ** 2 + R[2] ** 2),

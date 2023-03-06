@@ -246,7 +246,7 @@ def data(i, xy, z, grid_x, grid_y, zmin, zmax, metodo="linear", colormap="coolwa
         grid_x, grid_y, ma.masked_invalid(grid_z), cmap=colormap, vmin=zmin, vmax=zmax
     )
     grid[i].set_aspect("equal", "box")
-    grid[i].set_xlim([1.0, 2])
+    grid[i].set_xlim([2, 1])
     grid[i].set_ylim([-0.5, 0.5])
     grid[i].plot(X1, Y1, c="k", linestyle="--", label="beta=1")
     grid[i].plot(X1_M, Y1_M, c="k", linestyle="-", label="MAVEN")
@@ -274,6 +274,7 @@ data(1, xy, np.log(beta_str_y0), grid_x, grid_y, -4, 4)
 grid[0].set_title(r"Z=0 log($\beta*$)")
 grid[1].set_title(r"Y=0 log($\beta*$)")
 grid[0].set_ylabel(r"y (R$_M$)")
+grid[1].set_ylabel(r"z (R$_M$)")
 grid[0].set_xlabel(r"x (R$_M$)")
 grid[1].set_xlabel(r"x (R$_M$)")
 
@@ -317,18 +318,18 @@ grid[3].set_title(r"B$_x$ Y=0")
 grid[4].set_title(r"B$_y$ Y=0")
 grid[5].set_title(r"B$_z$ Y=0")
 
-cb = figure.colorbar(
+cb = fig.colorbar(
     cm.ScalarMappable(norm=Normalize(-50, 50), cmap="coolwarm"), cax=grid.cbar_axes[0]
 )
 cb.ax.set_title("B (nT)")
 
-figure.set_size_inches(9, 6)
+fig.set_size_inches(9, 6)
 # when saving, specify the DPI
 # plt.savefig("../../../Dropbox/Paper2/B_2d.png", dpi=600)
 plt.show()
 
 
-# densidad
+# # densidad
 
 fig = plt.figure(1, (2.0, 3.0))
 grid = AxesGrid(
@@ -363,6 +364,9 @@ cb = figure.colorbar(
     cm.ScalarMappable(norm=Normalize(0, 20), cmap="inferno"), cax=grid.cbar_axes[0]
 )
 cb.ax.set_title("dens.\n(cm⁻³)", fontsize=10)
+figure.set_size_inches(9, 6)
+# when saving, specify the DPI
+# plt.savefig("../../../Dropbox/Paper2/dens_2d.png", dpi=600)
 plt.show()
 
 

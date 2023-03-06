@@ -3,14 +3,7 @@ import sys
 from importar_datos import importar_mag
 
 sys.path.append("..")
-from funciones import (
-    error,
-    find_nearest,
-    Mij,
-    angulo,
-    find_nearest_final,
-    find_nearest_inicial,
-)
+from funciones import error, find_nearest, Mij, angulo, autovectores, donde
 from funciones_metodos import normal_fit
 from funciones_plot import hodograma
 
@@ -41,53 +34,27 @@ def MVA(year, month, day, ti_MVA, tf_MVA):
     # ya los importa cortados a los datos, entonces no hace falta que haga el cut yo
 
     M = len(t)
-    Bnorm = np.linalg.norm(B, axis=1)
-
-    # la matriz diaria:
-    MD = np.zeros((M, 9))
-    MD[:, 0] = t
-    for i in range(1, 4):
-        MD[:, i] = B[:, i - 1]
-    MD[:, 4] = Bnorm
-    for i in range(5, 8):
-        MD[:, i] = posicion[:, i - 5] / 3390  # en radios marcianos
-    MD[:, 8] = np.linalg.norm(posicion, axis=1) - 3390  # altitud en km
 
     n_p = int(M / 2)
 
     M_ij = Mij(B)
 
-    # ahora quiero los autovectores y autovalores
-    [lamb, x] = np.linalg.eigh(M_ij)  # uso eigh porque es simetrica
+    avec, lamb = autovectores(M_ij)
 
-    # Los ordeno de mayor a menor
-    idx = lamb.argsort()[::-1]
-    lamb = lamb[idx]
-    x = x[:, idx]
-    # ojo que me da las columnas en vez de las filas como autovectores: el av x1 = x[:,0]
-    x1 = x[:, 0]
-    x2 = x[:, 1]
-    x3 = x[:, 2]
-
-    if x3[0] < 0:  # si la normal aputna para adentro me la da vuelta
-        x3 = -x3
-    if any(np.cross(x1, x2) - x3) > 0.01:
-        print("Cambio el signo de x1 para que los av formen terna derecha")
-        x1 = -x1
-
-    print("la normal del MVA es ", x3)
+    print("la normal del MVA es ", avec[2])
 
     # las proyecciones
-    B1 = np.dot(B, x1)
-    B2 = np.dot(B, x2)
-    B3 = np.dot(B, x3)
+    B1 = np.dot(B, avec[0])
+    B2 = np.dot(B, avec[1])
+    B3 = np.dot(B, avec[2])
 
     # el B medio
     B_medio_vectorial = np.mean(B, axis=0)
-    altitud = np.mean(MD[:, 8])
+    altitud = np.linalg.norm(posicion, axis=1) - 3390  # km
+    altitud_media = np.mean(altitud)
 
     SZA = angulo(posicion[n_p, :], [1, 0, 0]) * 180 / np.pi
-    print(f"altitud = {altitud}, SZA = {SZA}")
+    print(f"altitud = {altitud_media}, SZA = {SZA}")
 
     print("cociente de lambdas = ", lamb[1] / lamb[2])
     B_norm_medio = np.linalg.norm(B_medio_vectorial)
@@ -98,7 +65,7 @@ def MVA(year, month, day, ti_MVA, tf_MVA):
     # el error
     phi, delta_B3 = error(lamb, B, x)
     print("MVA terminado")
-    return x3, B, t, posicion
+    return avec[2], B, t, posicion
 
 
 def ajuste(year, month, day, doy, ti_MVA, tf_MVA):
@@ -116,7 +83,7 @@ def ajuste(year, month, day, doy, ti_MVA, tf_MVA):
 
     t_nave = find_nearest(t, (t2 + t3) / 2)
     # el tiempo en el medio de la hoja de corriente
-    index = np.where(t == t_nave)[0][0]
+    index = donde(t, t_nave)
     # x0 = 0.78
     # e = 0.9
     normal_ajuste, L0 = normal_fit(posicion, index)

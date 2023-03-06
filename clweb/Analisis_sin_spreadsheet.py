@@ -10,9 +10,6 @@ from funciones import (
     angulo,
     ancho_mpb,
     corrientes,
-    find_nearest,
-    find_nearest_final,
-    find_nearest_inicial,
     fechas,
     tiempos,
     donde,
@@ -48,15 +45,33 @@ angulo_boot = angulo(
 
 ##############
 # Calculo la velocidad de la nave
-v_punto = np.zeros((M_cut - 1, 3))
-norma_v = np.zeros(M_cut - 1)
-for i in range(len(v_punto)):
-    v_punto[i, :] = (posicion_cut[i + 1, :] - posicion_cut[i]) / (1 / 32)
-    # en km/s, tiene resolución de 32Hz
-    norma_v[i] = np.linalg.norm(v_punto[i, :])
-# la velocidad promedio
-v_media = np.mean(v_punto, axis=0)
+def velocidad(posicion_cut):
+    M = len(posicion_cut)
+    v_punto = np.zeros((M - 1, 3))
+    for i in range(len(v_punto)):
+        v_punto[i, :] = (posicion_cut[i + 1, :] - posicion_cut[i]) / (1 / 32)
+        # en km/s, tiene resolución de 32Hz
+    # la velocidad promedio
+    v_media = np.mean(v_punto, axis=0)
+    return v_media
 
+
+def corte(t, ti, tf, vector):
+    inicio = donde(t, ti)
+    fin = donde(t, tf)
+    if vector.ndim > 1:
+        vector_cut = np.nanmean(vector[inicio:fin, :], axis=0)
+    else:
+        vector_cut = np.nanmean(vector[inicio:fin])
+    return vector_cut
+
+
+def fuerza(J, B):
+    f = np.cross(J * 1e-9, B * 1e-9)  # en N/m³
+    return f
+
+
+v_media = velocidad(posicion_cut)
 # ahora quiero ver si la nave atraviesa perpendicularmente a la MPB
 
 angulo_v_fit = angulo(normal_ajuste, v_media)
@@ -77,13 +92,8 @@ x_14_boot, x_23_boot = ancho_mpb(t1, t2, t3, t4, normal_boot, v_media)
 ###########
 # análisis de corrientes
 
-inicio_up = donde(t, t1 - 0.015)
-fin_up = donde(t, t1)
-B_upstream = np.mean(B[inicio_up:fin_up, :], axis=0)  # nT
-
-inicio_down = donde(t, t4)
-fin_down = donde(t, t4 + 0.015)
-B_downstream = np.mean(B[inicio_down:fin_down, :], axis=0)  # nT
+B_upstream = corte(t, t1 - 0.015, t1, B)
+B_downstream = corte(t, t4, t4 + 0.015, B)
 
 n_coplanar = normal_coplanar(B_upstream, B_downstream)
 
@@ -93,23 +103,22 @@ J_s_MVA, J_v_MVA = corrientes(x3, B_upstream, B_downstream, x_23_MVA)
 J_s_fit, J_v_fit = corrientes(normal_ajuste, B_upstream, B_downstream, x_23_fit)
 J_s_boot, J_v_boot = corrientes(normal_boot, B_upstream, B_downstream, x_23_boot)
 
-fuerza_mva = np.cross(J_v_MVA * 1e-9, B[inicio_down, :] * 1e-9)  # N/m^3 #en t4
-fuerza_fit = np.cross(J_v_fit * 1e-9, B[inicio_down, :] * 1e-9)  # N/m^3 #en t4
-fuerza_boot = np.cross(J_v_boot * 1e-9, B[inicio_down, :] * 1e-9)  # N/m^3
+inicio_down = donde(t, t1 - 0.015)
+fuerza_mva = fuerza(J_v_MVA, B[inicio_down, :])
+fuerza_fit = fuerza(J_v_fit, B[inicio_down, :])
+fuerza_boot = fuerza(J_v_boot, B[inicio_down, :])
 
 
 e_density = lpw[:, -1]
 t_lpw = lpw[:, 3] + lpw[:, 4] / 60 + lpw[:, 5] / 3600
 
-ti_lpw = np.where(t_lpw == find_nearest(t_lpw, t2))[0][0]
-tf_lpw = np.where(t_lpw == find_nearest(t_lpw, t3))[0][0]
-n_e = np.nanmean(e_density[ti_lpw:tf_lpw])  # hace el mean ignorando los nans #cm⁻³
+n_e = corte(t_lpw, t2, t3, e_density)
 n_e = n_e * 1e6  # m⁻³
 if np.isnan(n_e):
     n_e = 1e7
     print("LPW no tiene datos de densidad, asumí n_e = 1E7")
 q_e = 1.6e-19  # carga electron #C
 
-E_Hall = np.cross(J_v_MVA * 1e-9, B[inicio_down, :] * 1e-9) / (q_e * n_e)  # V/m
-E_Hall_fit = np.cross(J_v_fit * 1e-9, B[inicio_down, :] * 1e-9) / (q_e * n_e)  # V/m
-E_Hall_boot = np.cross(J_v_boot * 1e-9, B[inicio_down, :] * 1e-9) / (q_e * n_e)  # V/m
+E_Hall = fuerza_mva / (q_e * n_e)  # V/m
+E_Hall_fit = fuerza_fit / (q_e * n_e)  # V/m
+E_Hall_boot = fuerza_boot / (q_e * n_e)  # V/m

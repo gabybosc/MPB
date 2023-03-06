@@ -30,6 +30,31 @@ def ancho_mpb(t1, t2, t3, t4, normal, vel):
     return x_14, x_23
 
 
+def autovectores(M_ij):
+    """Devuelve los autovectores del MVA"""
+    # ahora quiero los autovectores y autovalores
+    [lamb, x] = np.linalg.eigh(M_ij)  # uso eigh porque es simetrica
+
+    # Los ordeno de mayor a menor
+    idx = lamb.argsort()[::-1]
+    lamb = lamb[idx]
+    x = x[:, idx]
+    # ojo que me da las columnas en vez de las filas como autovectores: el av x1 = x[:,0]
+    x1 = x[:, 0]
+    x2 = x[:, 1]
+    x3 = x[:, 2]
+
+    if x3[0] < 0:  # si la normal aputna para adentro me la da vuelta
+        x3 = -x3
+    if any(np.cross(x1, x2) - x3) > 0.01:
+        print("Cambio el signo de x1 para que los av formen terna derecha")
+        x1 = -x1
+
+    avec = [x1, x2, x3]
+    aval = lamb
+    return avec, aval
+
+
 def deltaB(B):
     """B es un array de Nx3, una matriz."""
     B_medio = np.mean(B, axis=0)
@@ -302,6 +327,18 @@ def hdec_to_UTC(hdec):
     s = int((((hdec % 1) * 60) % 1) * 60)
     UTC = f"{h}:{m}:{s}"
     return UTC
+
+
+def t_clweb(dataset):
+    """
+    Me convierte el t que está en hh mm ss en diferentes columnas en un t hdec
+    """
+    hh = dataset[:, 3]
+    mm = dataset[:, 4]
+    ss = dataset[:, 5]
+
+    t = hh + mm / 60 + ss / 3600  # hdec
+    return t
 
 
 def getrem(ins):

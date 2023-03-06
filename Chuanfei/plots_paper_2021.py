@@ -269,218 +269,218 @@ ax5.text(1.155, 4, "c)")
 ax6.text(1.155, 3.8, "d)")
 ax2.text(1.155, 0.8, "e)")
 
-
 # ax2.annotate('to Sun', xy=(0, -0.4), xycoords='axes fraction', xytext=(0.1, -0.4),
 # arrowprops=dict(arrowstyle="->", color='k'))
 figure = plt.gcf()  # get current figure
 figure.set_size_inches(8, 9)
 # when saving, specify the DPI
 plt.savefig("../../../Dropbox/Paper2/simulación_ejex.png", dpi=300)
+plt.show()
 # plt.show()
 
 """
 Trayectoria temporal
 """
-path = "../../../datos/simulacion_chuanfei/"
-datos_enteros = np.loadtxt(path + "nueva_simu/sat_HallOn_2022_highRes.sat", skiprows=2)
+# path = "../../../datos/simulacion_chuanfei/"
+# datos_enteros = np.loadtxt(path + "nueva_simu/sat_HallOn_2022_highRes.sat", skiprows=2)
 
-# Datos de la simulación
-pi = 1000
-pf = 1250
-mu0 = 4e-7 * np.pi  # T m / A
+# # Datos de la simulación
+# pi = 1000
+# pf = 1250
+# mu0 = 4e-7 * np.pi  # T m / A
 
-datos_tray = datos_enteros[pi:pf]
+# datos_tray = datos_enteros[pi:pf]
 
-x_tray = datos_tray[:, 8]
-y_tray = datos_tray[:, 9]
-z_tray = datos_tray[:, 10]
+# x_tray = datos_tray[:, 8]
+# y_tray = datos_tray[:, 9]
+# z_tray = datos_tray[:, 10]
 
-B_tray = datos_tray[:, 15:18]  # nT
-b1_tray = datos_tray[:, 40:43]
-J_tray = datos_tray[:, -3:]  # uA/m2
+# B_tray = datos_tray[:, 15:18]  # nT
+# b1_tray = datos_tray[:, 40:43]
+# J_tray = datos_tray[:, -3:]  # uA/m2
 
-presion_tray = {
-    "e-": datos_tray[:, 18],
-    "H+": datos_tray[:, 24],
-    "O+": datos_tray[:, 34],
-    "O2+": datos_tray[:, 29],
-    "CO2+": datos_tray[:, 39],
-}  # nPa
+# presion_tray = {
+#     "e-": datos_tray[:, 18],
+#     "H+": datos_tray[:, 24],
+#     "O+": datos_tray[:, 34],
+#     "O2+": datos_tray[:, 29],
+#     "CO2+": datos_tray[:, 39],
+# }  # nPa
 
-densities_tray = {
-    "e-": datos_tray[:, 11],
-    "H+": datos_tray[:, 20],
-    "O+": datos_tray[:, 30],
-    "O2+": datos_tray[:, 25],
-    "CO2+": datos_tray[:, 35],
-}  # mp/cc
+# densities_tray = {
+#     "e-": datos_tray[:, 11],
+#     "H+": datos_tray[:, 20],
+#     "O+": datos_tray[:, 30],
+#     "O2+": datos_tray[:, 25],
+#     "CO2+": datos_tray[:, 35],
+# }  # mp/cc
 
-velocidad_tray = {
-    "H+": datos_tray[:, 12:15],
-    "O+": datos_tray[:, 31:34],
-    "O2+": datos_tray[:, 26:29],
-    "CO2+": datos_tray[:, 36:39],
-}  # km/s
-
-
-# Datos de MAVEN
-mag, t, B_mag, posicion = importar_mag(2016, "03", 16, 17.7, 18.5)
-
-# Datos del análisis de MAVEN
-R = [1.082, -0.064, 0.515]
-normal = [0.920, -0.302, 0.251]
-j_maven = 282  # nA/m²
-v_x = -13000  # km/h la velocidad de MAVEN en x
+# velocidad_tray = {
+#     "H+": datos_tray[:, 12:15],
+#     "O+": datos_tray[:, 31:34],
+#     "O2+": datos_tray[:, 26:29],
+#     "CO2+": datos_tray[:, 36:39],
+# }  # km/s
 
 
-t1, t2, t3, t4 = 18.2167, 18.2204, 18.235, 18.2476
-t_up = t1 - 0.015
-t_down = t4 + 0.015
+# # Datos de MAVEN
+# mag, t, B_mag, posicion = importar_mag(2016, "03", 16, 17.7, 18.5)
 
-# la explicación de esto está en la función al final de todo
+# # Datos del análisis de MAVEN
+# R = [1.082, -0.064, 0.515]
+# normal = [0.920, -0.302, 0.251]
+# j_maven = 282  # nA/m²
+# v_x = -13000  # km/h la velocidad de MAVEN en x
 
-r_simu = np.transpose([x_tray, y_tray, z_tray]) * 3390
-zi = donde(posicion[:, 2], r_simu[0, 2])
-zf = donde(posicion[:, 2], r_simu[-1, 2])
 
-posicion_cut = posicion[zi:zf]
-t_cut = t[zi:zf]
-B_cut = B_mag[zi:zf]
-t_simu = np.linspace(t_cut[0], t_cut[-1], len(r_simu))
+# t1, t2, t3, t4 = 18.2167, 18.2204, 18.235, 18.2476
+# t_up = t1 - 0.015
+# t_down = t4 + 0.015
 
-lpw, t_lpw, e_density, flag = importar_lpw(2016, "03", 16, t_cut[0], t_cut[-1])
-swia, t_swia, proton_density, sw_vel = importar_swica(
-    2016, "03", 16, t_cut[0], t_cut[-1]
-)
-STATIC, t_static, H_density, O_density, O2_density, CO2_density = importar_STATIC(
-    2016, "03", 16, 17.7, 18.5
-)
+# # la explicación de esto está en la función al final de todo
 
-# los valores estos los elegi mirando los gráficos de la función ancho
-ti_simu = t_simu[donde(x_tray, 1.14)]
-tf_simu = t_simu[donde(x_tray, 1.01)]
+# r_simu = np.transpose([x_tray, y_tray, z_tray]) * 3390
+# zi = donde(posicion[:, 2], r_simu[0, 2])
+# zf = donde(posicion[:, 2], r_simu[-1, 2])
 
-ii = donde(t_simu, ti_simu)
-jj = donde(t_simu, tf_simu)
+# posicion_cut = posicion[zi:zf]
+# t_cut = t[zi:zf]
+# B_cut = B_mag[zi:zf]
+# t_simu = np.linspace(t_cut[0], t_cut[-1], len(r_simu))
 
-year = 2016
-month = 3
-day = 16
+# lpw, t_lpw, e_density, flag = importar_lpw(2016, "03", 16, t_cut[0], t_cut[-1])
+# swia, t_swia, proton_density, sw_vel = importar_swica(
+#     2016, "03", 16, t_cut[0], t_cut[-1]
+# )
+# STATIC, t_static, H_density, O_density, O2_density, CO2_density = importar_STATIC(
+#     2016, "03", 16, 17.7, 18.5
+# )
 
-tiempo_mag = np.array([np.datetime64(datenum(year, month, day, x)) for x in t_cut])
-tiempo_simu = np.array([np.datetime64(datenum(year, month, day, x)) for x in t_simu])
-tiempo_swia = np.array([np.datetime64(datenum(year, month, day, x)) for x in t_swia])
-tiempo_lpw = np.array([np.datetime64(datenum(year, month, day, x)) for x in t_lpw])
-tiempo_static = np.array(
-    [np.datetime64(datenum(year, month, day, x)) for x in t_static]
-)
-# idx_flag = [i for i in range(len(flag)) if flag[i] > 50]
+# # los valores estos los elegi mirando los gráficos de la función ancho
+# ti_simu = t_simu[donde(x_tray, 1.14)]
+# tf_simu = t_simu[donde(x_tray, 1.01)]
 
-normal = np.array([0.920, -0.302, 0.251])
-ancho_mpb = np.dot(r_simu[jj] - r_simu[ii], normal)
+# ii = donde(t_simu, ti_simu)
+# jj = donde(t_simu, tf_simu)
 
-tt = donde(t_cut, t1)
-ff = donde(t_cut, t4)
-# ancho = np.dot(posicion_cut[tt] - posicion_cut[ff], normal)
+# year = 2016
+# month = 3
+# day = 16
 
-j_media = np.mean(J[ii:jj]) * 1e3
+# tiempo_mag = np.array([np.datetime64(datenum(year, month, day, x)) for x in t_cut])
+# tiempo_simu = np.array([np.datetime64(datenum(year, month, day, x)) for x in t_simu])
+# tiempo_swia = np.array([np.datetime64(datenum(year, month, day, x)) for x in t_swia])
+# tiempo_lpw = np.array([np.datetime64(datenum(year, month, day, x)) for x in t_lpw])
+# tiempo_static = np.array(
+#     [np.datetime64(datenum(year, month, day, x)) for x in t_static]
+# )
+# # idx_flag = [i for i in range(len(flag)) if flag[i] > 50]
 
-i_menos = donde(t_simu, ti_simu - 0.0125)
-j_mas = donde(t_simu, tf_simu + 0.0125)
+# normal = np.array([0.920, -0.302, 0.251])
+# ancho_mpb = np.dot(r_simu[jj] - r_simu[ii], normal)
 
-Bup = np.mean(B_tray[jj:j_mas], axis=0) * 1e-9
-Bdown = np.mean(B_tray[i_menos:ii], axis=0) * 1e-9
-J_salto = 1 / (mu0 * ancho_mpb * 1e3) * np.cross(normal, Bup - Bdown) * 1e9
+# tt = donde(t_cut, t1)
+# ff = donde(t_cut, t4)
+# # ancho = np.dot(posicion_cut[tt] - posicion_cut[ff], normal)
 
-densidades_malas = [A for A in range(len(e_density)) if e_density[A] < 1]
-e_density[densidades_malas] = np.nan
+# j_media = np.mean(J[ii:jj]) * 1e3
 
-"""
-Ahora vienen los plots
-"""
-plt.rcParams["axes.prop_cycle"] = cycler(
-    "color",
-    ["#003f5c", "#ffa600", "#de425b", "#68abb8", "#f3babc", "#6cc08b", "#cacaca"],
-)
+# i_menos = donde(t_simu, ti_simu - 0.0125)
+# j_mas = donde(t_simu, tf_simu + 0.0125)
 
-plt.rcParams.update({"font.size": 12})
+# Bup = np.mean(B_tray[jj:j_mas], axis=0) * 1e-9
+# Bdown = np.mean(B_tray[i_menos:ii], axis=0) * 1e-9
+# J_salto = 1 / (mu0 * ancho_mpb * 1e3) * np.cross(normal, Bup - Bdown) * 1e9
 
-fig = plt.figure()
-fig.subplots_adjust(
-    top=0.95, bottom=0.1, left=0.12, right=0.95, hspace=0.0, wspace=0.15
-)
-plt.xticks(rotation=25)
-xfmt = md.DateFormatter("%H:%M")
+# densidades_malas = [A for A in range(len(e_density)) if e_density[A] < 1]
+# e_density[densidades_malas] = np.nan
 
-ax2 = plt.gca()
+# """
+# Ahora vienen los plots
+# """
+# plt.rcParams["axes.prop_cycle"] = cycler(
+#     "color",
+#     ["#003f5c", "#ffa600", "#de425b", "#68abb8", "#f3babc", "#6cc08b", "#cacaca"],
+# )
 
-ax2 = plt.subplot2grid((1, 1), (0, 0))
-ax2.xaxis.set_major_formatter(xfmt)
-plt.plot(tiempo_mag, np.linalg.norm(B_cut, axis=1), c="C0")
-plt.ylabel("|B| (nT)")
+# plt.rcParams.update({"font.size": 12})
 
-ax2 = plt.subplot2grid((4, 1), (0, 0))
-ax2.xaxis.set_major_formatter(xfmt)
-plt.plot(tiempo_mag, np.linalg.norm(B_cut, axis=1), c="C0")
-plt.plot(tiempo_simu, np.linalg.norm(B_tray, axis=1), c="C1")
-plt.ylabel("|B| (nT)")
-ax2.set_title(f"MAVEN MAG LPW SWIA STATIC {year}-{month}-{day}")
+# fig = plt.figure()
+# fig.subplots_adjust(
+#     top=0.95, bottom=0.1, left=0.12, right=0.95, hspace=0.0, wspace=0.15
+# )
+# plt.xticks(rotation=25)
+# xfmt = md.DateFormatter("%H:%M")
 
-ax1 = plt.subplot2grid((4, 1), (3, 0), sharex=ax2)
-ax1.xaxis.set_major_formatter(xfmt)
-ax1.semilogy(tiempo_static, H_density, ".", label=r"H$^+$")
-ax1.semilogy(tiempo_static, O_density, ".", label=r"O$^+$")
-ax1.semilogy(tiempo_static, O2_density, ".", label=r"O$_2^+$")
-ax1.semilogy(tiempo_static, CO2_density, ".", label=r"CO$_2^+$")
-ax1.semilogy(tiempo_simu, densities_tray["H+"], c="C0")
-ax1.semilogy(tiempo_simu, densities_tray["O+"], c="C1")
-ax1.semilogy(tiempo_simu, densities_tray["O2+"], c="C2")
-ax1.semilogy(tiempo_simu, densities_tray["CO2+"], c="C3")
-ax1.legend(loc="upper left")
-ax1.set_ylim(ymin=0.1, ymax=2e5)
-ax1.set_ylabel("H⁺ and heavies\ndensities (cm⁻³)")
-ax1.set_xlabel("Time (UTC)")
+# ax2 = plt.gca()
 
-ax4 = plt.subplot2grid((4, 1), (1, 0), sharex=ax2)
-ax4.xaxis.set_major_formatter(xfmt)
-ax4.semilogy(tiempo_lpw, e_density, c="C0")
-ax4.semilogy(tiempo_simu, densities_tray["e-"], c="C1")
-ax4.set_ylabel("Electron \n density (cm⁻³)")
+# ax2 = plt.subplot2grid((1, 1), (0, 0))
+# ax2.xaxis.set_major_formatter(xfmt)
+# plt.plot(tiempo_mag, np.linalg.norm(B_cut, axis=1), c="C0")
+# plt.ylabel("|B| (nT)")
 
-ax5 = plt.subplot2grid((4, 1), (2, 0), sharex=ax2)
-ax5.xaxis.set_major_formatter(xfmt)
-plt.semilogy(tiempo_swia, proton_density, c="C0")
-plt.semilogy(tiempo_simu, densities_tray["H+"], c="C1")
-ax5.set_ylim(ymin=0.8)
-ax5.set_ylabel("SW ion \n density (cm⁻³)")
-# ax5.xaxis.set_label_coords(-0.05, -0.05)
+# ax2 = plt.subplot2grid((4, 1), (0, 0))
+# ax2.xaxis.set_major_formatter(xfmt)
+# plt.plot(tiempo_mag, np.linalg.norm(B_cut, axis=1), c="C0")
+# plt.plot(tiempo_simu, np.linalg.norm(B_tray, axis=1), c="C1")
+# plt.ylabel("|B| (nT)")
+# ax2.set_title(f"MAVEN MAG LPW SWIA STATIC {year}-{month}-{day}")
 
-for ax in [ax1, ax2, ax4, ax5]:
-    ax.axvspan(
-        xmin=tiempo_mag[donde(t_cut, ti_simu)],
-        xmax=tiempo_mag[donde(t_cut, tf_simu)],
-        facecolor="#79B953",
-        alpha=0.4,
-    )
-    ax.axvspan(
-        xmin=tiempo_mag[donde(t_cut, t1)],
-        xmax=tiempo_mag[donde(t_cut, t4)],
-        facecolor="k",
-        alpha=0.5,
-    )
+# ax1 = plt.subplot2grid((4, 1), (3, 0), sharex=ax2)
+# ax1.xaxis.set_major_formatter(xfmt)
+# ax1.semilogy(tiempo_static, H_density, ".", label=r"H$^+$")
+# ax1.semilogy(tiempo_static, O_density, ".", label=r"O$^+$")
+# ax1.semilogy(tiempo_static, O2_density, ".", label=r"O$_2^+$")
+# ax1.semilogy(tiempo_static, CO2_density, ".", label=r"CO$_2^+$")
+# ax1.semilogy(tiempo_simu, densities_tray["H+"], c="C0")
+# ax1.semilogy(tiempo_simu, densities_tray["O+"], c="C1")
+# ax1.semilogy(tiempo_simu, densities_tray["O2+"], c="C2")
+# ax1.semilogy(tiempo_simu, densities_tray["CO2+"], c="C3")
+# ax1.legend(loc="upper left")
+# ax1.set_ylim(ymin=0.1, ymax=2e5)
+# ax1.set_ylabel("H⁺ and heavies\ndensities (cm⁻³)")
+# ax1.set_xlabel("Time (UTC)")
 
-    ax.set_xlim(tiempo_mag[12000], tiempo_mag[-17000])
-    ax.grid()
+# ax4 = plt.subplot2grid((4, 1), (1, 0), sharex=ax2)
+# ax4.xaxis.set_major_formatter(xfmt)
+# ax4.semilogy(tiempo_lpw, e_density, c="C0")
+# ax4.semilogy(tiempo_simu, densities_tray["e-"], c="C1")
+# ax4.set_ylabel("Electron \n density (cm⁻³)")
 
-ax2.legend(["MAVEN", "Simulation", "MPB simulation", "MPB MAVEN"], loc="upper left")
-for ax in [ax2, ax5, ax4]:
-    plt.setp(ax.get_xticklabels(), visible=False)
+# ax5 = plt.subplot2grid((4, 1), (2, 0), sharex=ax2)
+# ax5.xaxis.set_major_formatter(xfmt)
+# plt.semilogy(tiempo_swia, proton_density, c="C0")
+# plt.semilogy(tiempo_simu, densities_tray["H+"], c="C1")
+# ax5.set_ylim(ymin=0.8)
+# ax5.set_ylabel("SW ion \n density (cm⁻³)")
+# # ax5.xaxis.set_label_coords(-0.05, -0.05)
 
-figure = plt.gcf()  # get current figure
-figure.set_size_inches(8, 9)
-# when saving, specify the DPI
-plt.savefig("../../../Dropbox/Paper2/MAVEN_vs_simu_log.png", dpi=600)
-plt.show()
+# for ax in [ax1, ax2, ax4, ax5]:
+#     ax.axvspan(
+#         xmin=tiempo_mag[donde(t_cut, ti_simu)],
+#         xmax=tiempo_mag[donde(t_cut, tf_simu)],
+#         facecolor="#79B953",
+#         alpha=0.4,
+#     )
+#     ax.axvspan(
+#         xmin=tiempo_mag[donde(t_cut, t1)],
+#         xmax=tiempo_mag[donde(t_cut, t4)],
+#         facecolor="k",
+#         alpha=0.5,
+#     )
+
+#     ax.set_xlim(tiempo_mag[12000], tiempo_mag[-17000])
+#     ax.grid()
+
+# ax2.legend(["MAVEN", "Simulation", "MPB simulation", "MPB MAVEN"], loc="upper left")
+# for ax in [ax2, ax5, ax4]:
+#     plt.setp(ax.get_xticklabels(), visible=False)
+
+# figure = plt.gcf()  # get current figure
+# figure.set_size_inches(8, 9)
+# # when saving, specify the DPI
+# plt.savefig("../../../Dropbox/Paper2/MAVEN_vs_simu_log.png", dpi=600)
+# plt.show()
 
 
 #######
