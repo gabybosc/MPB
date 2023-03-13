@@ -25,17 +25,41 @@ for dia in range(1, 30):
     doy.append(date_orbit.strftime("%j"))
 month = date_orbit.strftime("%m")
 
+
+def return_url(url):
+    """como tiene nombre con una variable, mira todos a ver cuál es el link bueno"""
+    prefix = "https://pds-ppi.igpp.ucla.edu/ditdos/download?id=pds://PPI/"
+    for num in range(10):
+        test = prefix + url + f"{num}.sts"
+        result = urllib.request.urlopen(test)
+        if result.headers["Content-Length"] is None:
+            url = test
+            break
+
+    return url
+
+
+def descargar(fname, urlname):
+    """
+    Si no existe el file (fname) agarra la url (urlname) y lo descarga
+    """
+
+    if not os.path.isfile(fname):
+        with urllib.request.urlopen(urlname) as response, open(
+            fname,
+            "wb",
+        ) as out_file:
+            shutil.copyfileobj(response, out_file)
+
+
 directory = f"../../../datos/MAG_1s/{year}/"
 
 for i in range(len(doy)):
-    mag_1s = f"https://pds-ppi.igpp.ucla.edu/ditdos/download?id=pds://PPI/maven.mag.calibrated/data/ss/1sec/{year}/{month}/mvn_mag_l2_{year}{doy[i]}ss1s_{year}{month}{day[i]}_v01_r01.sts"
+    mag_1s = return_url(
+        f"maven.mag.calibrated/data/ss/1sec/{year}/{month}/mvn_mag_l2_{year}{doy[i]}ss1s_{year}{month}{day[i]}_v01_r0"
+    )
 
     path = (
         directory + f"mvn_mag_l2_{year}{doy[i]}ss1s_{year}{month}{day[i]}_v01_r01.sts"
     )
-    if not os.path.isfile(path):  # si no está ya descargado
-        with urllib.request.urlopen(mag_1s) as response, open(
-            path,
-            "wb",
-        ) as out_file:
-            shutil.copyfileobj(response, out_file)
+    descargar(path, mag_1s)
