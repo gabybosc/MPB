@@ -17,6 +17,35 @@ lst = np.genfromtxt("../outputs/hoja_grupo4.txt", dtype="str", usecols=0)
 # a = [int(x[-2:]) for x in lst]
 # fechas = np.unique(a)
 
+
+def return_url(url, extension):
+    """como tiene nombre con una variable, mira todos a ver cuál es el link bueno"""
+    prefix = "https://pds-ppi.igpp.ucla.edu/ditdos/download?id=pds://PPI/"
+    for num in range(10):
+        test = prefix + url + f"{num}.{extension}"
+        result = urllib.request.urlopen(test)
+        if result.headers["Content-Length"] is None:
+            url = test
+            break
+
+    return url
+
+
+def descargar(fname, urlname, j, instrumento):
+    """
+    Si no existe el file (fname) agarra la url (urlname) y lo descarga
+    """
+
+    if not os.path.isfile(fname):
+        with urllib.request.urlopen(urlname) as response, open(
+            fname,
+            "wb",
+        ) as out_file:
+            shutil.copyfileobj(response, out_file)
+
+        print(f"{instrumento} dia {j} listo")
+
+
 for j in lst:
     year, month, day = j.split("-")
 
@@ -35,43 +64,40 @@ for j in lst:
     """
     Las URLS
     """
-    prefix = "https://pds-ppi.igpp.ucla.edu/ditdos/download?id=pds://PPI/"
-    mag_1s = (
-        prefix
-        + f"maven.mag.calibrated/data/ss/1sec/{year}/{month}/mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts"
+
+    mag_1s = return_url(
+        f"maven.mag.calibrated/data/ss/1sec/{year}/{month}/mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r0",
+        "sts",
+    )
+    # mag_hires = return_url(
+    #     f"maven.mag.calibrated/data/ss/highres/{year}/{month}/mvn_mag_l2_{year}{doy}ss_{year}{month}{day}_v01_r0",
+    #     "sts",
+    # )
+
+    swea = return_url(
+        f"maven.swea.calibrated/data/svy_spec/{year}/{month}/mvn_swe_l2_svyspec_{year}{month}{day}_v04_r0",
+        "cdf",
+    )
+    lpw = return_url(
+        f"maven.lpw.derived/data/lp-nt/{year}/{month}/mvn_lpw_l2_lpnt_{year}{month}{day}_v03_r0",
+        "cdf",
     )
 
-    # mag_hires = prefix + f"maven.mag.calibrated/data/ss/highres/{year}/{month}/mvn_mag_l2_{year}{doy}ss_{year}{month}{day}_v01_r01.sts"
-
-    # como tiene nombre con una variable, mira todos a ver cuál es el link bueno
-    for num in range(10):
-        swea_test = (
-            prefix
-            + f"maven.swea.calibrated/data/svy_spec/{year}/{month}/mvn_swe_l2_svyspec_{year}{month}{day}_v04_r0{num}.cdf"
-        )
-        result = urllib.request.urlopen(swea_test)
-        if result.headers["Content-Length"] is None:
-            swea = swea_test
-            break
-
-    for num in range(10):
-        lpw_test = (
-            prefix
-            + f"maven.lpw.derived/data/lp-nt/{year}/{month}/mvn_lpw_l2_lpnt_{year}{month}{day}_v03_r0{num}.cdf"
-        )
-        result_lpw = urllib.request.urlopen(lpw_test)
-        if result_lpw.headers["Content-Length"] is None:
-            lpw = lpw_test
-            break
-
-    swia_mom = (
-        prefix
-        + f"maven.swia.calibrated/data/onboard_svy_mom/{year}/{month}/mvn_swi_l2_onboardsvymom_{year}{month}{day}_v02_r00.cdf"
+    swia_mom = return_url(
+        f"maven.swia.calibrated/data/onboard_svy_mom/{year}/{month}/mvn_swi_l2_onboardsvymom_{year}{month}{day}_v02_r0",
+        "cdf",
     )
 
-    # swica = prefix + f"maven.swia.calibrated/data/coarse_arc_3d/{year}/{month}/mvn_swi_l2_coarsearc3d_{year}{month}{day}_v02_r00.cdf"
+    # swica = return_url(
+    #     f"maven.swia.calibrated/data/coarse_arc_3d/{year}/{month}/mvn_swi_l2_coarsearc3d_{year}{month}{day}_v02_r0",
+    #     "cdf",
+    # )
 
-    # swifa = prefix + f"maven.swia.calibrated/data/fine_arc_3d/{year}/{month}/mvn_swi_l2_finearc3d_{year}{month}{day}_v02_r00.cdf"
+    # swifa = return_url(
+    #     f"maven.swia.calibrated/data/fine_arc_3d/{year}/{month}/mvn_swi_l2_finearc3d_{year}{month}{day}_v02_r0",
+    #     "cdf",
+    # )
+
     """
     Los archivos
     """
@@ -91,52 +117,10 @@ for j in lst:
     """
     Si el archivo no existe, lo descarga
     """
-    if not os.path.isfile(p_mag1s):
-        with urllib.request.urlopen(mag_1s) as response, open(
-            p_mag1s,
-            "wb",
-        ) as out_file:
-            shutil.copyfileobj(response, out_file)
-        print(f"mag dia {j} listo")
-
-    # if not os.path.isfile(p_maghr):
-    #     with urllib.request.urlopen(mag_hires) as response, open(
-    #         p_maghr,
-    #         "wb",
-    #     ) as out_file:
-    #         shutil.copyfileobj(response, out_file)
-    #     print(f"mag dia {j} listo")
-
-    if not os.path.isfile(p_swea):
-        with urllib.request.urlopen(swea) as response, open(p_swea, "wb") as out_file:
-            shutil.copyfileobj(response, out_file)
-        print(f"swea dia {j} listo")
-
-    if not os.path.isfile(p_swiamom):
-        with urllib.request.urlopen(swia_mom) as response, open(
-            p_swiamom,
-            "wb",
-        ) as out_file:
-            shutil.copyfileobj(response, out_file)
-        print(f"swia (onboard) dia {j} listo")
-
-    # if not os.path.isfile(p_swica):
-    #     with urllib.request.urlopen(swica) as response, open(
-    #         p_swica,
-    #         "wb",
-    #     ) as out_file:
-    #         shutil.copyfileobj(response, out_file)
-    #     print(f"swica dia {j} listo")
-
-    # if not os.path.isfile(p_swifa):
-    #     with urllib.request.urlopen(swifa) as response, open(
-    #         p_swifa,
-    #         "wb",
-    #     ) as out_file:
-    #         shutil.copyfileobj(response, out_file)
-    #     print(f"swifa dia {j} listo")
-
-    if not os.path.isfile(p_lpw):
-        with urllib.request.urlopen(lpw) as response, open(p_lpw, "wb") as out_file:
-            shutil.copyfileobj(response, out_file)
-        print(f"lpw dia {j} listo")
+    descargar(p_mag1s, mag_1s, j, "mag")
+    # descargar(p_maghr, mag_hires, j, "mag")
+    descargar(p_swea, swea, j, "swea")
+    descargar(p_swiamom, swia_mom, j, "swia")
+    # descargar(p_swica, swica, j, "swica")
+    # descargar(p_swifa, swifa, j, "swifa")
+    descargar(p_lpw, lpw, j, "lpw")
