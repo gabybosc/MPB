@@ -31,14 +31,14 @@ t1, t2, t3, t4 = 18.2167, 18.2204, 18.235, 18.2476
 
 
 def importar_swica(ti, tf):
-    path = f"../../../datos/clweb/2016-03-16/momentos/"
+    path = f"../../../datos/clweb/2016-03-16/momentos/SWICA/"
 
-    dens_full = np.loadtxt(path + "dens_swica_1-5000.asc")
-    dens = np.loadtxt(path + "dens_swica_600-1400.asc")
-    temp_full = np.loadtxt(path + "temp_swica_1-5000.asc")
-    temp = np.loadtxt(path + "temp_swica_600-1400.asc")
-    vel_full = np.loadtxt(path + "vel_swica_1-5000.asc")
-    vel = np.loadtxt(path + "vel_swica_600-1400.asc")
+    dens_full = np.loadtxt(path + "dens_full.asc")
+    dens = np.loadtxt(path + "dens_corte.asc")
+    temp_full = np.loadtxt(path + "temp_full.asc")
+    temp = np.loadtxt(path + "temp_corte.asc")
+    vel_full = np.loadtxt(path + "vel_full.asc")
+    vel = np.loadtxt(path + "vel_corte.asc")
 
     t = dens[:, 3] + dens[:, 4] / 60 + dens[:, 5] / 3600  # hdec
 
@@ -65,14 +65,14 @@ def importar_swica(ti, tf):
 
 
 def importar_swifa(ti, tf):
-    path = f"../../../datos/clweb/2016-03-16/momentos/"
+    path = f"../../../datos/clweb/2016-03-16/momentos/SWIFA/"
 
-    dens_full = np.loadtxt(path + "dens_swifa_1-5000.asc")
-    temp_full = np.loadtxt(path + "temp_swifa_1-5000.asc")
-    vel_full = np.loadtxt(path + "vel_swifa_1-5000.asc")
-    dens = np.loadtxt(path + "dens_swifa_600-2000.asc")
-    temp = np.loadtxt(path + "temp_swifa_600-2000.asc")
-    vel = np.loadtxt(path + "vel_swifa_600-2000.asc")
+    dens_full = np.loadtxt(path + "dens_full.asc")
+    dens = np.loadtxt(path + "dens_corte.asc")
+    temp_full = np.loadtxt(path + "temp_full.asc")
+    temp = np.loadtxt(path + "temp_corte.asc")
+    vel_full = np.loadtxt(path + "vel_full.asc")
+    vel = np.loadtxt(path + "vel_corte.asc")
 
     t = dens[:, 3] + dens[:, 4] / 60 + dens[:, 5] / 3600  # hdec
 
@@ -222,76 +222,22 @@ print(
     f"thermal ion gyroradius mean = {np.nanmean(th_gr, axis=0):1.3g} km"
 )  # nanmean ignora los nans
 
-#     if k[0] == sw_i:
-#         print(
-#             f"El radio de Larmor de iones SW es {rg:1.3g} km (entre {rg_min:1.3g} y {rg_max:1.3g})"
-#         )
-#     # if k[0] == ms_i:
-#     #     print(
-#     #         f"El radio de Larmor de iones MS es {rg:1.3g} km (entre {rg_min:1.3g} y {rg_max:1.3g})"
-#     #     )
 
-#     # if k[0] == sw_i:
-#     #     print(f"La girofrecuencia de iones SW es {gf:1.3g} s⁻¹")
-#     # if k[0] == ms_i:
-#     #     print(f"La girofrecuencia de iones MS es {gf:1.3g} s⁻¹")
+"""
+Longitud inercial
+"""
 
-#     # """
-#     # Proyectando en la normal:
-#     # """
-#     # # normal = np.array([0.920,-0.302,0.251])
-#     # v_normal = np.dot(np.mean(velocidad, axis=0), normal)
 
-#     # # el giroradio entonces:
-#     # rg_normal = mp * np.linalg.norm(v_normal) / (q_e * np.linalg.norm(B_medio))
+def long_inercial(density_full, swia_i, swia_f):
+    density_mean = np.zeros(swia_f - swia_i)  # upstream
+    paso = 20  # cada paso son 4 segundos.
+    if swia_i - paso > 0:  # si no se cumple, va a calcularlo mal
+        for i in range(swia_f - swia_i):
+            density_mean[i] = np.mean(
+                density_full[swia_i + i - paso : swia_i + i]
+            )  # toma desde atrás del ti así no se mete en la MPB nunca
 
-#     # if k[0] == sw_i:
-#     #     print(
-#     #         f"El radio de Larmor de iones SW con la velocidad proyectada en la normal es {rg_normal:1.3g} km"
-#     #     )
-#     # if k[0] == ms_i:
-#     #     print(
-#     #         f"El radio de Larmor de iones MS con la velocidad proyectada en la normal es {rg_normal:1.3g} km"
-#     #     )
-
-#     """
-#     Longitud inercial
-#     """
-#     # density_mean = np.zeros(swia_f - swia_i)  # upstream
-#     # paso = 20  # cada paso son 4 segundos.
-#     if k[0] == sw_i:
-#         density_mean = np.mean(density[swia_i:swia_f])
-#         ion_length = 2.28e07 / np.sqrt(density_mean) * 1e-5  # km
-#         print(f"La longitud inercial de protones (sin alfa) SW es {ion_length:1.3g} km")
-
-#         density_mean = np.mean(density_full[swia_i:swia_f])
-#         ion_length = 2.28e07 / np.sqrt(density_mean) * 1e-5  # km
-#         print(f"La longitud inercial de iones (prot + alfa) SW es {ion_length:1.3g} km")
-
-#     # if k[0] == ms_i:
-#     #     if swia_i - paso > 0:  # si no se cumple, va a calcularlo mal
-#     #         for i in range(swia_f - swia_i):
-#     #             density_mean[i] = np.mean(
-#     #                 density_full[swia_i + i - paso : swia_i + i]
-#     #             )  # toma desde atrás del ti así no se mete en la MPB nunca
-
-#     #         ion_length = 2.28e07 / np.sqrt(np.mean(density_mean)) * 1e-5  # km
-#     #         ion_min = 2.28e07 / np.sqrt(max(density_mean)) * 1e-5  # km
-#     #         ion_max = 2.28e07 / np.sqrt(min(density_mean)) * 1e-5  # km
-
-#     #     print(
-#     #         f"La longitud inercial de iones (protones + alfa) MS es {ion_length:1.3g} km (entre {ion_min:1.3g} y {ion_max:1.3g})"
-#     #     )
-#     #     if swia_i - paso > 0:  # si no se cumple, va a calcularlo mal
-#     #         for i in range(swia_f - swia_i):
-#     #             density_mean[i] = np.mean(
-#     #                 density[swia_i + i - paso : swia_i + i]
-#     #             )  # toma desde atrás del ti así no se mete en la MPB nunca
-
-#     #         ion_length = 2.28e07 / np.sqrt(np.mean(density_mean)) * 1e-5  # km
-#     #         ion_min = 2.28e07 / np.sqrt(max(density_mean)) * 1e-5  # km
-#     #         ion_max = 2.28e07 / np.sqrt(min(density_mean)) * 1e-5  # km
-
-#     print(
-#         f"La longitud inercial de protones (sin alfa) MS es {ion_length:1.3g} km (entre {ion_min:1.3g} y {ion_max:1.3g})"
-#     )
+        ion_length = 2.28e07 / np.sqrt(np.mean(density_mean)) * 1e-5  # km
+        # ion_min = 2.28e07 / np.sqrt(max(density_mean)) * 1e-5  # km
+        # ion_max = 2.28e07 / np.sqrt(min(density_mean)) * 1e-5  # km
+        return ion_length
