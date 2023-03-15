@@ -10,6 +10,7 @@ sys.path.append("..")
 from funciones import fechas, donde
 
 """
+VERSIÓN ALTERNATIVA donde primero recorta y después diezma (no cambia mucho los resultados)
 La long inercial depende de la densidad. Entonces hace tres cosas:
 Para el SW calcula usando SWIFA entre 600 y 2000 eV para excluir a los alfas
 Para la MS calcula usando SWICA entre 1 y 5000 (con alfa) y después entre 600 y 1400 eV (sin alfa)
@@ -98,36 +99,6 @@ def importar_swifa(ti, tf):
     )
 
 
-mag, t_mag_entero, B_entero, posicion = importar_mag(year, month, day, ti, tf)
-(
-    t_swia,
-    density_full,
-    density,
-    temperature_full,
-    temperature,
-    velocity_full,
-    velocity,
-) = importar_swica(ti, tf)
-# t_swifa_entero, density_full, density, temperature_full, temperature, velocity_full, velocity = importar_swifa(ti, tf)
-#  plt.plot(t_swia_entero, density)
-# plt.show()
-
-sw_i = 17.5
-sw_f = 17.8
-
-ms_i = 18.08
-ms_f = 18.21
-
-# plt.plot(t_swia, density, label="recorte")
-# plt.plot(t_swia, density_full, label="full")
-# plt.axvline(x=sw_i, c="k")
-# plt.axvline(x=sw_f, c="k")
-# plt.axvline(x=ms_f)
-# plt.axvline(x=ms_f)
-# plt.legend()
-# plt.title("SWICA")
-# plt.show()
-
 """
 giroradio: rg = mp * v_perp / (q_e * B)  en la región upstream
 where vperp is the component of the velocity perpendicular to the
@@ -192,33 +163,91 @@ def long_inercial(density):
     return ion_length
 
 
-# lo diezmamos para que tengan la misma cantidad de puntos
-B = diezmar(B_entero, density)
-t_mag = diezmar(t_mag_entero, density)
+mag, t_mag_entero, B_entero, posicion = importar_mag(year, month, day, ti, tf)
+
+# plt.plot(t_swia, density, label="recorte")
+# plt.plot(t_swia, density_full, label="full")
+# plt.axvline(x=sw_i, c="k")
+# plt.axvline(x=sw_f, c="k")
+# plt.axvline(x=ms_f)
+# plt.axvline(x=ms_f)
+# plt.legend()
+# plt.title("SWICA")
+# plt.show()
 
 # tomamos los límites de inicio y fin de la MS para ambos instrumentos
-mag_i = donde(t_mag, ms_i)
-mag_f = donde(t_mag, ms_f)
-swia_i = donde(t_swia, ms_i)
-swia_f = donde(t_swia, ms_f)
+def limites(inp):
+    if inp == "MS":
+        (
+            t_swia,
+            density_full,
+            density,
+            temperature_full,
+            temperature,
+            velocity_full,
+            velocity,
+        ) = importar_swica(ti, tf)
+        inicio = 18.08
+        fin = 18.21
+    elif inp == "SW":
+        (
+            t_swia,
+            density_full,
+            density,
+            temperature_full,
+            temperature,
+            velocity_full,
+            velocity,
+        ) = importar_swifa(ti, tf)
+        inicio = 17.5
+        fin = 17.8
+    mag_i = donde(t_mag_entero, inicio)
+    mag_f = donde(t_mag_entero, fin)
+    swia_i = donde(t_swia, inicio)
+    swia_f = donde(t_swia, fin)
+    # recorto en la MS
+    # tengo el B (único) y dos valores de velocidad, dependiendo del recorte de la DF
+    # lo mismo para la temperatura y densidad
+    B = B_entero[mag_i:mag_f] * 1e-9  # T
+    vel_cut = velocity[swia_i:swia_f, :3]
+    vel_full_cut = velocity_full[swia_i:swia_f, :3]
+    temp_cut = temperature[swia_i:swia_f]
+    temp_full_cut = temperature_full[swia_i:swia_f]
+    density_cut = density[swia_i:swia_f]
+    density_full_cut = density_full[swia_i:swia_f]
 
-# recorto en la MS
-# tengo el B (único) y dos valores de velocidad, dependiendo del recorte de la DF
-# lo mismo para la temperatura
-B_cut = B[mag_i:mag_f] * 1e-9  # T
-vel_cut = velocity[swia_i:swia_f, :3]
-vel_full_cut = velocity_full[swia_i:swia_f, :3]
-temp_cut = temperature[swia_i:swia_f]
-temp_full_cut = temperature_full[swia_i:swia_f]
-density_cut = density[swia_i:swia_f]
-density_full_cut = density_full[swia_i:swia_f]
+    # lo diezmamos para que tengan la misma cantidad de puntos
+    B_cut = diezmar(B, density)
 
+    return (
+        B_cut,
+        vel_cut,
+        vel_full_cut,
+        temp_cut,
+        temp_full_cut,
+        density_cut,
+        density_full_cut,
+    )
+
+
+# para la magnetofunda
+(
+    B_cut,
+    vel_cut,
+    vel_full_cut,
+    temp_cut,
+    temp_full_cut,
+    density_cut,
+    density_full_cut,
+) = limites("MS")
+
+
+# ahora sí, calculamos
 rg = giroradio(B_cut, vel_cut)
 rg_full = giroradio(B_cut, vel_full_cut)
 
 print(f"gr MS 1-5000 eV = {rg_full} km")
 print(f"gr MS recorte = {rg} km")
-
 
 th_gr = giroradio_termico(B_cut, temp_cut)
 th_gr_full = giroradio_termico(B_cut, temp_full_cut)
@@ -226,14 +255,39 @@ print(f"thermal gr MS 1-5000 eV = {np.nanmean(th_gr_full, axis=0):1.3g} km")
 print(f"thermal gr MS recorte = {np.nanmean(th_gr, axis=0):1.3g} km")
 # nanmean ignora los nans
 
-
-"""
-Longitud inercial
-"""
-
-
 proton_length = long_inercial(density_cut)
 proton_length_full = long_inercial(density_full_cut)
 
 print(f"long inercial MS 1-5000 eV = {proton_length:1.3g} km")
 print(f"long inercial MS recorte = {proton_length_full:1.3g} km")
+
+
+# para el SW
+
+(
+    B_cut,
+    vel_cut,
+    vel_full_cut,
+    temp_cut,
+    temp_full_cut,
+    density_cut,
+    density_full_cut,
+) = limites("SW")
+# ahora sí, calculamos
+rg = giroradio(B_cut, vel_cut)
+rg_full = giroradio(B_cut, vel_full_cut)
+
+print(f"gr SW 1-5000 eV = {rg_full} km")
+print(f"gr SW recorte = {rg} km")
+
+th_gr = giroradio_termico(B_cut, temp_cut)
+th_gr_full = giroradio_termico(B_cut, temp_full_cut)
+print(f"thermal gr SW 1-5000 eV = {np.nanmean(th_gr_full, axis=0):1.3g} km")
+print(f"thermal gr SW recorte = {np.nanmean(th_gr, axis=0):1.3g} km")
+# nanmean ignora los nans
+
+proton_length = long_inercial(density_cut)
+proton_length_full = long_inercial(density_full_cut)
+
+print(f"long inercial SW 1-5000 eV = {proton_length:1.3g} km")
+print(f"long inercial SW recorte = {proton_length_full:1.3g} km")
