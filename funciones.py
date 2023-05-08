@@ -310,12 +310,11 @@ def unix_to_timestamp(t_unix):
 
 def UTC_to_hdec(t_UTC):
     """Convierte de UTC a hdec"""
-    if len(t_UTC) > 5:
-        (h, m, s) = t_UTC.split(":")
-        t_hdec = int(h) + int(m) / 60 + int(s) / 3600
-    elif len(t_UTC) == 5:
-        (h, m) = t_UTC.split(":")
-        t_hdec = int(h) + int(m) / 60
+    t = t_UTC.split(":")
+    if len(t) == 3:
+        t_hdec = int(t[0]) + int(t[1]) / 60 + int(t[2]) / 3600
+    elif len(t) == 2:
+        t_hdec = int(t[0]) + int(t[1]) / 60
 
     return t_hdec
 
