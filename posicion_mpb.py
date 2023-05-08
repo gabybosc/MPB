@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from funciones import Bpara_Bperp, fechas, hdec_to_UTC, UTC_to_hdec, donde
 from importar_datos import importar_mag_1s
+import pickle
 
 
 """
@@ -14,9 +15,6 @@ np.set_printoptions(precision=4)
 def crear_txt_posiciones():
     "esto lo corro una sola vez y después ya tengo el txt con las posiciones"
     catalogo = np.genfromtxt("outputs/grupo4.txt", dtype="str")
-
-    pos_mpb = []
-    pos_bs = []
 
     lst = []
     for cat in catalogo:
@@ -36,20 +34,12 @@ def crear_txt_posiciones():
         if tf > 24:
             tf = 24
         mag, t, B, posicion = importar_mag_1s(year, month, day, ti, tf)
+        pos_mpb = posicion[donde(t, t_mpb)]
+        pos_bs = posicion[donde(t, t_bs)]
+        lst.append([year, month, day, t_bs, pos_bs, t_mpb, pos_mpb])
 
-        lst.append()
-        pos_mpb.append(posicion[donde(t, t_mpb)])
-        pos_bs.append(posicion[donde(t, t_bs)])
-
-    with open("outputs/posicion_mpb.txt", "a") as file:
-        for p in pos_mpb:
-            file.write(f"{p[0]}\t{p[1]}\t{p[2]}")
-            file.write("\n")
-
-    with open("outputs/posicion_bs.txt", "a") as file:
-        for p in pos_bs:
-            file.write(f"{p[0]}\t{p[1]}\t{p[2]}")
-            file.write("\n")
+    with open("outputs/etiquetas_grupo4", "wb") as fp:
+        pickle.dump(lst, fp)
 
 
 def marte():
@@ -75,8 +65,14 @@ def frontera(pos):
     return x, yz
 
 
-pos_mpb = np.loadtxt("outputs/posicion_mpb.txt")
-pos_bs = np.loadtxt("outputs/posicion_bs.txt")
+# crear_txt_posiciones()
+
+with open("outputs/etiquetas_grupo4", "rb") as fp:
+    cruces = pickle.load(fp)
+
+
+pos_bs = [cruces[i][4] for i in range(len(cruces))]
+pos_mpb = [cruces[i][6] for i in range(len(cruces))]
 
 marte()
 x_bs, yz_bs = frontera(pos_bs)
