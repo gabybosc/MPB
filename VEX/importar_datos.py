@@ -48,19 +48,23 @@ def importar_MAG_pds(year, doy, ti, tf):
         pos = np.genfromtxt(path, skip_header=1, usecols=[8, 9, 10])
         tt = np.genfromtxt(path, skip_header=1, usecols=0, dtype="str")
 
-        fecha = np.array([x.split("T") for x in tt])
-        hora = np.array([x.split(":") for x in fecha[:, 1]])
-        hh = np.array([int(x) for x in hora[:, 0]])
-        mm = np.array([int(x) for x in hora[:, 1]])
-        ss = np.array([float(x) for x in hora[:, 2]])
-        t = hh + mm / 60 + ss / 3600  # hdec
+        hora = np.array([x.split("T")[1] for x in tt])
+        t = np.array(
+            [
+                int(x.split(":")[0])
+                + int(x.split(":")[1]) / 60
+                + float(x.split(":")[2]) / 3600
+                for x in hora
+            ]
+        )  # hdec
 
         inicio = donde(t, ti)
         fin = donde(t, tf)
 
         t_cut = t[inicio:fin]
         B_cut = B[inicio:fin]
-    return t_cut, B_cut, pos
+        pos_cut = pos[inicio:fin]
+    return t_cut, B_cut, pos_cut
 
 
 def importar_MAG_clweb(year, month, day, ti, tf):

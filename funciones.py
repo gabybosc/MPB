@@ -47,7 +47,7 @@ def autovectores(M_ij):
     if x3[0] < 0:  # si la normal aputna para adentro me la da vuelta
         x3 = -x3
     if any(np.cross(x1, x2) - x3) > 0.01:
-        print("Cambio el signo de x1 para que los av formen terna derecha")
+        # print("Cambio el signo de x1 para que los av formen terna derecha")
         x1 = -x1
 
     avec = [x1, x2, x3]
@@ -108,6 +108,15 @@ def corrientes(normal, Bup, Bdown, ancho_mpb):
     jv = js / (1000 * ancho_mpb)  # nA/m²
 
     return js * 1e-6, jv
+
+
+def day_to_doy(year, month, day):
+    date_orbit = dt.date(int(year), int(month), int(day))
+
+    year = date_orbit.strftime("%Y")
+    doy = date_orbit.strftime("%j")
+
+    return year, doy
 
 
 def diezmar(largo, corto):

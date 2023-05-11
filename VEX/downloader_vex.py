@@ -13,9 +13,9 @@ import numpy as np
 from socket import gethostname
 
 
-year = 2012
-doy = np.random.choice(366, 60)  # elije 60 días aleatorios del año para descargar
-
+year = 2009
+# doy = np.random.choice(366, 60)  # elije 60 días aleatorios del año para descargar
+doy = range(1, 366)
 
 if gethostname() == "magneto2":
     path = f"../../../../../media/gabybosc/datos/VEX/{year}/"

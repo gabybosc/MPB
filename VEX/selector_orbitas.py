@@ -14,7 +14,7 @@ con el SZA de cada uno. Compara con el fit de Xu 2021.
 
 # path = glob.glob("../../../VEX.txt")
 
-path = glob.glob("../../../datos/VEX/2011/*.tab")
+path = glob.glob("../../../datos/VEX/2007/*.tab")
 # Ajuste de Xu de la MPB:
 x_Xu, yz_Xu = fit_Xu()
 
@@ -35,7 +35,6 @@ for k, j in enumerate(path):
     YZ = np.sqrt(orbita[:, 1] ** 2 + orbita[:, 2] ** 2)
 
     # calendario[k, 0] = date  # guarda la fecha
-    calendario.append(date)
 
     """
     Vamos a tirar todos los puntos donde la órbita esté lejos del planeta
@@ -51,30 +50,31 @@ for k, j in enumerate(path):
     yz_cut = YZ[indice]
 
     """Para comparar, necesito que las dos listas tengan igual length"""
+    if len(x_cut) > 0 and len(yz_cut) > 0:  # si no hay cruce dayside no sigue
+        calendario.append(date)
+        a = [donde(x_cut, x_Xu[i]) for i in range(len(x_Xu))]  # len(a) = len(Xu)
+        pos = np.transpose([x_cut[a], yz_cut[a]])
+        pos_xu = np.transpose([x_Xu, yz_Xu])
 
-    a = [donde(x_cut, x_Xu[i]) for i in range(len(x_Xu))]  # len(a) = len(Xu)
-    pos = np.transpose([x_cut[a], yz_cut[a]])
-    pos_xu = np.transpose([x_Xu, yz_Xu])
+        """
+        pos y pos_xu tienen la misma longitud. Como las órbitas son bien portadas
+        (valores siempre positivos), puedo simplemente hacer la resta entre las
+        normas y ver cuándo es mínima.
+        Me quedo con ese punto entonces.
+        """
 
-    """
-    pos y pos_xu tienen la misma longitud. Como las órbitas son bien portadas
-    (valores siempre positivos), puedo simplemente hacer la resta entre las
-    normas y ver cuándo es mínima.
-    Me quedo con ese punto entonces.
-    """
+        idx = np.linalg.norm(pos - pos_xu, axis=1).argmin()
 
-    idx = np.linalg.norm(pos - pos_xu, axis=1).argmin()
+        def SZA(posicion, index):
+            SZA = angulo(posicion[index, :], [1, 0]) * 180 / np.pi
+            return SZA
 
-    def SZA(posicion, index):
-        SZA = angulo(posicion[index, :], [1, 0]) * 180 / np.pi
-        return SZA
+        sza_mpb = SZA(pos, idx)
 
-    sza_mpb = SZA(pos, idx)
-
-    # calendario[k, 1] = time[idx]
-    # calendario[k, 2] = sza_mpb
-    timetable.append(time[idx])
-    angulos.append(sza_mpb)
+        # calendario[k, 1] = time[idx]
+        # calendario[k, 2] = sza_mpb
+        timetable.append(time[idx])
+        angulos.append(sza_mpb)
 
 
 with open("../outputs/orbitas_VEX.txt", "a") as file:
