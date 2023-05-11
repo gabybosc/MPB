@@ -11,12 +11,12 @@ np.set_printoptions(precision=4)
 
 
 def altitude(SZA):
-    alt = 0.11 * SZA ** 2 - 0.22 * SZA + 389
+    alt = 0.11 * SZA**2 - 0.22 * SZA + 389
     return alt / 6050
 
 
 def fit_Xu():
-    """ Devuelve el fit de Xu 2021    """
+    """Devuelve el fit de Xu 2021 en RV"""
     sza = np.linspace(0, np.pi, 100)
     alt = 1 + altitude(sza * 180 / np.pi)
 
@@ -29,7 +29,7 @@ def fit_Xu():
 
 
 def fit_R(R, sza):
-    """ Ajusta el fit de Xu 2021 para la posicion de la nave"""
+    """Ajusta el fit de Xu 2021 para la posicion de la nave"""
     a = (np.linalg.norm(R) - 1) * 6050 - 0.22 * sza - 389
     sza_array = np.linspace(0, np.pi / 2, 100)
     alt = 1 + (a + 0.22 * (sza_array * 180 / np.pi) + 389) / 6050
