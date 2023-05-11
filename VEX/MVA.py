@@ -1,17 +1,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.widgets import MultiCursor
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
 import matplotlib as mpl
+from matplotlib.widgets import MultiCursor
 from cycler import cycler
-from importar_datos import importar_MAG_pds, importar_ELS_clweb, importar_fila
+from importar_datos import importar_MAG_pds, importar_fila
 from fit_venus import plot_orbita, fit_Xu
-from multiplot import multi_plot
+from multiplot import multi_plot_MAG_only
 from update_parametros import (
     hoja_MVA_update,
     hoja_MVA_analisis,
-    hoja_param,
     hoja_t1t2t3t4,
 )
 import sys
@@ -20,14 +17,11 @@ sys.path.append("..")
 from funciones import (
     donde,
     fechas,
-    tiempos,
     Mij,
     error,
     corrientes,
     ancho_mpb,
     Bpara_Bperp,
-    find_nearest,
-    next_available_row,
     SZA,
 )
 from funciones_plot import hodograma
@@ -103,22 +97,16 @@ Bnorm = np.linalg.norm(B, axis=1)
 
 Bpara, Bperp, tpara = Bpara_Bperp(B[::32], t[::32], ti, tf)
 
-t_els, ELS = importar_ELS_clweb(year, month, day, ti, tf)
-energy = ELS[:, 7]
-JE_total = ELS[:, -1]
-
-# val = multi_plot(t, tpara, t_els, B, Bnorm, Bpara, Bperp, energy, JE_total, 2)
+val = multi_plot_MAG_only(t, tpara, B, Bnorm, Bpara, Bperp, 2)
 nr, hoja_parametros, hoja_mva, hoja_boot, hoja_fit = importar_fila(year, month, day)
 
-# ti, tf = 2.778339846633605, 2.7804097790334508  # tiempos()
-# inicio_MVA = donde(t, val[0])
-# fin_MVA = donde(t, val[1])
-inicio_MVA = donde(t, 2.778339847)
-fin_MVA = donde(t, 2.780409779)
+inicio_MVA = donde(t, min(val))
+fin_MVA = donde(t, max(val))
 
 sza = SZA(pos, inicio_MVA)
 x3 = MVA(B[inicio_MVA:fin_MVA], year, month, day)
 
+plt.show()
 xx, yz = fit_Xu()
 pos_RV = pos / 6050
 orbita = np.sqrt(pos_RV[:, 1] ** 2 + pos_RV[:, 2] ** 2)

@@ -7,6 +7,7 @@ from cycler import cycler
 from importar_datos import importar_MAG_pds
 from fit_venus import plot_orbita
 import sys
+from multiplot import multi_plot_MAG_only
 
 sys.path.append("..")
 from funciones import datenum, donde, Bpara_Bperp, fechas, tiempos, find_nearest
@@ -76,58 +77,9 @@ orbita = np.sqrt(pos_RV[:, 1] ** 2 + pos_RV[:, 2] ** 2)
 
 plot_orbita(pos_RV, orbita, xx, yz)
 plt.show()
-happy = False
-while not happy:
-    val = []
-    while len(val) < 4:
-        plt.clf()  # clear figure
-        fig = plt.figure(
-            1, constrained_layout=True
-        )  # Lo bueno de esta forma es que puedo hacer que solo algunos compartan eje
-        fig.subplots_adjust(
-            top=0.95, bottom=0.1, left=0.05, right=0.95, hspace=0.005, wspace=0.15
-        )
-        # xfmt = md.DateFormatter("%H:%M")
-        ax1 = plt.gca()
 
-        plt.title("Spacebar when ready to click:")
-        ax1 = plt.subplot2grid((3, 1), (0, 0))
-        ax1.plot(t, Bnorm, linewidth=0.5)
-        ax1.set_ylabel("|B| (nT)")
-        ax1.set_title(f"VEX MAG {year}-{month}-{day}")
-        ax1.grid()
-
-        ax2 = plt.subplot2grid((3, 1), (1, 0), sharex=ax1)
-        ax2.plot(t, B[:, 0], label="Bx VSO", linewidth=0.5)
-        ax2.plot(t, B[:, 1], label="By VSO", linewidth=0.5)
-        ax2.plot(t, B[:, 2], label="Bz VSO", linewidth=0.5)
-        ax2.set_ylabel("B components (nT)")
-        ax2.legend(loc="upper left")
-        ax2.grid()
-
-        ax3 = plt.subplot2grid((3, 1), (2, 0), sharex=ax1)
-        ax3.plot(tpara, Bpara, linewidth=0.5, label="B ||")
-        ax3.plot(tpara, Bperp, linewidth=0.5, label="B perp")
-        ax3.set_ylabel("variación de Bpara perp")
-        ax3.set_xlabel("Tiempo (hdec)")
-        ax3.set_ylim([-0.1, 1])
-        ax3.legend(loc="upper left")
-        ax3.grid()
-
-        fig.canvas.mpl_connect("pick_event", onpick1)
-        multi = MultiCursor(fig.canvas, (ax1, ax2, ax3), color="black", lw=1)
-
-        zoom_ok = False
-        print("\nSpacebar when ready to click:\n")
-        while not zoom_ok:
-            zoom_ok = plt.waitforbuttonpress(-1)
-        print("Click to select MPB: ")
-        val = np.asarray(plt.ginput(4))[:, 0]
-        print("Selected values: ", val)
-        outs = sorted(val)
-
-    print("Happy? Keyboard click for yes, mouse click for no.")
-    happy = plt.waitforbuttonpress()
+val = multi_plot_MAG_only(t, tpara, B, Bnorm, Bpara, Bperp)
+outs = sorted(val)
 
 plt.show()
 
@@ -146,26 +98,26 @@ fig.subplots_adjust(
 )
 plt.xticks(rotation=25)
 xfmt = md.DateFormatter("%H:%M")
+
+ax1 = plt.gca()
+ax1 = plt.subplot2grid((3, 1), (0, 0))
+ax2 = plt.subplot2grid((3, 1), (1, 0), sharex=ax1)
+ax3 = plt.subplot2grid((3, 1), (2, 0), sharex=ax1)
 for ax in [ax1, ax2, ax3]:
     ax.xaxis.set_major_formatter(xfmt)
     ax.set_xlim(tiempo_mag[0], tiempo_mag[-1])
     ax.grid()
     ax.legend(loc="upper left")
 
-ax1 = plt.gca()
-
-ax1 = plt.subplot2grid((3, 1), (0, 0))
 ax1.plot(tiempo_mag, Bnorm, linewidth=0.5)
 ax1.set_ylabel("|B| (nT)")
 ax1.set_title(f"VEX MAG {year}-{month}-{day}")
 
-ax2 = plt.subplot2grid((3, 1), (1, 0), sharex=ax1)
 ax2.plot(tiempo_mag, B[:, 0], label="Bx VSO", linewidth=0.5)
 ax2.plot(tiempo_mag, B[:, 1], label="By VSO", linewidth=0.5)
 ax2.plot(tiempo_mag, B[:, 2], label="Bz VSO", linewidth=0.5)
 ax2.set_ylabel("B components (nT)")
 
-ax3 = plt.subplot2grid((3, 1), (2, 0), sharex=ax1)
 ax3.plot(tiempo_paraperp, Bpara, linewidth=0.5, label=r"|$\Delta B \parallel$| / |B|")
 ax3.plot(tiempo_paraperp, Bperp, "-.", linewidth=0.5, label=r"|$\Delta B \perp$| / |B|")
 ax3.set_ylabel("Relative variation \n of B")
@@ -173,7 +125,7 @@ ax3.set_xlabel("Tiempo (UTC)")
 ax3.set_ylim([-0.1, 1])
 
 
-for ax in [ax1, ax2, ax3]:
+for ax in [ax1, ax2]:
     plt.setp(ax.get_xticklabels(), visible=False)
 for ax in [ax1, ax2, ax3]:
     ax.axvspan(xmin=MPB[1], xmax=MPB[2], facecolor="#79B953", alpha=0.5)

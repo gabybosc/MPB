@@ -37,7 +37,7 @@ def importar_VEX_mag_AMDA(year, month, day, ti, tf):
 
 def importar_MAG_pds(year, doy, ti, tf):
     path = f"../../../datos/VEX/{year}/VEX_MAG_{year}{doy}.tab"
-    filt = f"../../../datos/VEX/{year}/VEX_mag_filtrado_{year}{doy}.gz"
+    filt = f"../../../datos/VEX/filtrados/VEX_mag_filtrado_{year}{doy}.gz"
 
     if Path(path).stat().st_size > 1000:
         if os.path.isfile(filt):

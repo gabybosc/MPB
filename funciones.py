@@ -119,6 +119,15 @@ def day_to_doy(year, month, day):
     return year, doy
 
 
+def doy_to_day(year, doy):
+    date_orbit = dt.datetime(int(year), 1, 1) + dt.timedelta(int(doy) - 1)
+    year = date_orbit.strftime("%Y")
+    month = date_orbit.strftime("%m")
+    day = date_orbit.strftime("%d")
+
+    return year, month, day
+
+
 def diezmar(largo, corto):
     """le doy un array largo que quiero que mida como el corto y me devuelve los
     índices tal que len(largo[idx]) == len(corto). Ambos tienen que tener
