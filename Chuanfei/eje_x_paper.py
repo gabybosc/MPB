@@ -90,6 +90,14 @@ for ion in ["O+", "O2+", "CO2+"]:
 
 """Ancho MPB: hay una función al fondo que uso para elegir los límites que
 tomé acá"""
+
+"""
+lim sup y lim inf salen de la derivada segunda
+los uso para ajustar la lineal 
+La MPR está en la región entre el lim inf y -0.015 del lim inf. 
+Tomo el valor medio de la MPR. El inicio de la MPB va a ser donde la lineal 
+y la MPR se corten.
+"""
 lim_sup = 1.20
 lim_inf = 1.175
 
