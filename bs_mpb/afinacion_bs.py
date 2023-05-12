@@ -24,10 +24,10 @@ Después de este correr after_encontrar
 
 np.set_printoptions(precision=4)
 
-catalogo = np.genfromtxt("../outputs/grupo4.txt", dtype="str")
+catalogo = np.genfromtxt("../outputs/grupo1.txt", dtype="str")
 # ek grupo 4 está bastante bien distrubuido en ángulos
 
-i = int(input("numero de lista\n"))  # hicimos hasta 100!!
+i = int(input("numero de lista\n"))  # hicimos hasta 55!!
 
 cat = catalogo[i]
 year, month, day = cat[0].split("-")
@@ -49,7 +49,8 @@ if tf > 24:
     tf = 24
 mag, t, B, posicion = importar_mag_1s(year, month, day, ti, tf)
 swea, t_swea, energia, flux_plot = importar_swea(year, month, day, ti, tf)
-swia, t_swia, i_density, i_temp, vel_mso = importar_swia(year, month, day, ti, tf)
+# swia, t_swia, i_density, i_temp, vel_mso = importar_swia(year, month, day, ti, tf)
+swia, t_swia, i_density, i_temp, vel_mso = 0, 0, 0, 0, 0
 lpw, t_lpw, e_density = importar_lpw(year, month, day, ti, tf)
 
 B_norm = np.linalg.norm(B, axis=1)
@@ -157,7 +158,7 @@ while not happy:
     print("Happy? Keyboard click for yes, mouse click for no.\n")
     happy = plt.waitforbuttonpress()
 
-with open("../outputs/new_grupo4.txt", "a") as file:
+with open("../outputs/new_grupo1.txt", "a") as file:
     file.write(
         f"{cat[0]}\t{hdec_to_UTC(val[0][0])}\t{hdec_to_UTC(val[1][0])}\t{cat[3]}\t{cat[4]}"
     )
