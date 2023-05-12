@@ -47,7 +47,7 @@ def autovectores(M_ij):
     if x3[0] < 0:  # si la normal aputna para adentro me la da vuelta
         x3 = -x3
     if any(np.cross(x1, x2) - x3) > 0.01:
-        print("Cambio el signo de x1 para que los av formen terna derecha")
+        # print("Cambio el signo de x1 para que los av formen terna derecha")
         x1 = -x1
 
     avec = [x1, x2, x3]
@@ -108,6 +108,24 @@ def corrientes(normal, Bup, Bdown, ancho_mpb):
     jv = js / (1000 * ancho_mpb)  # nA/m²
 
     return js * 1e-6, jv
+
+
+def day_to_doy(year, month, day):
+    date_orbit = dt.date(int(year), int(month), int(day))
+
+    year = date_orbit.strftime("%Y")
+    doy = date_orbit.strftime("%j")
+
+    return year, doy
+
+
+def doy_to_day(year, doy):
+    date_orbit = dt.datetime(int(year), 1, 1) + dt.timedelta(int(doy) - 1)
+    year = date_orbit.strftime("%Y")
+    month = date_orbit.strftime("%m")
+    day = date_orbit.strftime("%d")
+
+    return year, month, day
 
 
 def diezmar(largo, corto):
@@ -310,12 +328,11 @@ def unix_to_timestamp(t_unix):
 
 def UTC_to_hdec(t_UTC):
     """Convierte de UTC a hdec"""
-    if len(t_UTC) > 5:
-        (h, m, s) = t_UTC.split(":")
-        t_hdec = int(h) + int(m) / 60 + int(s) / 3600
-    elif len(t_UTC) == 5:
-        (h, m) = t_UTC.split(":")
-        t_hdec = int(h) + int(m) / 60
+    t = t_UTC.split(":")
+    if len(t) == 3:
+        t_hdec = int(t[0]) + int(t[1]) / 60 + int(t[2]) / 3600
+    elif len(t) == 2:
+        t_hdec = int(t[0]) + int(t[1]) / 60
 
     return t_hdec
 

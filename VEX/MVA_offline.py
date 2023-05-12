@@ -1,27 +1,24 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-from matplotlib.widgets import MultiCursor
 from cycler import cycler
-from importar_datos import importar_MAG_pds, importar_fila
+from importar_datos import importar_MAG_pds, importar_ELS_clweb
 from fit_venus import plot_orbita, fit_Xu
-from multiplot import multi_plot_MAG_only
-from update_parametros import (
-    hoja_MVA_update,
-    hoja_MVA_analisis,
-    hoja_t1t2t3t4,
-)
+
+
 import sys
 
 sys.path.append("..")
 from funciones import (
     donde,
     fechas,
+    tiempos,
     Mij,
     error,
     corrientes,
     ancho_mpb,
     Bpara_Bperp,
+    find_nearest,
     SZA,
 )
 from funciones_plot import hodograma
@@ -34,7 +31,7 @@ mpl.rcParams["axes.prop_cycle"] = cycler(
 )
 
 
-def MVA(B, year, month, day):
+def MVA(B):
     # ya los importa cortados a los datos, entonces no hace falta que haga el cut yo
     M_ij = Mij(B)
 
@@ -56,8 +53,6 @@ def MVA(B, year, month, day):
         print("Cambio el signo de x1 para que los av formen terna derecha")
         x1 = -x1
 
-    av = np.concatenate([x1, x2, x3])
-
     print("la normal del MVA es ", x3)
 
     # las proyecciones
@@ -74,44 +69,51 @@ def MVA(B, year, month, day):
     print(f"El B medio es {B_norm_medio}")
     hodograma(B1, B2, B3)
 
-    # el error
-    phi, delta_B3 = error(lamb, B, x)
-    if phi[2, 1] > phi[2, 0]:
-        error_normal = phi[2, 1] * 180 / np.pi
-    else:
-        error_normal = phi[2, 0] * 180 / np.pi
-
-    print("MVA terminado")
-
-    nr, hoja_parametros, hoja_mva, hoja_boot, hoja_fit = importar_fila(year, month, day)
-
-    # #######update la hoja de MVA
-    hoja_MVA_update(hoja_mva, nr, lamb, av, error_normal, B3, delta_B3, B_norm_medio)
     return x3
 
 
 year, month, day, doy = fechas()
-ti, tf = 0, 24  # tiempos()
+lista = np.loadtxt("../outputs/orbitas_VEX.txt", dtype=str)
+
+for l in lista:
+    if l[0] == f"{year}-{month}-{day}":
+        hh = int(l[1].split(":")[0])
+        ti = hh - 2
+        tf = hh + 2
+        if ti < 0:
+            ti = 0
+        if tf > 24:
+            tf = 24
 t, B, pos = importar_MAG_pds(year, doy, ti, tf)
 Bnorm = np.linalg.norm(B, axis=1)
 
 Bpara, Bperp, tpara = Bpara_Bperp(B[::32], t[::32], ti, tf)
 
-val = multi_plot_MAG_only(t, tpara, B, Bnorm, Bpara, Bperp, 2)
-nr, hoja_parametros, hoja_mva, hoja_boot, hoja_fit = importar_fila(year, month, day)
 
-inicio_MVA = donde(t, min(val))
-fin_MVA = donde(t, max(val))
+# ti, tf = 2.778339846633605, 2.7804097790334508  # tiempos()
+# inicio_MVA = donde(t, val[0])
+# fin_MVA = donde(t, val[1])
+dd = np.loadtxt("../outputs/VEX_times.txt", usecols=1)
+times = np.loadtxt("../outputs/VEX_times.txt")
+idx = donde(dd, int(doy))
+t1 = times[idx][2]
+t2 = times[idx][3]
+t3 = times[idx][4]
+t4 = times[idx][5]
+
+ti = t2
+tf = t3
+inicio_MVA = donde(t, ti)
+fin_MVA = donde(t, tf)
 
 sza = SZA(pos, inicio_MVA)
-x3 = MVA(B[inicio_MVA:fin_MVA], year, month, day)
+x3 = MVA(B[inicio_MVA:fin_MVA])
 
-plt.show()
 xx, yz = fit_Xu()
 pos_RV = pos / 6050
 orbita = np.sqrt(pos_RV[:, 1] ** 2 + pos_RV[:, 2] ** 2)
 
-plt.figure()
+
 plot_orbita(pos_RV, orbita, xx, yz)
 
 plt.quiver(
@@ -121,15 +123,6 @@ plt.quiver(
     np.sqrt(x3[1] ** 2 + x3[2] ** 2),
 )
 
-
-dd = np.loadtxt("../outputs/VEX_times.txt", usecols=1)
-times = np.loadtxt("../outputs/VEX_times.txt")
-idx = donde(dd, int(doy))
-t1 = times[idx][2]
-t2 = times[idx][3]
-t3 = times[idx][4]
-t4 = times[idx][5]
-hoja_t1t2t3t4(hoja_parametros, nr, t1, t2, t3, t4)
 
 v_punto = np.zeros((len(B) - 1, 3))
 norma_v = np.zeros(len(B) - 1)
@@ -158,9 +151,8 @@ fuerza_mva = np.cross(J_v_MVA * 1e-9, B[inicio_down, :] * 1e-9)  # N/m^3 #en t4
 print(
     f"Js = {J_s_MVA} mA/m, |Js| = {np.linalg.norm(J_s_MVA):.3g} mA/m \nJv = {J_v_MVA} nA/m², |Jv| = {np.linalg.norm(J_v_MVA):.3g} nA/m²"
 )
-hoja_MVA_analisis(
-    hoja_mva, nr, t[inicio_MVA], t[fin_MVA], x14, x23, J_s_MVA, J_v_MVA, fuerza_mva
-)
+
+plt.show()
 # E_Hall = np.cross(J_v_MVA * 1e-9, B[inicio_down, :] * 1e-9) / (q_e * n_e)  # V/m
 
 # buenas órbitas: SZA no tan alto, el campo en SW no es Bx

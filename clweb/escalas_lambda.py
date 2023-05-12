@@ -10,12 +10,9 @@ from escalas_lambda_func import escalas_lambda, MVA
 sys.path.append("..")
 
 from funciones import (
-    find_nearest,
-    Mij,
     fechas,
     array_datenums,
     donde,
-    tiempos,
     UTC_to_hdec,
 )
 from importar_datos import importar_mag, importar_t1t2t3t4
@@ -94,7 +91,6 @@ xfmt = md.DateFormatter("%H:%M:%S")
 
 
 fig = plt.figure(2)
-# Lo bueno de esta forma es que puedo hacer que solo algunos compartan eje
 fig.subplots_adjust(
     top=0.93, bottom=0.07, left=0.05, right=0.95, hspace=0.005, wspace=0.15
 )

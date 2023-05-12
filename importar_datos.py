@@ -39,6 +39,7 @@ def importar_mag_1s(year, month, day, ti, tf):
         path + f"mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts",
         skiprows=160,
     )
+    mag = mag[:86386]
 
     hh = mag[:, 2]
     mm = mag[:, 3]
@@ -107,7 +108,6 @@ def importar_swea(year, month, day, ti, tf):
     path = find_path("SWEA")
     # chequea que el archivo no está vacío
     if Path(path + f"mvn_swe_l2_svyspec_{year}{month}{day}.cdf").stat().st_size > 1000:
-
         swea = cdf.CDF(path + f"mvn_swe_l2_svyspec_{year}{month}{day}.cdf")
 
         flux_all = swea.varget("diff_en_fluxes")
@@ -214,6 +214,7 @@ def importar_swia(year, month, day, ti, tf):
 #     vel_mso_cut = vel_mso_xyz[inicio:fin]  # km/s
 #
 #     return swia, t_cut, density_cut, temperature_cut, vel_mso_cut
+
 
 # ###################################################################### LPW
 def importar_lpw(year, month, day, ti, tf):
