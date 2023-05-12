@@ -2,12 +2,13 @@ from sys import exit
 import numpy as np
 from importar_datos import importar_mag, importar_swia, importar_fila
 import matplotlib.pyplot as plt
+import matplotlib.dates as md
 
 np.set_printoptions(precision=4)
 import sys
 
 sys.path.append("..")
-from funciones import fechas, donde
+from funciones import fechas, donde, datenum
 
 """
 VERSIÓN ALTERNATIVA donde primero recorta y después diezma (no cambia mucho los resultados)
@@ -99,6 +100,22 @@ def importar_swifa(ti, tf):
     )
 
 
+def importar_lpw(ti, tf):
+    path = f"../../../datos/clweb/2016-03-16/"
+
+    lpw = np.loadtxt(path + "LPW_MS.asc")
+
+    t = lpw[:, 3] + lpw[:, 4] / 60 + lpw[:, 5] / 3600  # hdec
+
+    inicio = donde(t, ti)
+    fin = donde(t, tf)
+
+    t_cut = t[inicio:fin]
+    density = lpw[inicio:fin, -1]
+
+    return t_cut, density
+
+
 """
 giroradio: rg = mp * v_perp / (q_e * B)  en la región upstream
 where vperp is the component of the velocity perpendicular to the
@@ -146,9 +163,10 @@ def giroradio(B, velocidad):
 
 def giroradio_termico(B, temp):
     """sería mejor haciendo un barrido, pero vamos a empezar por lo fácil"""
-    B_avg = np.mean(B, axis=0) * 1e-5  # gauss
+    B_avg = np.mean(B, axis=0) * 1e4  # gauss
 
     thermal_gyroradius = 1.02e02 * np.sqrt(np.mean(temp)) / np.linalg.norm(B_avg)  # cm
+    # thermal_gyroradius = 2.28 * np.sqrt(np.mean(temp)) / np.linalg.norm(B_avg)  # cm para electrones
     return thermal_gyroradius * 1e-5  # km
 
 
@@ -160,7 +178,18 @@ def long_inercial(density):
         # lo ideal sería tomar desde atrás del ti así no se mete en la MPB nunca
 
     ion_length = 2.28e07 / np.sqrt(np.mean(density_mean)) * 1e-5  # km
-    return ion_length
+    return ion_length, density_mean
+
+
+def long_inercial_electrones(density):
+    density_mean = np.zeros(len(density))
+    paso = 20  # cada paso son 4 segundos.
+    for i in range(len(density)):
+        density_mean[i] = np.mean(density[i : +i + paso])
+        # lo ideal sería tomar desde atrás del ti así no se mete en la MPB nunca
+
+    e_length = 5.31e05 / np.sqrt(np.mean(density_mean)) * 1e-5  # km
+    return e_length
 
 
 mag, t_mag_entero, B_entero, posicion = importar_mag(year, month, day, ti, tf)
@@ -208,6 +237,7 @@ def limites(inp):
     # recorto en la MS
     # tengo el B (único) y dos valores de velocidad, dependiendo del recorte de la DF
     # lo mismo para la temperatura y densidad
+    t_swia = t_swia[swia_i:swia_f]
     B = B_entero[mag_i:mag_f] * 1e-9  # T
     vel_cut = velocity[swia_i:swia_f, :3]
     vel_full_cut = velocity_full[swia_i:swia_f, :3]
@@ -220,6 +250,7 @@ def limites(inp):
     B_cut = diezmar(B, density)
 
     return (
+        t_swia,
         B_cut,
         vel_cut,
         vel_full_cut,
@@ -230,8 +261,51 @@ def limites(inp):
     )
 
 
+# para el SW
+
+(
+    t_swia,
+    B_cut,
+    vel_cut,
+    vel_full_cut,
+    temp_cut,
+    temp_full_cut,
+    density_cut,
+    density_full_cut,
+) = limites("SW")
+# ahora sí, calculamos
+rg = giroradio(B_cut, vel_cut)
+rg_full = giroradio(B_cut, vel_full_cut)
+
+print(f"gr SW 1-5000 eV = {rg_full} km")
+print(f"gr SW recorte = {rg} km")
+
+th_gr = giroradio_termico(B_cut, temp_cut)
+th_gr_full = giroradio_termico(B_cut, temp_full_cut)
+print(f"thermal gr SW 1-5000 eV = {np.nanmean(th_gr_full, axis=0):1.3g} km")
+print(f"thermal gr SW recorte = {np.nanmean(th_gr, axis=0):1.3g} km")
+# nanmean ignora los nans
+
+proton_length, density_cut_mean = long_inercial(density_cut)
+proton_length_full, density_full_mean = long_inercial(density_full_cut)
+
+print(f"long inercial SW 1-5000 eV = {proton_length_full:1.3g} km")
+print(f"long inercial SW recorte = {proton_length:1.3g} km")
+
+# tiempo = np.array([np.datetime64(datenum(2016, 3, 16, x)) for x in t_swia])
+# fig = plt.figure(1)
+# ax1 = plt.subplot2grid((1,1), (0, 0))
+# xfmt = md.DateFormatter("%H:%M")
+# ax1.xaxis.set_major_formatter(xfmt)
+# ax1.plot(tiempo, density_cut_mean, label="protons")
+# ax1.plot(tiempo, density_full_mean, label="all ions")
+# ax1.set_xlabel("time (hdec)")
+# ax1.set_ylabel("denisty (cm⁻³)")
+# ax1.legend()
+# plt.show()
 # para la magnetofunda
 (
+    t_swia,
     B_cut,
     vel_cut,
     vel_full_cut,
@@ -255,39 +329,22 @@ print(f"thermal gr MS 1-5000 eV = {np.nanmean(th_gr_full, axis=0):1.3g} km")
 print(f"thermal gr MS recorte = {np.nanmean(th_gr, axis=0):1.3g} km")
 # nanmean ignora los nans
 
-proton_length = long_inercial(density_cut)
-proton_length_full = long_inercial(density_full_cut)
+proton_length, den = long_inercial(density_cut)
+proton_length_full, den = long_inercial(density_full_cut)
+proton_length_085, den = long_inercial(density_full_cut * 0.95)
 
-print(f"long inercial MS 1-5000 eV = {proton_length:1.3g} km")
-print(f"long inercial MS recorte = {proton_length_full:1.3g} km")
+print(f"long inercial MS 1-5000 eV = {proton_length_full:1.3g} km")
+print(f"long inercial MS 1-5000 eV * 0.85 = {proton_length_085:1.3g} km")
+print(f"long inercial MS recorte = {proton_length:1.3g} km")
 
 
-# para el SW
+t_lpw, e_dens = importar_lpw(18.08, 18.21)
 
-(
-    B_cut,
-    vel_cut,
-    vel_full_cut,
-    temp_cut,
-    temp_full_cut,
-    density_cut,
-    density_full_cut,
-) = limites("SW")
-# ahora sí, calculamos
-rg = giroradio(B_cut, vel_cut)
-rg_full = giroradio(B_cut, vel_full_cut)
+e_length = long_inercial_electrones(e_dens)
+print(f"long inercial electrones MS = {e_length:1.3g} km")
 
-print(f"gr SW 1-5000 eV = {rg_full} km")
-print(f"gr SW recorte = {rg} km")
-
-th_gr = giroradio_termico(B_cut, temp_cut)
-th_gr_full = giroradio_termico(B_cut, temp_full_cut)
-print(f"thermal gr SW 1-5000 eV = {np.nanmean(th_gr_full, axis=0):1.3g} km")
-print(f"thermal gr SW recorte = {np.nanmean(th_gr, axis=0):1.3g} km")
-# nanmean ignora los nans
-
-proton_length = long_inercial(density_cut)
-proton_length_full = long_inercial(density_full_cut)
-
-print(f"long inercial SW 1-5000 eV = {proton_length:1.3g} km")
-print(f"long inercial SW recorte = {proton_length_full:1.3g} km")
+# plt.plot(t_lpw, e_dens, label="electron density")
+# plt.plot(t_swia, density_full_cut * 0.85, label="proton density")
+# plt.xlabel("t (hdec)")
+# plt.legend()
+# plt.show()

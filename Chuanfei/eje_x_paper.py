@@ -305,39 +305,55 @@ ax6.legend(["x", "y", "z", "MPB"])
 plt.show()
 
 
-def ancho(x, B):
-    """
-    Busco el punto máximo de la derivada y luego ajusto con una lineal el campo B
-    pero que pase por el punto máximo
-    """
+def derivar(B, x):
     dBx_dx = np.gradient(B[:, 0], np.abs(x[0] - x[2]) * 3390e3)
     dBy_dx = np.gradient(B[:, 1], np.abs(x[0] - x[2]) * 3390e3)
     dBz_dx = np.gradient(B[:, 2], np.abs(x[0] - x[2]) * 3390e3)
     dBdx = np.transpose(np.vstack((dBx_dx, dBy_dx, dBz_dx)))
+    return dBdx
+
+
+def ancho(x, B):
+    """
+    Busco el punto máximo de la derivada y luego ajusto con una lineal el campo B
+    pero que pase por el punto máximo
+    los puntos entre los cuales ajusto la slope van a ser máximos/mínimos locales de la derivada segunda
+    """
+    dBdx = derivar(B, x)
+    d2Bdx = derivar(dBdx, x)
     B_norm = np.linalg.norm(B, axis=1)
 
-    plt.figure()
-    plt.plot(x, dBdx, ".")
-    plt.plot(x, np.linalg.norm(dBdx, axis=1), ".")
-    plt.legend(["x", "y", "z", "norm"])
-    plt.title("Derivada de B")
-    plt.show()
+    # plt.figure()
+    # plt.plot(x, dBdx, ".")
+    # plt.plot(x, np.linalg.norm(dBdx, axis=1), ".")
+    # plt.legend(["x", "y", "z", "norm"])
+    # plt.title("Derivada de B")
+    # plt.show()
 
     fig = plt.figure()
     fig.subplots()
     plt.title("Campo magnético y su derivada en x")
 
-    ax1 = plt.subplot2grid((2, 1), (0, 0))
+    ax1 = plt.subplot2grid((3, 1), (0, 0))
     plt.plot(x, B_norm, ".")
     plt.setp(ax1.get_xticklabels(), visible=False)
     ax1.set_ylabel("|B|")
     ax1.grid()
 
-    ax2 = plt.subplot2grid((2, 1), (1, 0), sharex=ax1)
+    ax2 = plt.subplot2grid((3, 1), (1, 0), sharex=ax1)
     ax2.plot(x, np.linalg.norm(dBdx, axis=1), ".")
     ax2.set_ylabel("dB/dx")
     ax2.set_xlabel("x (RM)")
     ax2.grid()
 
-    multi = MultiCursor(fig.canvas, (ax1, ax2), color="black", lw=1)
+    ax3 = plt.subplot2grid((3, 1), (2, 0), sharex=ax1)
+    ax3.plot(x, np.linalg.norm(d2Bdx, axis=1), ".")
+    ax3.set_ylabel("d²B/dx²")
+    ax3.set_xlabel("x (RM)")
+    ax3.grid()
+
+    multi = MultiCursor(fig.canvas, (ax1, ax2, ax3), color="black", lw=1)
     plt.show()
+
+
+ancho(x, B)
