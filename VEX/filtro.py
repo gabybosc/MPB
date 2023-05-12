@@ -27,7 +27,6 @@ Bnorm = np.linalg.norm(B, axis=1)
 
 
 def filtro(Tseg):
-
     fs = 1 / Tseg / 16  # f normalizada, da lo mismo si es omega o frec
     fp = 0.3 * fs  # fp < fs para que sea pasabajos
     N, Wn = signal.buttord(fp, fs, 3, 50)
@@ -57,6 +56,8 @@ plt.plot(
 plt.legend()
 plt.show()
 
-np.savetxt(
-    f"../../../datos/VEX/{year}/VEX_mag_filtrado_{year}{doy}.gz", B_filtrado,
-)
+if input("save? y/n\n") == "y":
+    np.savetxt(
+        f"../../../datos/VEX/filtrados/VEX_mag_filtrado_{year}{doy}.gz",
+        B_filtrado,
+    )
