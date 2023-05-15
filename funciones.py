@@ -330,7 +330,7 @@ def UTC_to_hdec(t_UTC):
     """Convierte de UTC a hdec"""
     t = t_UTC.split(":")
     if len(t) == 3:
-        t_hdec = int(t[0]) + int(t[1]) / 60 + int(t[2]) / 3600
+        t_hdec = int(t[0]) + int(t[1]) / 60 + float(t[2]) / 3600
     elif len(t) == 2:
         t_hdec = int(t[0]) + int(t[1]) / 60
 
