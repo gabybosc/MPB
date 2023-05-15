@@ -39,31 +39,34 @@ def importar_MAG_pds(year, doy, ti, tf):
     path = f"../../../datos/VEX/{year}/VEX_MAG_{year}{doy}.tab"
     filt = f"../../../datos/VEX/filtrados/VEX_mag_filtrado_{year}{doy}.gz"
 
-    if Path(path).stat().st_size > 1000:
-        if os.path.isfile(filt):
-            B = np.loadtxt(filt)
-            # B = np.genfromtxt(path, skip_header=1, usecols=[5, 6, 7])
-        else:
-            B = np.genfromtxt(path, skip_header=1, usecols=[5, 6, 7])
-        pos = np.genfromtxt(path, skip_header=1, usecols=[8, 9, 10])
-        tt = np.genfromtxt(path, skip_header=1, usecols=0, dtype="str")
+    if os.path.exists(path):
+        if Path(path).stat().st_size > 1000:
+            if os.path.isfile(filt):
+                B = np.loadtxt(filt)
+                # B = np.genfromtxt(path, skip_header=1, usecols=[5, 6, 7])
+            else:
+                B = np.genfromtxt(path, skip_header=1, usecols=[5, 6, 7])
+            pos = np.genfromtxt(path, skip_header=1, usecols=[8, 9, 10])
+            tt = np.genfromtxt(path, skip_header=1, usecols=0, dtype="str")
 
-        hora = np.array([x.split("T")[1] for x in tt])
-        t = np.array(
-            [
-                int(x.split(":")[0])
-                + int(x.split(":")[1]) / 60
-                + float(x.split(":")[2]) / 3600
-                for x in hora
-            ]
-        )  # hdec
+            hora = np.array([x.split("T")[1] for x in tt])
+            t = np.array(
+                [
+                    int(x.split(":")[0])
+                    + int(x.split(":")[1]) / 60
+                    + float(x.split(":")[2]) / 3600
+                    for x in hora
+                ]
+            )  # hdec
 
-        inicio = donde(t, ti)
-        fin = donde(t, tf)
+            inicio = donde(t, ti)
+            fin = donde(t, tf)
 
-        t_cut = t[inicio:fin]
-        B_cut = B[inicio:fin]
-        pos_cut = pos[inicio:fin]
+            t_cut = t[inicio:fin]
+            B_cut = B[inicio:fin]
+            pos_cut = pos[inicio:fin]
+    else:
+        t_cut, B_cut, pos_cut = 0, 0, 0
     return t_cut, B_cut, pos_cut
 
 
