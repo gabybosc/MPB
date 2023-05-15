@@ -2,6 +2,7 @@ import numpy as np
 import sys
 from pathlib import Path
 import os as os
+from os.path import exists
 from glob import glob
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
