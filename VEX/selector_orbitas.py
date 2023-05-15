@@ -14,7 +14,7 @@ con el SZA de cada uno. Compara con el fit de Xu 2021.
 
 # path = glob.glob("../../../VEX.txt")
 
-path = glob.glob("../../../datos/VEX/2007/*.tab")
+path = glob.glob("../../../datos/VEX/2009/*.tab")
 # Ajuste de Xu de la MPB:
 x_Xu, yz_Xu = fit_Xu()
 

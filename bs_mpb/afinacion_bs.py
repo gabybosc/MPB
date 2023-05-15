@@ -63,9 +63,7 @@ val = False
 while not happy:
     # while val is False:
     plt.clf()  # clear figure
-    fig = plt.figure(
-        1, constrained_layout=True
-    )  # Lo bueno de esta forma es que puedo hacer que solo algunos compartan eje
+    fig = plt.figure(1, constrained_layout=True)
     fig.subplots_adjust(
         top=0.95,
         bottom=0.1,

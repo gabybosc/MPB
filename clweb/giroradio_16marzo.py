@@ -118,15 +118,15 @@ sw_f = 17.8
 ms_i = 18.08
 ms_f = 18.21
 
-# plt.plot(t_swia, density, label="recorte")
-# plt.plot(t_swia, density_full, label="full")
-# plt.axvline(x=sw_i, c="k")
-# plt.axvline(x=sw_f, c="k")
-# plt.axvline(x=ms_f)
-# plt.axvline(x=ms_f)
-# plt.legend()
-# plt.title("SWICA")
-# plt.show()
+plt.plot(t_swia, density, label="recorte")
+plt.plot(t_swia, density_full, label="full")
+plt.axvline(x=sw_i, c="k")
+plt.axvline(x=sw_f, c="k")
+plt.axvline(x=ms_f)
+plt.axvline(x=ms_f)
+plt.legend()
+plt.title("SWICA")
+plt.show()
 
 """
 giroradio: rg = mp * v_perp / (q_e * B)  en la región upstream
@@ -235,5 +235,5 @@ Longitud inercial
 proton_length = long_inercial(density_cut)
 proton_length_full = long_inercial(density_full_cut)
 
-print(f"long inercial MS 1-5000 eV = {proton_length:1.3g} km")
-print(f"long inercial MS recorte = {proton_length_full:1.3g} km")
+print(f"long inercial MS 1-5000 eV = {proton_length_full:1.3g} km")
+print(f"long inercial MS recorte = {proton_length:1.3g} km")
