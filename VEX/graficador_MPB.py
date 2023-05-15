@@ -8,7 +8,7 @@ sys.path.append("..")
 from funciones import Bpara_Bperp, doy_to_day
 
 lista = np.loadtxt("../outputs/VEX_times.txt")
-fig_path = "../../../../Pictures/VEX/MVA/"
+fig_path = "../outputs/VEX/MPB/"
 
 for l in lista:
     year = int(l[0])

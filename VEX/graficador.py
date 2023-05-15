@@ -8,7 +8,7 @@ sys.path.append("..")
 from funciones import day_to_doy, Bpara_Bperp
 
 lista = np.loadtxt("../outputs/orbitas_VEX.txt", dtype=str)
-fig_path = "../../../../Pictures/VEX/"
+fig_path = "../outputs/VEX/"
 
 for l in lista:
     if float(l[2]) < 60:

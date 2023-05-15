@@ -36,8 +36,12 @@ def importar_VEX_mag_AMDA(year, month, day, ti, tf):
 
 
 def importar_MAG_pds(year, doy, ti, tf):
-    path = f"../../../datos/VEX/{year}/VEX_MAG_{year}{doy}.tab"
-    filt = f"../../../datos/VEX/filtrados/VEX_mag_filtrado_{year}{doy}.gz"
+    if gethostname() == "gbosco":
+        path = f"../../../../media/gabybosc/datos/VEX/{year}/VEX_MAG_{year}{doy}.tab"
+        filt = f"../../../../media/gabybosc/datos/VEX/filtrados/VEX_mag_filtrado_{year}{doy}.gz"
+    else:
+        path = f"../../../datos/VEX/{year}/VEX_MAG_{year}{doy}.tab"
+        filt = f"../../../datos/VEX/filtrados/VEX_mag_filtrado_{year}{doy}.gz"
 
     if Path(path).stat().st_size > 1000:
         if os.path.isfile(filt):

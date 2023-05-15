@@ -4,6 +4,7 @@ from funciones import donde, unix_to_decimal
 import cdflib as cdf
 import gspread
 import os
+from os.path import exists
 from pathlib import Path
 from oauth2client.service_account import ServiceAccountCredentials
 from socket import gethostname
@@ -160,25 +161,28 @@ def importar_swia(year, month, day, ti, tf):
 
     path = find_path("SWIA")
 
-    if (
-        Path(path + f"/mvn_swi_l2_onboardsvymom_{year}{month}{day}.cdf").stat().st_size
-        > 1000
-    ):
-        swia = cdf.CDF(path + f"mvn_swi_l2_onboardsvymom_{year}{month}{day}.cdf")
+    if exists(path + f"mvn_swi_l2_onboardsvymom_{year}{month}{day}.cdf"):
+        if (
+            Path(path + f"/mvn_swi_l2_onboardsvymom_{year}{month}{day}.cdf")
+            .stat()
+            .st_size
+            > 1000
+        ):
+            swia = cdf.CDF(path + f"mvn_swi_l2_onboardsvymom_{year}{month}{day}.cdf")
 
-        t_unix = swia.varget("time_unix")
-        density = swia.varget("density")  # cm⁻³
-        temperature = swia.varget("temperature_mso")  # eV
-        vel_mso_xyz = swia.varget("velocity_mso")  # km/s
+            t_unix = swia.varget("time_unix")
+            density = swia.varget("density")  # cm⁻³
+            temperature = swia.varget("temperature_mso")  # eV
+            vel_mso_xyz = swia.varget("velocity_mso")  # km/s
 
-        t_swia = unix_to_decimal(t_unix)
-        inicio = donde(t_swia, ti)
-        fin = donde(t_swia, tf)
+            t_swia = unix_to_decimal(t_unix)
+            inicio = donde(t_swia, ti)
+            fin = donde(t_swia, tf)
 
-        t_cut = t_swia[inicio:fin]
-        density_cut = density[inicio:fin]
-        temperature_cut = temperature[inicio:fin]
-        vel_mso_cut = vel_mso_xyz[inicio:fin]  # km/s
+            t_cut = t_swia[inicio:fin]
+            density_cut = density[inicio:fin]
+            temperature_cut = temperature[inicio:fin]
+            vel_mso_cut = vel_mso_xyz[inicio:fin]  # km/s
 
     else:
         print("swia vacío")
