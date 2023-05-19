@@ -2,21 +2,21 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-from importar_datos import importar_mag_1s, importar_swea, importar_swia
 import sys
 
 
 sys.path.append("..")
-from funciones import Bpara_Bperp, hdec_to_UTC
+from importar_datos import importar_mag_1s, importar_swea, importar_swia
+from funciones import Bpara_Bperp, UTC_to_hdec
 
-lista = np.loadtxt("../outputs/new_grupo1.txt")
-fig_path = "../../BS_MPB/"
+lista = np.genfromtxt("../outputs/new_grupo1.txt", dtype=str)
+fig_path = "../../Pictures/BS_MPB/"
 
 for l in lista:
     year, month, day = l[0].split("-")
 
-    t_bs = hdec_to_UTC(l[1])
-    t_mpb = hdec_to_UTC(l[2])
+    t_bs = UTC_to_hdec(l[1])
+    t_mpb = UTC_to_hdec(l[2])
 
     if t_bs < t_mpb:
         ti = t_bs - 0.2
@@ -54,8 +54,9 @@ for l in lista:
     ax4 = plt.subplot2grid((3, 2), (0, 1), sharex=ax1)
     ax5 = plt.subplot2grid((3, 2), (1, 1), sharex=ax1)
     ax6 = plt.subplot2grid((3, 2), (2, 1), sharex=ax1)
-    plt.plot(tpara, Bpara, label=r"|$\Delta B \parallel$| / B")
-    plt.plot(tpara, Bperp, "-.", label=r"|$\Delta B \perp$| / B")
+
+    ax1.plot(tpara, Bpara, label=r"|$\Delta B \parallel$| / B")
+    ax1.plot(tpara, Bperp, "-.", label=r"|$\Delta B \perp$| / B")
     plt.setp(ax1.get_xticklabels(), visible=False)
     ax1.set_ylabel(r"|$\Delta B$|/ B")
     ax1.set_xlim([t[0], t[-1]])
@@ -69,7 +70,7 @@ for l in lista:
     ax2.legend(["Bx", "By", "Bz"])
     ax2.grid()
 
-    plt.plot(t, Bnorm)
+    ax3.plot(t, Bnorm)
     ax3.grid()
     ax3.axvline(x=t_bs, color="c")
     ax3.set_ylabel("|B| (nT)")
