@@ -79,8 +79,7 @@ def BS_MPB(L, e, x0):
     return (X1, yz)
 
 
-def marte(x_bs, yz_bs, x_mpb, yz_mpb):
-    fig, ax = plt.subplots()
+def marte(ax, x_bs, yz_bs, x_mpb, yz_mpb):
     ax.plot()
     ax.plot(x_bs, yz_bs, color="#07aec7", linestyle="-.")
     ax.plot(x_mpb, yz_mpb, color="#FF1493", linestyle="-.")
@@ -104,30 +103,30 @@ def orbitas(posicion, year, month, day):
     ax.plot(x, proyeccion, label=f"{day}-{month}-{year}")
 
 
-x_bs, yz_bs = BS_MPB(2.04, 1.03, 0.64)
-x_mpb, yz_mpb = BS_MPB(0.96, 0.9, 0.78)
-marte(x_bs, yz_bs, x_mpb, yz_mpb)
+# x_bs, yz_bs = BS_MPB(2.04, 1.03, 0.64)
+# x_mpb, yz_mpb = BS_MPB(0.96, 0.9, 0.78)
+# marte(x_bs, yz_bs, x_mpb, yz_mpb)
 
 
-# t, posicion_cut, year, month, day = datos()
-# t, posicion_cut, year, month, day = datos_fijos(2015, 10, 10, 12, 13)
+# # t, posicion_cut, year, month, day = datos()
+# # t, posicion_cut, year, month, day = datos_fijos(2015, 10, 10, 12, 13)
+# # orbitas(posicion_cut, year, month, day)
+
+# # t, posicion_cut, year, month, day = datos_fijos(2015, 10, 12, 18.75, 19.75)
+# # orbitas(posicion_cut, year, month, day)
+
+# t, posicion_cut, year, month, day = datos_fijos(2016, "03", 16, 17.5, 18.5)
 # orbitas(posicion_cut, year, month, day)
 
-# t, posicion_cut, year, month, day = datos_fijos(2015, 10, 12, 18.75, 19.75)
-# orbitas(posicion_cut, year, month, day)
+# # t, posicion_cut, year, month, day = datos_fijos(2016, "03", 31, 12.5, 13.5)
+# # orbitas(posicion_cut, year, month, day)
 
-t, posicion_cut, year, month, day = datos_fijos(2016, "03", 16, 17.5, 18.5)
-orbitas(posicion_cut, year, month, day)
+# # t, posicion_cut, year, month, day = datos_fijos(2016, "04", "05", 16, 17)
+# # orbitas(posicion_cut, year, month, day)
 
-# t, posicion_cut, year, month, day = datos_fijos(2016, "03", 31, 12.5, 13.5)
-# orbitas(posicion_cut, year, month, day)
+# # t, posicion_cut, year, month, day = datos_fijos(2017, 11, 24, 12, 13)
+# # orbitas(posicion_cut, year, month, day)
 
-# t, posicion_cut, year, month, day = datos_fijos(2016, "04", "05", 16, 17)
-# orbitas(posicion_cut, year, month, day)
-
-# t, posicion_cut, year, month, day = datos_fijos(2017, 11, 24, 12, 13)
-# orbitas(posicion_cut, year, month, day)
-
-plt.legend()
-plt.show(block=False)
+# plt.legend()
+# plt.show(block=False)
 # plt.savefig("../outputs/figs_MPB/Orbitas.png", dpi=200)
