@@ -24,10 +24,10 @@ Después de este correr after_encontrar
 
 np.set_printoptions(precision=4)
 
-catalogo = np.genfromtxt("../outputs/grupo2.txt", dtype="str")
+catalogo = np.genfromtxt("../outputs/grupo3.txt", dtype="str")
 # ek grupo 4 está bastante bien distrubuido en ángulos
 
-i = int(input("numero de lista\n"))  # hicimos hasta 55!!
+i = int(input("numero de lista\n"))  # hicimos hasta !!
 
 cat = catalogo[i]
 year, month, day = cat[0].split("-")
@@ -155,7 +155,7 @@ while not happy:
     print("Happy? Keyboard click for yes, mouse click for no.\n")
     happy = plt.waitforbuttonpress()
 
-with open("../outputs/new_grupo2.txt", "a") as file:
+with open("../outputs/new_grupo3.txt", "a") as file:
     file.write(
         f"{cat[0]}\t{hdec_to_UTC(val[0][0])}\t{hdec_to_UTC(val[1][0])}\t{cat[3]}\t{cat[4]}"
     )

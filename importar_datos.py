@@ -108,25 +108,28 @@ def importar_swea(year, month, day, ti, tf):
 
     path = find_path("SWEA")
     # chequea que el archivo no está vacío
-    if Path(path + f"mvn_swe_l2_svyspec_{year}{month}{day}.cdf").stat().st_size > 1000:
-        swea = cdf.CDF(path + f"mvn_swe_l2_svyspec_{year}{month}{day}.cdf")
+    if exists(path + f"mvn_swe_l2_svyspec_{year}{month}{day}.cdf"):
+        if (
+            Path(path + f"mvn_swe_l2_svyspec_{year}{month}{day}.cdf").stat().st_size
+            > 1000
+        ):
+            swea = cdf.CDF(path + f"mvn_swe_l2_svyspec_{year}{month}{day}.cdf")
 
-        flux_all = swea.varget("diff_en_fluxes")
-        energia = swea.varget("energy")
-        t_unix = swea.varget("time_unix")
+            flux_all = swea.varget("diff_en_fluxes")
+            energia = swea.varget("energy")
+            t_unix = swea.varget("time_unix")
 
-        t = unix_to_decimal(t_unix)
+            t = unix_to_decimal(t_unix)
 
-        inicio = donde(t, ti)
-        fin = donde(t, tf)
+            inicio = donde(t, ti)
+            fin = donde(t, tf)
 
-        t_cut = t[inicio:fin]
+            t_cut = t[inicio:fin]
 
-        flux = flux_all[inicio:fin]
-        flux_plot = np.transpose(flux)[::-1]
+            flux = flux_all[inicio:fin]
+            flux_plot = np.transpose(flux)[::-1]
 
     else:
-        print("swea vacío")
         swea, t_cut, energia, flux_plot = 0, 0, 0, 0
 
     return swea, t_cut, energia, flux_plot
@@ -185,7 +188,7 @@ def importar_swia(year, month, day, ti, tf):
             vel_mso_cut = vel_mso_xyz[inicio:fin]  # km/s
 
     else:
-        print("swia vacío")
+        # print("swia vacío")
         swia, t_cut, density_cut, temperature_cut, vel_mso_cut = 0, 0, 0, 0, 0
 
     return swia, t_cut, density_cut, temperature_cut, vel_mso_cut
