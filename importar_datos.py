@@ -22,6 +22,10 @@ def find_path(instrumento):
 
 
 def importar_mag_1s(year, month, day, ti, tf):
+    """
+    devuelve mag, t, B, posición
+    """
+
     date_orbit = dt.date(int(year), int(month), int(day))
 
     year = date_orbit.strftime("%Y")
@@ -33,6 +37,8 @@ def importar_mag_1s(year, month, day, ti, tf):
         path = f"../../../../media/gabybosc/datos/MAG_1s/{year}/"
     elif gethostname() == "gabybosc":
         path = f"../../datos/MAG_1s/{year}/"
+    elif "DESKTOP-2GS0QF2":
+        path = f"../../../datos/MAG_1s/{year}/"
     else:
         path = f"../../../datos/MAG_1s/{year}-{month}-{day}/"
 

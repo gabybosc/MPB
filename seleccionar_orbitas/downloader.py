@@ -12,7 +12,7 @@ import os as os
 
 # fechas = np.arange(61, 92)  # np.loadtxt("outputs/fechas_MVA_2016.txt")
 
-lst = np.genfromtxt("../outputs/hoja_grupo4.txt", dtype="str", usecols=0)
+lst = np.genfromtxt("../outputs/grupo1.txt", dtype="str", usecols=0)
 
 # a = [int(x[-2:]) for x in lst]
 # fechas = np.unique(a)
@@ -43,7 +43,7 @@ def descargar(fname, urlname, j, instrumento):
         ) as out_file:
             shutil.copyfileobj(response, out_file)
 
-        print(f"{instrumento} dia {j} listo")
+        # print(f"{instrumento} dia {j} listo")
 
 
 for j in lst:
@@ -123,4 +123,5 @@ for j in lst:
     descargar(p_swiamom, swia_mom, j, "swia")
     # descargar(p_swica, swica, j, "swica")
     # descargar(p_swifa, swifa, j, "swifa")
-    descargar(p_lpw, lpw, j, "lpw")
+    # descargar(p_lpw, lpw, j, "lpw")
+    print(f"día {j} listo")
