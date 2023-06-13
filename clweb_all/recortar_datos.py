@@ -12,11 +12,13 @@ swica = np.loadtxt(path + "SWICA.asc")
 swifa = np.loadtxt(path + "SWIFA.asc")
 # swea = np.loadtxt(path + "SWEA.asc")
 
-for data in [mag, swica, swifa]:
+dic = {"mag": mag, "swica": swica, "swifa": swifa}
+
+for d in dic:
+    data = dic[str(d)]
     year = data[:, 0]
     month = data[:, 1]
     day = data[:, 2]
-
     idx = [
         0,
     ]  # para que siempre cuente al día 1
@@ -27,7 +29,7 @@ for data in [mag, swica, swifa]:
     for j in range(len(idx) - 1):
         inicio = idx[j]
         fin = idx[j + 1] - 1
-        np.save(path + f"{data}_dia{int(day[inicio])}", data[inicio:fin])
+        np.save(path + f"{d}_dia{int(day[inicio])}", data[inicio:fin])
 
 
 """
