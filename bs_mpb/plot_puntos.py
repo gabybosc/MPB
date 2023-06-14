@@ -78,12 +78,31 @@ ax.set_title("MAVEN MSO coordinates", fontsize=16)
 ax.set_xlabel(r"$X_{MSO}$ ($R_M$)", fontsize=14)
 ax.set_ylabel(r"$(Y²_{MSO} + Z²_{MSO} )^{1/2}$ ($R_M$)", fontsize=14)
 
+# scatter_bs = ax.scatter(x_bs[1], yz_bs[1], c="C2", marker="s")
+# scatter_mpb = ax.scatter(x_mpb[1], yz_mpb[1], c="C2", marker="s")
+# scatter_bs = ax.scatter(x_bs[15], yz_bs[15], c="C3", marker="d")
+# scatter_mpb = ax.scatter(x_mpb[15], yz_mpb[15], c="C3", marker="d")
+yy = 2014
+mm = 12
+dd = 4
+
+for i in range(len(newdates)):
+    year = int(newdates[i][0])
+    month = int(newdates[i][1])
+    day = int(newdates[i][2])
+
+    if year == yy:
+        if month == mm:
+            if day == dd:
+                print("yes")
+                scatter_bs = ax.scatter(x_bs[i], yz_bs[i], c="red", marker="s", s=100)
+                scatter_mpb = ax.scatter(
+                    x_mpb[i], yz_mpb[i], c="red", marker="s", s=100
+                )
+
+
 scatter_bs = ax.scatter(x_bs, yz_bs)
 scatter_mpb = ax.scatter(x_mpb, yz_mpb)
-scatter_bs = ax.scatter(x_bs[1], yz_bs[1], c="C2", marker="s")
-scatter_mpb = ax.scatter(x_mpb[1], yz_mpb[1], c="C2", marker="s")
-scatter_bs = ax.scatter(x_bs[15], yz_bs[15], c="C3", marker="d")
-scatter_mpb = ax.scatter(x_mpb[15], yz_mpb[15], c="C3", marker="d")
 
 annot = ax.annotate(
     "",
@@ -132,18 +151,3 @@ def hover(event):
 fig.canvas.mpl_connect("motion_notify_event", hover)
 
 plt.show()
-
-yy = 2014
-mm = 12
-dd = 19
-
-
-for i in range(len(newdates)):
-    year = int(newdates[i][0])
-    month = int(newdates[i][1])
-    day = int(newdates[i][2])
-
-    if year == yy:
-        if month == mm:
-            if day == dd:
-                print(year, month, day, i)
