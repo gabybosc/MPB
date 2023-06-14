@@ -8,59 +8,36 @@ sys.path.append("..")
 from importar_datos import importar_mag_1s
 from funciones import UTC_to_hdec, donde
 
-grupo = input("número de grupo\n")
-path = f"../outputs/grupo{grupo}/"
-lista = np.genfromtxt(path + f"bs_mpb_final.txt", dtype=str)
 
-if exists(path + "pos_bs.npy"):
-    pos_bs = np.load(path + "pos_bs.npy")
-    pos_mpb = np.load(path + "pos_mpb.npy")
-    newdates = np.load(path + "newdates.npy")
-    final = np.load(path + "newnew.npy")
+path = f"../outputs/grupo1/"
+bs1 = np.load(path + "pos_bs.npy")
+mpb1 = np.load(path + "pos_mpb.npy")
+fechas1 = np.load(path + "newdates.npy")
 
-else:
-    pos_bs = []
-    pos_mpb = []
-    newdates = []
-    final = []
+path = f"../outputs/grupo2/"
+bs2 = np.load(path + "pos_bs.npy")
+mpb2 = np.load(path + "pos_mpb.npy")
+fechas2 = np.load(path + "newdates.npy")
 
-    for l in lista:
-        year, month, day = l[0].split("-")
+path = f"../outputs/grupo3/"
+bs3 = np.load(path + "pos_bs.npy")
+mpb3 = np.load(path + "pos_mpb.npy")
+fechas3 = np.load(path + "newdates.npy")
 
-        t_bs = UTC_to_hdec(l[1])
-        t_mpb = UTC_to_hdec(l[2])
+path = f"../outputs/grupo4/"
+bs4 = np.load(path + "pos_bs.npy")
+mpb4 = np.load(path + "pos_mpb.npy")
+fechas4 = np.load(path + "newdates.npy")
 
-        if t_bs < t_mpb:
-            ti = t_bs - 0.2
-            tf = t_mpb + 0.2
-        else:
-            ti = t_mpb - 0.2
-            tf = t_bs + 0.2
-        if ti < 0:
-            ti = 0
-        if tf > 24:
-            tf = 24
 
-        mag, t, B, pos = importar_mag_1s(year, month, day, ti, tf)
-        idx_bs = donde(t, t_bs)
-        idx_mpb = donde(t, t_mpb)
+pos_bs = np.hstack((bs2, bs3, bs4))
+pos_mpb = np.hstack((mpb2, mpb3, mpb4))
+newdates = np.vstack((fechas2, fechas3, fechas4))
 
-        pos_bs.append(pos[idx_bs] / 3390)
-        pos_mpb.append(pos[idx_mpb] / 3390)
-        newdates.append((year, month, day, t_bs))
-        final.append(l)
-
-    pos_bs = np.transpose(pos_bs)
-    pos_mpb = np.transpose(pos_mpb)
-    np.save(path + "newnew.npy", final)
-    np.save(path + "newdates.npy", newdates)
-    np.save(path + "pos_mpb.npy", pos_mpb)
-    np.save(path + "pos_bs.npy", pos_bs)
 # from plot_orbitas import marte, BS_MPB
 # X_bs, YZ_bs = BS_MPB(2.04, 1.03, 0.64)
 # X_mpb, YZ_mpb = BS_MPB(0.96, 0.9, 0.78)
 # # marte(ax, X_bs, YZ_bs, X_mpb, YZ_mpb)
-
 
 x_bs = pos_bs[0]
 yz_bs = np.sqrt(pos_bs[1] ** 2 + pos_bs[2] ** 2)
@@ -80,10 +57,6 @@ ax.set_ylabel(r"$(Y²_{MSO} + Z²_{MSO} )^{1/2}$ ($R_M$)", fontsize=14)
 
 scatter_bs = ax.scatter(x_bs, yz_bs)
 scatter_mpb = ax.scatter(x_mpb, yz_mpb)
-scatter_bs = ax.scatter(x_bs[1], yz_bs[1], c="C2", marker="s")
-scatter_mpb = ax.scatter(x_mpb[1], yz_mpb[1], c="C2", marker="s")
-scatter_bs = ax.scatter(x_bs[15], yz_bs[15], c="C3", marker="d")
-scatter_mpb = ax.scatter(x_mpb[15], yz_mpb[15], c="C3", marker="d")
 
 annot = ax.annotate(
     "",
@@ -132,18 +105,3 @@ def hover(event):
 fig.canvas.mpl_connect("motion_notify_event", hover)
 
 plt.show()
-
-yy = 2014
-mm = 12
-dd = 19
-
-
-for i in range(len(newdates)):
-    year = int(newdates[i][0])
-    month = int(newdates[i][1])
-    day = int(newdates[i][2])
-
-    if year == yy:
-        if month == mm:
-            if day == dd:
-                print(year, month, day, i)

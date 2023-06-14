@@ -10,12 +10,15 @@ sys.path.append("..")
 from importar_datos import importar_mag_1s, importar_swea, importar_swia
 from funciones import Bpara_Bperp, UTC_to_hdec
 
-lista = np.genfromtxt("../outputs/grupo3.txt", dtype=str)
-fig_path = "../../Pictures/BS_MPB/grupo3/"
+grupo = input("grupo\n")
+lista = np.genfromtxt(f"../outputs/grupo{grupo}/bs_mpb_final.txt", dtype=str)
+fig_path = f"../../Pictures/BS_MPB/grupo{grupo}/"
 
 for l in lista:
     year, month, day = l[0].split("-")
-    if not exists(fig_path + f"{year}-{month}-{day}.png"):  # si no está ya la figura
+    if not exists(
+        fig_path + f"{year}-{month}-{day}-{l[1]}.png"
+    ):  # si no está ya la figura
         t_bs = UTC_to_hdec(l[1])
         t_mpb = UTC_to_hdec(l[2])
 
@@ -117,5 +120,5 @@ for l in lista:
         figure = plt.gcf()  # get current figure
         figure.set_size_inches(16, 8)
         # when saving, specify the DPI
-        plt.savefig(fig_path + f"{year}-{month}-{day}.png", dpi=150)
+        plt.savefig(fig_path + f"{year}-{month}-{day}-{l[1]}.png", dpi=150)
         # plt.show()
