@@ -8,6 +8,11 @@ sys.path.append("..")
 from importar_datos import importar_mag_1s
 from funciones import UTC_to_hdec, donde
 
+"""
+Un plot con los cuatro grupos en diferentes subplots
+Son los puntos de los cruces en torno al planeta
+"""
+
 
 fig = plt.figure(1, constrained_layout=True)
 fig.subplots_adjust(
