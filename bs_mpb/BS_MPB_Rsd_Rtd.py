@@ -3,8 +3,34 @@ import Vignesfit_functions as fvig
 
 
 """
+Necesita antes haber corrido BS_MPB_positions 
 Calculo las standoff y terminator distance (uso funciones que están en Vignes_functions <-- ahí está la definición del terminator para chequear).
 """
+
+
+def Rsd_Rtd(pos, pos_polar, x0, eps):
+    """
+    Encuentra la standoff distance y terminator distance dado un array de posiciones
+    x0, eps son los parámetros de la cónica
+    """
+
+    N_events = len(pos[:, 0])
+    L = np.empty(N_events)
+
+    for i in range(N_events):
+        L[i] = fvig.fit_L(pos_polar[i, 0], pos_polar[i, 1], eps)
+
+    # CALCULATE VIGNES STANDOFF AND TERMINATOR DISTANCE
+
+    Rsd = np.empty(N_events)
+    Rtd = np.empty(N_events)
+
+    for i in range(N_events):
+        Rsd[i] = fvig.Rsd(L[i], x0, eps)
+
+        Rtd[i] = fvig.Rtd(L[i], pos[i, 1], pos[i, 2], x0, eps)
+
+    return Rsd, Rtd
 
 
 g = input("número de grupo\n")
@@ -56,7 +82,49 @@ for i in range(N_events):
     Rtd_MPB[i] = fvig.Rtd(L_MPB[i], R_MPB[i, 1], R_MPB[i, 2], 0.78, 0.90)
 
 
-np.save(path + "Rsd_bs.npy", Rsd_BS)
-np.save(path + "Rtd_bs.npy", Rtd_BS)
-np.save(path + "Rsd_mpb.npy", Rsd_MPB)
-np.save(path + "Rtd_mpb.npy", Rtd_MPB)
+# np.save(path + "Rsd_bs.npy", Rsd_BS)
+# np.save(path + "Rtd_bs.npy", Rtd_BS)
+# np.save(path + "Rsd_mpb.npy", Rsd_MPB)
+# np.save(path + "Rtd_mpb.npy", Rtd_MPB)
+
+
+Rsd_BS_f, Rtd_BS_f = Rsd_Rtd(R_BS, Rpolar_BS, 0.64, 1.03)
+Rsd_MPB_f, Rtd_MPB_f = Rsd_Rtd(R_MPB, Rpolar_MPB, 0.78, 0.9)
+
+Rsd_BS_f == Rsd_BS
+Rtd_BS_f == Rtd_BS
+Rsd_MPB_f == Rsd_MPB
+Rtd_MPB_f == Rtd_MPB
+
+# Lf_bs = L_func(R_BS, Rpolar_BS)
+# Lf_mpb = L_func(R_MPB, Rpolar_MPB)
+
+# Lf_mpb == L_MPB
+
+
+# def L_func(pos, pos_polar, eps):
+#     """
+#     Encuentra la standoff distance y terminator distance dado un array de posiciones
+#     x0, eps son los parámetros de la cónica
+#     """
+
+#     N_events = len(pos[:, 0])
+#     L = np.empty(N_events)
+
+#     for i in range(N_events):
+#         L[i] = fvig.fit_L(pos_polar[i, 0], pos_polar[i, 1], eps)
+#     return L
+
+
+# def Rsd(pos, L, x0, eps):
+#     # CALCULATE VIGNES STANDOFF AND TERMINATOR DISTANCE
+
+#     Rsd = np.empty(N_events)
+#     Rtd = np.empty(N_events)
+
+#     for i in range(N_events):
+#         Rsd[i] = fvig.Rsd(L[i], x0, eps)
+
+#         Rtd[i] = fvig.Rtd(L[i], pos[i, 1], pos[i, 2], x0, eps)
+
+#     return Rsd, Rtd

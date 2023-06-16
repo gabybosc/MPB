@@ -25,14 +25,17 @@ newdates = np.load(path + "newdates.npy")
 # CREATE LINEAR REGRESSION
 
 
-# obtain linear fit slope and origin
+idx = [i for i in range(len(Rtd_BS)) if np.abs(Rtd_BS[i]) < 5]
 
-m_Rsd, b_Rsd = np.polyfit(Rsd_MPB, Rsd_BS, 1, cov=False)
+Rtd_BS_mod = np.array(Rtd_BS[idx])
+Rsd_BS_mod = np.array(Rsd_BS[idx])
+Rtd_MPB_mod = np.array(Rtd_MPB[idx])
+Rsd_MPB_mod = np.array(Rsd_MPB[idx])
 
-m_Rtd, b_Rtd = np.polyfit(Rtd_MPB, Rtd_BS, 1, cov=False)
+m_Rtd, b_Rtd = np.polyfit(Rtd_MPB_mod, Rtd_BS_mod, 1, cov=False)
+m_Rsd, b_Rsd = np.polyfit(Rsd_MPB_mod, Rsd_BS_mod, 1, cov=False)
 
-
-names = [i[0] + "-" + i[1] + "-" + i[2] + "h" + str(i[3])[:3] for i in newdates]
+names = [i[0] + "-" + i[1] + "-" + i[2] + "h" + str(i[3])[:3] for i in newdates[idx]]
 # calculate reduced chi square
 
 
@@ -54,6 +57,8 @@ chi_Rsd = np.round(chired(Rsd_BS, m_Rsd * Rsd_MPB + b_Rsd, 2), 3)
 
 chi_Rtd = np.round(chired(Rtd_BS, m_Rtd * Rtd_MPB + b_Rtd, 2), 3)
 
+chi_Rtd_mod = np.round(chired(Rtd_BS_mod, m_Rtd * Rtd_MPB_mod + b_Rtd, 2), 3)
+
 
 # PLOT
 
@@ -69,9 +74,12 @@ ax1.plot(
     Rsd_MPB, m_Rsd * Rsd_MPB + b_Rsd, color="red", label=r"$\chi^2=${}".format(chi_Rsd)
 )  # model
 
-scatter_td = ax2.scatter(Rtd_MPB, Rtd_BS)  # measured data
+scatter_td = ax2.scatter(Rtd_MPB_mod, Rtd_BS_mod)  # measured data
 ax2.plot(
-    Rtd_MPB, m_Rtd * Rtd_MPB + b_Rtd, color="red", label=r"$\chi^2=${}".format(chi_Rtd)
+    Rtd_MPB_mod,
+    m_Rtd * Rtd_MPB_mod + b_Rtd,
+    color="red",
+    label=r"$\chi^2=${}".format(chi_Rtd_mod),
 )  # model
 ax1.set_xlabel(r"standoff distance MPB [$R_M$]")
 ax1.set_ylabel(r"standoff distance BS [$R_M$]")
