@@ -5,7 +5,7 @@ import sys
 sys.path.append("..")
 from funciones import donde, t_clweb
 
-path = "../../../datos/clweb/2015-01/"
+path = "../../../datos/clweb/2015-03/"
 
 mag = np.loadtxt(path + "MAG.asc")
 swica = np.loadtxt(path + "SWICA.asc")
