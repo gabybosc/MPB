@@ -23,26 +23,28 @@ Después de este correr after_encontrar
 """
 
 np.set_printoptions(precision=4)
-
-catalogo = np.genfromtxt("../outputs/grupo3.txt", dtype="str")
+grupo = 3
+catalogo = np.genfromtxt(f"../outputs/grupo{grupo}/primer_corte.txt", dtype="str")
 # ek grupo 4 está bastante bien distrubuido en ángulos
 
 i = int(input("numero de lista\n"))  # hicimos hasta !!
 
+# for i in range(len(catalogo)):
 cat = catalogo[i]
 year, month, day = cat[0].split("-")
 
 # if year == "2018" and month == "11":  # sólo quiero elegir de este mes
 
 t_bs = UTC_to_hdec(cat[1])
-t_mpb = UTC_to_hdec(cat[2])
+t_mpb = t_bs + 0.0001  # UTC_to_hdec(cat[2])
+# print(i, year, month, day, t_bs)
 
 if t_bs < t_mpb:
-    ti = t_bs - 1
-    tf = t_mpb + 1
+    ti = t_bs - 2
+    tf = t_mpb + 2
 else:
-    ti = t_mpb - 1
-    tf = t_bs + 1
+    ti = t_mpb - 2
+    tf = t_bs + 2
 if ti < 0:
     ti = 0
 if tf > 24:
@@ -155,7 +157,7 @@ while not happy:
     print("Happy? Keyboard click for yes, mouse click for no.\n")
     happy = plt.waitforbuttonpress()
 
-with open("../outputs/new_grupo3.txt", "a") as file:
+with open(f"../outputs/grupo{grupo}/segundo_corte.txt", "a") as file:
     file.write(
         f"{cat[0]}\t{hdec_to_UTC(val[0][0])}\t{hdec_to_UTC(val[1][0])}\t{cat[3]}\t{cat[4]}"
     )

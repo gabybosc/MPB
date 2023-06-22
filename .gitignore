@@ -4,6 +4,7 @@
 *.pyc
 *.pkl
 *.json
+*.npy
 
 #si quiero que uno en particular no sea ignorado, pongo una linea !nombre.txt
 !t1t2t3t4.txt
