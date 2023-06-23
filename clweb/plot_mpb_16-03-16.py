@@ -64,9 +64,12 @@ B_para, B_perp_norm, t_plot = Bpara_Bperp(Blow, tlow, t[0], t[-1])
 
 # ######### SWEA
 
-swea, t_swea, energias, JE_cut = importar_swea(year, month, day, ti, tf)
+# swea, t_swea, energias = importar_swea(year, month, day, ti, tf)
 # inicio_swea = np.where(t_swea == find_nearest(t_swea, t1 - 0.075))[0][0]
 # fin_swea = np.where(t_swea == find_nearest(t_swea, t4 + 0.075))[0][0]
+swea, t_swea, JE_cut = importar_swea(year, month, day, ti, tf)
+
+
 # ####### densidad SWIA
 
 # swia, t_swia, density = importar_swia(year, month, day, ti, tf)
@@ -75,7 +78,7 @@ t_swica, t_swifa, density_swica, density_swifa = importar_swicfa(
 )
 
 # ###### densidad electrones
-lpw, t_lpw, e_density = importar_lpw(year, month, day, ti, tf)
+lpw, t_lpw, e_density, flag = importar_lpw(year, month, day, ti, tf)
 
 # ############ tiempos UTC
 year = int(year)
@@ -112,77 +115,77 @@ mpl.rcParams["axes.prop_cycle"] = cycler(
 # ####plot grl zoom proyectada en los autovectores
 
 
-fig = plt.figure(
-    1, figsize=(20, 10)
-)  # Lo bueno de esta forma es que puedo hacer que solo algunos compartan eje
-fig.subplots_adjust(
-    top=0.95, bottom=0.1, left=0.12, right=0.95, hspace=0.0, wspace=0.15
-)
-plt.xticks(rotation=25)
-xfmt = md.DateFormatter("%H:%M")
+# fig = plt.figure(
+#     1, figsize=(20, 10)
+# )  # Lo bueno de esta forma es que puedo hacer que solo algunos compartan eje
+# fig.subplots_adjust(
+#     top=0.95, bottom=0.1, left=0.12, right=0.95, hspace=0.0, wspace=0.15
+# )
+# plt.xticks(rotation=25)
+# xfmt = md.DateFormatter("%H:%M")
 
-axz1 = plt.gca()
+# axz1 = plt.gca()
 
-axz1.xaxis.set_major_formatter(xfmt)
-axz1 = plt.subplot2grid((2, 1), (0, 0))
-axz1.plot(tiempo_mag, B[:, 0], label="Bx")
-axz1.plot(tiempo_mag, B[:, 1], label="By")
-axz1.plot(tiempo_mag, B[:, 2], label="Bz")
-plt.setp(axz1.get_xticklabels(), visible=False)
-axz1.set_ylabel("B components (nT)", fontsize=16)
-axz1.set_title("MAVEN MAG 2016 March 16th", fontsize=18)
+# axz1.xaxis.set_major_formatter(xfmt)
+# axz1 = plt.subplot2grid((2, 1), (0, 0))
+# axz1.plot(tiempo_mag, B[:, 0], label="Bx")
+# axz1.plot(tiempo_mag, B[:, 1], label="By")
+# axz1.plot(tiempo_mag, B[:, 2], label="Bz")
+# plt.setp(axz1.get_xticklabels(), visible=False)
+# axz1.set_ylabel("B components (nT)", fontsize=16)
+# axz1.set_title("MAVEN MAG 2016 March 16th", fontsize=18)
 
-axz2 = plt.subplot2grid((2, 1), (1, 0), sharex=axz1)
-axz2.xaxis.set_major_formatter(xfmt)
-axz2.plot(tiempo_mag, Bnorm)
-axz2.set_ylabel("|B| (nT)", fontsize=16)
-axz1.tick_params(axis="both", which="major", labelsize=14)
-axz2.tick_params(axis="both", which="major", labelsize=14)
-axz2.set_xlabel("Time (UTC)", fontsize=16)
-
-
-axz1.axvspan(
-    xmin=tiempo_mag[tm_up][0], xmax=tiempo_mag[tm1][0], facecolor="#581845", alpha=0.5
-)
-axz1.axvspan(
-    xmin=tiempo_mag[tmva][0], xmax=tiempo_mag[tm3][0], facecolor="#FFC300", alpha=0.75
-)
-axz1.axvspan(
-    xmin=tiempo_mag[tm4][0], xmax=tiempo_mag[tm_down][0], facecolor="#C70039", alpha=0.5
-)
-
-axz2.axvspan(
-    xmin=tiempo_mag[tm_up][0],
-    xmax=tiempo_mag[tm1][0],
-    facecolor="#581845",
-    alpha=0.5,
-    label="Upstream",
-)
-axz2.axvspan(
-    xmin=tiempo_mag[tmva][0],
-    xmax=tiempo_mag[tm3][0],
-    facecolor="#FFC300",
-    alpha=0.75,
-    label="MVA",
-)
-axz2.axvspan(
-    xmin=tiempo_mag[tm4][0],
-    xmax=tiempo_mag[tm_down][0],
-    facecolor="#C70039",
-    alpha=0.5,
-    label="Downstream",
-)
+# axz2 = plt.subplot2grid((2, 1), (1, 0), sharex=axz1)
+# axz2.xaxis.set_major_formatter(xfmt)
+# axz2.plot(tiempo_mag, Bnorm)
+# axz2.set_ylabel("|B| (nT)", fontsize=16)
+# axz1.tick_params(axis="both", which="major", labelsize=14)
+# axz2.tick_params(axis="both", which="major", labelsize=14)
+# axz2.set_xlabel("Time (UTC)", fontsize=16)
 
 
-for ax in [axz1, axz2]:
-    ax.set_xlim(tiempo_mag[zoom_inicial], tiempo_mag[zoom_final])
-    ax.grid()
-    ax.legend(fontsize=16)
-    for xc in tiempo_lim:
-        ax.axvline(x=xc, color="k", linewidth=1.5)
+# axz1.axvspan(
+#     xmin=tiempo_mag[tm_up][0], xmax=tiempo_mag[tm1][0], facecolor="#581845", alpha=0.5
+# )
+# axz1.axvspan(
+#     xmin=tiempo_mag[tmva][0], xmax=tiempo_mag[tm3][0], facecolor="#FFC300", alpha=0.75
+# )
+# axz1.axvspan(
+#     xmin=tiempo_mag[tm4][0], xmax=tiempo_mag[tm_down][0], facecolor="#C70039", alpha=0.5
+# )
 
-# plt.tight_layout()
-plt.show(block=False)
+# axz2.axvspan(
+#     xmin=tiempo_mag[tm_up][0],
+#     xmax=tiempo_mag[tm1][0],
+#     facecolor="#581845",
+#     alpha=0.5,
+#     label="Upstream",
+# )
+# axz2.axvspan(
+#     xmin=tiempo_mag[tmva][0],
+#     xmax=tiempo_mag[tm3][0],
+#     facecolor="#FFC300",
+#     alpha=0.75,
+#     label="MVA",
+# )
+# axz2.axvspan(
+#     xmin=tiempo_mag[tm4][0],
+#     xmax=tiempo_mag[tm_down][0],
+#     facecolor="#C70039",
+#     alpha=0.5,
+#     label="Downstream",
+# )
+
+
+# for ax in [axz1, axz2]:
+#     ax.set_xlim(tiempo_mag[zoom_inicial], tiempo_mag[zoom_final])
+#     ax.grid()
+#     ax.legend(fontsize=16)
+#     for xc in tiempo_lim:
+#         ax.axvline(x=xc, color="k", linewidth=1.5)
+
+# # plt.tight_layout()
+# plt.show(block=False)
 
 
 # ##### funciones para el plot que se repiten
@@ -235,8 +238,8 @@ ax3.set_ylabel("Relative variation \n of B")
 ax4 = plt.subplot2grid((5, 1), (3, 0), sharex=ax1)
 ax4.xaxis.set_major_formatter(xfmt)
 ax4.set_ylabel("Diff energy flux \n of the SW e- \n (cm⁻² sr⁻¹ s⁻¹)")
-for i in range(len(energias)):
-    plt.semilogy(tiempo_swea, JE_cut[i], label=f"{energias[i]} eV")
+plt.semilogy(tiempo_swea, JE_cut)
+ax4.legend(["50", "100", "150"])
 
 ax5 = plt.subplot2grid((5, 1), (4, 0), sharex=ax1)
 ax5.xaxis.set_major_formatter(xfmt)
@@ -303,10 +306,10 @@ ax5.text(tiempo_mag[tm2][0] - 40000000, 0.55, "t2", fontsize=13, color="k", rota
 ax5.text(tiempo_mag[tm3][0] - 50000000, 2, "t3", fontsize=13, color="k", rotation=90)
 ax5.text(tiempo_mag[tm4][0] - 50000000, 0.55, "t4", fontsize=13, color="k", rotation=90)
 
-axz2.text(tiempo_mag[tm1][0] - 7500000, 0, "t1", fontsize=16, color="k", rotation=90)
-axz2.text(tiempo_mag[tm2][0] - 7500000, 10, "t2", fontsize=16, color="k", rotation=90)
-axz2.text(tiempo_mag[tm3][0] - 7500000, 0, "t3", fontsize=16, color="k", rotation=90)
-axz2.text(tiempo_mag[tm4][0] - 7500000, 10, "t4", fontsize=16, color="k", rotation=90)
+# axz2.text(tiempo_mag[tm1][0] - 7500000, 0, "t1", fontsize=16, color="k", rotation=90)
+# axz2.text(tiempo_mag[tm2][0] - 7500000, 10, "t2", fontsize=16, color="k", rotation=90)
+# axz2.text(tiempo_mag[tm3][0] - 7500000, 0, "t3", fontsize=16, color="k", rotation=90)
+# axz2.text(tiempo_mag[tm4][0] - 7500000, 10, "t4", fontsize=16, color="k", rotation=90)
 
 plt.tight_layout()
 
