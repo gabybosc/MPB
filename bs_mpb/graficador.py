@@ -8,7 +8,7 @@ from os.path import exists
 
 sys.path.append("..")
 from importar_datos import importar_mag_1s, importar_swea, importar_swia
-from funciones import Bpara_Bperp, UTC_to_hdec
+from funciones import Bpara_Bperp, UTC_to_hdec, donde
 
 grupo = input("grupo\n")
 lista = np.genfromtxt(f"../outputs/grupo{grupo}/bs_mpb_final.txt", dtype=str)
@@ -38,6 +38,12 @@ for l in lista:
         swia, t_swia, i_density, i_temp, vel_mso = importar_swia(
             year, month, day, ti, tf
         )
+        energias = [50 + i * 25 for i in range(6)]
+        JE_pds = np.zeros((len(t_swea), len(energias)))
+
+        for i, e in enumerate(energias):
+            j = donde(energia, e)
+            JE_pds[:, i] = flux_plot[j]
 
         Bnorm = np.linalg.norm(B, axis=1)
         Bpara, Bperp, tpara = Bpara_Bperp(B, t, ti, tf)
@@ -97,21 +103,25 @@ for l in lista:
         ax5.plot(t_swia, i_density)
         ax5.grid()
 
-        if swea != 0:
-            ax6.set_ylabel("Energia", picker=True)  # , bbox=dict(facecolor='red'))
-            plt.setp(ax6.get_xticklabels(), visible=False)
-            im = plt.imshow(
-                flux_plot,
-                aspect="auto",
-                origin="lower",
-                extent=(t_swea[0], t_swea[-1], energia[-1], energia[0]),
-                cmap="inferno",
-                norm=LogNorm(vmin=1e4, vmax=1e9),
-            )
-            divider = make_axes_locatable(ax6)
-            cax = divider.append_axes("top", size="7%", pad="1%")
-            cb = plt.colorbar(im, cax=cax, orientation="horizontal")
-            cax.xaxis.set_ticks_position("top")
+        ax6.semilogy(t_swea, JE_pds)
+        ax6.legend(energias)
+        ax6.grid()
+        ax6.set_ylabel("Diff. en. flux")
+        # if swea != 0:
+        #     ax6.set_ylabel("Energia", picker=True)  # , bbox=dict(facecolor='red'))
+        #     plt.setp(ax6.get_xticklabels(), visible=False)
+        #     im = plt.imshow(
+        #         flux_plot,
+        #         aspect="auto",
+        #         origin="lower",
+        #         extent=(t_swea[0], t_swea[-1], energia[-1], energia[0]),
+        #         cmap="inferno",
+        #         norm=LogNorm(vmin=1e4, vmax=1e9),
+        #     )
+        #     divider = make_axes_locatable(ax6)
+        #     cax = divider.append_axes("top", size="7%", pad="1%")
+        #     cb = plt.colorbar(im, cax=cax, orientation="horizontal")
+        #     cax.xaxis.set_ticks_position("top")
 
         for ax in [ax1, ax2, ax3, ax4, ax5, ax6]:
             ax.axvline(x=t_bs, c="m", label="bs")

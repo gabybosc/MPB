@@ -238,19 +238,23 @@ def importar_lpw(year, month, day, ti, tf):
 
     path = find_path("LPW")
 
-    if Path(path + f"mvn_lpw_l2_lpnt_{year}{month}{day}.cdf").stat().st_size > 1000:
-        lpw = cdf.CDF(path + f"mvn_lpw_l2_lpnt_{year}{month}{day}.cdf")
+    if exists(path + f"mvn_lpw_l2_lpnt_{year}{month}{day}.cdf"):
+        if Path(path + f"mvn_lpw_l2_lpnt_{year}{month}{day}.cdf").stat().st_size > 1000:
+            lpw = cdf.CDF(path + f"mvn_lpw_l2_lpnt_{year}{month}{day}.cdf")
 
-        t_unix = lpw.varget("time_unix")
-        e_density = lpw.varget("data")[:, 3]
+            t_unix = lpw.varget("time_unix")
+            e_density = lpw.varget("data")[:, 3]
 
-        t = unix_to_decimal(t_unix)
+            t = unix_to_decimal(t_unix)
 
-        inicio = donde(t, ti)
-        fin = donde(t, tf)
+            inicio = donde(t, ti)
+            fin = donde(t, tf)
 
-        t_cut = t[inicio:fin]
-        e_density_cut = e_density[inicio:fin]
+            t_cut = t[inicio:fin]
+            e_density_cut = e_density[inicio:fin]
+        else:
+            print("lpw vacío")
+            lpw, t_cut, e_density_cut = 0, 0, 0
 
     else:
         print("lpw vacío")

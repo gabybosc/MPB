@@ -6,9 +6,11 @@ import matplotlib.dates as md
 import sys
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import datetime as dt
+from cycler import cycler
+
 
 sys.path.append("..")
-from funciones import Bpara_Bperp, fechas, hdec_to_UTC, UTC_to_hdec
+from funciones import Bpara_Bperp, fechas, hdec_to_UTC, UTC_to_hdec, donde
 from funciones_plot import onpick1
 from importar_datos import importar_mag_1s, importar_lpw, importar_swea, importar_swia
 
@@ -17,15 +19,20 @@ from importar_datos import importar_mag_1s, importar_lpw, importar_swea, importa
 Le paso un día entero y elijo la órbita y luego marco la posición media de la MPB,
 Es en hdec porque si no el valor que devuelve es raro ya que lo saca del gráfico y está en xfmt
 Lo escribe en una nueva columna en el archivo que hice con catalogo_maven_parte2
-Para eso, grafica |B|, BxByBz, swea, swia y lpw.M   
+Para eso, grafica |B|, BxByBz, swea, swia y lpw.
 
 Después de este correr after_encontrar
 """
 
 np.set_printoptions(precision=4)
-grupo = 3
+grupo = 1
 catalogo = np.genfromtxt(f"../outputs/grupo{grupo}/primer_corte.txt", dtype="str")
 # ek grupo 4 está bastante bien distrubuido en ángulos
+
+plt.rcParams["axes.prop_cycle"] = cycler(
+    "color",
+    ["#003f5c", "#ffa600", "#de425b", "#68abb8", "#f3babc", "#6cc08b", "#cacaca"],
+)
 
 i = int(input("numero de lista\n"))  # hicimos hasta !!
 
@@ -36,7 +43,7 @@ year, month, day = cat[0].split("-")
 # if year == "2018" and month == "11":  # sólo quiero elegir de este mes
 
 t_bs = UTC_to_hdec(cat[1])
-t_mpb = t_bs + 0.0001  # UTC_to_hdec(cat[2])
+t_mpb = UTC_to_hdec(cat[2])
 # print(i, year, month, day, t_bs)
 
 if t_bs < t_mpb:
@@ -52,7 +59,12 @@ if tf > 24:
 mag, t, B, posicion = importar_mag_1s(year, month, day, ti, tf)
 swea, t_swea, energia, flux_plot = importar_swea(year, month, day, ti, tf)
 swia, t_swia, i_density, i_temp, vel_mso = importar_swia(year, month, day, ti, tf)
-# swia, t_swia, i_density, i_temp, vel_mso = 0, 0, 0, 0, 0
+energias = [50 + i * 25 for i in range(6)]
+JE_pds = np.zeros((len(t_swea), len(energias)))
+
+for i, e in enumerate(energias):
+    j = donde(energia, e)
+    JE_pds[:, i] = flux_plot[j]
 
 B_norm = np.linalg.norm(B, axis=1)
 
@@ -124,21 +136,26 @@ while not happy:
     ax5.grid()
 
     ax6 = plt.subplot2grid((3, 2), (2, 1), sharex=ax1)
-    if swea != 0:
-        ax6.set_ylabel("Energia", picker=True)  # , bbox=dict(facecolor='red'))
-        plt.setp(ax6.get_xticklabels(), visible=False)
-        im = plt.imshow(
-            flux_plot,
-            aspect="auto",
-            origin="lower",
-            extent=(t_swea[0], t_swea[-1], energia[-1], energia[0]),
-            cmap="inferno",
-            norm=LogNorm(vmin=1e4, vmax=1e9),
-        )
-        divider = make_axes_locatable(ax6)
-        cax = divider.append_axes("top", size="7%", pad="1%")
-        cb = plt.colorbar(im, cax=cax, orientation="horizontal")
-        cax.xaxis.set_ticks_position("top")
+    plt.semilogy(t_swea, JE_pds)
+    ax6.legend(energias)
+    ax6.grid()
+    ax6.set_ylabel("Diff. en. flux")
+
+    # if swea != 0:
+    #     ax6.set_ylabel("Energia", picker=True)  # , bbox=dict(facecolor='red'))
+    #     plt.setp(ax6.get_xticklabels(), visible=False)
+    #     im = plt.imshow(
+    #         flux_plot,
+    #         aspect="auto",
+    #         origin="lower",
+    #         extent=(t_swea[0], t_swea[-1], energia[-1], energia[0]),
+    #         cmap="inferno",
+    #         norm=LogNorm(vmin=1e4, vmax=1e9),
+    #     )
+    #     divider = make_axes_locatable(ax6)
+    #     cax = divider.append_axes("top", size="7%", pad="1%")
+    #     cb = plt.colorbar(im, cax=cax, orientation="horizontal")
+    #     cax.xaxis.set_ticks_position("top")
 
     for ax in [ax1, ax2, ax3, ax4, ax5, ax6]:
         ax.axvline(x=t_bs, c="m", label="bs")
@@ -150,15 +167,20 @@ while not happy:
     print("\nSpacebar when ready to click:\n")
     while not zoom_ok:
         zoom_ok = plt.waitforbuttonpress(-1)
-    print("Click to select MPB: ")
+    print("Click to select BS and MPB: ")
     val = plt.ginput(2)  # [0][0]
-    print("Selected values: ", hdec_to_UTC(val[0][0]), hdec_to_UTC(val[1][0]))
+    print(
+        "Selected values for BS: ",
+        hdec_to_UTC(val[0][0]),
+        "\nSelected values for MPB: ",
+        hdec_to_UTC(val[1][0]),
+    )
 
     print("Happy? Keyboard click for yes, mouse click for no.\n")
     happy = plt.waitforbuttonpress()
 
-with open(f"../outputs/grupo{grupo}/segundo_corte.txt", "a") as file:
-    file.write(
-        f"{cat[0]}\t{hdec_to_UTC(val[0][0])}\t{hdec_to_UTC(val[1][0])}\t{cat[3]}\t{cat[4]}"
-    )
-    file.write("\n")
+# with open(f"../outputs/grupo{grupo}/segundo_corte.txt", "a") as file:
+#     file.write(
+#         f"{cat[0]}\t{hdec_to_UTC(val[0][0])}\t{hdec_to_UTC(val[1][0])}\t{cat[3]}\t{cat[4]}"
+#     )
+#     file.write("\n")
