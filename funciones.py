@@ -339,9 +339,9 @@ def UTC_to_hdec(t_UTC):
 
 def hdec_to_UTC(hdec):
     """Convierte de hdec a utc"""
-    h = int(hdec)
-    m = int((hdec % 1) * 60)
-    s = int((((hdec % 1) * 60) % 1) * 60)
+    h = str(int(hdec)).zfill(2)
+    m = str(int((hdec % 1) * 60)).zfill(2)
+    s = str(int((((hdec % 1) * 60) % 1) * 60)).zfill(2)
     UTC = f"{h}:{m}:{s}"
     return UTC
 

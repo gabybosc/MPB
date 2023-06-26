@@ -7,6 +7,7 @@ import sys
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import datetime as dt
 from cycler import cycler
+from os.path import exists
 
 
 sys.path.append("..")
@@ -151,23 +152,30 @@ def plot_encontrar(frontera):
         while not zoom_ok:
             zoom_ok = plt.waitforbuttonpress(-1)
         print(f"Click to select {frontera} limits: ")
-        val = plt.ginput(2)  # [0][0]
+        outs = plt.ginput(3)  # [0][0]
+        val = sorted(outs)
+        val_UTC = [hdec_to_UTC(val[i][0]) for i in range(3)]
         print(
             f"Selected values for {frontera}: ",
-            hdec_to_UTC(val[0][0]),
-            hdec_to_UTC(val[1][0]),
+            val_UTC,
         )
 
         print("Happy? Keyboard click for yes, mouse click for no.\n")
         happy = plt.waitforbuttonpress()
-        return val
+        return val_UTC
 
 
 val_BS = plot_encontrar("BS")
 val_MPB = plot_encontrar("MPB")
 
-with open(f"../outputs/grupo{grupo}/limites_bs_mpb.txt", "a") as file:
+filepath = f"../outputs/grupo{grupo}/limites_bs_mpb.txt"
+
+if not exists(filepath):
+    with open(filepath, "w") as file:
+        file.write("date\tBS_min\tBS\tBS_max\tMPB_min\tMPB\tMPB_max\ttheta\tbeta\n")
+
+with open(filepath, "a") as file:
     file.write(
-        f"{cat[0]}\t{hdec_to_UTC(val_BS[0][0])}\t{hdec_to_UTC(val_BS[1][0])}\t{hdec_to_UTC(val_MPB[0][0])}\t{hdec_to_UTC(val_MPB[1][0])}\t{cat[3]}\t{cat[4]}"
+        f"{cat[0]}\t{val_BS[0]}\t{val_BS[1]}\t{val_BS[2]}\t{val_MPB[0]}\t{val_MPB[1]}\t{val_MPB[2]}\t{cat[3]}\t{cat[4]}"
     )
     file.write("\n")
