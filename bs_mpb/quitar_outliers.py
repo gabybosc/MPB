@@ -4,12 +4,6 @@ import func_position as fpos
 from os.path import exists
 import Vignesfit_functions as fvig
 
-import sys
-
-sys.path.append("../")
-from funciones import UTC_to_hdec
-
-
 g = input("número de grupo\n")
 
 path = f"../outputs/grupo{g}/"
@@ -168,6 +162,8 @@ fig.subplots_adjust(
 )
 ax1 = plt.subplot2grid((1, 2), (0, 0))
 ax2 = plt.subplot2grid((1, 2), (0, 1))
+ax1.set_aspect("equal", "box")
+ax2.set_aspect("equal", "box")
 scatter_sd = ax1.scatter(Rsd_MPB_mod, Rsd_BS_mod)  # measured data
 ax1.plot(
     Rsd_MPB_mod,

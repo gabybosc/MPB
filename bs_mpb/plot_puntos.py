@@ -94,7 +94,6 @@ for i in range(len(newdates)):
     if year == yy:
         if month == mm:
             if day == dd:
-                print("yes")
                 scatter_bs = ax.scatter(x_bs[i], yz_bs[i], c="red", marker="s", s=100)
                 scatter_mpb = ax.scatter(
                     x_mpb[i], yz_mpb[i], c="red", marker="s", s=100
