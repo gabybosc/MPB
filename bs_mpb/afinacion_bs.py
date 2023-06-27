@@ -96,6 +96,8 @@ def plot_encontrar(frontera):
             linewidth=1,
             label=r"|$\Delta B \perp$| / B",
         )
+        if max(B_para) > 3:
+            ax1.set_ylim([-0.1, 3])
         plt.setp(ax1.get_xticklabels(), visible=False)
         ax1.set_ylabel(r"|$\Delta B$|/ B")
         ax1.set_xlim([t[0], t[-1]])
@@ -163,7 +165,8 @@ def plot_encontrar(frontera):
 
         print("Happy? Keyboard click for yes, mouse click for no.\n")
         happy = plt.waitforbuttonpress()
-        return val_UTC
+
+    return val_UTC
 
 
 val_BS = plot_encontrar("BS")
