@@ -89,8 +89,8 @@ path = f"../outputs/grupo{g}/"
 if not exists(path + "pos_bs.npy"):
     generar_npys(path)
 
-pos_bs = np.transpose(np.load(path + "pos_bs.npy"))
-pos_mpb = np.transpose(np.load(path + "pos_mpb.npy"))
+pos_bs = np.load(path + "pos_bs.npy")
+pos_mpb = np.load(path + "pos_mpb.npy")
 newdates = np.load(path + "newdates.npy")
 
 r0_BS = np.array([0.64, 0, 0])
