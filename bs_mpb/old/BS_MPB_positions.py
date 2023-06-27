@@ -1,5 +1,4 @@
 import numpy as np
-import import_MAG_data as MAG
 import func_position as fpos
 from os.path import exists
 
