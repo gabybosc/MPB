@@ -3,13 +3,22 @@ import matplotlib.pyplot as plt
 import func_position as fpos
 from os.path import exists
 import Vignesfit_functions as fvig
-
-g = input("número de grupo\n")
-
-path = f"../outputs/grupo{g}/"
+from generar_npys import generar_npys
 
 """
 saca los outliers de la Rsd y Rtd y me los... grafica? pone en una lista? No decidí todavía
+Usa los archivos: (si no están, los crea)
+pos_bs.npy
+pos_mpb.npy
+newdates.npy
+
+Genera los archivos:
+pos_polar_bs.npy
+pos_polar_mpb.npy
+Rsd_bs.npy
+Rtd_bs.npy
+Rsd_mpb.npy
+Rtd_mpb.npy
 """
 
 
@@ -73,48 +82,20 @@ def chired(ydata, ymod, param_fit):
     return chi_red
 
 
-# if not exists(path + "pos_polar_bs.npy"):
-#     pos_bs = np.transpose(np.load(path + "pos_bs.npy"))
-#     r0_BS = np.array([0.64, 0, 0])
-#     Rpolar_BS = polarizar(pos_bs, r0_BS)
-#     np.save(path + "pos_polar_bs.npy", Rpolar_BS)
-# else:
-#     Rpolar_BS = np.load(path + "pos_polar_bs.npy")
+g = input("número de grupo\n")
 
-# if not exists(path + "pos_polar_mpb.npy"):
-#     pos_mpb = np.transpose(np.load(path + "pos_mpb.npy"))
-#     r0_MPB = np.array([0.78, 0, 0])
-#     Rpolar_MPB = polarizar(pos_mpb, r0_MPB)
-#     np.save(path + "pos_polar_mpb.npy", Rpolar_MPB)
-# else:
-#     Rpolar_MPB = np.load(path + "pos_polar_mpb.npy")
+path = f"../outputs/grupo{g}/"
 
-
-# if not exists(path + "Rsd_bs.npy"):
-#     x0_bs = 0.64
-#     eps_bs = 1.03
-#     Rsd_BS, Rtd_BS = Rsd_Rtd(Rpolar_BS, x0_bs, eps_bs)
-#     np.save(path + "Rsd_bs.npy", Rsd_BS)
-#     np.save(path + "Rtd_bs.npy", Rtd_BS)
-# else:
-#     Rsd_BS = np.load(path + "Rsd_bs.npy")
-#     Rtd_BS = np.load(path + "Rtd_bs.npy")
-
-# if not exists(path + "Rsd_mpb.npy"):
-#     x0_mpb = 0.78
-#     eps_mpb = 0.9
-#     Rsd_MPB, Rtd_MPB = Rsd_Rtd(Rpolar_MPB, x0_mpb, eps_mpb)
-#     np.save(path + "Rsd_mpb.npy", Rsd_MPB)
-#     np.save(path + "Rtd_mpb.npy", Rtd_MPB)
-# else:
-#     Rsd_MPB = np.load(path + "Rsd_mpb.npy")
-#     Rtd_MPB = np.load(path + "Rtd_mpb.npy")
+if not exists(path + "pos_bs.npy"):
+    generar_npys(path)
 
 pos_bs = np.transpose(np.load(path + "pos_bs.npy"))
+pos_mpb = np.transpose(np.load(path + "pos_mpb.npy"))
+newdates = np.load(path + "newdates.npy")
+
 r0_BS = np.array([0.64, 0, 0])
 Rpolar_BS = polarizar(pos_bs, r0_BS)
 np.save(path + "pos_polar_bs.npy", Rpolar_BS)
-pos_mpb = np.transpose(np.load(path + "pos_mpb.npy"))
 r0_MPB = np.array([0.78, 0, 0])
 Rpolar_MPB = polarizar(pos_mpb, r0_MPB)
 np.save(path + "pos_polar_mpb.npy", Rpolar_MPB)
@@ -128,7 +109,6 @@ eps_mpb = 0.92
 Rsd_MPB, Rtd_MPB = Rsd_Rtd(pos_mpb, Rpolar_MPB, x0_mpb, eps_mpb)
 np.save(path + "Rsd_mpb.npy", Rsd_MPB)
 np.save(path + "Rtd_mpb.npy", Rtd_MPB)
-newdates = np.load(path + "newdates.npy")
 
 
 # recorto los outliers
