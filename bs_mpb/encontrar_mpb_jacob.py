@@ -1,29 +1,31 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.widgets import MultiCursor
-from matplotlib.colors import LogNorm
-import matplotlib.dates as md
 import sys
-from mpl_toolkits.axes_grid1 import make_axes_locatable
-import datetime as dt
 from cycler import cycler
 from os.path import exists
-
+from figura_encontrar import plot_encontrar
 
 sys.path.append("..")
-from funciones import Bpara_Bperp, fechas, hdec_to_UTC, UTC_to_hdec, donde
-from funciones_plot import onpick1
-from importar_datos import importar_mag_1s, importar_lpw, importar_swea, importar_swia
+from funciones import Bpara_Bperp, UTC_to_hdec, donde
+from importar_datos import importar_mag_1s, importar_swea, importar_swia
 
 
 """
 Permite elegir dos tiempos (límites) + uno central para la MPB y los guarda en un txt
 Tiene flag
+empiezo haciendo los quasipara de todos los grupos
 """
 
 np.set_printoptions(precision=4)
-grupo = 1
+grupo = 2
 p = "para"  # para o perp
+
+"""
+salteados xq swea anda mal (después se pueden ver aparte):
+grupo 1 quasipara num=3, 4, 14, 15 
+
+"""
+
 path = f"outs_catalogo_previa/grupo{grupo}/"
 
 fecha = np.load(path + f"fecha_{p}.npy")
@@ -36,14 +38,20 @@ plt.rcParams["axes.prop_cycle"] = cycler(
     ["#003f5c", "#ffa600", "#de425b", "#68abb8", "#f3babc", "#6cc08b", "#cacaca"],
 )
 
-num = int(input("numero de lista\n"))
+# num = int(input("numero de lista\n"))
 
-# for i in range(len(fecha)):
-year, month, day = fecha[num].split("-")
+for num in range(0, len(fecha)):
+    print(num)
+    year, month, day = fecha[num].split("-")
 
-t_bs = UTC_to_hdec(hora_bs[num])
-if t_bs < 23 and t_bs > 1:
-    # saltea los que estén cerca del nuevo día porque me dan fiaca
+    t_bs = UTC_to_hdec(hora_bs[num])
+
+    if t_bs > 23 or t_bs < 1:  # no cuenta los que están cerca del cambio de día
+        continue
+        # num = num + 1
+        # print(num)
+        # year, month, day = fecha[num].split("-")
+        # t_bs = UTC_to_hdec(hora_bs[num])
 
     ti = t_bs - 1.5  # mira +- 1.5h respecto del BS
     if ti < 0:
@@ -52,137 +60,56 @@ if t_bs < 23 and t_bs > 1:
     if tf > 24:
         tf = 24
 
-mag, t, B, posicion = importar_mag_1s(year, month, day, ti, tf)
-B_norm = np.linalg.norm(B, axis=1)
-B_para, B_perp_norm, tpara = Bpara_Bperp(B, t, ti + 0.2, tf - 0.2)
+    mag, t, B, posicion = importar_mag_1s(year, month, day, ti, tf)
+    B_norm = np.linalg.norm(B, axis=1)
+    B_para, B_perp_norm, tpara = Bpara_Bperp(B, t, ti + 0.2, tf - 0.2)
 
-swia, t_swia, i_density, i_temp, vel_mso = importar_swia(year, month, day, ti, tf)
+    swia, t_swia, i_density, i_temp, vel_mso = importar_swia(year, month, day, ti, tf)
 
-swea, t_swea, energia, flux_plot = importar_swea(year, month, day, ti, tf)
-energias = [50 + i * 50 for i in range(3)]
-JE_pds = np.zeros((len(t_swea), len(energias)))
+    swea, t_swea, energia, flux_plot = importar_swea(year, month, day, ti, tf)
+    energias = [50 + i * 50 for i in range(3)]
+    if type(t_swea) != int:
+        JE_pds = np.zeros((len(t_swea), len(energias)))
 
-for i, e in enumerate(energias):
-    j = donde(energia, e)
-    JE_pds[:, i] = flux_plot[j]
+        for i, e in enumerate(energias):
+            j = donde(energia, e)
+            JE_pds[:, i] = flux_plot[j]
+    else:
+        JE_pds = 0
 
+    val_MPB = plot_encontrar(
+        "MPB",
+        fecha[num],
+        tpara,
+        B_para,
+        B_perp_norm,
+        t,
+        B,
+        t_bs,
+        B_norm,
+        t_swia,
+        vel_mso,
+        i_density,
+        t_swea,
+        JE_pds,
+        energias,
+    )
 
-def plot_encontrar(frontera):
-    happy = False
-    val = False
-    while not happy:
-        # while val is False:
-        plt.clf()  # clear figure
-        fig = plt.figure(1, constrained_layout=True)
-        fig.subplots_adjust(
-            top=0.95,
-            bottom=0.1,
-            left=0.05,
-            right=0.95,
-            hspace=0.005,
-            wspace=0.15,
+    flag_MPB = None
+    while flag_MPB == None:
+        flag = input("MPB confiable? y/n\n")
+        if flag == "y":
+            flag_MPB = 1
+        elif flag == "n":
+            flag_MPB = 0
+
+    filepath = f"../outputs/grupo{grupo}/limites_mpb_jacob.txt"
+
+    if not exists(filepath):
+        with open(filepath, "w") as file:
+            file.write("date\tMPB_min\tMPB\tMPB_max\tflag\n")
+
+    with open(filepath, "a") as file:
+        file.write(
+            f"{fecha[num]}\t{val_MPB[0]}\t{val_MPB[1]}\t{val_MPB[2]}\t{flag_MPB}\n"
         )
-        plt.title(f"Spacebar when ready to click for {frontera}:")
-
-        ax1 = plt.subplot2grid((3, 2), (0, 0))
-        plt.plot(tpara, B_para, linewidth=1, label=r"|$\Delta B \parallel$| / B")
-        plt.plot(
-            tpara,
-            B_perp_norm,
-            "-.",
-            linewidth=1,
-            label=r"|$\Delta B \perp$| / B",
-        )
-        if max(B_para) > 1.5:
-            ax1.set_ylim([-0.1, 1.5])
-        plt.setp(ax1.get_xticklabels(), visible=False)
-        ax1.set_ylabel(r"|$\Delta B$|/ B")
-        ax1.set_xlim([t[0], t[-1]])
-        ax1.grid()
-        ax1.legend()
-        ax1.set_title(f"{year}-{month}-{day}  {frontera}")
-
-        ax2 = plt.subplot2grid((3, 2), (1, 0), sharex=ax1)
-        ax2.plot(t, B)
-        plt.setp(ax2.get_xticklabels(), visible=False)
-        ax2.set_ylabel("Bx, By, Bz (nT)")
-        ax2.legend(["Bx", "By", "Bz"])
-        ax2.grid()
-
-        ax3 = plt.subplot2grid((3, 2), (2, 0), sharex=ax1)
-        plt.plot(t, B_norm)
-        ax3.grid()
-        ax3.axvline(x=t_bs, color="c")
-        ax3.set_ylabel("|B| (nT)")
-        ax3.set_xlabel("Tiempo (hdec)")
-
-        if max(B_norm) > 70:
-            ax2.set_ylim([-50, 50])
-            ax3.set_ylim([0, 50])
-
-        ax4 = plt.subplot2grid((3, 2), (0, 1), sharex=ax1)
-        plt.setp(ax4.get_xticklabels(), visible=False)
-        ax4.set_xlabel("Tiempo (hdec)")
-        ax4.set_ylabel("proton velocity")
-        ax4.plot(t_swia, vel_mso)
-        ax4.grid()
-
-        ax5 = plt.subplot2grid((3, 2), (1, 1), sharex=ax1)
-        plt.setp(ax5.get_xticklabels(), visible=False)
-        ax5.set_ylabel("Densidad de p+ \n del SW (cm⁻³)")
-        ax5.plot(t_swia, i_density)
-        ax5.grid()
-        if type(i_density) != int:
-            if len(i_density) > 0:
-                if max(i_density) > 15:
-                    ax5.set_ylim([-1, 15])
-
-        ax6 = plt.subplot2grid((3, 2), (2, 1), sharex=ax1)
-        plt.semilogy(t_swea, JE_pds)
-        ax6.legend(energias)
-        ax6.grid()
-        ax6.set_ylabel("Diff. en. flux")
-
-        for ax in [ax1, ax2, ax3, ax4, ax5, ax6]:
-            ax.axvline(x=t_bs, c="m", label="bs")
-        fig.canvas.mpl_connect("pick_event", onpick1)
-        multi = MultiCursor(
-            fig.canvas, (ax1, ax2, ax3, ax4, ax5, ax6), color="black", lw=1
-        )
-
-        zoom_ok = False
-        print("\nSpacebar when ready to click:\n")
-        while not zoom_ok:
-            zoom_ok = plt.waitforbuttonpress(-1)
-        print(f"Click to select {frontera} limits: ")
-        outs = plt.ginput(3)  # [0][0]
-        val = sorted(outs)
-        val_UTC = [hdec_to_UTC(val[i][0]) for i in range(3)]
-        print(
-            f"Selected values for {frontera}: ",
-            val_UTC,
-        )
-
-        print("Happy? Keyboard click for yes, mouse click for no.\n")
-        happy = plt.waitforbuttonpress()
-
-    return val_UTC
-
-
-val_MPB = plot_encontrar("MPB")
-flag_MPB = None
-while flag_MPB == None:
-    flag = input("MPB confiable? y/n\n")
-    if flag == "y":
-        flag_MPB = 1
-    elif flag == "n":
-        flag_MPB = 0
-
-filepath = f"../outputs/grupo{grupo}/limites_mpb_jacob.txt"
-
-if not exists(filepath):
-    with open(filepath, "w") as file:
-        file.write("date\tMPB_min\tMPB\tMPB_max\tflag\n")
-
-with open(filepath, "a") as file:
-    file.write(f"{fecha[num]}\t{val_MPB[0]}\t{val_MPB[1]}\t{val_MPB[2]}\t{flag_MPB}\n")
