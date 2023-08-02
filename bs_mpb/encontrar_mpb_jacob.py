@@ -17,57 +17,54 @@ from importar_datos import importar_mag_1s, importar_lpw, importar_swea, importa
 
 
 """
-Permite elegir dos tiempos (límites) para el BS y los guarda en un txt
+Permite elegir dos tiempos (límites) + uno central para la MPB y los guarda en un txt
 Tiene flag
 """
 
 np.set_printoptions(precision=4)
 grupo = 1
+p = "para"  # para o perp
+path = f"outs_catalogo_previa/grupo{grupo}/"
+
+fecha = np.load(path + f"fecha_{p}.npy")
+hora_bs = np.load(path + f"hora_{p}.npy")
+
 catalogo = np.genfromtxt(f"../outputs/grupo{grupo}/bs_mpb_final.txt", dtype="str")
-# ek grupo 4 está bastante bien distrubuido en ángulos
 
 plt.rcParams["axes.prop_cycle"] = cycler(
     "color",
     ["#003f5c", "#ffa600", "#de425b", "#68abb8", "#f3babc", "#6cc08b", "#cacaca"],
 )
 
-i = int(input("numero de lista\n"))  # hicimos hasta !!
+num = int(input("numero de lista\n"))
 
-# for i in range(len(catalogo)):
-cat = catalogo[i]
-year, month, day = cat[0].split("-")
+# for i in range(len(fecha)):
+year, month, day = fecha[num].split("-")
 
-# if year == "2018" and month == "11":  # sólo quiero elegir de este mes
+t_bs = UTC_to_hdec(hora_bs[num])
+if t_bs < 23 and t_bs > 1:
+    # saltea los que estén cerca del nuevo día porque me dan fiaca
 
-t_bs = UTC_to_hdec(cat[1])
-t_mpb = UTC_to_hdec(cat[2])
-# print(i, year, month, day, t_bs)
+    ti = t_bs - 1.5  # mira +- 1.5h respecto del BS
+    if ti < 0:
+        ti = 0.2
+    tf = t_bs + 1.5
+    if tf > 24:
+        tf = 24
 
-if t_bs < t_mpb:
-    ti = t_bs - 2
-    tf = t_mpb + 2
-else:
-    ti = t_mpb - 2
-    tf = t_bs + 2
-if ti < 0:
-    ti = 0
-if tf > 24:
-    tf = 24
 mag, t, B, posicion = importar_mag_1s(year, month, day, ti, tf)
-swea, t_swea, energia, flux_plot = importar_swea(year, month, day, ti, tf)
+B_norm = np.linalg.norm(B, axis=1)
+B_para, B_perp_norm, tpara = Bpara_Bperp(B, t, ti + 0.2, tf - 0.2)
+
 swia, t_swia, i_density, i_temp, vel_mso = importar_swia(year, month, day, ti, tf)
-energias = [50 + i * 25 for i in range(6)]
+
+swea, t_swea, energia, flux_plot = importar_swea(year, month, day, ti, tf)
+energias = [50 + i * 50 for i in range(3)]
 JE_pds = np.zeros((len(t_swea), len(energias)))
 
 for i, e in enumerate(energias):
     j = donde(energia, e)
     JE_pds[:, i] = flux_plot[j]
-
-B_norm = np.linalg.norm(B, axis=1)
-
-B_para, B_perp_norm, tpara = Bpara_Bperp(
-    B, t, ti + 0.2, tf - 0.2
-)  # estos ti, tf tienen que ser menores que el total de datos
 
 
 def plot_encontrar(frontera):
@@ -96,8 +93,8 @@ def plot_encontrar(frontera):
             linewidth=1,
             label=r"|$\Delta B \perp$| / B",
         )
-        if max(B_para) > 3:
-            ax1.set_ylim([-0.1, 3])
+        if max(B_para) > 1.5:
+            ax1.set_ylim([-0.1, 1.5])
         plt.setp(ax1.get_xticklabels(), visible=False)
         ax1.set_ylabel(r"|$\Delta B$|/ B")
         ax1.set_xlim([t[0], t[-1]])
@@ -135,6 +132,10 @@ def plot_encontrar(frontera):
         ax5.set_ylabel("Densidad de p+ \n del SW (cm⁻³)")
         ax5.plot(t_swia, i_density)
         ax5.grid()
+        if type(i_density) != int:
+            if len(i_density) > 0:
+                if max(i_density) > 15:
+                    ax5.set_ylim([-1, 15])
 
         ax6 = plt.subplot2grid((3, 2), (2, 1), sharex=ax1)
         plt.semilogy(t_swea, JE_pds)
@@ -144,7 +145,6 @@ def plot_encontrar(frontera):
 
         for ax in [ax1, ax2, ax3, ax4, ax5, ax6]:
             ax.axvline(x=t_bs, c="m", label="bs")
-            ax.axvline(x=t_mpb, c="g", label="mpb")
         fig.canvas.mpl_connect("pick_event", onpick1)
         multi = MultiCursor(
             fig.canvas, (ax1, ax2, ax3, ax4, ax5, ax6), color="black", lw=1
@@ -169,16 +169,6 @@ def plot_encontrar(frontera):
     return val_UTC
 
 
-val_BS = plot_encontrar("BS")
-
-flag_BS = None
-while flag_BS == None:
-    flag = input("BS confiable? y/n\n")
-    if flag == "y":
-        flag_BS = 1
-    elif flag == "n":
-        flag_BS = 0
-
 val_MPB = plot_encontrar("MPB")
 flag_MPB = None
 while flag_MPB == None:
@@ -188,16 +178,11 @@ while flag_MPB == None:
     elif flag == "n":
         flag_MPB = 0
 
-filepath = f"../outputs/grupo{grupo}/limites_bs_mpb.txt"
+filepath = f"../outputs/grupo{grupo}/limites_mpb_jacob.txt"
 
 if not exists(filepath):
     with open(filepath, "w") as file:
-        file.write(
-            "date\tBS_min\tBS\tBS_max\tflag\tMPB_min\tMPB\tMPB_max\tflag\ttheta\tbeta\n"
-        )
+        file.write("date\tMPB_min\tMPB\tMPB_max\tflag\n")
 
 with open(filepath, "a") as file:
-    file.write(
-        f"{cat[0]}\t{val_BS[0]}\t{val_BS[1]}\t{val_BS[2]}\t{flag_BS}\t{val_MPB[0]}\t{val_MPB[1]}\t{val_MPB[2]}\t{flag_MPB}\t{cat[3]}\t{cat[4]}"
-    )
-    file.write("\n")
+    file.write(f"{fecha[num]}\t{val_MPB[0]}\t{val_MPB[1]}\t{val_MPB[2]}\t{flag_MPB}\n")
