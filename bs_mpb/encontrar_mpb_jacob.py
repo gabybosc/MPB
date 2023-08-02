@@ -14,10 +14,12 @@ from importar_datos import importar_mag_1s, importar_swea, importar_swia
 Permite elegir dos tiempos (límites) + uno central para la MPB y los guarda en un txt
 Tiene flag
 empiezo haciendo los quasipara de todos los grupos
+ya están quasipara grupo 1, 2, 3
+grupo 4 hasta 47 inclusive
 """
 
 np.set_printoptions(precision=4)
-grupo = 2
+grupo = 4
 p = "para"  # para o perp
 
 """
@@ -48,10 +50,6 @@ for num in range(0, len(fecha)):
 
     if t_bs > 23 or t_bs < 1:  # no cuenta los que están cerca del cambio de día
         continue
-        # num = num + 1
-        # print(num)
-        # year, month, day = fecha[num].split("-")
-        # t_bs = UTC_to_hdec(hora_bs[num])
 
     ti = t_bs - 1.5  # mira +- 1.5h respecto del BS
     if ti < 0:

@@ -49,6 +49,11 @@ def importar_mag_1s(year, month, day, ti, tf):
     mag = mag[:86386]
 
     hh = mag[:, 2]
+
+    if hh[-1] == 0:  # si llegó al otro día
+        mag = mag[:-1]
+        hh = mag[:, 2]
+
     mm = mag[:, 3]
     ss = mag[:, 4]
 
@@ -85,6 +90,11 @@ def importar_mag(year, month, day, ti, tf):
     )
 
     hh = mag[:, 2]
+
+    if hh[-1] == 0:
+        mag = mag[:-1]
+        hh = mag[:, 2]
+
     mm = mag[:, 3]
     ss = mag[:, 4]
 
