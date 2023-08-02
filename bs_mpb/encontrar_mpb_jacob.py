@@ -13,14 +13,13 @@ from importar_datos import importar_mag_1s, importar_swea, importar_swia
 """
 Permite elegir dos tiempos (límites) + uno central para la MPB y los guarda en un txt
 Tiene flag
-empiezo haciendo los quasipara de todos los grupos
-ya están quasipara grupo 1, 2, 3
-grupo 4 hasta 47 inclusive
+ya están quasipara grupo 1, 2, 3, 4
+quasiperp grupo 3
 """
 
 np.set_printoptions(precision=4)
 grupo = 4
-p = "para"  # para o perp
+p = "perp"  # para o perp
 
 """
 salteados xq swea anda mal (después se pueden ver aparte):
@@ -43,7 +42,7 @@ plt.rcParams["axes.prop_cycle"] = cycler(
 # num = int(input("numero de lista\n"))
 
 for num in range(0, len(fecha)):
-    print(num)
+    print(f"{num} de f{len(fecha)}")
     year, month, day = fecha[num].split("-")
 
     t_bs = UTC_to_hdec(hora_bs[num])

@@ -11,23 +11,26 @@ from importar_datos import importar_mag_1s, importar_swea, importar_swia
 from funciones import Bpara_Bperp, UTC_to_hdec, donde
 
 grupo = input("grupo\n")
-lista = np.genfromtxt(f"../outputs/grupo{grupo}/bs_mpb_final.txt", dtype=str)
-fig_path = f"../../Pictures/BS_MPB/grupo{grupo}/"
+lista = np.genfromtxt(
+    f"../outputs/grupo{grupo}/limites_mpb_jacob.txt", skip_header=1, dtype=str
+)
+fig_path = f"../../Pictures/BS_MPB/grupo{grupo}bis/"
 
 for l in lista:
     year, month, day = l[0].split("-")
     if not exists(
         fig_path + f"{year}-{month}-{day}-{l[1]}.png"
     ):  # si no está ya la figura
-        t_bs = UTC_to_hdec(l[1])
+        t_1 = UTC_to_hdec(l[1])
         t_mpb = UTC_to_hdec(l[2])
+        t_2 = UTC_to_hdec(l[3])
 
-        if t_bs < t_mpb:
-            ti = t_bs - 0.2
-            tf = t_mpb + 0.2
+        if t_1 < t_mpb:
+            ti = t_1 - 1
+            tf = t_mpb + 1
         else:
-            ti = t_mpb - 0.2
-            tf = t_bs + 0.2
+            ti = t_mpb - 1
+            tf = t_1 + 1
         if ti < 0:
             ti = 0
         if tf > 24:
@@ -84,7 +87,7 @@ for l in lista:
 
         ax3.plot(t, Bnorm)
         ax3.grid()
-        ax3.axvline(x=t_bs, color="c")
+        ax3.axvline(x=t_1, color="c")
         ax3.set_ylabel("|B| (nT)")
         ax3.set_xlabel("Tiempo (hdec)")
 
@@ -124,7 +127,8 @@ for l in lista:
         #     cax.xaxis.set_ticks_position("top")
 
         for ax in [ax1, ax2, ax3, ax4, ax5, ax6]:
-            ax.axvline(x=t_bs, c="m", label="bs")
+            ax.axvline(x=t_1, c="m", label="t1")
+            ax.axvline(x=t_2, c="b", label="t2")
             ax.axvline(x=t_mpb, c="g", label="mpb")
 
         figure = plt.gcf()  # get current figure
