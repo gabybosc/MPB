@@ -33,34 +33,60 @@ grupo3 = 2015/9 2015/10 2015/11 2015/12 2016/1
 grupo4 = 2017/7 2017/8  2017/09 2017/10 2017/11 2017/12 2019/06 2019/7 2019/8 2019/09 2019/10 2019/11 2021/05 2021/6 2021/7 2021/08 2021/9
 """
 
-# # for mes in ["01", "02", "03","04", "05", "06", "07", "08", "09", "10", "11", "12"]:
+
+# for mes in ["01", "02", "03","04", "05", "06", "07", "08", "09", "10", "11", "12"]:
+# def agregar_al_grupo(anio, mes, date, grupo):
+#     for i, val in enumerate(date):
+#         year = val.split("-")[0]
+#         month = val.split("-")[1]
+#         if year == anio and month == mes:
+#             grupo.append(i)
+
+
+# grupo1 = []
+# grupo2 = []
+# grupo3 = []
 # grupo4 = []
+
+# anio = "2014"
+# for mes in ["11", "12"]:
+#     agregar_al_grupo(anio, mes, date, grupo1)
+# anio = "2015"
+# for mes in [
+#     "01",
+#     "02",
+#     "03",
+# ]:
+#     agregar_al_grupo(anio, mes, date, grupo1)
+
+# anio = "2018"
+# for mes in ["07", "08", "09", "10", "11", "12"]:
+#     agregar_al_grupo(anio, mes, date, grupo2)
+# anio = "2020"
+# for mes in ["06", "07", "08", "09", "10", "11"]:
+#     agregar_al_grupo(anio, mes, date, grupo2)
+
+# anio = "2015"
+# for mes in ["09", "10", "11", "12"]:
+#     agregar_al_grupo(anio, mes, date, grupo3)
+# anio = "2016"
+# for mes in ["01"]:
+#     agregar_al_grupo(anio, mes, date, grupo3)
+
 # anio = "2017"
 # for mes in ["07", "08", "09", "10", "11", "12"]:
-#     for i, val in enumerate(date):
-#         year = val.split("-")[0]
-#         month = val.split("-")[1]
-#         if year == anio and month == mes:
-#             grupo4.append(i)
+#     agregar_al_grupo(anio, mes, date, grupo4)
 # anio = "2019"
 # for mes in ["06", "07", "08", "09", "10", "11"]:
-#     for i, val in enumerate(date):
-#         year = val.split("-")[0]
-#         month = val.split("-")[1]
-#         if year == anio and month == mes:
-#             grupo4.append(i)
+#     agregar_al_grupo(anio, mes, date, grupo4)
 # anio = "2021"
 # for mes in ["05", "06", "07", "08", "09"]:
-#     for i, val in enumerate(date):
-#         year = val.split("-")[0]
-#         month = val.split("-")[1]
-#         if year == anio and month == mes:
-#             grupo4.append(i)
+#     agregar_al_grupo(anio, mes, date, grupo4)
 
-# np.save("grupo1.npy", grupo1)
-# np.save("grupo2.npy", grupo2)
-# np.save("grupo3.npy", grupo3)
-# np.save("grupo4.npy", grupo4)
+# np.save("outs_catalogo_previa/grupo1.npy", grupo1)
+# np.save("outs_catalogo_previa/grupo2.npy", grupo2)
+# np.save("outs_catalogo_previa/grupo3.npy", grupo3)
+# np.save("outs_catalogo_previa/grupo4.npy", grupo4)
 
 """
 lo mejor va a ser hacer cuatro listas, una de para, una de perp, 
