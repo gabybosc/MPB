@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import sys
 from cycler import cycler
 from os.path import exists
-from figura_encontrar import plot_encontrar
+from figura_encontrar import plot_encontrar_con_orbita
 
 sys.path.append("..")
 from funciones import Bpara_Bperp, UTC_to_hdec, donde, fechas
@@ -11,10 +11,7 @@ from importar_datos import importar_mag_1s, importar_swea, importar_swia
 
 
 """
-Permite elegir dos tiempos (límites) + uno central para la MPB y los guarda en un txt
-Tiene flag
-ya están quasipara grupo 1, 2, 3, 4
-quasiperp grupo 3
+Para revisar los cruces que tienen flag 0
 """
 
 np.set_printoptions(precision=4)
@@ -70,18 +67,20 @@ if type(t_swea) != int:
 else:
     JE_pds = 0
 
-val_MPB = plot_encontrar(
-    "MPB",
-    fecha[num],
+idx_mpb = donde(t, t_mpb)
+
+val_MPB = plot_encontrar_con_orbita(
+    fecha,
     tpara,
     B_para,
     B_perp_norm,
     t,
     B,
+    idx_mpb,
     t_mpb,
     B_norm,
     t_swia,
-    vel_mso,
+    posicion,
     i_density,
     t_swea,
     JE_pds,
@@ -96,7 +95,7 @@ while flag_MPB == None:
     elif flag == "n":
         flag_MPB = 0
 
-filepath = f"../outputs/grupo{grupo}/limites_mpb_jacob_revised.txt"
+filepath = f"../outputs/grupo{grupo}/jacob_dayside_revised.txt"
 
 if not exists(filepath):
     with open(filepath, "w") as file:
