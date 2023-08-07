@@ -43,8 +43,8 @@ for grupo in [1, 2, 4]:
                 tf = t_bs + 0.25
 
             if t_mpb[1] > t_bs:
-                ti = t_mpb[1] + 0.25
-                tf = t_bs - 0.25
+                ti = t_bs - 0.25
+                tf = t_mpb[1] + 0.25
 
             if ti < 0:
                 ti = 0.2

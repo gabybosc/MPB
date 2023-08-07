@@ -46,8 +46,6 @@ def importar_mag_1s(year, month, day, ti, tf):
         path + f"mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts",
         skiprows=160,
     )
-    mag = mag[:86386]
-
     hh = mag[:, 2]
 
     if hh[-1] == 0:  # si llegó al otro día
