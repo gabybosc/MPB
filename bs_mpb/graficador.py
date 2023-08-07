@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 from cycler import cycler
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+from figura_encontrar import BS_MPB, marte, orbitas
 import sys
 from os.path import exists
 
@@ -16,34 +17,41 @@ plt.rcParams["axes.prop_cycle"] = cycler(
     ["#003f5c", "#ffa600", "#de425b", "#68abb8", "#f3babc", "#6cc08b", "#cacaca"],
 )
 
-for grupo in [1, 2, 3, 4]:
+for grupo in [1, 2, 4]:
     # grupo = input("grupo\n")
     lista = np.genfromtxt(
-        f"../outputs/grupo{grupo}/jacob_dayside.txt", skip_header=1, dtype=str
+        f"../outputs/grupo{grupo}/jacob_dayside_bs.txt", skip_header=1, dtype=str
     )
-    fig_path = f"../../Pictures/BS_MPB/grupo{grupo}_Jacob/"
+    fig_path = f"../../../../Pictures/BS_MPB/grupo{grupo}_Jacob/"  # casa
+    # fig_path = f"../../Pictures/BS_MPB/grupo{grupo}_Jacob/"  # iafe
 
     for l in lista:
+        flag = l[-3]
         year, month, day = l[0].split("-")
-        if not exists(
-            fig_path + f"{year}-{month}-{day}-{l[1]}.png"
-        ):  # si no está ya la figura
-            t_1 = UTC_to_hdec(l[1])
-            t_mpb = UTC_to_hdec(l[2])
-            t_2 = UTC_to_hdec(l[3])
+        t_bs = UTC_to_hdec(l[1])
+        t_mpb = (
+            UTC_to_hdec(l[2]),
+            UTC_to_hdec(l[3]),
+            UTC_to_hdec(l[4]),
+        )
 
-            if t_1 < t_mpb:
-                ti = t_1 - 0.5
-                tf = t_mpb + 0.5
-            else:
-                ti = t_mpb - 0.5
-                tf = t_1 + 0.5
+        if not exists(
+            fig_path + f"{year}-{month}-{day}-{int(t_mpb[1])}.png"
+        ):  # si no está ya la figura
+            if t_mpb[1] < t_bs:
+                ti = t_mpb[1] - 0.25
+                tf = t_bs + 0.25
+
+            if t_mpb[1] > t_bs:
+                ti = t_mpb[1] + 0.25
+                tf = t_bs - 0.25
+
             if ti < 0:
-                ti = 0
+                ti = 0.2
             if tf > 24:
                 tf = 24
 
-            mag, t, B, pos = importar_mag_1s(year, month, day, ti, tf)
+            mag, t, B, posicion = importar_mag_1s(year, month, day, ti, tf)
             swea, t_swea, energia, flux_plot = importar_swea(year, month, day, ti, tf)
             swia, t_swia, i_density, i_temp, vel_mso = importar_swia(
                 year, month, day, ti, tf
@@ -58,6 +66,7 @@ for grupo in [1, 2, 3, 4]:
             else:
                 JE_pds = 0
 
+            idx_mpb = donde(t, t_mpb[1])
             Bnorm = np.linalg.norm(B, axis=1)
             Bpara, Bperp, tpara = Bpara_Bperp(B, t, ti, tf)
 
@@ -99,30 +108,29 @@ for grupo in [1, 2, 3, 4]:
 
             ax3.plot(t, Bnorm)
             ax3.grid()
-            if max(Bnorm) > 70 and Bnorm[donde(t, t_mpb)] < 40:
+            if max(Bnorm) > 70 and Bnorm[donde(t, t_mpb[1])] < 40:
                 ax2.set_ylim([-50, 50])
                 ax3.set_ylim([0, 50])
-            if Bnorm[donde(t, t_mpb)] < 20:
+            if Bnorm[donde(t, t_mpb[1])] < 20:
                 ax2.set_ylim([-20, 20])
                 ax3.set_ylim([0, 30])
-            elif max(Bnorm) > 70 and Bnorm[donde(t, t_mpb)] > 40:
+            elif max(Bnorm) > 70 and Bnorm[donde(t, t_mpb[1])] > 40:
                 ax2.set_ylim([-100, 100])
                 ax3.set_ylim([0, 100])
-            ax3.axvline(x=t_1, color="c")
             ax3.set_ylabel("|B| (nT)")
             ax3.set_xlabel("Tiempo (hdec)")
 
-            plt.setp(ax4.get_xticklabels(), visible=False)
-            ax4.set_xlabel("Tiempo (hdec)")
-            ax4.set_ylabel("proton velocity")
-            ax4.plot(t_swia, vel_mso)
-            ax4.grid()
+            ax4 = plt.subplot2grid((3, 2), (0, 1))
+            x_bs, yz_bs = BS_MPB(2.04, 1.03, 0.64)
+            x_mpb, yz_mpb = BS_MPB(0.96, 0.9, 0.78)
+            marte(ax4, x_bs, yz_bs, x_mpb, yz_mpb)
+            orbitas(posicion / 3390, idx_mpb, t)
 
             plt.setp(ax5.get_xticklabels(), visible=False)
             ax5.set_ylabel("Densidad de p+ \n del SW (cm⁻³)")
             ax5.plot(t_swia, i_density)
             if type(i_density) != int:
-                if max(i_density) > 30 and i_density[donde(t_swia, t_mpb)] < 20:
+                if max(i_density) > 30 and i_density[donde(t_swia, t_mpb[1])] < 20:
                     ax5.set_ylim([-0.1, 20])
             ax5.grid()
 
@@ -130,29 +138,22 @@ for grupo in [1, 2, 3, 4]:
             ax6.legend(energias, loc="upper right")
             ax6.grid()
             ax6.set_ylabel("Diff. en. flux")
-            # if swea != 0:
-            #     ax6.set_ylabel("Energia", picker=True)  # , bbox=dict(facecolor='red'))
-            #     plt.setp(ax6.get_xticklabels(), visible=False)
-            #     im = plt.imshow(
-            #         flux_plot,
-            #         aspect="auto",
-            #         origin="lower",
-            #         extent=(t_swea[0], t_swea[-1], energia[-1], energia[0]),
-            #         cmap="inferno",
-            #         norm=LogNorm(vmin=1e4, vmax=1e9),
-            #     )
-            #     divider = make_axes_locatable(ax6)
-            #     cax = divider.append_axes("top", size="7%", pad="1%")
-            #     cb = plt.colorbar(im, cax=cax, orientation="horizontal")
-            #     cax.xaxis.set_ticks_position("top")
 
-            for ax in [ax1, ax2, ax3, ax4, ax5, ax6]:
-                ax.axvline(x=t_1, c="m", label="t1")
-                ax.axvline(x=t_2, c="b", label="t2")
-                ax.axvline(x=t_mpb, c="g", label="mpb")
+            for ax in [ax1, ax2, ax3, ax5, ax6]:
+                ax.axvline(x=t_mpb[1], c="#FF1493")
+                ax.axvline(x=t_bs, c="#07aec7")
+                ax.axvspan(xmin=t_mpb[0], xmax=t_mpb[2], facecolor="#79B953", alpha=0.6)
 
             figure = plt.gcf()  # get current figure
             figure.set_size_inches(16, 8)
             # when saving, specify the DPI
-            plt.savefig(fig_path + f"{year}-{month}-{day}-{l[1]}.png", dpi=150)
+            if flag == "0":
+                plt.savefig(
+                    fig_path + f"flagged-{year}-{month}-{day}-{int(t_mpb[1])}.png",
+                    dpi=150,
+                )
+            else:
+                plt.savefig(
+                    fig_path + f"{year}-{month}-{day}-{int(t_mpb[1])}.png", dpi=150
+                )
             # plt.show()

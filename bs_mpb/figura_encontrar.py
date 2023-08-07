@@ -189,7 +189,7 @@ def marte(ax, x_bs, yz_bs, x_mpb, yz_mpb):
     ax.set_ylabel(r"$(Y²_{MSO} + Z²_{MSO} )^{1/2}$ ($R_M$)")
 
 
-def orbitas(posicion, idx_mpb):
+def orbitas(posicion, idx_mpb, t):
     x = posicion[:, 0]
     y = posicion[:, 1]
     z = posicion[:, 2]
@@ -198,6 +198,9 @@ def orbitas(posicion, idx_mpb):
     ax = fig.gca()
     ax.plot(x, proyeccion)
     ax.scatter(x[idx_mpb], proyeccion[idx_mpb], color="#003f5c")
+    ax.scatter(x[0], proyeccion[0], color="#003f5c", label=f"{t[0]:.4g}", marker="o")
+    ax.scatter(x[-1], proyeccion[-1], color="#003f5c", label=f"{t[-1]:.4g}", marker="X")
+    ax.legend()
 
 
 def plot_encontrar_con_orbita(
@@ -242,8 +245,10 @@ def plot_encontrar_con_orbita(
             linewidth=1,
             label=r"|$\Delta B \perp$| / B",
         )
-        if max(B_para) > 1.2:
-            ax1.set_ylim([-0.1, 1])
+        ax1.set_ylim([-0.1, 1.2])
+        if B_para[idx_mpb] < 0.5 and B_perp_norm[idx_mpb] < 0.5:
+            ax1.set_ylim([-0.1, 0.5])
+
         plt.setp(ax1.get_xticklabels(), visible=False)
         ax1.set_ylabel(r"|$\Delta B$|/ B")
         ax1.set_xlim([t[0], t[-1]])
@@ -272,7 +277,7 @@ def plot_encontrar_con_orbita(
         x_bs, yz_bs = BS_MPB(2.04, 1.03, 0.64)
         x_mpb, yz_mpb = BS_MPB(0.96, 0.9, 0.78)
         marte(ax4, x_bs, yz_bs, x_mpb, yz_mpb)
-        orbitas(posicion / 3390, idx_mpb)
+        orbitas(posicion / 3390, idx_mpb, t)
 
         ax5 = plt.subplot2grid((3, 2), (1, 1), sharex=ax1)
         plt.setp(ax5.get_xticklabels(), visible=False)
@@ -291,7 +296,8 @@ def plot_encontrar_con_orbita(
         ax6.set_ylabel("Diff. en. flux")
 
         for ax in [ax1, ax2, ax3, ax4, ax5, ax6]:
-            ax.axvline(x=t_mpb, c="#FF1493", label="mpb")
+            ax.axvline(x=t_mpb[1], c="#FF1493", label="mpb")
+            ax.axvspan(xmin=t_mpb[0], xmax=t_mpb[2], facecolor="#79B953", alpha=0.6)
         fig.canvas.mpl_connect("pick_event", onpick1)
         multi = MultiCursor(
             fig.canvas, (ax1, ax2, ax3, ax4, ax5, ax6), color="black", lw=1
@@ -313,4 +319,4 @@ def plot_encontrar_con_orbita(
         print("Happy? Keyboard click for yes, mouse click for no.\n")
         happy = plt.waitforbuttonpress()
 
-    # return val_UTC
+    return val_UTC

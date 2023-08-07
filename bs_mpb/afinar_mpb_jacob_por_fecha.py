@@ -16,7 +16,7 @@ Para revisar los cruces que tienen flag 0
 
 np.set_printoptions(precision=4)
 
-grupo = input("grupo\n")
+grupo = 2  # input("grupo\n")
 
 path = f"outs_catalogo_previa/grupo{grupo}/"
 
@@ -27,7 +27,9 @@ d_str = str(dates[0] + "-" + dates[1] + "-" + dates[2])
 catalogo = np.genfromtxt(f"../outputs/grupo{grupo}/jacob_dayside.txt", dtype="str")
 
 fecha = catalogo[:, 0]
+hora_min = catalogo[:, 1]
 hora_mpb = catalogo[:, 2]
+hora_max = catalogo[:, 3]
 
 for ff in range(len(fecha)):
     if d_str == fecha[ff]:
@@ -40,12 +42,16 @@ plt.rcParams["axes.prop_cycle"] = cycler(
 )
 
 year, month, day = fecha[num].split("-")
-t_mpb = UTC_to_hdec(hora_mpb[num])
+t_mpb = (
+    UTC_to_hdec(hora_min[num]),
+    UTC_to_hdec(hora_mpb[num]),
+    UTC_to_hdec(hora_max[num]),
+)
 
-ti = t_mpb - 1
+ti = t_mpb[1] - 1
 if ti < 0:
     ti = 0.2
-tf = t_mpb + 1
+tf = t_mpb[1] + 1
 if tf > 24:
     tf = 24
 
@@ -66,7 +72,7 @@ if type(t_swea) != int:
 else:
     JE_pds = 0
 
-idx_mpb = donde(t, t_mpb)
+idx_mpb = donde(t, t_mpb[1])
 
 val_MPB = plot_encontrar_con_orbita(
     fecha[num],
@@ -86,21 +92,21 @@ val_MPB = plot_encontrar_con_orbita(
     energias,
 )
 
-# flag_MPB = None
-# while flag_MPB == None:
-#     flag = input("MPB confiable? y/n\n")
-#     if flag == "y":
-#         flag_MPB = 1
-#     elif flag == "n":
-#         flag_MPB = 0
+flag_MPB = None
+while flag_MPB == None:
+    flag = input("Sobreescribir MPB? y/n\n")
+    if flag == "y":
+        flag_MPB = 1
+    elif flag == "n":
+        flag_MPB = 0
 
-# filepath = f"../outputs/grupo{grupo}/jacob_dayside_revised.txt"
+filepath = f"../outputs/grupo{grupo}/jacob_dayside_revised.txt"
 
-# if not exists(filepath):
-#     with open(filepath, "w") as file:
-#         file.write("date\tMPB_min\tMPB\tMPB_max\tflag\ttheta\tbeta\n")
+if not exists(filepath):
+    with open(filepath, "w") as file:
+        file.write("date\tMPB_min\tMPB\tMPB_max\tflag\ttheta\tbeta\n")
 
-# with open(filepath, "a") as file:
-#     file.write(
-#         f"{fecha[num]}\t{val_MPB[0]}\t{val_MPB[1]}\t{val_MPB[2]}\t{flag_MPB}\t{catalogo[num, -2]}\t{catalogo[num, -1]}\n"
-#     )
+with open(filepath, "a") as file:
+    file.write(
+        f"{fecha[num]}\t{val_MPB[0]}\t{val_MPB[1]}\t{val_MPB[2]}\t{flag_MPB}\t{catalogo[num, -2]}\t{catalogo[num, -1]}\n"
+    )

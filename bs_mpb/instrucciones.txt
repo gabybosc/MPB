@@ -21,3 +21,14 @@ Usando el catálogo de Jacob:
     output: ../outputs/grupo{grupo}/jacob_dayside_revised.txt
     Sirve para mirar caso por caso. Voy a usarlo para revisar los de flag 0.
     Los que revise van a estar en el nuevo txt, pero voy a tener que combinarlo con el viejo.
+
+5) agregar_bs.py
+    input: ../outputs/grupo{grupo}/jacob_dayside.txt
+    output: ../outputs/grupo{grupo}/jacob_dayside_bs.txt
+    agrega el cruce del BS de jacob a mis listas, que no estaba...
+
+6) graficador.py
+    input: ../outputs/grupo{grupo}/jacob_dayside_bs.txt
+    output: ../../Pictures/BS_MPB/grupo{grupo}_Jacob/{}.png
+    grafica y guarda los cruces del dayside para poder chequear si nos gustan
+    los flaggeados con 0 están marcados para prestarles atención especial
