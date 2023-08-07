@@ -44,7 +44,6 @@ plt.rcParams["axes.prop_cycle"] = cycler(
 for num in range(0, len(fecha)):
     print(f"{num} de f{len(fecha)}")
     year, month, day = fecha[num].split("-")
-
     t_bs = UTC_to_hdec(hora_bs[num])
 
     if t_bs > 23 or t_bs < 1:  # no cuenta los que están cerca del cambio de día
