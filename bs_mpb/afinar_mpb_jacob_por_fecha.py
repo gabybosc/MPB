@@ -32,7 +32,6 @@ hora_mpb = catalogo[:, 2]
 for ff in range(len(fecha)):
     if d_str == fecha[ff]:
         if time == int(hora_mpb[ff].split(":")[0]):
-            print("yes")
             num = ff
 
 plt.rcParams["axes.prop_cycle"] = cycler(
@@ -70,7 +69,7 @@ else:
 idx_mpb = donde(t, t_mpb)
 
 val_MPB = plot_encontrar_con_orbita(
-    fecha,
+    fecha[num],
     tpara,
     B_para,
     B_perp_norm,
@@ -87,21 +86,21 @@ val_MPB = plot_encontrar_con_orbita(
     energias,
 )
 
-flag_MPB = None
-while flag_MPB == None:
-    flag = input("MPB confiable? y/n\n")
-    if flag == "y":
-        flag_MPB = 1
-    elif flag == "n":
-        flag_MPB = 0
+# flag_MPB = None
+# while flag_MPB == None:
+#     flag = input("MPB confiable? y/n\n")
+#     if flag == "y":
+#         flag_MPB = 1
+#     elif flag == "n":
+#         flag_MPB = 0
 
-filepath = f"../outputs/grupo{grupo}/jacob_dayside_revised.txt"
+# filepath = f"../outputs/grupo{grupo}/jacob_dayside_revised.txt"
 
-if not exists(filepath):
-    with open(filepath, "w") as file:
-        file.write("date\tMPB_min\tMPB\tMPB_max\tflag\ttheta\tbeta\n")
+# if not exists(filepath):
+#     with open(filepath, "w") as file:
+#         file.write("date\tMPB_min\tMPB\tMPB_max\tflag\ttheta\tbeta\n")
 
-with open(filepath, "a") as file:
-    file.write(
-        f"{fecha[num]}\t{val_MPB[0]}\t{val_MPB[1]}\t{val_MPB[2]}\t{flag_MPB}\t{catalogo[num, -2]}\t{catalogo[num, -1]}\n"
-    )
+# with open(filepath, "a") as file:
+#     file.write(
+#         f"{fecha[num]}\t{val_MPB[0]}\t{val_MPB[1]}\t{val_MPB[2]}\t{flag_MPB}\t{catalogo[num, -2]}\t{catalogo[num, -1]}\n"
+#     )

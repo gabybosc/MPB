@@ -1,12 +1,18 @@
 import matplotlib.pyplot as plt
 from matplotlib.widgets import MultiCursor
 import numpy as np
+from cycler import cycler
 import sys
 
 
 sys.path.append("..")
 from funciones import hdec_to_UTC
 from funciones_plot import onpick1
+
+plt.rcParams["axes.prop_cycle"] = cycler(
+    "color",
+    ["#003f5c", "#ffa600", "#de425b", "#68abb8", "#f3babc", "#6cc08b", "#cacaca"],
+)
 
 
 def plot_encontrar(
@@ -155,6 +161,30 @@ def marte(ax, x_bs, yz_bs, x_mpb, yz_mpb):
     ax.set_ylim(0, 2.5)
     circle = plt.Circle((0, 0), 1, color="#c1440e", clip_on=True)
     ax.add_artist(circle)
+    ax.annotate("15", (np.cos(15 * np.pi / 180), np.sin(15 * np.pi / 180)))
+    ax.annotate("30", (np.cos(30 * np.pi / 180), np.sin(30 * np.pi / 180)))
+    ax.annotate("45", (np.cos(45 * np.pi / 180), np.sin(45 * np.pi / 180)))
+    ax.annotate("60", (np.cos(60 * np.pi / 180), np.sin(60 * np.pi / 180)))
+    ax.annotate("75", (np.cos(75 * np.pi / 180), np.sin(75 * np.pi / 180)))
+    ax.annotate("90", (np.cos(90 * np.pi / 180), np.sin(90 * np.pi / 180)))
+    ax.scatter(
+        np.cos(15 * np.pi / 180), np.sin(15 * np.pi / 180), marker="x", color="#003f5c"
+    )
+    ax.scatter(
+        np.cos(30 * np.pi / 180), np.sin(30 * np.pi / 180), marker="x", color="#003f5c"
+    )
+    ax.scatter(
+        np.cos(45 * np.pi / 180), np.sin(45 * np.pi / 180), marker="x", color="#003f5c"
+    )
+    ax.scatter(
+        np.cos(60 * np.pi / 180), np.sin(60 * np.pi / 180), marker="x", color="#003f5c"
+    )
+    ax.scatter(
+        np.cos(75 * np.pi / 180), np.sin(75 * np.pi / 180), marker="x", color="#003f5c"
+    )
+    ax.scatter(
+        np.cos(90 * np.pi / 180), np.sin(90 * np.pi / 180), marker="x", color="#003f5c"
+    )
     ax.set_xlabel(r"$X_{MSO}$ ($R_M$)")
     ax.set_ylabel(r"$(Y²_{MSO} + Z²_{MSO} )^{1/2}$ ($R_M$)")
 
@@ -167,7 +197,7 @@ def orbitas(posicion, idx_mpb):
     fig = plt.gcf()
     ax = fig.gca()
     ax.plot(x, proyeccion)
-    ax.scatter(x[idx_mpb], proyeccion[idx_mpb])
+    ax.scatter(x[idx_mpb], proyeccion[idx_mpb], color="#003f5c")
 
 
 def plot_encontrar_con_orbita(
@@ -231,7 +261,6 @@ def plot_encontrar_con_orbita(
         ax3 = plt.subplot2grid((3, 2), (2, 0), sharex=ax1)
         plt.plot(t, B_norm)
         ax3.grid()
-        ax3.axvline(x=t_mpb, color="c")
         ax3.set_ylabel("|B| (nT)")
         ax3.set_xlabel("Tiempo (hdec)")
 
@@ -262,7 +291,7 @@ def plot_encontrar_con_orbita(
         ax6.set_ylabel("Diff. en. flux")
 
         for ax in [ax1, ax2, ax3, ax4, ax5, ax6]:
-            ax.axvline(x=t_mpb, c="m", label="bs")
+            ax.axvline(x=t_mpb, c="#FF1493", label="mpb")
         fig.canvas.mpl_connect("pick_event", onpick1)
         multi = MultiCursor(
             fig.canvas, (ax1, ax2, ax3, ax4, ax5, ax6), color="black", lw=1
