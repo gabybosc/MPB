@@ -185,7 +185,7 @@ def marte(ax, x_bs, yz_bs, x_mpb, yz_mpb):
     ax.scatter(
         np.cos(90 * np.pi / 180), np.sin(90 * np.pi / 180), marker="x", color="#003f5c"
     )
-    ax.set_xlabel(r"$X_{MSO}$ ($R_M$)")
+    # ax.set_xlabel(r"$X_{MSO}$ ($R_M$)")
     ax.set_ylabel(r"$(Y²_{MSO} + Z²_{MSO} )^{1/2}$ ($R_M$)")
 
 
