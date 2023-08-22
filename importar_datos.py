@@ -22,6 +22,10 @@ def find_path(instrumento):
 
 
 def importar_mag_1s(year, month, day, ti, tf):
+    """
+    devuelve mag, t, B, posición
+    """
+
     date_orbit = dt.date(int(year), int(month), int(day))
 
     year = date_orbit.strftime("%Y")
@@ -33,6 +37,8 @@ def importar_mag_1s(year, month, day, ti, tf):
         path = f"../../../../media/gabybosc/datos/MAG_1s/{year}/"
     elif gethostname() == "gabybosc":
         path = f"../../datos/MAG_1s/{year}/"
+    elif "DESKTOP-2GS0QF2":
+        path = f"../../../datos/MAG_1s/{year}/"
     else:
         path = f"../../../datos/MAG_1s/{year}-{month}-{day}/"
 
@@ -40,9 +46,12 @@ def importar_mag_1s(year, month, day, ti, tf):
         path + f"mvn_mag_l2_{year}{doy}ss1s_{year}{month}{day}_v01_r01.sts",
         skiprows=160,
     )
-    mag = mag[:86386]
-
     hh = mag[:, 2]
+
+    if hh[-1] == 0:  # si llegó al otro día
+        mag = mag[:-1]
+        hh = mag[:, 2]
+
     mm = mag[:, 3]
     ss = mag[:, 4]
 
@@ -79,6 +88,11 @@ def importar_mag(year, month, day, ti, tf):
     )
 
     hh = mag[:, 2]
+
+    if hh[-1] == 0:
+        mag = mag[:-1]
+        hh = mag[:, 2]
+
     mm = mag[:, 3]
     ss = mag[:, 4]
 
@@ -108,25 +122,28 @@ def importar_swea(year, month, day, ti, tf):
 
     path = find_path("SWEA")
     # chequea que el archivo no está vacío
-    if Path(path + f"mvn_swe_l2_svyspec_{year}{month}{day}.cdf").stat().st_size > 1000:
-        swea = cdf.CDF(path + f"mvn_swe_l2_svyspec_{year}{month}{day}.cdf")
+    if exists(path + f"mvn_swe_l2_svyspec_{year}{month}{day}.cdf"):
+        if (
+            Path(path + f"mvn_swe_l2_svyspec_{year}{month}{day}.cdf").stat().st_size
+            > 1000
+        ):
+            swea = cdf.CDF(path + f"mvn_swe_l2_svyspec_{year}{month}{day}.cdf")
 
-        flux_all = swea.varget("diff_en_fluxes")
-        energia = swea.varget("energy")
-        t_unix = swea.varget("time_unix")
+            flux_all = swea.varget("diff_en_fluxes")
+            energia = swea.varget("energy")
+            t_unix = swea.varget("time_unix")
 
-        t = unix_to_decimal(t_unix)
+            t = unix_to_decimal(t_unix)
 
-        inicio = donde(t, ti)
-        fin = donde(t, tf)
+            inicio = donde(t, ti)
+            fin = donde(t, tf)
 
-        t_cut = t[inicio:fin]
+            t_cut = t[inicio:fin]
 
-        flux = flux_all[inicio:fin]
-        flux_plot = np.transpose(flux)[::-1]
+            flux = flux_all[inicio:fin]
+            flux_plot = np.transpose(flux)[::-1]
 
     else:
-        print("swea vacío")
         swea, t_cut, energia, flux_plot = 0, 0, 0, 0
 
     return swea, t_cut, energia, flux_plot
@@ -185,7 +202,7 @@ def importar_swia(year, month, day, ti, tf):
             vel_mso_cut = vel_mso_xyz[inicio:fin]  # km/s
 
     else:
-        print("swia vacío")
+        # print("swia vacío")
         swia, t_cut, density_cut, temperature_cut, vel_mso_cut = 0, 0, 0, 0, 0
 
     return swia, t_cut, density_cut, temperature_cut, vel_mso_cut
@@ -229,19 +246,23 @@ def importar_lpw(year, month, day, ti, tf):
 
     path = find_path("LPW")
 
-    if Path(path + f"mvn_lpw_l2_lpnt_{year}{month}{day}.cdf").stat().st_size > 1000:
-        lpw = cdf.CDF(path + f"mvn_lpw_l2_lpnt_{year}{month}{day}.cdf")
+    if exists(path + f"mvn_lpw_l2_lpnt_{year}{month}{day}.cdf"):
+        if Path(path + f"mvn_lpw_l2_lpnt_{year}{month}{day}.cdf").stat().st_size > 1000:
+            lpw = cdf.CDF(path + f"mvn_lpw_l2_lpnt_{year}{month}{day}.cdf")
 
-        t_unix = lpw.varget("time_unix")
-        e_density = lpw.varget("data")[:, 3]
+            t_unix = lpw.varget("time_unix")
+            e_density = lpw.varget("data")[:, 3]
 
-        t = unix_to_decimal(t_unix)
+            t = unix_to_decimal(t_unix)
 
-        inicio = donde(t, ti)
-        fin = donde(t, tf)
+            inicio = donde(t, ti)
+            fin = donde(t, tf)
 
-        t_cut = t[inicio:fin]
-        e_density_cut = e_density[inicio:fin]
+            t_cut = t[inicio:fin]
+            e_density_cut = e_density[inicio:fin]
+        else:
+            print("lpw vacío")
+            lpw, t_cut, e_density_cut = 0, 0, 0
 
     else:
         print("lpw vacío")

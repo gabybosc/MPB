@@ -4,16 +4,8 @@
 *.pyc
 *.pkl
 *.json
+*.npy
 
 #si quiero que uno en particular no sea ignorado, pongo una linea !nombre.txt
 !t1t2t3t4.txt
-!para_sofi.txt
-!catalogo_grupo1.txt
-!catalogo_grupo2.txt
-!catalogo_grupo3.txt
-!catalogo_grupo4.txt
-!hora_grupo1.txt
-!hoja_grupo2.txt
-!hora_grupo3.txt
-!hora_grupo4.txt
-!grupo1.txt
+!instrucciones.txt

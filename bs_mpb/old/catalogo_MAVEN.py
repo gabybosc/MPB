@@ -60,7 +60,7 @@ tengo que hacer una subselección
 Para el grupo 1 vamos a empezar por elegir noviembre de 2014
 """
 
-anio = "2021"  # input("año\n")
+anio = "2015"  # input("año\n")
 # mes = input("mes (MM)\n")
 
 nov2014 = []  # lista de índices de las listas lstc y lsth de noviembre
@@ -96,7 +96,7 @@ Si son muchas, elige 10 random y después yo miro y buscando la MPB más linda e
 Escribe un archivo con la fecha, hora, theta y pdyn
 """
 
-with open("outputs/catalogo_grupo4.txt", "a") as file:
+with open("outputs/catalogo_grupo3.txt", "a") as file:
     for i in l:
         fec = date_c[lst_c[nov2014[i]]]
         tim = time_c[lst_c[nov2014[i]]]

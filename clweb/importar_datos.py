@@ -6,7 +6,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 from socket import gethostname
 
 sys.path.append("..")
-from funciones import donde, t_clweb
+from funciones import donde, t_clweb, find_nearest
 
 
 def find_path(year, month, day, t_i, t_f):
@@ -39,7 +39,6 @@ def tiempo_limite(ti, tf):
 
 
 def importar_mag(year, month, day, ti, tf):
-
     t_i, t_f = tiempo_limite(ti, tf)
     path = find_path(year, month, day, t_i, t_f)
 
@@ -120,17 +119,25 @@ def importar_swea(year, month, day, ti, tf):
 
     inicio = donde(t_swea, ti)
     fin = donde(t_swea, tf)  # este corte no sirve para JE ni para energy!!
-
+    energy = swea[:, 7]
+    JE_total = swea[:, -1]
     t_cut = t_swea[inicio:fin]
 
-    return swea, t_cut, energias
+    JE_cut = np.zeros((len(t_cut), len(energias)))
+    for i, energia in enumerate(energias):
+        index = np.where(energy == find_nearest(energy, energia))[
+            0
+        ]  # no cambiarlo a donde()! Me tiene que dar un array, no un escalar.
+        JE = JE_total[index]
+        JE_cut[:, i] = JE[inicio:fin]
+
+    return swea, t_cut, JE_cut
 
 
 # #########################################################################SWIA
 
 
 def importar_swia(year, month, day, ti, tf):
-
     t_i, t_f = tiempo_limite(ti, tf)
     path = find_path(year, month, day, t_i, t_f)
 
@@ -153,7 +160,6 @@ def importar_swia(year, month, day, ti, tf):
 
 
 def importar_swicfa(year, month, day, ti, tf):
-
     t_i, t_f = tiempo_limite(ti, tf)
     path = find_path(year, month, day, t_i, t_f)
 
@@ -173,7 +179,6 @@ def importar_swicfa(year, month, day, ti, tf):
 
 
 def importar_vel_swica(year, month, day, ti, tf):
-
     t_i, t_f = tiempo_limite(ti, tf)
 
     path = find_path(year, month, day, t_i, t_f)
@@ -196,7 +201,6 @@ def importar_vel_swica(year, month, day, ti, tf):
 
 
 def importar_lpw(year, month, day, ti, tf):
-
     t_i, t_f = tiempo_limite(ti, tf)
 
     path = find_path(year, month, day, t_i, t_f)
@@ -219,7 +223,6 @@ def importar_lpw(year, month, day, ti, tf):
 
 
 def importar_static(year, month, day, ti, tf):
-
     t_i, t_f = tiempo_limite(ti, tf)
     path = find_path(year, month, day, t_i, t_f)
 

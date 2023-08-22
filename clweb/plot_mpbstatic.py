@@ -52,12 +52,8 @@ Bnorm = np.linalg.norm(B, axis=1)
 
 # ######### SWEA
 
-swea, t_swea, energias = importar_swea(year, month, day, ti, tf)
-energy = swea[:, 7]
-JE_total = swea[:, -1]
+swea, t_swea, JE = importar_swea(year, month, day, ti, tf)
 
-inicio_swea = donde(t_swea, ti)  # debería ser 0
-fin_swea = donde(t_swea, tf)
 
 # ######################################################################## SWIA
 
@@ -136,16 +132,8 @@ ax3.set_yscale("log")
 
 ax4 = plt.subplot2grid((5, 1), (3, 0), sharex=ax1)
 ax4.xaxis.set_major_formatter(xfmt)
-for energia in energias:
-    index = np.where(energy == find_nearest(energy, energia))[
-        0
-    ]  # no cambiarlo a donde()! Me tiene que dar un array, no un escalar.
-    JE = JE_total[index]
-    plt.semilogy(
-        tiempo_swea[inicio_swea:fin_swea],
-        JE[inicio_swea:fin_swea],
-        label=f"{energia} eV",
-    )
+plt.semilogy(tiempo_swea, JE)
+ax4.legend(["50", "100", "150"])
 ax4.legend(loc="center right")
 ax4.set_ylabel("Diff energy flux \n of the SW e- \n (cm⁻² sr⁻¹ s⁻¹)")
 

@@ -1,0 +1,34 @@
+Usando el catálogo de Jacob:
+
+1) catalogo_MAVEN_Jacob.py 
+    input: el csv de jacob
+    output: npys en path = outs_catalogo_previa/grupo{n}/{}.npy
+    Selecciona del catálogo de Jacob las fechas de cruces que correspondan a cada grupo
+
+2) encontrar_mpb_jacob.py 
+    input: npys en path = outs_catalogo_previa/grupo{n}/{}.npy
+    output: ../outputs/grupo{grupo}/limites_mpb_jacob.txt
+    Grafica parámetros y marca el bs de Jacob. Me pide 3 puntos del cruce y los guarda.
+    Tiene flag.
+
+3) quitar_nightside.py
+    input: ../outputs/grupo{grupo}/limites_mpb_jacob.txt
+    output: ../outputs/grupo{grupo}/jacob_dayside.txt
+    Saca los datos del nightside
+
+4) afinar_mpb_jacob_por_fecha.py
+    input: ../outputs/grupo{grupo}/jacob_dayside.txt
+    output: ../outputs/grupo{grupo}/jacob_dayside_revised.txt
+    Sirve para mirar caso por caso. Voy a usarlo para revisar los de flag 0.
+    Los que revise van a estar en el nuevo txt, pero voy a tener que combinarlo con el viejo.
+
+5) agregar_bs.py
+    input: ../outputs/grupo{grupo}/jacob_dayside.txt
+    output: ../outputs/grupo{grupo}/jacob_dayside_bs.txt
+    agrega el cruce del BS de jacob a mis listas, que no estaba...
+
+6) graficador.py
+    input: ../outputs/grupo{grupo}/jacob_dayside_bs.txt
+    output: ../../Pictures/BS_MPB/grupo{grupo}_Jacob/{}.png
+    grafica y guarda los cruces del dayside para poder chequear si nos gustan
+    los flaggeados con 0 están marcados para prestarles atención especial
