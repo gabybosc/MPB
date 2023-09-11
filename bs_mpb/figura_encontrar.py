@@ -85,17 +85,17 @@ def plot_encontrar(
             ax2.set_ylim([-50, 50])
             ax3.set_ylim([0, 50])
 
-        # ax4 = plt.subplot2grid((3, 2), (0, 1), sharex=ax1)
-        # plt.setp(ax4.get_xticklabels(), visible=False)
-        # ax4.set_xlabel("Tiempo (hdec)")
-        # ax4.set_ylabel("proton velocity")
-        # ax4.plot(t_swia, vel_mso)
-        # ax4.grid()
         ax4 = plt.subplot2grid((3, 2), (0, 1), sharex=ax1)
         plt.setp(ax4.get_xticklabels(), visible=False)
-        ax4.set_ylabel("posición")
-        ax4.plot(t, posicion)
+        ax4.set_xlabel("Tiempo (hdec)")
+        ax4.set_ylabel("proton velocity")
+        ax4.plot(t_swia, vel_mso)
         ax4.grid()
+        # ax4 = plt.subplot2grid((3, 2), (0, 1), sharex=ax1)
+        # plt.setp(ax4.get_xticklabels(), visible=False)
+        # ax4.set_ylabel("posición")
+        # ax4.plot(t, posicion)
+        # ax4.grid()
 
         ax5 = plt.subplot2grid((3, 2), (1, 1), sharex=ax1)
         plt.setp(ax5.get_xticklabels(), visible=False)
@@ -185,7 +185,7 @@ def marte(ax, x_bs, yz_bs, x_mpb, yz_mpb):
     ax.scatter(
         np.cos(90 * np.pi / 180), np.sin(90 * np.pi / 180), marker="x", color="#003f5c"
     )
-    ax.set_xlabel(r"$X_{MSO}$ ($R_M$)")
+    # ax.set_xlabel(r"$X_{MSO}$ ($R_M$)")
     ax.set_ylabel(r"$(Y²_{MSO} + Z²_{MSO} )^{1/2}$ ($R_M$)")
 
 

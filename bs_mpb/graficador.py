@@ -17,13 +17,13 @@ plt.rcParams["axes.prop_cycle"] = cycler(
     ["#003f5c", "#ffa600", "#de425b", "#68abb8", "#f3babc", "#6cc08b", "#cacaca"],
 )
 
-for grupo in [1, 2, 4]:
-    # grupo = input("grupo\n")
+# grupo = input("grupo\n")
+for grupo in [1, 2, 3, 4]:
     lista = np.genfromtxt(
         f"../outputs/grupo{grupo}/jacob_dayside_bs.txt", skip_header=1, dtype=str
     )
-    fig_path = f"../../../../Pictures/BS_MPB/grupo{grupo}_Jacob/"  # casa
-    # fig_path = f"../../Pictures/BS_MPB/grupo{grupo}_Jacob/"  # iafe
+    # fig_path = f"../../../../Pictures/BS_MPB/grupo{grupo}_Jacob/"  # casa
+    fig_path = f"../../Pictures/BS_MPB/grupo{grupo}_Jacob/"  # iafe
 
     for l in lista:
         flag = l[-3]
@@ -121,6 +121,7 @@ for grupo in [1, 2, 4]:
             ax3.set_xlabel("Tiempo (hdec)")
 
             ax4 = plt.subplot2grid((3, 2), (0, 1))
+            plt.setp(ax4.get_xticklabels(), visible=False)
             x_bs, yz_bs = BS_MPB(2.04, 1.03, 0.64)
             x_mpb, yz_mpb = BS_MPB(0.96, 0.9, 0.78)
             marte(ax4, x_bs, yz_bs, x_mpb, yz_mpb)
