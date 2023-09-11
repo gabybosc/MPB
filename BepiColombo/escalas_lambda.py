@@ -132,7 +132,7 @@ t_MVA = t[inicio_MVA:fin_MVA]
 
 xfmt = md.DateFormatter("%H:%M:%S")
 
-fig = plt.figure(2)
+fig = plt.figure()
 fig.subplots_adjust(
     top=0.93, bottom=0.07, left=0.05, right=0.95, hspace=0.005, wspace=0.15
 )
@@ -147,3 +147,6 @@ ax2 = plt.subplot2grid((1, 2), (0, 1), sharex=ax1)
 imshow_UTC("2021", "08", "10", tiempo_central, cociente, escalas_plot, "inferno", 3)
 multi = MultiCursor(fig.canvas, (ax1, ax2), color="c", lw=1)
 plt.show()
+
+
+# 13:55:00 +- 20seg

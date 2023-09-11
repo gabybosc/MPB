@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from importar_datos import importar_MAG_pds
+from leer_datos import importar_bepi
 
 import sys
 
@@ -67,12 +67,14 @@ def plot_orbita(pos_RV, orbita, xx, yz):
     # plt.show()
 
 
-# year, month, day, doy = fechas()
-# ti, tf = tiempos()
-#
-# t, B, pos = importar_MAG_pds(year, doy, ti, tf)
-# # t, B, pos = importar_MAG_pds(2011, 213, 0, 10)
-# pos_RV = pos / 6050
-# xx, yz = fit()
-# orbita = np.sqrt(pos_RV[:, 1] ** 2 + pos_RV[:, 2] ** 2)
-# plot_orbita(pos_RV, orbita, xx, yz)
+year, month, day = 2021, "08", 10  # fechas()
+ti_MVA, tf_MVA = 13.911111, 13.922222
+t1, t2, t3, t4 = [13.8974, 13.9078, 13.9283, 13.9469]
+
+
+t, B, posicion = importar_bepi(t1 - 0.5, t4 + 0.5)
+# t, B, pos = importar_MAG_pds(2011, 213, 0, 10)
+pos_RV = posicion / 6050
+xx, yz = fit_Xu()
+orbita = np.sqrt(pos_RV[:, 1] ** 2 + pos_RV[:, 2] ** 2)
+plot_orbita(pos_RV, orbita, xx, yz)
