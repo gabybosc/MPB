@@ -41,19 +41,12 @@ def altitude(SZA):
     return 1 + alt / 6050
 
 
-def fit_2d():
-    sza = np.linspace(0, np.pi / 2, 100)
-    alt = altitude(sza * 180 / np.pi)
-
-    y_alt = np.array([alt[i] * np.sin(sza[i]) for i in range(len(alt))])
-    x_alt = np.array([alt[i] * np.cos(sza[i]) for i in range(len(alt))])
-
-    yz = y_alt[x_alt >= 0]
-    xx = x_alt[x_alt >= 0]
-    return xx, yz
+def normal_polares(alt, SZA):
+    n = [1, 0.22 * (SZA - 1) / alt]
+    return n / np.linalg.norm(n)
 
 
-def fit_3d():
+def paraboloide():
     theta = np.linspace(0, np.pi * 2 / 4, 100)  # es el SZA
     phi = np.linspace(0, 2 * np.pi, 100)
     THETA, PHI = np.meshgrid(theta, phi)
@@ -69,7 +62,49 @@ def fit_3d():
     return x, y, z
 
 
-def plot_orbita(pos_RV, orbita, xx, yz):
+def normal_cartesianas(alt, SZA):
+    n = normal_polares(alt, SZA)
+    x = n[0] * np.cos(n[1])
+    y = n[0] * np.sin(n[1])
+    return x, y
+
+
+def plot_3d(x, y, z, R, norm):
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1, projection="3d")
+    ax.set_xlabel(r"$X_{MSO} (R_m)$")
+    ax.set_ylabel(r"$Y_{MSO} (R_m)$")
+    ax.set_zlabel(r"$Z_{MSO} (R_m)$")
+
+    ax.plot_surface(
+        x,
+        y,
+        z,
+        rstride=4,
+        cstride=4,
+        alpha=0.5,
+        edgecolor="none",
+        cmap=plt.get_cmap("Blues_r"),
+    )
+
+    plt.show()
+
+
+def fit_2d():
+    sza = np.linspace(0, np.pi / 2, 100)
+    alt = altitude(sza * 180 / np.pi)
+
+    y_alt = np.array([alt[i] * np.sin(sza[i]) for i in range(len(alt))])
+    x_alt = np.array([alt[i] * np.cos(sza[i]) for i in range(len(alt))])
+
+    yz = y_alt[x_alt >= 0]
+    xx = x_alt[x_alt >= 0]
+    return xx, yz
+
+
+def plot_2D(pos_RV, orbita, R, n):
+    xx, yz = fit_2d()
+
     fig, ax = plt.subplots()
     ax.plot(pos_RV[:, 0], orbita)
     ax.scatter(
@@ -79,6 +114,7 @@ def plot_orbita(pos_RV, orbita, xx, yz):
         pos_RV[-1, 0], orbita[-1], s=50, zorder=2, marker="x", color="k", label="end"
     )
     ax.plot(xx, yz, color="#5647b4", linestyle="-.")
+    ax.quiver(R, n)
     ax.axis("equal")
     ax.set_xlim(0, 2.5)
     ax.set_ylim(0, 2.5)
@@ -90,71 +126,7 @@ def plot_orbita(pos_RV, orbita, xx, yz):
     plt.legend()
 
 
-def normal(p):
-    """la normal de un paraboloide de revolución en un punto p en cartesianas"""
-    if p[0] == 0:
-        a = 1
-    else:
-        a = (p[1] ** 2 + p[2] ** 2) / p[0] ** 2
-        # "a" es el parámetro pero cambia punto a punto
-    print(p)
-    norm = np.array([2 * p[0], 2 * p[1] / a**2, 2 * p[2] / a**2])
-    norm = norm / np.linalg.norm(norm)
-    return norm
-
-
-def punto(theta, phi):
-    sza = theta * 180 / np.pi
-    alt = altitude(sza)
-
-    x = alt * np.cos(theta)
-    y = alt * np.sin(theta) * np.cos(phi)
-    z = alt * np.sin(theta) * np.sin(phi)
-
-    R = [x, y, z]
-    return R
-
-
-def plot_3d(x, y, z, R, norm):
-    fig = plt.figure()
-    ax = fig.add_subplot(1, 1, 1, projection="3d")
-    ax.set_xlabel(r"$X_{MSO} (R_m)$")
-    ax.set_ylabel(r"$Y_{MSO} (R_m)$")
-    ax.set_zlabel(r"$Z_{MSO} (R_m)$")
-
-    u, v = np.mgrid[0 : 2 * np.pi : 20j, 0 : np.pi : 10j]
-    ax.plot_wireframe(
-        np.cos(u) * np.sin(v),
-        np.sin(u) * np.sin(v),
-        np.cos(v),
-        color="#c1440e",
-        linewidth=0.5,
-    )
-    ax.plot_surface(
-        x,
-        y,
-        z,
-        rstride=4,
-        cstride=4,
-        alpha=0.5,
-        edgecolor="none",
-        cmap=plt.get_cmap("Blues_r"),
-    )
-    ax.quiver(
-        R[0],
-        R[1],
-        R[2],
-        norm[0],
-        norm[1],
-        norm[2],
-        color="k",
-        # length=0.5,
-        label="Normal del MVA",
-    )
-    plt.show()
-
-
-x, y, z = fit_3d()
+# x, y, z = paraboloide()
 # R = punto(0, 0)  # theta y phi se cuentan desde el [1, 0, 0]
 # norm = normal(R)
 # plot_3d(x, y, z, R, norm)
@@ -181,8 +153,8 @@ Bpara, Bperp, tpara = Bpara_Bperp(B[::32], t[::32], t1 - 0.2, t4 + 0.2)
 inicio_MVA = donde(t, ti_MVA)
 fin_MVA = donde(t, tf_MVA)
 R = posicion[inicio_MVA, :] / 6050
-norm = normal(R)
-plot_3d(x, y, z, R, norm)
+# norm = normal(R)
+# plot_3d(x, y, z, R, norm)
 
 
 # xx, yz = fit()
