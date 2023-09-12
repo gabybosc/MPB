@@ -99,7 +99,7 @@ phi, delta_B3 = error(lamb, B_cut, x)
 # normal_fit, X1, Y1, Z1, R, L0 = ajuste_conico(posicion[inicio:fin], index, orbita, x3)
 
 # B3_fit = np.dot(B_cut, normal_fit)
-
+n_fit = np.array([0.8938, 0.4485])
 ###############
 # Bootstrap
 
@@ -123,18 +123,21 @@ if sigma31 > sigma32:
 else:
     error_boot = sigma32
 
-# angulo_mva = np.arccos(np.clip(np.dot(normal_fit, x3), -1.0, 1.0))
+n = np.array([x3[0], np.sqrt(x3[1] ** 2 + x3[2] ** 2)])
+angulo_mva = np.arccos(np.clip(np.dot(n_fit, n), -1.0, 1.0))
 
 
 print(f"SZA = {SZAngle:.3g}º y altitud = {int(altitud)}km")
 print(f"MVA entre los tiempos {ti_MVA} y {tf_MVA}")
 print(f"Cociente de lambdas = {lamb[1]/lamb[2]:.4g}")
-# print(f"El ángulo entre las normales de MVA y del fit es {angulo_mva * 180/np.pi:.3g}º")
+print(
+    f"El ángulo entre las normales 2D de MVA y del fit es {angulo_mva * 180/np.pi:.3g}º"
+)
 
 ti = t1 - 0.15
 tf = t4 + 0.15
 
-B_para, B_perp_norm, t_plot = Bpara_Bperp(B, t, t1, t4)
+B_para, B_perp_norm, t_plot = Bpara_Bperp(B, t, ti, tf)
 
 plt.clf()  # clear figure
 fig = plt.figure(4)

@@ -9,15 +9,7 @@ import sys
 sys.path.append("..")
 from funciones import (
     donde,
-    fechas,
-    tiempos,
-    Mij,
-    error,
-    corrientes,
-    ancho_mpb,
-    Bpara_Bperp,
-    find_nearest,
-    next_available_row,
+    UTC_to_hdec,
     SZA,
 )
 
@@ -29,31 +21,31 @@ mpl.rcParams["axes.prop_cycle"] = cycler(
 )
 
 """
-Tengo que hacer el fit este que es 2D en 3D para que tenga sentido calcular la normal
+Ahora quiero que el fit sea considerando el punto por el que cruza
 """
 
 
-def altitude(sza):
-    """El SZA tiene que estar en grados!!"""
-
-    alt = 0.11 * sza**2 - 0.22 * sza + 389
-    # alt es simplemente la altitud *desde la corteza* en km, por eso le sumo 1 RV
+def altitude(sza, a=0.11, b=-0.22, c=389):
+    """El SZA en grados!!"""
+    alt = a * sza**2 + b * sza + c
     return 1 + alt / 6050
 
 
-def normal_polares(alt, sza):
-    n = [1, 0.22 * (sza - 1) / alt]
-    return n / np.linalg.norm(n)
+def normal(sza):
+    """sza en rad"""
+    r = 0.0597 * sza**2 - 0.002 * sza + 1.12
+    dr = 0.1194 * sza - 0.002
+    dx = dr * np.cos(sza) - r * np.sin(sza)
+    dy = dr * np.sin(sza) + r * np.cos(sza)
+    normal = np.array([-dy, dx])
+    n = normal / np.linalg.norm(normal)
+
+    if n[0] < 0:
+        n = -n
+    return n
 
 
-def normal_cartesianas(alt, sza):
-    n = normal_polares(alt, sza)
-    x = n[0] * np.cos(n[1])
-    y = n[0] * np.sin(n[1])
-    return [x, y]
-
-
-def fit_2d():
+def fit_Xu():
     sza = np.linspace(0, np.pi / 2, 100)
     alt = altitude(sza * 180 / np.pi)
 
@@ -65,9 +57,46 @@ def fit_2d():
     return xx, yz
 
 
-def plot_2D(pos_RV, R, n):
-    xx, yz = fit_2d()
+def c_parametro(posicion, pos_MPB):
+    r = np.linalg.norm(posicion[pos_MPB, :]) - 6050  # para convertirla en altitud
+    theta = SZA(posicion, pos_MPB)
+    c = r - 0.11 * theta**2 + 0.22 * theta
+
+    return c
+
+
+def b_parametro(posicion, pos_MPB):
+    r = np.linalg.norm(posicion[pos_MPB, :]) - 6050
+    theta = SZA(posicion, pos_MPB)
+    b = (r - 0.11 * theta**2 - 389) / theta
+
+    return b
+
+
+def a_parametro(posicion, pos_MPB):
+    """theta tiene que estar en grados"""
+    r = np.linalg.norm(posicion[pos_MPB, :]) - 6050
+    theta = SZA(posicion, pos_MPB)
+    a = (r + 0.22 * theta - 389) / theta**2
+    return a
+
+
+def fit_2d(a=0.11, b=-0.22, c=389):
+    sza = np.linspace(0, np.pi / 2, 100)
+    alt = altitude(sza * 180 / np.pi, a, b, c)
+
+    y_alt = np.array([alt[i] * np.sin(sza[i]) for i in range(len(alt))])
+    x_alt = np.array([alt[i] * np.cos(sza[i]) for i in range(len(alt))])
+
+    yz = y_alt[x_alt >= 0]
+    xx = x_alt[x_alt >= 0]
+    return xx, yz
+
+
+def plot_2D(pos_RV, R, n, c):
+    xx, yz = fit_2d(c=c)
     orbita = np.sqrt(pos_RV[:, 1] ** 2 + pos_RV[:, 2] ** 2)
+    nmva = np.array([0.7467, 0.6652])
 
     fig, ax = plt.subplots()
     ax.plot(pos_RV[:, 0], orbita)
@@ -78,7 +107,8 @@ def plot_2D(pos_RV, R, n):
         pos_RV[-1, 0], orbita[-1], s=50, zorder=2, marker="x", color="k", label="end"
     )
     ax.plot(xx, yz, color="#5647b4", linestyle="-.")
-    ax.quiver(R[0], R[1], n[0], n[1])
+    ax.quiver(R[0], R[1], n[0], n[1], scale=10, label="fit")
+    ax.quiver(R[0], R[1], nmva[0], nmva[1], color="C2", scale=10, label="MVA")
     ax.scatter(R[0], R[1])
     ax.axis("equal")
     ax.set_xlim(0, 2.5)
@@ -99,64 +129,58 @@ Bnorm = np.linalg.norm(B, axis=1)
 
 inicio_MVA = donde(t, ti_MVA)
 fin_MVA = donde(t, tf_MVA)
-R = posicion[inicio_MVA, :] / 6050
+pos_MPB = int(0.5 * (fin_MVA + inicio_MVA))
+bs = donde(t, 14)
+mpr = donde(t, UTC_to_hdec("13:50:00"))
+
+
+R = posicion[pos_MPB, :] / 6050
 R_2d = [R[0], np.sqrt(R[1] ** 2 + R[2] ** 2)]
-alt = np.linalg.norm(R)
-sza = SZA(posicion, inicio_MVA)
-n = normal_cartesianas(alt, sza)
+
+
+alt = np.linalg.norm(posicion[pos_MPB, :]) - 6050
+sza_rad = SZA(posicion, pos_MPB) / 180 * np.pi
+sza = SZA(posicion, pos_MPB)
+n = normal(sza_rad)
+# n = normal_cartesianas(1 + alt / 6050, sza_rad)
 pos_RV = posicion / 6050
-yz = np.sqrt(pos_RV[:, 1] ** 2 + pos_RV[:, 2] ** 2)
+c = c_parametro(posicion, pos_MPB)
 
-plot_2D(pos_RV, R_2d, n)
-# plt.figure()
-# plt.plot(pos_RV[:, 0], yz)
-
+plot_2D(pos_RV, R_2d, n, c)
 plt.show()
-# xx, yz = fit()
-# pos_RV = pos / 6050
-# orbita = np.sqrt(pos_RV[:, 1] ** 2 + pos_RV[:, 2] ** 2)
-# sza = SZA(pos, inicio_MVA)
-# R = pos_RV[inicio_MVA]
 
 
-# def fit_R(R, sza):
-#     a = (np.linalg.norm(R) - 1) * 6050 - 0.22 * sza - 389
-#     sza_array = np.linspace(0, np.pi / 2, 100)
-#     alt = 1 + (a + 0.22 * (sza_array * 180 / np.pi) + 389) / 6050
+"""
+descomentar lo siguiente si quiero chequear qué pasa cambiando diferentes parámetros
 
-#     y_alt = np.array([alt[i] * np.sin(sza_array[i]) for i in range(len(alt))])
-#     x_alt = np.array([alt[i] * np.cos(sza_array[i]) for i in range(len(alt))])
-
-#     yz = y_alt[x_alt >= 0]
-#     xx = x_alt[x_alt >= 0]
-#     return xx, yz
-
-
-# xx, yz = fit()
-# xxR, yzR = fit_R(R, sza)
-# pos_RV = pos / 6050
-# orbita = np.sqrt(pos_RV[:, 1] ** 2 + pos_RV[:, 2] ** 2)
-# plot_orbita(pos_RV, orbita, xx, yz)
-# plt.plot(xxR, yzR, color="m", linestyle="--")
-# plt.show()
-
-
-# # ahroa busco la normal
-
-# # plt.scatter(x_alt, y_alt, c="m")
-# # # plt.scatter(pos_RV[inicio_MVA, 0], np.sqrt(pos_RV[inicio_MVA, 1]**2 + pos_RV[inicio_MVA, 2]**2))
-# # plt.scatter(R[0], np.sqrt(R[1] ** 2 + R[2] ** 2))
-
-# p = 0.22 * (sza - 1)
-# tg = np.array([1, p])
-
-# plt.quiver(
-#     pos_RV[inicio_MVA, 0],
-#     np.sqrt(pos_RV[inicio_MVA, 1] ** 2 + pos_RV[inicio_MVA, 2] ** 2),
-#     tg[0],
-#     tg[1],
-# )
-# m = -1 / p
-# y = m * ()
-# k = altitude(sza) - 1 / p * sza
-# n = -1 / p * sza + k
+a = a_parametro(posicion, pos_MPB)
+b = b_parametro(posicion, pos_MPB)
+R_mpr = posicion[mpr, :] / 6050
+R_bs = posicion[bs, :] / 6050
+R_mpr2d = [R_mpr[0], np.sqrt(R_mpr[1] ** 2 + R_mpr[2] ** 2)]
+R_bs2d = [R_bs[0], np.sqrt(R_bs[1] ** 2 + R_bs[2] ** 2)]
+xx, yz = fit_Xu()
+XX_a, YZ_a = fit_2d(a=a)
+XX_b, YZ_b = fit_2d(b=b)
+XX_c, YZ_c = fit_2d(c=c)
+orbita = np.sqrt(pos_RV[:, 1] ** 2 + pos_RV[:, 2] ** 2)
+fig, ax = plt.subplots()
+ax.plot(pos_RV[:, 0], orbita)
+ax.scatter(R_mpr2d[0], R_mpr2d[1], label="MPR (13:50)")
+ax.scatter(R_2d[0], R_2d[1], label="MPB (13:55)")
+ax.scatter(R_bs2d[0], R_bs2d[1], label="BS (14:00)")
+ax.plot(xx, yz, color="#5647b4", linestyle="-.", label="Xu")
+ax.plot(XX_c, YZ_c, color="C3", linestyle="-.", label="c")
+ax.plot(XX_b, YZ_b, color="C4", linestyle="-.", label="b")
+ax.plot(XX_a, YZ_a, color="C5", linestyle="-.", label="a")
+ax.axis("equal")
+ax.set_xlim(0, 2.5)
+ax.set_ylim(0, 2.5)
+circle = plt.Circle((0, 0), 1, color="#eecb8b", clip_on=True)
+ax.add_artist(circle)
+ax.set_title("VENUS VSO coordinates", fontsize=16)
+ax.set_xlabel(r"$X_{VSO}$ ($R_V$)", fontsize=14)
+ax.set_ylabel(r"$(Y²_{VSO} + Z²_{VSO} )^{1/2}$ ($R_V$)", fontsize=14)
+plt.legend()
+plt.show()
+"""
