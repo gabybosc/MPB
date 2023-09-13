@@ -139,8 +139,7 @@ tf = t4 + 0.15
 
 B_para, B_perp_norm, t_plot = Bpara_Bperp(B, t, ti, tf)
 
-plt.clf()  # clear figure
-fig = plt.figure(4)
+fig = plt.figure()
 fig.subplots_adjust(
     top=0.93, bottom=0.07, left=0.05, right=0.95, hspace=0.005, wspace=0.15
 )

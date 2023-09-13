@@ -28,6 +28,7 @@ Ahora quiero que el fit sea considerando el punto por el que cruza
 def altitude(sza, a=0.11, b=-0.22, c=389):
     """El SZA en grados!!"""
     alt = a * sza**2 + b * sza + c
+    # alt es la altitud, en realidad yo quiero que la función me devuelva la coord r medida desde el (0,0) en RV
     return 1 + alt / 6050
 
 
@@ -46,7 +47,7 @@ def normal(sza):
 
 
 def fit_Xu():
-    sza = np.linspace(0, np.pi / 2, 100)
+    sza = np.linspace(0, np.pi * 0.5, 100)
     alt = altitude(sza * 180 / np.pi)
 
     y_alt = np.array([alt[i] * np.sin(sza[i]) for i in range(len(alt))])

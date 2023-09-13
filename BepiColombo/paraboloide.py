@@ -9,15 +9,7 @@ import sys
 sys.path.append("..")
 from funciones import (
     donde,
-    fechas,
-    tiempos,
-    Mij,
-    error,
-    corrientes,
-    ancho_mpb,
     Bpara_Bperp,
-    find_nearest,
-    next_available_row,
     SZA,
 )
 
@@ -33,25 +25,27 @@ Tengo que hacer el fit este que es 2D en 3D para que tenga sentido calcular la n
 """
 
 
-def altitude(SZA):
-    """El SZA tiene que estar en grados!!"""
-
-    alt = 0.11 * SZA**2 - 0.22 * SZA + 389
-    # alt es simplemente la altitud *desde la corteza* en km, por eso le sumo 1 RV
+def altitude(sza, a=0.11, b=-0.22, c=389):
+    """El SZA en grados!!"""
+    alt = a * sza**2 + b * sza + c
+    # alt es la altitud, en realidad yo quiero que la función me devuelva la coord r medida desde el (0,0) en RV
     return 1 + alt / 6050
 
 
-def normal_polares(alt, SZA):
-    n = [1, 0.22 * (SZA - 1) / alt]
-    return n / np.linalg.norm(n)
+def c_parametro(posicion, pos_MPB):
+    r = np.linalg.norm(posicion[pos_MPB, :]) - 6050  # para convertirla en altitud
+    theta = SZA(posicion, pos_MPB)
+    c = r - 0.11 * theta**2 + 0.22 * theta
+
+    return c
 
 
-def paraboloide():
-    theta = np.linspace(0, np.pi * 2 / 4, 100)  # es el SZA
+def paraboloide(a=0.11, b=-0.22, c=389):
+    theta = np.linspace(0, np.pi * 0.5, 100)  # es el SZA
     phi = np.linspace(0, 2 * np.pi, 100)
     THETA, PHI = np.meshgrid(theta, phi)
 
-    alt = altitude(THETA * 180 / np.pi)
+    alt = altitude(THETA * 180 / np.pi, a, b, c)
 
     y_alt = np.array([alt[i] * np.sin(THETA[i]) for i in range(len(alt))])
     x = np.array([alt[i] * np.cos(THETA[i]) for i in range(len(alt))])
@@ -62,20 +56,17 @@ def paraboloide():
     return x, y, z
 
 
-def normal_cartesianas(alt, SZA):
-    n = normal_polares(alt, SZA)
-    x = n[0] * np.cos(n[1])
-    y = n[0] * np.sin(n[1])
-    return x, y
+def plot_3d(pos_RV, R, n, c):
+    x, y, z = paraboloide(c=c)
+    nmva = np.array([0.7467, -0.6497, 0.1428])
 
-
-def plot_3d(x, y, z, R, norm):
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1, projection="3d")
     ax.set_xlabel(r"$X_{MSO} (R_m)$")
     ax.set_ylabel(r"$Y_{MSO} (R_m)$")
     ax.set_zlabel(r"$Z_{MSO} (R_m)$")
-
+    ax.plot(pos_RV[:, 0], pos_RV[:, 1], pos_RV[:, 2])
+    ax.quiver(R[0], R[1], R[2], n[0], n[1], n[2])
     ax.plot_surface(
         x,
         y,
@@ -88,42 +79,6 @@ def plot_3d(x, y, z, R, norm):
     )
 
     plt.show()
-
-
-def fit_2d():
-    sza = np.linspace(0, np.pi / 2, 100)
-    alt = altitude(sza * 180 / np.pi)
-
-    y_alt = np.array([alt[i] * np.sin(sza[i]) for i in range(len(alt))])
-    x_alt = np.array([alt[i] * np.cos(sza[i]) for i in range(len(alt))])
-
-    yz = y_alt[x_alt >= 0]
-    xx = x_alt[x_alt >= 0]
-    return xx, yz
-
-
-def plot_2D(pos_RV, orbita, R, n):
-    xx, yz = fit_2d()
-
-    fig, ax = plt.subplots()
-    ax.plot(pos_RV[:, 0], orbita)
-    ax.scatter(
-        pos_RV[0, 0], orbita[0], s=50, zorder=2, marker="o", color="r", label="start"
-    )
-    ax.scatter(
-        pos_RV[-1, 0], orbita[-1], s=50, zorder=2, marker="x", color="k", label="end"
-    )
-    ax.plot(xx, yz, color="#5647b4", linestyle="-.")
-    ax.quiver(R, n)
-    ax.axis("equal")
-    ax.set_xlim(0, 2.5)
-    ax.set_ylim(0, 2.5)
-    circle = plt.Circle((0, 0), 1, color="#eecb8b", clip_on=True)
-    ax.add_artist(circle)
-    ax.set_title("VENUS VSO coordinates", fontsize=16)
-    ax.set_xlabel(r"$X_{VSO}$ ($R_V$)", fontsize=14)
-    ax.set_ylabel(r"$(Y²_{VSO} + Z²_{VSO} )^{1/2}$ ($R_V$)", fontsize=14)
-    plt.legend()
 
 
 # x, y, z = paraboloide()
@@ -140,7 +95,7 @@ def plot_2D(pos_RV, orbita, R, n):
 #     return L, e, x0
 
 
-year, month, day = 2021, "08", 10  # fechas()
+year, month, day = 2021, "08", 10
 ti_MVA, tf_MVA = 13.911111, 13.922222
 t1, t2, t3, t4 = [13.8974, 13.9078, 13.9283, 13.9469]
 t, B, posicion = importar_bepi(t1 - 0.5, t4 + 0.5)
@@ -152,9 +107,12 @@ Bpara, Bperp, tpara = Bpara_Bperp(B[::32], t[::32], t1 - 0.2, t4 + 0.2)
 
 inicio_MVA = donde(t, ti_MVA)
 fin_MVA = donde(t, tf_MVA)
+pos_MPB = int((inicio_MVA + fin_MVA) * 0.5)
 R = posicion[inicio_MVA, :] / 6050
-# norm = normal(R)
-# plot_3d(x, y, z, R, norm)
+# n = normal(R)
+nmva = np.array([0.7467, -0.6497, 0.1428])
+c = c_parametro(posicion, inicio_MVA)
+plot_3d(posicion / 6050, R, nmva, c)
 
 
 # xx, yz = fit()
@@ -162,19 +120,6 @@ R = posicion[inicio_MVA, :] / 6050
 # orbita = np.sqrt(pos_RV[:, 1] ** 2 + pos_RV[:, 2] ** 2)
 # sza = SZA(pos, inicio_MVA)
 # R = pos_RV[inicio_MVA]
-
-
-# def fit_R(R, sza):
-#     a = (np.linalg.norm(R) - 1) * 6050 - 0.22 * sza - 389
-#     sza_array = np.linspace(0, np.pi / 2, 100)
-#     alt = 1 + (a + 0.22 * (sza_array * 180 / np.pi) + 389) / 6050
-
-#     y_alt = np.array([alt[i] * np.sin(sza_array[i]) for i in range(len(alt))])
-#     x_alt = np.array([alt[i] * np.cos(sza_array[i]) for i in range(len(alt))])
-
-#     yz = y_alt[x_alt >= 0]
-#     xx = x_alt[x_alt >= 0]
-#     return xx, yz
 
 
 # xx, yz = fit()
