@@ -29,7 +29,7 @@ def fit_Xu():
 
 
 def fit_R(R, sza):
-    """Ajusta el fit de Xu 2021 para la posicion de la nave"""
+    """Ajusta el fit de Xu 2021 para la posicion de la nave en RV"""
     a = (np.linalg.norm(R) - 1) * 6050 - 0.22 * sza - 389
     sza_array = np.linspace(0, np.pi / 2, 100)
     alt = 1 + (a + 0.22 * (sza_array * 180 / np.pi) + 389) / 6050
@@ -39,7 +39,10 @@ def fit_R(R, sza):
 
     yz = y_alt[x_alt >= 0]
     xx = x_alt[x_alt >= 0]
-    return xx, yz
+
+    vect = [0.22 * (sza - 1), -1]
+    norm = vect / np.linalg.norm(vect)
+    return xx, yz, norm
 
 
 def plot_orbita(pos_RV, orbita, xx, yz):

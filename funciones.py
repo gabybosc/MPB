@@ -304,6 +304,7 @@ def rms(x):
 
 
 def SZA(posicion, index):
+    """El SZA en grados"""
     SZA = angulo(posicion[index, :], [1, 0, 0]) * 180 / np.pi
     return SZA
 

@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 from cycler import cycler
 from importar_datos import importar_MAG_pds, importar_ELS_clweb
-from fit_venus import plot_orbita, fit_Xu
+from fit_venus import plot_orbita, fit_Xu, fit_R
 
 
 import sys
@@ -109,50 +109,114 @@ fin_MVA = donde(t, tf)
 sza = SZA(pos, inicio_MVA)
 x3 = MVA(B[inicio_MVA:fin_MVA])
 
-xx, yz = fit_Xu()
+xx_xu, yz_xu = fit_Xu()
 pos_RV = pos / 6050
+xx, yz, norm = fit_R(pos_RV[inicio_MVA, :], sza)
 orbita = np.sqrt(pos_RV[:, 1] ** 2 + pos_RV[:, 2] ** 2)
 
-
-plot_orbita(pos_RV, orbita, xx, yz)
-
-plt.quiver(
-    pos_RV[inicio_MVA, 0],
-    np.sqrt(pos_RV[inicio_MVA, 1] ** 2 + pos_RV[inicio_MVA, 2] ** 2),
-    x3[0],
-    np.sqrt(x3[1] ** 2 + x3[2] ** 2),
-)
+import math
 
 
-v_punto = np.zeros((len(B) - 1, 3))
-norma_v = np.zeros(len(B) - 1)
-for i in range(len(v_punto)):
-    v_punto[i, :] = (pos[i + 1, :] - pos[i]) / (1 / 32)
-    # en km/s, tiene resolución de 32Hz
-    norma_v[i] = np.linalg.norm(v_punto[i, :])
-# la velocidad promedio
-v_media = np.mean(v_punto, axis=0)
+def get_normals(Ri, Rf, length=0.1):
+    x0, y0, xa, ya = (
+        Ri[0],
+        Ri[1],
+        Rf[0],
+        Rf[1],
+    )
+    dx, dy = xa - x0, ya - y0
+    norm = math.hypot(dx, dy) * 1 / length
+    dx /= norm
+    dy /= norm
+
+    ax.plot((x0, x0 - dy), (y0, y0 + dx))
 
 
-x14, x23 = ancho_mpb(t1, t2, t3, t4, x3, v_media)
-print(f"Ancho MPB hmax = {x14:.3g}, hmin = {x23:.3g}")
+fig, ax = plt.subplots()
+ax.plot(xx, yz, color="#5682b4", linestyle="--", label="fit")
 
-inicio_up = donde(t, t1 - 0.015)
-fin_up = donde(t, t1)
-B_upstream = np.mean(B[inicio_up:fin_up, :], axis=0)  # nT
+R = pos_RV
+a = (np.linalg.norm(R[inicio_MVA]) - 1) * 6050 - 0.22 * sza - 389
+sza_array = np.linspace(0, np.pi / 2, 100)
+alt = 1 + (a + 0.22 * (sza * 180 / np.pi) + 389) / 6050
+y_i = np.array(alt * np.sin(sza))
+x_i = np.array(alt * np.cos(sza))
 
-inicio_down = donde(t, t4)
-fin_down = donde(t, t4 + 0.015)
-B_downstream = np.mean(B[inicio_down:fin_down, :], axis=0)  # nT
+a = (np.linalg.norm(R[fin_MVA]) - 1) * 6050 - 0.22 * sza - 389
+alt = 1 + (a + 0.22 * (sza * 180 / np.pi) + 389) / 6050
+y_f = np.array(alt * np.sin(sza))
+x_f = np.array(alt * np.cos(sza))
 
-J_s_MVA, J_v_MVA = corrientes(x3, B_upstream, B_downstream, x23)
-
-fuerza_mva = np.cross(J_v_MVA * 1e-9, B[inicio_down, :] * 1e-9)  # N/m^3 #en t4
-print(
-    f"Js = {J_s_MVA} mA/m, |Js| = {np.linalg.norm(J_s_MVA):.3g} mA/m \nJv = {J_v_MVA} nA/m², |Jv| = {np.linalg.norm(J_v_MVA):.3g} nA/m²"
-)
-
+ax.scatter(x_i, y_i, color="#5682b4", linestyle="--", label="fit")
 plt.show()
+
+get_normals([x_i, y_i], [x_f, y_f])
+
+ax.plot(pos_RV[:, 0], orbita)
+ax.scatter(
+    pos_RV[0, 0], orbita[0], s=50, zorder=2, marker="o", color="r", label="start"
+)
+ax.scatter(
+    pos_RV[-1, 0], orbita[-1], s=50, zorder=2, marker="x", color="k", label="end"
+)
+ax.plot(xx_xu, yz_xu, color="#5647b4", linestyle="-.", label="Xu")
+ax.plot(xx, yz, color="#5682b4", linestyle="--", label="fit")
+ax.axis("equal")
+ax.set_xlim(0, 2.5)
+ax.set_ylim(0, 2.5)
+circle = plt.Circle((0, 0), 1, color="#eecb8b", clip_on=True)
+ax.add_artist(circle)
+ax.set_title("VENUS VSO coordinates", fontsize=16)
+ax.set_xlabel(r"$X_{VSO}$ ($R_V$)", fontsize=14)
+ax.set_ylabel(r"$(Y²_{VSO} + Z²_{VSO} )^{1/2}$ ($R_V$)", fontsize=14)
+# plt.quiver(
+#     pos_RV[inicio_MVA, 0],
+#     np.sqrt(pos_RV[inicio_MVA, 1] ** 2 + pos_RV[inicio_MVA, 2] ** 2),
+#     x3[0],
+#     np.sqrt(x3[1] ** 2 + x3[2] ** 2),
+#     label="mva",
+# )
+
+# plt.quiver(
+#     pos_RV[inicio_MVA, 0],
+#     np.sqrt(pos_RV[inicio_MVA, 1] ** 2 + pos_RV[inicio_MVA, 2] ** 2),
+#     norm[0],
+#     norm[1],
+#     label="fit",
+# )
+
+plt.legend()
+plt.show()
+
+# v_punto = np.zeros((len(B) - 1, 3))
+# norma_v = np.zeros(len(B) - 1)
+# for i in range(len(v_punto)):
+#     v_punto[i, :] = (pos[i + 1, :] - pos[i]) / (1 / 32)
+#     # en km/s, tiene resolución de 32Hz
+#     norma_v[i] = np.linalg.norm(v_punto[i, :])
+# # la velocidad promedio
+# v_media = np.mean(v_punto, axis=0)
+
+
+# x14, x23 = ancho_mpb(t1, t2, t3, t4, x3, v_media)
+# print(f"Ancho MPB hmax = {x14:.3g}, hmin = {x23:.3g}")
+
+# inicio_up = donde(t, t1 - 0.015)
+# fin_up = donde(t, t1)
+# B_upstream = np.mean(B[inicio_up:fin_up, :], axis=0)  # nT
+
+# inicio_down = donde(t, t4)
+# fin_down = donde(t, t4 + 0.015)
+# B_downstream = np.mean(B[inicio_down:fin_down, :], axis=0)  # nT
+
+# J_s_MVA, J_v_MVA = corrientes(x3, B_upstream, B_downstream, x23)
+
+# fuerza_mva = np.cross(J_v_MVA * 1e-9, B[inicio_down, :] * 1e-9)  # N/m^3 #en t4
+# print(
+#     f"Js = {J_s_MVA} mA/m, |Js| = {np.linalg.norm(J_s_MVA):.3g} mA/m \nJv = {J_v_MVA} nA/m², |Jv| = {np.linalg.norm(J_v_MVA):.3g} nA/m²"
+# )
+
+# plt.show()
 # E_Hall = np.cross(J_v_MVA * 1e-9, B[inicio_down, :] * 1e-9) / (q_e * n_e)  # V/m
 
 # buenas órbitas: SZA no tan alto, el campo en SW no es Bx
