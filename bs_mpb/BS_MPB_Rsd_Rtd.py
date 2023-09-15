@@ -14,7 +14,7 @@ def Rsd_Rtd(pos, pos_polar, x0, eps):
     x0, eps son los parámetros de la cónica
     """
 
-    N_events = len(pos[:, 0])
+    N_events = len(pos)
     L = np.empty(N_events)
 
     for i in range(N_events):
@@ -28,7 +28,7 @@ def Rsd_Rtd(pos, pos_polar, x0, eps):
     for i in range(N_events):
         Rsd[i] = fvig.Rsd(L[i], x0, eps)
 
-        Rtd[i] = fvig.Rtd(L[i], pos[i, 1], pos[i, 2], x0, eps)
+        Rtd[i] = fvig.Rtd(L[i], x0, eps)
 
     return Rsd, Rtd
 
@@ -37,15 +37,15 @@ g = input("número de grupo\n")
 
 path = f"../outputs/grupo{g}/"
 
-R_BS = np.transpose(np.load(path + "pos_bs.npy"))
-R_MPB = np.transpose(np.load(path + "pos_mpb.npy"))
+R_BS = np.load(path + "pos_bs.npy")
+R_MPB = np.load(path + "pos_mpb.npy")
 
 Rpolar_BS = np.load(path + "pos_polar_bs.npy")
 
 Rpolar_MPB = np.load(path + "pos_polar_mpb.npy")
 
 
-N_events = len(R_BS[:, 0])
+N_events = len(R_BS)
 
 
 # ADJUST L VIGNES TO FIT BS & MPB CROSSINGS
@@ -75,17 +75,17 @@ Rtd_MPB = np.empty(N_events)
 for i in range(N_events):
     Rsd_BS[i] = fvig.Rsd(L_BS[i])
 
-    Rtd_BS[i] = fvig.Rtd(L_BS[i], R_BS[i, 1], R_BS[i, 2])
+    Rtd_BS[i] = fvig.Rtd(L_BS[i])
 
     Rsd_MPB[i] = fvig.Rsd(L_MPB[i], 0.78, 0.90)
 
-    Rtd_MPB[i] = fvig.Rtd(L_MPB[i], R_MPB[i, 1], R_MPB[i, 2], 0.78, 0.90)
+    Rtd_MPB[i] = fvig.Rtd(L_MPB[i], 0.78, 0.90)
 
 
-# np.save(path + "Rsd_bs.npy", Rsd_BS)
-# np.save(path + "Rtd_bs.npy", Rtd_BS)
-# np.save(path + "Rsd_mpb.npy", Rsd_MPB)
-# np.save(path + "Rtd_mpb.npy", Rtd_MPB)
+np.save(path + "Rsd_bs.npy", Rsd_BS)
+np.save(path + "Rtd_bs.npy", Rtd_BS)
+np.save(path + "Rsd_mpb.npy", Rsd_MPB)
+np.save(path + "Rtd_mpb.npy", Rtd_MPB)
 
 
 Rsd_BS_f, Rtd_BS_f = Rsd_Rtd(R_BS, Rpolar_BS, 0.64, 1.03)

@@ -20,10 +20,12 @@ g = input("número de grupo\n")
 
 path = f"../outputs/grupo{g}/"
 
+datos = np.genfromtxt(f"../outputs/grupo{g}/FINAL_ESTA_SI.txt")
+
 
 # find spacecraft position at crossing times
-pos_bs = np.transpose(np.load(path + "pos_bs.npy"))
-pos_mpb = np.transpose(np.load(path + "pos_mpb.npy"))
+pos_bs = np.load(path + "pos_bs.npy")
+pos_mpb = np.load(path + "pos_mpb.npy")
 
 
 # polar

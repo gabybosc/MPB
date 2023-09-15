@@ -18,7 +18,7 @@ newnew.npy
 
 
 def generar_npys(path):
-    lista = np.genfromtxt(path + f"bs_mpb_final.txt", dtype=str)
+    lista = np.genfromtxt(path + f"FINAL_ESTA_SI.txt", dtype=str)
 
     pos_bs = []  # la posición media del bs
     pos_mpb = []  # la posición media de la mpb
@@ -60,7 +60,7 @@ def generar_npys(path):
 
 
 def generar_npys_limites(path):
-    lista = np.genfromtxt(path + f"limites_bs_mpb.txt", skip_header=1, dtype=str)
+    lista = np.genfromtxt(path + f"FINAL_ESTA_SI.txt", skip_header=1, dtype=str)
 
     pos_bs_min = []  # la posición min del bs
     pos_bs = []
@@ -71,15 +71,18 @@ def generar_npys_limites(path):
     newdates = []  # día y hora aprox del cruce
     final = []  # la lista original pero en npy
 
+
+    # ate_bs	date_mpb	BS_min	BS	BS_max	flag_BS	MPB_min	MPB	MPB_max	flag_MPB	theta	beta
+    # 0       1           2       3       4   5       6       7       8       9
     for l in lista:
         year, month, day = l[0].split("-")
 
-        t_bs_min = UTC_to_hdec(l[1])
-        t_bs = UTC_to_hdec(l[2])
-        t_bs_max = UTC_to_hdec(l[3])
-        t_mpb_min = UTC_to_hdec(l[5])
-        t_mpb = UTC_to_hdec(l[6])
-        t_mpb_max = UTC_to_hdec(l[7])
+        t_bs_min = UTC_to_hdec(l[2])
+        t_bs = UTC_to_hdec(l[3])
+        t_bs_max = UTC_to_hdec(l[4])
+        t_mpb_min = UTC_to_hdec(l[6])
+        t_mpb = UTC_to_hdec(l[7])
+        t_mpb_max = UTC_to_hdec(l[8])
 
         if t_bs < t_mpb:
             ti = t_bs - 0.5
@@ -139,9 +142,6 @@ def generar_npys_limites(path):
     np.save(path + "pos_mpb_max.npy", pos_mpb_max)
 
 
-# pos_bs, pos_bs_max, pos_bs_min, pos_mpb, pos_bs_min, pos_mpb_max = generar_npys_limites(
-#     path
-# )
-# grupo = input("número de grupo\n")
-# path = f"../outputs/grupo{grupo}/"
-# generar_npys(grupo)
+grupo = input("número de grupo\n")
+path = f"../outputs/grupo{grupo}/"
+generar_npys_limites(path)
