@@ -72,6 +72,7 @@ def generar_npys_limites(path):
     final = []  # la lista original pero en npy
 
     for l in lista:
+        print(l)
         year, month, day = l[0].split("-")
 
         t_bs_min = UTC_to_hdec(l[1])
@@ -139,9 +140,7 @@ def generar_npys_limites(path):
     np.save(path + "pos_mpb_max.npy", pos_mpb_max)
 
 
-# pos_bs, pos_bs_max, pos_bs_min, pos_mpb, pos_bs_min, pos_mpb_max = generar_npys_limites(
-#     path
-# )
 # grupo = input("número de grupo\n")
+# grupo = 4
 # path = f"../outputs/grupo{grupo}/"
-# generar_npys(grupo)
+# generar_npys_limites(path)
