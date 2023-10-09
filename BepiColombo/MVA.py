@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.dates as md
 from leer_datos import importar_bepi
+from funciones_bepi import tiempos_UTC
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from matplotlib.colors import LogNorm
 import sys
@@ -15,11 +17,11 @@ from funciones import (
     Bpara_Bperp,
     SZA,
 )
-from funciones_metodos import (
-    ajuste_conico,
-    plot_bootstrap,
-    bootstrap,
-)
+
+# from funciones_metodos import (
+#     plot_bootstrap,
+#     bootstrap,
+# )
 from funciones_plot import hodograma
 
 
@@ -83,45 +85,35 @@ B_norm_medio = np.linalg.norm(B_medio_vectorial)
 
 hodograma(B1, B2, B3)
 
-plt.show(block=False)
 # el error
 phi, delta_B3 = error(lamb, B_cut, x)
 
 ###############
-# fit
-# orbita = posicion[donde(t, t1 - 1) : donde(t, t4 + 1)] / 3390  # radios marcianos
 
-# index = donde(
-#     t[inicio:fin], (t2 + t3) / 2
-# )  # el tiempo en el medio de la hoja de corriente
-# x0 = 0.78
-# e = 0.9
-# normal_fit, X1, Y1, Z1, R, L0 = ajuste_conico(posicion[inicio:fin], index, orbita, x3)
-
-# B3_fit = np.dot(B_cut, normal_fit)
 n_fit = np.array([0.8938, 0.4485])
+# B3_fit = np.dot(B_cut, n_fit)  # esto sirve para una normal 3D
 ###############
 # Bootstrap
 
-N_boot = 1000
-normal_boot, phi_boot, delta_B3_boot, out, out_phi = bootstrap(N_boot, B_cut)
+# N_boot = 1000
+# normal_boot, phi_boot, delta_B3_boot, out, out_phi = bootstrap(N_boot, B_cut)
 
-muB, sigmaB, mu31, sigma31, mu32, sigma32 = plot_bootstrap(out, out_phi)
+# muB, sigmaB, mu31, sigma31, mu32, sigma32 = plot_bootstrap(out, out_phi)
 
-B3_boot = np.dot(B_cut, normal_boot)
+# B3_boot = np.dot(B_cut, normal_boot)
 
-#######
-# Errores
-if phi[2, 1] > phi[2, 0]:
-    error_normal = phi[2, 1] * 57.2958
-else:
-    error_normal = phi[2, 0] * 57.2958
-    # quiero ver si el error más grande es phi31 o phi32
+# #######
+# # Errores
+# if phi[2, 1] > phi[2, 0]:
+#     error_normal = phi[2, 1] * 57.2958
+# else:
+#     error_normal = phi[2, 0] * 57.2958
+#     # quiero ver si el error más grande es phi31 o phi32
 
-if sigma31 > sigma32:
-    error_boot = sigma31
-else:
-    error_boot = sigma32
+# if sigma31 > sigma32:
+#     error_boot = sigma31
+# else:
+#     error_boot = sigma32
 
 n = np.array([x3[0], np.sqrt(x3[1] ** 2 + x3[2] ** 2)])
 angulo_mva = np.arccos(np.clip(np.dot(n_fit, n), -1.0, 1.0))
@@ -139,46 +131,68 @@ tf = t4 + 0.15
 
 B_para, B_perp_norm, t_plot = Bpara_Bperp(B, t, ti, tf)
 
-fig = plt.figure()
+t, B, pos = importar_bepi(13.5, 14.1)
+Bnorm = np.linalg.norm(B, axis=1)
+pos_RV = pos / 6050
+
+
+Bpara, Bperp, tpara = Bpara_Bperp(B, t, 13.5, 14.1)
+
+yy = 2021
+mm = 8
+dd = 10
+tiempo_mag = tiempos_UTC(yy, mm, dd, t)
+tiempo_paraperp = tiempos_UTC(yy, mm, dd, tpara)
+
+outs = [13.8807, 13.8933, 13.9094, 13.929]
+MPB = tiempos_UTC(yy, mm, dd, outs)
+
+fig = plt.figure(
+    2, figsize=(8, 30)
+)  # Lo bueno de esta forma es que puedo hacer que solo algunos compartan eje
 fig.subplots_adjust(
-    top=0.93, bottom=0.07, left=0.05, right=0.95, hspace=0.005, wspace=0.15
+    top=0.95, bottom=0.1, left=0.12, right=0.95, hspace=0.0, wspace=0.15
 )
-fig.set_size_inches(15, 10)  # con este tamaño ocupa toda la pantalla de la laptop
+plt.xticks(rotation=25)
+xfmt = md.DateFormatter("%H:%M")
 
+ax1 = plt.gca()
 ax1 = plt.subplot2grid((3, 1), (0, 0))
-plt.plot(t_plot, B_para, linewidth=1, label=r"|$\Delta B \parallel$| / B")
-plt.plot(t_plot, B_perp_norm, "-.", linewidth=1, label=r"|$\Delta B \perp$| / B")
-plt.setp(ax1.get_xticklabels(), visible=False)
-for xc in [t1, t2, t3, t4]:
-    plt.axvline(x=xc, color="k", linewidth=1)
-plt.axvline(x=ti_MVA, color="r", linewidth=1)
-plt.axvline(x=tf_MVA, color="r", linewidth=1)
-ax1.set_ylabel(r"|$\Delta B$|/ B")
-ax1.grid()
-ax1.legend()
-
-ax4 = plt.subplot2grid((3, 1), (1, 0), sharex=ax1)
-ax4.plot(t, B)
-for xc in [t1, t2, t3, t4]:
-    plt.axvline(x=xc, color="k", linewidth=1)
-plt.axvline(x=ti_MVA, color="r", linewidth=1)
-plt.axvline(x=tf_MVA, color="r", linewidth=1)
-plt.setp(ax4.get_xticklabels(), visible=False)
-ax4.set_ylabel("Bx, By, Bz (nT)")
-ax4.legend(["Bx", "By", "Bz"])
-ax4.grid()
-
+ax2 = plt.subplot2grid((3, 1), (1, 0), sharex=ax1)
 ax3 = plt.subplot2grid((3, 1), (2, 0), sharex=ax1)
-plt.plot(t, np.linalg.norm(B, axis=1))
-ax3.grid()
-for xc in [t1, t2, t3, t4]:
-    plt.axvline(x=xc, color="k", linewidth=1)
-plt.axvline(x=ti_MVA, color="r", linewidth=1)
-plt.axvline(x=tf_MVA, color="r", linewidth=1)
-ax3.set_ylabel("|B| (nT)")
-ax3.set_xlabel("Tiempo (hdec)")
+for ax in [ax1, ax2, ax3]:
+    ax.xaxis.set_major_formatter(xfmt)
+    ax.set_xlim(tiempo_mag[0], tiempo_mag[-1])
+    ax.grid()
 
-plt.suptitle(f"BepiColombo {year}-{month}-{day}")
+ax1.plot(tiempo_mag, Bnorm, linewidth=0.5)
+ax1.set_ylabel("|B| (nT)")
+ax1.set_title(f"Bepi-Colombo MAG 2021-08-10")
+
+ax2.plot(tiempo_mag, B[:, 0], label="Bx VSO", linewidth=0.5)
+ax2.plot(tiempo_mag, B[:, 1], label="By VSO", linewidth=0.5)
+ax2.plot(tiempo_mag, B[:, 2], label="Bz VSO", linewidth=0.5)
+ax2.set_ylabel("B components (nT)")
+
+ax3.plot(tiempo_paraperp, Bpara, linewidth=0.5, label=r"|$\Delta B \parallel$| / |B|")
+ax3.plot(tiempo_paraperp, Bperp, "-.", linewidth=0.5, label=r"|$\Delta B \perp$| / |B|")
+ax3.set_ylabel("Relative variation \n of B")
+ax3.set_xlabel("Tiempo (UTC)")
+ax3.set_ylim([-0.1, 1])
 
 
-plt.show(block=False)
+for ax in [ax2, ax3]:
+    ax.legend(loc="upper left")
+for ax in [ax1, ax2]:
+    plt.setp(ax.get_xticklabels(), visible=False)
+for ax in [ax1, ax2, ax3]:
+    ax.axvspan(xmin=MPB[1], xmax=MPB[2], facecolor="#79B953", alpha=0.5)
+    ax.axvspan(xmin=MPB[0], xmax=MPB[1], facecolor="#cdcdcd", alpha=0.7)
+    ax.axvspan(xmin=MPB[2], xmax=MPB[3], facecolor="#cdcdcd", alpha=0.7)
+    plt.axvline(x=ti_MVA, color="r", linewidth=1)
+    plt.axvline(x=tf_MVA, color="r", linewidth=1)
+    # en un radio de 10 min de la MPB
+    ax.set_xlim([MPB[0] - np.timedelta64(10, "m"), MPB[-1] + np.timedelta64(10, "m")])
+
+
+plt.show()
