@@ -134,8 +134,8 @@ hoja_t1t2t3t4(hoja_parametros, nr, t1, t2, t3, t4)
 v_punto = np.zeros((len(B) - 1, 3))
 norma_v = np.zeros(len(B) - 1)
 for i in range(len(v_punto)):
-    v_punto[i, :] = (pos[i + 1, :] - pos[i]) / (1 / 32)
-    # en km/s, tiene resolución de 32Hz
+    v_punto[i, :] = (pos[i + 1, :] - pos[i]) / (1 / 128)
+    # en km/s, tiene resolución de 128Hz
     norma_v[i] = np.linalg.norm(v_punto[i, :])
 # la velocidad promedio
 v_media = np.mean(v_punto, axis=0)

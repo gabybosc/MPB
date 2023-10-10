@@ -185,21 +185,19 @@ ax.set_ylabel(r"$(Y²_{VSO} + Z²_{VSO} )^{1/2}$ ($R_V$)", fontsize=14)
 #     label="fit",
 # )
 
-plt.legend()
-plt.show()
 
-# v_punto = np.zeros((len(B) - 1, 3))
-# norma_v = np.zeros(len(B) - 1)
-# for i in range(len(v_punto)):
-#     v_punto[i, :] = (pos[i + 1, :] - pos[i]) / (1 / 32)
-#     # en km/s, tiene resolución de 32Hz
-#     norma_v[i] = np.linalg.norm(v_punto[i, :])
-# # la velocidad promedio
-# v_media = np.mean(v_punto, axis=0)
+v_punto = np.zeros((len(B) - 1, 3))
+norma_v = np.zeros(len(B) - 1)
+for i in range(len(v_punto)):
+    v_punto[i, :] = (pos[i + 1, :] - pos[i]) / (1 / 128)
+    # en km/s, tiene resolución de 128Hz
+    norma_v[i] = np.linalg.norm(v_punto[i, :])
+# la velocidad promedio
+v_media = np.mean(v_punto, axis=0)
 
 
-# x14, x23 = ancho_mpb(t1, t2, t3, t4, x3, v_media)
-# print(f"Ancho MPB hmax = {x14:.3g}, hmin = {x23:.3g}")
+x14, x23 = ancho_mpb(t1, t2, t3, t4, x3, v_media)
+print(f"Ancho MPB hmax = {x14:.3g} km, hmin = {x23:.3g} km")
 
 # inicio_up = donde(t, t1 - 0.015)
 # fin_up = donde(t, t1)
@@ -222,3 +220,5 @@ plt.show()
 # buenas órbitas: SZA no tan alto, el campo en SW no es Bx
 # 21 nov 2007
 # 14 abr 2007
+plt.legend()
+plt.show()
