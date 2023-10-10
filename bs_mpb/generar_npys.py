@@ -71,10 +71,10 @@ def generar_npys_limites(path):
     newdates = []  # día y hora aprox del cruce
     final = []  # la lista original pero en npy
 
-
     # ate_bs	date_mpb	BS_min	BS	BS_max	flag_BS	MPB_min	MPB	MPB_max	flag_MPB	theta	beta
     # 0       1           2       3       4   5       6       7       8       9
     for l in lista:
+        print(l)
         year, month, day = l[0].split("-")
 
         t_bs_min = UTC_to_hdec(l[2])
@@ -142,6 +142,7 @@ def generar_npys_limites(path):
     np.save(path + "pos_mpb_max.npy", pos_mpb_max)
 
 
-grupo = input("número de grupo\n")
-path = f"../outputs/grupo{grupo}/"
-generar_npys_limites(path)
+# grupo = input("número de grupo\n")
+# grupo = 4
+# path = f"../outputs/grupo{grupo}/"
+# generar_npys_limites(path)

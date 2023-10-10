@@ -6,6 +6,8 @@ import Vignesfit_functions as fvig
 from generar_npys import generar_npys_limites
 from scipy import odr
 from scipy.stats import chisquare
+import matplotlib as mpl
+from cycler import cycler
 
 """
 Grafica R_sd BS vs MPB teniendo en cuenta el error
@@ -25,6 +27,10 @@ Rtd_bs.npy
 Rsd_mpb.npy
 Rtd_mpb.npy
 """
+mpl.rcParams["axes.prop_cycle"] = cycler(
+    "color",
+    ["#003f5c", "#ffa600", "#de425b", "#68abb8", "#f3babc", "#6cc08b", "#cacaca"],
+)
 
 
 def polarizar(pos, r0):
@@ -92,7 +98,7 @@ g = input("número de grupo\n")
 path = f"../outputs/grupo{g}/"
 
 # if not exists(path + "pos_bs_min.npy"):
-generar_npys_limites(path)
+# generar_npys_limites(path)
 
 pos_bs = np.load(path + "pos_bs.npy")
 pos_bs_min = np.load(path + "pos_bs_min.npy")
@@ -130,8 +136,8 @@ np.save(path + "Rtd_bs_max.npy", Rtd_BS_max)
 np.save(path + "Rsd_bs.npy", Rsd_BS)
 np.save(path + "Rtd_bs.npy", Rtd_BS)
 
-x0_mpb = 0.86
-eps_mpb = 0.92
+x0_mpb = 0.78
+eps_mpb = 0.90
 Rsd_MPB_min, Rtd_MPB_min = Rsd_Rtd(pos_mpb_min, Rpolar_MPB_min, x0_mpb, eps_mpb)
 Rsd_MPB_max, Rtd_MPB_max = Rsd_Rtd(pos_mpb_max, Rpolar_MPB_max, x0_mpb, eps_mpb)
 Rsd_MPB, Rtd_MPB = Rsd_Rtd(pos_mpb, Rpolar_MPB, x0_mpb, eps_mpb)
@@ -185,15 +191,18 @@ def chired(ydata, ymod, param_fit):
 
 
 newfit = myoutput.beta[0] * Rsd_MPB + myoutput.beta[1]
-chisquare(Rsd_BS, newfit)
-chisquare(Rsd_BS, lin)
+# chisquare(Rsd_BS, newfit)
+# chisquare(Rsd_BS, lin)
 chi_Rsd = chired(Rsd_BS, lin, 2)
 chi_Rsd_err = chired(Rsd_BS, newfit, 2)
-plt.errorbar(Rsd_MPB, Rsd_BS, fmt="o", xerr=err_mpb, yerr=err_bs)
+plt.errorbar(Rsd_MPB, Rsd_BS, fmt="o", xerr=err_mpb, yerr=err_bs, zorder=0)
 plt.plot(Rsd_MPB, lin, label=f"w/o error, {chi_Rsd}")
 plt.plot(Rsd_MPB, newfit, label=f"w/error, {chi_Rsd_err}")
 plt.legend()
 plt.gca().set_aspect("equal")
+plt.xlabel("Standoff Distance MPB (RM)")
+plt.ylabel("Standoff Distance BS (RM)")
+plt.title(f"Fit con el error mínimo - Grupo {g}")
 plt.show()
 # recorto los outliers  # esto me falta modificarlo por el momento
 
