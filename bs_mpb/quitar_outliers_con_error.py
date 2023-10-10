@@ -74,7 +74,7 @@ def Rsd_Rtd(pos, pos_polar, x0, eps):
     for i in range(N_events):
         Rsd[i] = fvig.Rsd(L[i], x0, eps)
 
-        Rtd[i] = fvig.Rtd(L[i], pos[i, 1], pos[i, 2], x0, eps)
+        Rtd[i] = fvig.Rtd(L[i], x0, eps)
 
     return Rsd, Rtd
 
@@ -191,6 +191,7 @@ def chired(ydata, ymod, param_fit):
 
 
 newfit = myoutput.beta[0] * Rsd_MPB + myoutput.beta[1]
+print("pendiente del fit c/error" + myoutput.beta[0])
 # chisquare(Rsd_BS, newfit)
 # chisquare(Rsd_BS, lin)
 chi_Rsd = chired(Rsd_BS, lin, 2)
@@ -206,129 +207,130 @@ plt.title(f"Fit con el error mínimo - Grupo {g}")
 plt.show()
 # recorto los outliers  # esto me falta modificarlo por el momento
 
+# plt.plot(Rsd_MPB, Rsd_BS - Rsd_MPB, ".")
 
-# idx = [i for i in range(len(Rtd_BS)) if np.abs(Rtd_BS[i]) < 10]
+idx = [i for i in range(len(Rtd_BS)) if np.abs(Rtd_BS[i]) < 10]
 
-# Rtd_BS_mod = np.array(Rtd_BS[idx])
-# Rsd_BS_mod = np.array(Rsd_BS[idx])
-# Rtd_MPB_mod = np.array(Rtd_MPB[idx])
-# Rsd_MPB_mod = np.array(Rsd_MPB[idx])
+Rtd_BS_mod = np.array(Rtd_BS[idx])
+Rsd_BS_mod = np.array(Rsd_BS[idx])
+Rtd_MPB_mod = np.array(Rtd_MPB[idx])
+Rsd_MPB_mod = np.array(Rsd_MPB[idx])
 
-# m_Rtd, b_Rtd = np.polyfit(Rtd_MPB_mod, Rtd_BS_mod, 1, cov=False)
-# m_Rsd, b_Rsd = np.polyfit(Rsd_MPB_mod, Rsd_BS_mod, 1, cov=False)
+m_Rtd, b_Rtd = np.polyfit(Rtd_MPB_mod, Rtd_BS_mod, 1, cov=False)
+m_Rsd, b_Rsd = np.polyfit(Rsd_MPB_mod, Rsd_BS_mod, 1, cov=False)
 
-# names = [i[0] + "-" + i[1] + "-" + i[2] + "h" + str(i[3])[:3] for i in newdates[idx]]
+names = [i[0] + "-" + i[1] + "-" + i[2] + "h" + str(i[3])[:3] for i in newdates[idx]]
 # calculate reduced chi square
 
 
-# chi_Rsd = np.round(chired(Rsd_BS_mod, m_Rsd * Rsd_MPB_mod + b_Rsd, 2), 3)
+chi_Rsd = np.round(chired(Rsd_BS_mod, m_Rsd * Rsd_MPB_mod + b_Rsd, 2), 3)
 
-# chi_Rtd = np.round(chired(Rtd_BS_mod, m_Rtd * Rtd_MPB_mod + b_Rtd, 2), 3)
+chi_Rtd = np.round(chired(Rtd_BS_mod, m_Rtd * Rtd_MPB_mod + b_Rtd, 2), 3)
 
 
 # PLOT
 
 
-# fig = plt.figure(1)
-# fig.subplots_adjust(
-#     top=0.95, bottom=0.1, left=0.05, right=0.95, hspace=0.1, wspace=0.15
-# )
-# ax1 = plt.subplot2grid((1, 2), (0, 0))
-# ax2 = plt.subplot2grid((1, 2), (0, 1))
-# ax1.set_aspect("equal", "box")
-# ax2.set_aspect("equal", "box")
-# scatter_sd = ax1.scatter(Rsd_MPB_mod, Rsd_BS_mod)  # measured data
-# ax1.plot(
-#     Rsd_MPB_mod,
-#     m_Rsd * Rsd_MPB_mod + b_Rsd,
-#     color="red",
-#     label=r"$\chi^2=${}".format(chi_Rsd),
-# )  # model
+fig = plt.figure(1)
+fig.subplots_adjust(
+    top=0.95, bottom=0.1, left=0.05, right=0.95, hspace=0.1, wspace=0.15
+)
+ax1 = plt.subplot2grid((1, 2), (0, 0))
+ax2 = plt.subplot2grid((1, 2), (0, 1))
+ax1.set_aspect("equal", "box")
+ax2.set_aspect("equal", "box")
+scatter_sd = ax1.scatter(Rsd_MPB_mod, Rsd_BS_mod)  # measured data
+ax1.plot(
+    Rsd_MPB_mod,
+    m_Rsd * Rsd_MPB_mod + b_Rsd,
+    color="red",
+    label=r"$\chi^2=${}".format(chi_Rsd),
+)  # model
 
-# scatter_td = ax2.scatter(Rtd_MPB_mod, Rtd_BS_mod)  # measured data
-# ax2.plot(
-#     Rtd_MPB_mod,
-#     m_Rtd * Rtd_MPB_mod + b_Rtd,
-#     color="red",
-#     label=r"$\chi^2=${}".format(chi_Rtd),
-# )  # model
-# ax1.set_xlabel(r"standoff distance MPB [$R_M$]")
-# ax1.set_ylabel(r"standoff distance BS [$R_M$]")
-# ax1.legend(loc=0)
-# ax2.set_xlabel(r"terminator distance MPB [$R_M$]")
-# ax2.set_ylabel(r"terminator distance BS [$R_M$]")
-# ax2.legend(loc=0)
-
-
-# annot = ax1.annotate(
-#     "",
-#     xy=(0, 0),
-#     xytext=(20, 20),
-#     textcoords="offset points",
-#     bbox=dict(boxstyle="round", fc="w"),
-#     arrowprops=dict(arrowstyle="->"),
-# )
-# annot.set_visible(False)
-
-# annot = ax2.annotate(
-#     "",
-#     xy=(0, 0),
-#     xytext=(20, 20),
-#     textcoords="offset points",
-#     bbox=dict(boxstyle="round", fc="w"),
-#     arrowprops=dict(arrowstyle="->"),
-# )
-# annot.set_visible(False)
+scatter_td = ax2.scatter(Rtd_MPB_mod, Rtd_BS_mod)  # measured data
+ax2.plot(
+    Rtd_MPB_mod,
+    m_Rtd * Rtd_MPB_mod + b_Rtd,
+    color="red",
+    label=r"$\chi^2=${}".format(chi_Rtd),
+)  # model
+ax1.set_xlabel(r"standoff distance MPB [$R_M$]")
+ax1.set_ylabel(r"standoff distance BS [$R_M$]")
+ax1.legend(loc=0)
+ax2.set_xlabel(r"terminator distance MPB [$R_M$]")
+ax2.set_ylabel(r"terminator distance BS [$R_M$]")
+ax2.legend(loc=0)
 
 
-# def update_annot(ind, scatter):
-#     pos = scatter.get_offsets()[ind["ind"][0]]
+annot = ax1.annotate(
+    "",
+    xy=(0, 0),
+    xytext=(20, 20),
+    textcoords="offset points",
+    bbox=dict(boxstyle="round", fc="w"),
+    arrowprops=dict(arrowstyle="->"),
+)
+annot.set_visible(False)
 
-#     annot.xy = pos
-#     text = "{}".format(" ".join([names[n] for n in ind["ind"]]))
-#     annot.set_text(text)
-#     annot.get_bbox_patch().set_alpha(0.4)
-
-
-# def hover(event):
-#     vis = annot.get_visible()
-#     if event.inaxes == ax1:
-#         cont_sd, ind_sd = scatter_sd.contains(event)
-#         if cont_sd:
-#             update_annot(ind_sd, scatter_sd)
-#             annot.set_visible(True)
-#             scatter_sd.set_facecolor("C0")  # Reset facecolor of all points in ax1
-#             fig.canvas.draw_idle()
-#             if ind_sd["ind"][0] < len(Rsd_BS):
-#                 ind_td = {"ind": [ind_sd["ind"][0]]}
-#                 update_annot(ind_td, scatter_td)
-#                 scatter_td.set_facecolor(
-#                     ["red" if i in ind_td["ind"] else "C0" for i in range(len(Rtd_BS))]
-#                 )  # Highlight the corresponding point in ax2
-#         else:
-#             if vis:
-#                 annot.set_visible(False)
-#                 fig.canvas.draw_idle()
-#     elif event.inaxes == ax2:
-#         cont_td, ind_td = scatter_td.contains(event)
-#         if cont_td:
-#             update_annot(ind_td, scatter_td)
-#             annot.set_visible(True)
-#             scatter_td.set_facecolor("C0")  # Reset facecolor of all points in ax2
-#             fig.canvas.draw_idle()
-#             if ind_td["ind"][0] < len(Rtd_MPB):
-#                 ind_sd = {"ind": [ind_td["ind"][0]]}
-#                 update_annot(ind_sd, scatter_sd)
-#                 scatter_sd.set_facecolor(
-#                     ["red" if i in ind_sd["ind"] else "C0" for i in range(len(Rsd_MPB))]
-#                 )  # Highlight the corresponding point in ax1
-#         else:
-#             if vis:
-#                 annot.set_visible(False)
-#                 scatter_sd.set_facecolor("C0")  # Reset facecolor of all points in ax1
-#                 fig.canvas.draw_idle()
+annot = ax2.annotate(
+    "",
+    xy=(0, 0),
+    xytext=(20, 20),
+    textcoords="offset points",
+    bbox=dict(boxstyle="round", fc="w"),
+    arrowprops=dict(arrowstyle="->"),
+)
+annot.set_visible(False)
 
 
-# fig.canvas.mpl_connect("motion_notify_event", hover)
+def update_annot(ind, scatter):
+    pos = scatter.get_offsets()[ind["ind"][0]]
 
-# plt.show()
+    annot.xy = pos
+    text = "{}".format(" ".join([names[n] for n in ind["ind"]]))
+    annot.set_text(text)
+    annot.get_bbox_patch().set_alpha(0.4)
+
+
+def hover(event):
+    vis = annot.get_visible()
+    if event.inaxes == ax1:
+        cont_sd, ind_sd = scatter_sd.contains(event)
+        if cont_sd:
+            update_annot(ind_sd, scatter_sd)
+            annot.set_visible(True)
+            scatter_sd.set_facecolor("C0")  # Reset facecolor of all points in ax1
+            fig.canvas.draw_idle()
+            if ind_sd["ind"][0] < len(Rsd_BS):
+                ind_td = {"ind": [ind_sd["ind"][0]]}
+                update_annot(ind_td, scatter_td)
+                scatter_td.set_facecolor(
+                    ["red" if i in ind_td["ind"] else "C0" for i in range(len(Rtd_BS))]
+                )  # Highlight the corresponding point in ax2
+        else:
+            if vis:
+                annot.set_visible(False)
+                fig.canvas.draw_idle()
+    elif event.inaxes == ax2:
+        cont_td, ind_td = scatter_td.contains(event)
+        if cont_td:
+            update_annot(ind_td, scatter_td)
+            annot.set_visible(True)
+            scatter_td.set_facecolor("C0")  # Reset facecolor of all points in ax2
+            fig.canvas.draw_idle()
+            if ind_td["ind"][0] < len(Rtd_MPB):
+                ind_sd = {"ind": [ind_td["ind"][0]]}
+                update_annot(ind_sd, scatter_sd)
+                scatter_sd.set_facecolor(
+                    ["red" if i in ind_sd["ind"] else "C0" for i in range(len(Rsd_MPB))]
+                )  # Highlight the corresponding point in ax1
+        else:
+            if vis:
+                annot.set_visible(False)
+                scatter_sd.set_facecolor("C0")  # Reset facecolor of all points in ax1
+                fig.canvas.draw_idle()
+
+
+fig.canvas.mpl_connect("motion_notify_event", hover)
+
+plt.show()
