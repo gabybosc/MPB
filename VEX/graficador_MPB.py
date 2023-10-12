@@ -7,6 +7,11 @@ import sys
 sys.path.append("..")
 from funciones import Bpara_Bperp, doy_to_day
 
+"""
+Plotea y guarda automáticamente las figs con datos de MAG y los tiempos t1t2t3t4
+"""
+
+
 lista = np.loadtxt("../outputs/VEX_times.txt")
 fig_path = "../outputs/VEX/MPB/"
 

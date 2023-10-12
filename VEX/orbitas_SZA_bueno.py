@@ -18,7 +18,7 @@ en los cuales se cumplen:
 SZA < 80º
 B en el SW no es mayormente Bx
 
-Se fija dónde es que coincide la posicion de MAVEN con el fit de Xu2021 y mira
+Se fija dónde es que coincide la posicion de VEX con el fit de Xu2021 y mira
 estas condiciones en ese punto.
 
 
@@ -35,7 +35,7 @@ calendario = np.zeros((cantidad_datos, 4))
 
 
 def altitude(sza):
-    alt = 0.11 * sza ** 2 - 0.22 * sza + 389
+    alt = 0.11 * sza**2 - 0.22 * sza + 389
     return alt / 6050
 
 
@@ -71,7 +71,6 @@ def Xu2021_2D():
 def importar_MAG(path):
     # chequea que el archivo no está vacío
     if Path(path).stat().st_size > 1000:
-
         B = np.genfromtxt(path, skip_header=1, usecols=[5, 6, 7])
         pos = np.genfromtxt(path, skip_header=1, usecols=[8, 9, 10])
         tt = np.genfromtxt(path, skip_header=1, usecols=0, dtype="str")
@@ -137,7 +136,7 @@ for i, j in enumerate(path):
     idx = minimo * paso
 
     """
-    Clasificación por SZA despues poner entre 30 y 60 y luego 60 y 90
+    Clasificación por SZA
     """
 
     sza = SZA(pos, idx)

@@ -6,7 +6,7 @@ import matplotlib as mpl
 from cycler import cycler
 import sys
 from importar_datos import importar_MAG_pds, importar_ELS_clweb
-from fit_venus import plot_orbita
+from _fit_venus import plot_orbita
 
 sys.path.append("..")
 from funciones import datenum, donde, Bpara_Bperp, fechas, tiempos, find_nearest
@@ -48,7 +48,7 @@ def tiempos_UTC(yy, mm, dd, t):
 
 
 def altitude(SZA):
-    alt = 0.11 * SZA ** 2 - 0.22 * SZA + 389
+    alt = 0.11 * SZA**2 - 0.22 * SZA + 389
     return alt / 6050
 
 
@@ -119,7 +119,10 @@ while not happy:
                 0
             ]  # no cambiarlo a donde()! Me tiene que dar un array, no un escalar.
             plt.semilogy(
-                t_els[index], JE_total[index], label=f"{energia} eV", linewidth=0.5,
+                t_els[index],
+                JE_total[index],
+                label=f"{energia} eV",
+                linewidth=0.5,
             )
         ax4.set_ylabel("Diff energy flux \n of the SW e- \n (cm⁻² sr⁻¹ s⁻¹)")
         ax4.legend(loc="center right")
@@ -190,7 +193,10 @@ for energia in energias:
         0
     ]  # no cambiarlo a donde()! Me tiene que dar un array, no un escalar.
     plt.semilogy(
-        tiempo_els[index], JE_total[index], label=f"{energia} eV", linewidth=0.5,
+        tiempo_els[index],
+        JE_total[index],
+        label=f"{energia} eV",
+        linewidth=0.5,
     )
 ax4.legend(loc="center right")
 ax4.set_ylabel("Diff energy flux \n of the SW e- \n (cm⁻² sr⁻¹ s⁻¹)")

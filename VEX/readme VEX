@@ -1,0 +1,31 @@
+Funciones:
+_fit_venus.py: Son funciones del fit para usar en otros scripts.
+_importar_datos.py: las funciones para importar los datos de VEX de PDS/clweb
+_multiplot.py: las funciones para seleccionar la MPB con datos de MAG y ASPERA
+_update_parametros.py: funciones para la hoja de gdocs
+
+
+Downloaders:
+downloader_clweb.py: descarga los datos de clweb
+downloader_vex.py: descarga los datos de PDS
+
+Tratamiento previo:
+filtro.py: filtra los datos de VEX 
+orbitas_SZA_bueno.py: Clasifica según el SZA
+selector_orbitas.py: Agarra los cruces de la MPB de VEX y va a devolverme una lista con el SZA de cada uno.
+                    Compara con el fit de Xu 2021. No sé bien cuál es la diferencia con orbitas_SZA_bueno
+
+Análisis
+escalas_lambda.py: Hace un barrido en ventanas para ver cuándo se maximiza el cociente de lambdas. Plotea.
+fit_2d.py: hace el fit 2d de Xu pasando por el punto y calcula la normal. Plotea.
+fit_3d.py: hace el fit 3d de Xu como un paraboloide de revolución, pasando por el punto. 
+            No calcula la normal todavía. Plotea.
+giroradio_inbound.py: Calcula el giroradio y la long inercial de iones. 
+MVA_offline.py: Hace el MVA, calcula el ancho.
+MVA.py: Hace el MVA, calcula el ancho y la fuerza. Lo pone en gdocs.
+
+Graficadores
+graficador_MPB.py: Grafica los datos de MAG de VEX marcando la MPB y los guarda.
+plot_todo.py: grafica MAG y ELS para un día particular
+seleccionar_MPB_MAG_only.py: grafica MAG para seleccionar la MPB, llama a multiplot
+seleccionar_MPB.py: grafica MAG y ELS para seleccionar la MPB

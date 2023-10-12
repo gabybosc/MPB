@@ -1,7 +1,7 @@
 import numpy as np
 import glob as glob
 import sys
-from fit_venus import fit_Xu
+from _fit_venus import fit_Xu
 
 sys.path.append("..")
 from funciones import donde, angulo

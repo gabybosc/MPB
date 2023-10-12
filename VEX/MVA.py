@@ -4,9 +4,9 @@ import matplotlib as mpl
 from matplotlib.widgets import MultiCursor
 from cycler import cycler
 from importar_datos import importar_MAG_pds, importar_fila
-from fit_venus import plot_orbita, fit_Xu
-from multiplot import multi_plot_MAG_only
-from update_parametros import (
+from _fit_venus import plot_orbita, fit_Xu
+from _multiplot import multi_plot_MAG_only
+from _update_parametros import (
     hoja_MVA_update,
     hoja_MVA_analisis,
     hoja_t1t2t3t4,

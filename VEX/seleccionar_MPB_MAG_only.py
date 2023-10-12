@@ -5,9 +5,9 @@ from matplotlib.widgets import MultiCursor
 import matplotlib as mpl
 from cycler import cycler
 from importar_datos import importar_MAG_pds
-from fit_venus import plot_orbita
+from _fit_venus import plot_orbita
+from _multiplot import multi_plot_MAG_only
 import sys
-from multiplot import multi_plot_MAG_only
 
 sys.path.append("..")
 from funciones import datenum, donde, Bpara_Bperp, fechas, tiempos, find_nearest
@@ -143,8 +143,8 @@ plt.show()
 # buenas órbitas: SZA no tan alto, el campo en SW no es Bx
 # 21 nov 2007
 # 14 abr 2007
-with open("../outputs/VEX_times.txt", "a") as file:
-    file.write(f"{year}\t{doy}\t")
-    for k in range(len(outs)):
-        file.write(f"{outs[k]}\t")
-    file.write("\n")
+# with open("../outputs/VEX_times.txt", "a") as file:
+#     file.write(f"{year}\t{doy}\t")
+#     for k in range(len(outs)):
+#         file.write(f"{outs[k]}\t")
+#     file.write("\n")

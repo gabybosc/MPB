@@ -2,9 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from cycler import cycler
-from importar_datos import importar_MAG_pds, importar_ELS_clweb
-from fit_venus import plot_orbita, fit_Xu, fit_R
-
+from _importar_datos import importar_MAG_pds, importar_ELS_clweb
+from _fit_venus import plot_orbita, fit_Xu, fit_R
+import math
 
 import sys
 
@@ -113,8 +113,6 @@ xx_xu, yz_xu = fit_Xu()
 pos_RV = pos / 6050
 xx, yz, norm = fit_R(pos_RV[inicio_MVA, :], sza)
 orbita = np.sqrt(pos_RV[:, 1] ** 2 + pos_RV[:, 2] ** 2)
-
-import math
 
 
 def get_normals(Ri, Rf, length=0.1):
