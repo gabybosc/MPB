@@ -1,11 +1,11 @@
-Funciones:
+Funciones
 _fit_venus.py: Son funciones del fit para usar en otros scripts.
 _importar_datos.py: las funciones para importar los datos de VEX de PDS/clweb
 _multiplot.py: las funciones para seleccionar la MPB con datos de MAG y ASPERA
 _update_parametros.py: funciones para la hoja de gdocs
 
 
-Downloaders:
+Downloaders
 downloader_clweb.py: descarga los datos de clweb
 downloader_vex.py: descarga los datos de PDS
 

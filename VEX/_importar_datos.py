@@ -43,7 +43,7 @@ def importar_MAG_pds(year, doy, ti, tf):
     elif gethostname() == "DESKTOP-2GS0QF2":
         os.chdir(f"G:/")
         path = f"VEX{year}/VEX_MAG_{year}{doy}.tab"
-        filt = f"../../../datos/VEX/filtrados/VEX_mag_filtrado_{year}{doy}.gz"
+        filt = f"VEX{year}/VEX_mag_filtrado_{year}{doy}.gz"
     else:
         path = f"../../../datos/VEX/{year}/VEX_MAG_{year}{doy}.tab"
         filt = f"../../../datos/VEX/filtrados/VEX_mag_filtrado_{year}{doy}.gz"
