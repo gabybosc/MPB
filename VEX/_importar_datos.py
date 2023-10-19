@@ -40,6 +40,10 @@ def importar_MAG_pds(year, doy, ti, tf):
     if gethostname() == "gbosco":
         path = f"../../../../media/gabybosc/datos/VEX/{year}/VEX_MAG_{year}{doy}.tab"
         filt = f"../../../../media/gabybosc/datos/VEX/filtrados/VEX_mag_filtrado_{year}{doy}.gz"
+    elif gethostname() == "DESKTOP-2GS0QF2":
+        os.chdir(f"G:/")
+        path = f"VEX{year}/VEX_MAG_{year}{doy}.tab"
+        filt = f"../../../datos/VEX/filtrados/VEX_mag_filtrado_{year}{doy}.gz"
     else:
         path = f"../../../datos/VEX/{year}/VEX_MAG_{year}{doy}.tab"
         filt = f"../../../datos/VEX/filtrados/VEX_mag_filtrado_{year}{doy}.gz"
@@ -70,8 +74,12 @@ def importar_MAG_pds(year, doy, ti, tf):
             t_cut = t[inicio:fin]
             B_cut = B[inicio:fin]
             pos_cut = pos[inicio:fin]
-    else:
-        t_cut, B_cut, pos_cut = 0, 0, 0
+        if (
+            gethostname() == "DESKTOP-2GS0QF2"
+        ):  # si estoy en la pc tengo que volver al dir original
+            os.chdir("C:/Users/RainbowRider/Documents/GitHub/MPB/VEX/")
+        else:
+            t_cut, B_cut, pos_cut = 0, 0, 0
     return t_cut, B_cut, pos_cut
 
 

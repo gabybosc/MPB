@@ -134,6 +134,9 @@ while not happy:
     happy = plt.waitforbuttonpress()
 
 
-with open("outputs/para_sofi.txt", "a") as file:
-    file.write(f"{year}\t{doy}\t{val}")
-    file.write("\n")
+guardar = input("save? y/n\n")
+
+if guardar == "y":
+    with open("outputs/para_sofi.txt", "a") as file:
+        file.write(f"{year}\t{doy}\t{val}")
+        file.write("\n")

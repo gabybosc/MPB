@@ -38,7 +38,7 @@ def importar_mag_1s(year, month, day, ti, tf):
     elif gethostname() == "gabybosc":
         path = f"../../datos/MAG_1s/{year}/"
     elif "DESKTOP-2GS0QF2":
-        path = f"../../../datos/MAG_1s/{year}/"
+        path = f"../../datos/MAG_1s/{year}/"
     else:
         path = f"../../../datos/MAG_1s/{year}-{month}-{day}/"
 

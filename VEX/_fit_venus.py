@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from importar_datos import importar_MAG_pds
+from _importar_datos import importar_MAG_pds
 
 import sys
 

@@ -2,6 +2,8 @@ import numpy as np
 import glob as glob
 import sys
 from _fit_venus import fit_Xu
+from socket import gethostname
+import os
 
 sys.path.append("..")
 from funciones import donde, angulo
@@ -11,10 +13,13 @@ from funciones import donde, angulo
 Agarra los cruces de la MPB de VEX y va a devolverme una lista 
 con el SZA de cada uno. Compara con el fit de Xu 2021.
 """
-
+year = 2014
 # path = glob.glob("../../../VEX.txt")
-
-path = glob.glob("../../../datos/VEX/2009/*.tab")
+if gethostname() == "DESKTOP-2GS0QF2":
+    os.chdir(f"G:/VEX{year}/")
+    path = glob.glob("*.tab")
+else:
+    path = glob.glob(f"../../../datos/VEX/{year}]/*.tab")
 # Ajuste de Xu de la MPB:
 x_Xu, yz_Xu = fit_Xu()
 
@@ -76,8 +81,16 @@ for k, j in enumerate(path):
         timetable.append(time[idx])
         angulos.append(sza_mpb)
 
+if gethostname() == "DESKTOP-2GS0QF2":
+    os.chdir("C:/Users/RainbowRider/Documents/GitHub/MPB/VEX/")
 
-with open("../outputs/orbitas_VEX.txt", "a") as file:
+with open(f"../outputs/orbitas_VEX{year}.txt", "a") as file:
     for i in range(len(calendario)):
+        file.write(f"{calendario[i]}\t{timetable[i]}\t{angulos[i]}")
+        file.write("\n")
+
+idx = [i for i in range(len(angulos)) if angulos[i] < 65]
+with open(f"../outputs/VEX{year}_menor65.txt", "a") as file:
+    for i in idx:
         file.write(f"{calendario[i]}\t{timetable[i]}\t{angulos[i]}")
         file.write("\n")

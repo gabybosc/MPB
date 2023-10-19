@@ -11,9 +11,7 @@ downloader_vex.py: descarga los datos de PDS
 
 Tratamiento previo:
 filtro.py: filtra los datos de VEX 
-orbitas_SZA_bueno.py: Clasifica según el SZA
-selector_orbitas.py: Agarra los cruces de la MPB de VEX y va a devolverme una lista con el SZA de cada uno.
-                    Compara con el fit de Xu 2021. No sé bien cuál es la diferencia con orbitas_SZA_bueno
+selector_orbitas.py: Crea una lista con el SZA de los cruces de VEX
 
 Análisis
 escalas_lambda.py: Hace un barrido en ventanas para ver cuándo se maximiza el cociente de lambdas. Plotea.
