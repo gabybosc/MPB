@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from cycler import cycler
-from _importar_datos import importar_MAG_pds, importar_ELS_clweb
+from _importar_datos import importar_MAG, importar_ELS_clweb
 from _fit_venus import plot_orbita, fit_Xu, fit_R
 import math
 
@@ -84,12 +84,15 @@ for l in lista:
             ti = 0
         if tf > 24:
             tf = 24
-t, B, pos = importar_MAG_pds(year, doy, ti, tf)
+
+t, B, pos, cl = importar_MAG(year, doy, ti, tf)
+if cl == True:
+    Bpara, Bperp, tpara = Bpara_Bperp(B, t, ti, tf)  # si son datos de clweb 1s
+else:
+    # para datos de PDS filtrados y diezmados
+    Bpara, Bperp, tpara = Bpara_Bperp(B[::32], t[::32], ti, tf)
+
 Bnorm = np.linalg.norm(B, axis=1)
-
-Bpara, Bperp, tpara = Bpara_Bperp(B[::32], t[::32], ti, tf)
-
-
 # ti, tf = 2.778339846633605, 2.7804097790334508  # tiempos()
 # inicio_MVA = donde(t, val[0])
 # fin_MVA = donde(t, val[1])

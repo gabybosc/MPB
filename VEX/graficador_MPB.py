@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from importar_datos import importar_MAG_pds
+from importar_datos import importar_MAG
 import sys
 
 
@@ -28,9 +28,13 @@ for l in lista:
     if tf > 24:
         tf = 24
 
-    t, B, pos = importar_MAG_pds(year, doy, ti, tf)
+    t, B, pos, cl = importar_MAG(year, doy, ti, tf)
+    if cl == True:
+        Bpara, Bperp, tpara = Bpara_Bperp(B, t, ti, tf)  # si son datos de clweb 1s
+    else:
+        # para datos de PDS filtrados y diezmados
+        Bpara, Bperp, tpara = Bpara_Bperp(B[::32], t[::32], ti, tf)
     Bnorm = np.linalg.norm(B, axis=1)
-    Bpara, Bperp, tpara = Bpara_Bperp(B[::32], t[::32], ti, tf)
 
     plt.clf()
     fig = plt.figure(1, constrained_layout=True)

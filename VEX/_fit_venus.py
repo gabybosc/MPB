@@ -1,11 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from _importar_datos import importar_MAG_pds
-
-import sys
-
-sys.path.append("..")
-from funciones import datenum, donde, fechas, tiempos
 
 np.set_printoptions(precision=4)
 
@@ -65,14 +59,3 @@ def plot_orbita(pos_RV, orbita, xx, yz):
     ax.set_ylabel(r"$(Y²_{VSO} + Z²_{VSO} )^{1/2}$ ($R_V$)", fontsize=14)
     plt.legend()
     # plt.show()
-
-
-# year, month, day, doy = fechas()
-# ti, tf = tiempos()
-#
-# t, B, pos = importar_MAG_pds(year, doy, ti, tf)
-# # t, B, pos = importar_MAG_pds(2011, 213, 0, 10)
-# pos_RV = pos / 6050
-# xx, yz = fit()
-# orbita = np.sqrt(pos_RV[:, 1] ** 2 + pos_RV[:, 2] ** 2)
-# plot_orbita(pos_RV, orbita, xx, yz)

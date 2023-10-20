@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as md
 import matplotlib as mpl
 from cycler import cycler
-from _importar_datos import importar_MAG_pds
+from _importar_datos import importar_MAG
 from matplotlib.widgets import MultiCursor
 import sys
 
@@ -22,8 +22,8 @@ puedo o hacer un avg o un downsampling
 year = 2008
 lista = np.loadtxt(f"../outputs/VEX{year}_menor65.txt", dtype=str)
 
-# i = int(input("indice en lista\n"))
-for i in range(int(input("indice en lista\n")), 366):
+# i = int(input("indice en lista\n")) 13
+for i in range(72, 366):
     print(i)
     l = lista[i]
     year, month, day = l[0].split("-")
@@ -36,11 +36,17 @@ for i in range(int(input("indice en lista\n")), 366):
     if tf > 24:
         tf = 24
 
-    t, B, pos = importar_MAG_pds(year, doy, ti, tf)
+    # t, B, pos = importar_MAG_pds(year, doy, ti, tf)
+
+    t, B, pos, cl = importar_MAG(year, doy, ti, tf)
+    if cl == True:
+        Bpara, Bperp, tpara = Bpara_Bperp(B, t, ti, tf)  # si son datos de clweb 1s
+    else:
+        # para datos de PDS filtrados y diezmados
+        Bpara, Bperp, tpara = Bpara_Bperp(B[::32], t[::32], ti, tf)
+
     Bnorm = np.linalg.norm(B, axis=1)
     pos_RV = pos / 6050
-
-    Bpara, Bperp, tpara = Bpara_Bperp(B[::32], t[::32], ti, tf)
 
     # ############ tiempos UTC
 

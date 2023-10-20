@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 from cycler import cycler
 from mpl_toolkits.mplot3d import Axes3D
-from importar_datos import importar_MAG_pds
+from importar_datos import importar_MAG
 import sys
 
 sys.path.append("..")
@@ -125,7 +125,7 @@ def plot_2D(pos_RV, R, n, c):
 year, doy = 2011, 120  # fechas()
 ti_MVA, tf_MVA = 2.778339444, 2.780409722
 t1, t2, t3, t4 = [2.755924008, 2.774626456, 2.785536217, 2.804238665]
-t, B, posicion = importar_MAG_pds(year, doy, t1 - 1, t4 + 1)
+t, B, posicion, cl = importar_MAG(year, doy, t1 - 0.5, t4 + 0.5)
 Bnorm = np.linalg.norm(B, axis=1)
 
 inicio_MVA = donde(t, ti_MVA)

@@ -1,5 +1,5 @@
 import numpy as np
-from importar_datos import importar_MAG_pds, importar_ELS_clweb, importar_fila
+from importar_datos import importar_MAG
 import sys
 
 sys.path.append("..")
@@ -29,7 +29,7 @@ doy = 120
 ti = 2
 tf = 4
 
-t, B_entero, posicion = importar_MAG_pds(year, doy, ti, tf)
+t, B_entero, posicion, cl = importar_MAG(year, doy, ti, tf)
 IMA = np.loadtxt(f"../../../datos/clweb/VEX_IMA_vel.asc")
 hh = IMA[:, 3]
 mm = IMA[:, 4]

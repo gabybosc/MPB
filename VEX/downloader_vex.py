@@ -16,7 +16,7 @@ from socket import gethostname
 
 year = 2014
 # doy = np.random.choice(366, 60)  # elije 60 días aleatorios del año para descargar
-doy = range(52, 366)
+doy = range(193, 366)
 
 if gethostname() == "magneto2":
     path = f"../../../../../media/gabybosc/datos/VEX/{year}/"
@@ -34,3 +34,6 @@ for dd in doy:
         "wb",
     ) as out_file:
         shutil.copyfileobj(response, out_file)
+
+if gethostname() == "DESKTOP-2GS0QF2":
+    chdir("C:/Users/RainbowRider/Documents/GitHub/MPB/VEX/")

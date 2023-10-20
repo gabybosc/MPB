@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib.widgets import MultiCursor
 from cycler import cycler
-from importar_datos import importar_MAG_pds, importar_fila
+from importar_datos import importar_MAG, importar_fila
 from _fit_venus import plot_orbita, fit_Xu
 from _multiplot import multi_plot_MAG_only
 from _update_parametros import (
@@ -92,10 +92,14 @@ def MVA(B, year, month, day):
 
 year, month, day, doy = fechas()
 ti, tf = 0, 24  # tiempos()
-t, B, pos = importar_MAG_pds(year, doy, ti, tf)
+t, B, pos, cl = importar_MAG(year, doy, ti, tf)
+if cl == True:
+    Bpara, Bperp, tpara = Bpara_Bperp(B, t, ti, tf)  # si son datos de clweb 1s
+else:
+    # para datos de PDS filtrados y diezmados
+    Bpara, Bperp, tpara = Bpara_Bperp(B[::32], t[::32], ti, tf)
 Bnorm = np.linalg.norm(B, axis=1)
 
-Bpara, Bperp, tpara = Bpara_Bperp(B[::32], t[::32], ti, tf)
 
 val = multi_plot_MAG_only(t, tpara, B, Bnorm, Bpara, Bperp, 2)
 nr, hoja_parametros, hoja_mva, hoja_boot, hoja_fit = importar_fila(year, month, day)

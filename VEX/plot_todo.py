@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
-from importar_datos import importar_MAG_pds, importar_ELS_clweb
+from importar_datos import importar_MAG, importar_ELS_clweb
 
 sys.path.append("..")
 from funciones import find_nearest, Bpara_Bperp
@@ -16,9 +16,13 @@ doy = 120
 ti = 2
 tf = 3
 
-t, B, pos = importar_MAG_pds(year, doy, ti, tf)
+t, B, pos, cl = importar_MAG(year, doy, ti, tf)
+if cl == True:
+    Bpara, Bperp, tpara = Bpara_Bperp(B, t, ti, tf)  # si son datos de clweb 1s
+else:
+    # para datos de PDS filtrados y diezmados
+    Bpara, Bperp, tpara = Bpara_Bperp(B[::32], t[::32], ti, tf)
 Bnorm = np.linalg.norm(B, axis=1)
-Bpara, Bperp, tpara = Bpara_Bperp(B[::32], t[::32], ti, tf)
 
 t_els, ELS = importar_ELS_clweb(year, month, day, ti, tf)
 energy = ELS[:, 7]

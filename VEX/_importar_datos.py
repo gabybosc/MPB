@@ -11,7 +11,7 @@ from socket import gethostname
 
 sys.path.append("..")
 
-from funciones import donde, next_available_row
+from funciones import donde, next_available_row, doy_to_day
 
 np.set_printoptions(precision=4)
 
@@ -36,6 +36,69 @@ def importar_VEX_mag_AMDA(year, month, day, ti, tf):
     return t_cut, B_cut, pos
 
 
+def importar_MAG(year, doy, ti, tf):
+    """
+    Este agarra los datos de pds filtrados y si no existen, busca los de clweb
+    """
+    year, month, day = doy_to_day(year, doy)
+
+    if gethostname() == "DESKTOP-2GS0QF2":
+        os.chdir(f"G:/")
+        filt = f"VEX{year}/VEX_mag_filtrado_{year}{doy}.gz"
+        magcl = f"VEX{year}/MAG{year}{month}{day}.asc"
+        poscl = f"VEX{year}/pos{year}{month}{day}.asc"
+
+    if os.path.exists(filt):
+        MAG = np.loadtxt(filt)
+        t = MAG[0]
+        B = MAG[1:4]
+        pos = MAG[4:]
+        cl = False
+
+    else:
+        mag = np.loadtxt(magcl)
+        pos = np.loadtxt(poscl)[-3:]
+
+        hh = mag[:, 3]
+        mm = mag[:, 4]
+        ss = mag[:, 5]
+
+        B = mag[:, 6:9]
+        t = hh + mm / 60 + ss / 3600  # hdec
+        cl = True
+
+    inicio = donde(t, ti)
+    fin = donde(t, tf)
+
+    t_cut = t[inicio:fin]
+    B_cut = B[inicio:fin]
+    pos_cut = pos[inicio:fin]
+
+    if gethostname() == "DESKTOP-2GS0QF2":
+        os.chdir("C:/Users/RainbowRider/Documents/GitHub/MPB/VEX/")
+
+    return t_cut, B_cut, pos_cut, cl
+
+
+#    hh = mag[:, 3]
+#     mm = mag[:, 4]
+#     ss = mag[:, 5]
+
+#     B = mag[:, 6:9]
+#     t = hh + mm / 60 + ss / 3600  # hdec
+
+#     inicio = donde(t, ti)
+#     fin = donde(t, tf)
+
+#     t_cut = t[inicio:fin]
+#     B_cut = B[inicio:fin]
+#     pos_cut = pos[inicio:fin]
+
+#     if gethostname() == "DESKTOP-2GS0QF2":
+#         os.chdir("C:/Users/RainbowRider/Documents/GitHub/MPB/VEX/")
+#     return t_cut, B_cut, pos_cut
+
+
 def importar_MAG_pds(year, doy, ti, tf):
     if gethostname() == "gbosco":
         path = f"../../../../media/gabybosc/datos/VEX/{year}/VEX_MAG_{year}{doy}.tab"
@@ -43,7 +106,7 @@ def importar_MAG_pds(year, doy, ti, tf):
     elif gethostname() == "DESKTOP-2GS0QF2":
         os.chdir(f"G:/")
         path = f"VEX{year}/VEX_MAG_{year}{doy}.tab"
-        filt = f"VEX{year}/VEX_mag_filtrado_{year}{doy}.gz"
+        filt = f"VEX{year}/VEX_mag_filtrado_{year}{doy}.npy"
     else:
         path = f"../../../datos/VEX/{year}/VEX_MAG_{year}{doy}.tab"
         filt = f"../../../datos/VEX/filtrados/VEX_mag_filtrado_{year}{doy}.gz"
@@ -51,8 +114,8 @@ def importar_MAG_pds(year, doy, ti, tf):
     if os.path.exists(path):
         if Path(path).stat().st_size > 1000:
             if os.path.isfile(filt):
-                B = np.loadtxt(filt)
-                # B = np.genfromtxt(path, skip_header=1, usecols=[5, 6, 7])
+                t = np.load(filt)[0]
+                B = np.load(filt)[1:]
             else:
                 B = np.genfromtxt(path, skip_header=1, usecols=[5, 6, 7])
             pos = np.genfromtxt(path, skip_header=1, usecols=[8, 9, 10])
@@ -83,8 +146,13 @@ def importar_MAG_pds(year, doy, ti, tf):
     return t_cut, B_cut, pos_cut
 
 
-def importar_MAG_clweb(year, month, day, ti, tf):
-    mag = np.loadtxt(f"../../../datos/clweb/VEX_MAG_{year}{month}{day}.asc")
+def importar_MAG_clweb(year, doy, ti, tf):
+    year, month, day = doy_to_day(year, doy)
+    if gethostname() == "DESKTOP-2GS0QF2":
+        os.chdir(f"G:/")
+        path = f"VEX{year}/"
+        mag = np.loadtxt(path + f"MAG{year}{month}{day}.asc")
+        pos = np.loadtxt(path + f"pos{year}{month}{day}.asc")[-3:]
 
     hh = mag[:, 3]
     mm = mag[:, 4]
@@ -98,11 +166,21 @@ def importar_MAG_clweb(year, month, day, ti, tf):
 
     t_cut = t[inicio:fin]
     B_cut = B[inicio:fin]
-    return t_cut, B_cut
+    pos_cut = pos[inicio:fin]
+
+    if gethostname() == "DESKTOP-2GS0QF2":
+        os.chdir("C:/Users/RainbowRider/Documents/GitHub/MPB/VEX/")
+    return t_cut, B_cut, pos_cut
 
 
-def importar_ELS_clweb(year, month, day, ti, tf):
-    ELS = np.loadtxt(f"../../../datos/clweb/VEX_ASPERA4_ELS_{year}{month}{day}.asc")
+def importar_ELS_clweb(year, doy, ti, tf):
+    year, month, day = doy_to_day(year, doy)
+    if gethostname() == "DESKTOP-2GS0QF2":
+        os.chdir(f"G:/")
+        path = f"VEX{year}/"
+        ELS = np.loadtxt(path + f"ELS{year}{month}{day}.asc")
+    else:
+        ELS = np.loadtxt(f"../../../datos/clweb/VEX_ASPERA4_ELS_{year}{month}{day}.asc")
     hh = ELS[:, 3]
     mm = ELS[:, 4]
     ss = ELS[:, 5]
@@ -119,6 +197,9 @@ def importar_ELS_clweb(year, month, day, ti, tf):
 
     t_cut = t[inicio:fin]
     ELS_cut = ELS[inicio:fin, :]
+
+    if gethostname() == "DESKTOP-2GS0QF2":
+        os.chdir("C:/Users/RainbowRider/Documents/GitHub/MPB/VEX/")
 
     return t_cut, ELS_cut
 
