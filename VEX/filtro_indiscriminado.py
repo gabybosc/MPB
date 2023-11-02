@@ -4,35 +4,41 @@ import matplotlib.pyplot as plt
 import sys
 from socket import gethostname
 import os
+
 from _importar_datos import importar_MAG_pds
 
 sys.path.append("..")
-from funciones import fechas, day_to_doy
+from funciones import fechas, day_to_doy, donde
 
 """
 Hace un filtro butterworth para quitar el ruido de la señal que es de aproximadamente 180 ms.
 Primero usa buttord para encontrar el orden.
 Es un filtro digital con lo cual pide que las frecuencias estén normalizadas
-respecto de la frec de Nyquist. En este caso Nyquist es 32Hz/2 = 16Hz.
+respecto de la frec de Nyquist. En este caso Nyquist es 128Hz/2 = 64Hz.
 Como las frecuencias están normalizadas, da lo mismo usar f o w.
 N es el orden del filtro, en general voy a querer que N sea cercano a 10.
 
-Comentado está otro filtro más fuerte.
+Como es de 128Hz, va a cortarlo a 32Hz tomando un punto de cada cuatro. 
+En este caso entonces, Nyquist pasa a ser 16Hz.
 """
-year = 2008
-lista = np.loadtxt(f"../outputs/VEX{year}_menor65.txt", dtype=str)
+year = 2014
 
-# i = int(input("indice en lista\n"))
-for i in range(85):
-    print(i)
-    l = lista[i]
-    year, month, day = l[0].split("-")
-    year, doy = day_to_doy(year, month, day)
+# lista = np.loadtxt(f"../outputs/VEX{year}_menor65.txt", dtype=str)
 
-    # year, month, day, doy = fechas()
+# # i = int(input("indice en lista\n"))
+# for i in range(len(lista)):
+#     print(i)
+#     l = lista[i]
+#     year, month, day = l[0].split("-")
+#     year, doy = day_to_doy(year, month, day)
 
+for doy in range(144, 174):
+    print(doy)
     ti, tf = 0, 24  # tiempos()
-    t, B, pos = importar_MAG_pds(year, doy, ti, tf)
+    tiempo, campo, posicion = importar_MAG_pds(year, str(doy).zfill(3), ti, tf)
+    t = tiempo[::4]
+    B = campo[::4]
+    pos = posicion[::4]
 
     Bnorm = np.linalg.norm(B, axis=1)
 
@@ -48,11 +54,6 @@ for i in range(85):
 
         return (B_filtrado, fp, fs)
 
-    # Tseg = input("T filtro? (default 180 ms)\n")
-    # if not Tseg:  # si no escribe nada, toma el default
-    #     Tseg = 180e-3  # 180ms
-    # else:
-    #     Tseg = float(Tseg)
     Tseg = 180e-3  # 180ms
     B_filtrado, fp, fs = filtro(Tseg)
     # plt.plot(t, Bnorm, label="sin filtro")
@@ -64,13 +65,9 @@ for i in range(85):
     # )
     # plt.legend()
     # plt.show()
+
     if gethostname() == "DESKTOP-2GS0QF2":
         os.chdir(f"G:/")
-        filt = f"VEX{year}/VEX_mag_filtrado_{year}{doy}.gz"
-        np.savetxt(filt, B_filtrado)
-
-    # if input("save? y/n\n") == "y":
-    #     if gethostname() == "DESKTOP-2GS0QF2":
-    #         os.chdir(f"G:/")
-    #         filt = f"VEX{year}/VEX_mag_filtrado_{year}{doy}.gz"
-    #         np.savetxt(filt, B_filtrado)
+        filt = f"VEX{year}/VEX_mag_filtrado_{year}{str(doy).zfill(3)}.gz"
+        np.savetxt(filt, np.vstack((t, B_filtrado.T, pos.T)))
+        os.chdir("C:/Users/RainbowRider/Documents/GitHub/MPB/VEX/")

@@ -1,11 +1,20 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from importar_datos import importar_MAG_pds
+from cycler import cycler
+from _importar_datos import importar_MAG
 import sys
 
 
 sys.path.append("..")
 from funciones import Bpara_Bperp, doy_to_day
+
+"""
+Plotea y guarda automáticamente las figs con datos de MAG y los tiempos t1t2t3t4
+"""
+plt.rcParams["axes.prop_cycle"] = cycler(
+    "color",
+    ["#003f5c", "#ffa600", "#de425b", "#68abb8", "#f3babc", "#6cc08b", "#cacaca"],
+)
 
 lista = np.loadtxt("../outputs/VEX_times.txt")
 fig_path = "../outputs/VEX/MPB/"
@@ -23,9 +32,13 @@ for l in lista:
     if tf > 24:
         tf = 24
 
-    t, B, pos = importar_MAG_pds(year, doy, ti, tf)
+    t, B, pos, cl, tpos = importar_MAG(year, doy, ti, tf)
+    if cl == True:
+        Bpara, Bperp, tpara = Bpara_Bperp(B, t, ti, tf)  # si son datos de clweb 1s
+    else:
+        # para datos de PDS filtrados y diezmados
+        Bpara, Bperp, tpara = Bpara_Bperp(B[::32], t[::32], ti, tf)
     Bnorm = np.linalg.norm(B, axis=1)
-    Bpara, Bperp, tpara = Bpara_Bperp(B[::32], t[::32], ti, tf)
 
     plt.clf()
     fig = plt.figure(1, constrained_layout=True)
@@ -54,7 +67,8 @@ for l in lista:
     ax3.plot(tpara, Bperp, linewidth=0.5, label="B perp")
     ax3.set_ylabel("variación de Bpara perp")
     ax3.set_xlabel("Tiempo (hdec)")
-    ax3.set_ylim([-0.1, 5])
+    if max(Bpara) > 1 or max(Bperp) > 1:
+        ax3.set_ylim([-0.1, 1])
     ax3.legend(loc="upper left")
     ax3.grid()
 

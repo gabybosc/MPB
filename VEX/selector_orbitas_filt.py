@@ -4,9 +4,10 @@ import sys
 from _fit_venus import fit_Xu
 from socket import gethostname
 import os
+import matplotlib.pyplot as plt
 
 sys.path.append("..")
-from funciones import donde, angulo
+from funciones import donde, angulo, doy_to_day
 
 
 """
@@ -17,10 +18,10 @@ year = 2014
 # path = glob.glob("../../../VEX.txt")
 if gethostname() == "DESKTOP-2GS0QF2":
     os.chdir(f"G:/VEX{year}/")
-    path = glob.glob("*.tab")
-else:
-    path = glob.glob(f"../../../datos/VEX/{year}]/*.tab")
-# Ajuste de Xu de la MPB:
+    path = glob.glob("*.gz") + glob.glob("pos*.asc")  # los filtrados
+    # path = "VEX_mag_filtrado_2014026.gz"
+    # path = "pos20140806.asc"
+    # os.chdir("C:/Users/RainbowRider/Documents/GitHub/MPB/VEX/")
 x_Xu, yz_Xu = fit_Xu()
 
 
@@ -28,18 +29,27 @@ x_Xu, yz_Xu = fit_Xu()
 calendario = []
 timetable = []
 angulos = []
+# for j in [path]:
 for k, j in enumerate(path):
-    posicion = np.loadtxt(j, skiprows=1, usecols=[8, 9, 10])
-    orbita = posicion / 6050  # en RV
-
-    timedata = np.loadtxt(j, skiprows=1, usecols=0, dtype=str)
-    time = np.array([timedata[i].split("T")[1] for i in range(len(timedata))])
-    date = timedata[0].split("T")[0]
+    if "pos" in j:
+        pos = np.loadtxt(j)
+        hh = pos[:, 3]
+        mm = pos[:, 4]
+        ss = pos[:, 5]
+        orbita = pos[:, 6:9]
+        t = hh + mm / 60 + ss / 3600  # hdec
+        date = f"{int(pos[1, 0])}-{str(int(pos[1, 1])).zfill(2)}-{str(int(pos[1, 2])).zfill(2)}"
+    else:
+        MAG = np.loadtxt(j)
+        posicion = MAG[4:].T
+        t = MAG[0]
+        dd = j.split("_")[-1].split(".")[0]
+        date = doy_to_day(dd[:4], dd[4:])
+        date = f"{date[0]}-{date[1]}-{date[2]}"
+        orbita = posicion / 6050  # en RV
 
     XX = orbita[:, 0]
     YZ = np.sqrt(orbita[:, 1] ** 2 + orbita[:, 2] ** 2)
-
-    # calendario[k, 0] = date  # guarda la fecha
 
     """
     Vamos a tirar todos los puntos donde la órbita esté lejos del planeta
@@ -60,6 +70,8 @@ for k, j in enumerate(path):
         a = [donde(x_cut, x_Xu[i]) for i in range(len(x_Xu))]  # len(a) = len(Xu)
         pos = np.transpose([x_cut[a], yz_cut[a]])
         pos_xu = np.transpose([x_Xu, yz_Xu])
+        # plt.plot(pos, pos_xu)
+        # plt.show()
 
         """
         pos y pos_xu tienen la misma longitud. Como las órbitas son bien portadas
@@ -76,9 +88,7 @@ for k, j in enumerate(path):
 
         sza_mpb = SZA(pos, idx)
 
-        # calendario[k, 1] = time[idx]
-        # calendario[k, 2] = sza_mpb
-        timetable.append(time[idx])
+        timetable.append(t[idx])
         angulos.append(sza_mpb)
 
 if gethostname() == "DESKTOP-2GS0QF2":
@@ -86,11 +96,11 @@ if gethostname() == "DESKTOP-2GS0QF2":
 
 with open(f"../outputs/orbitas_VEX{year}.txt", "a") as file:
     for i in range(len(calendario)):
-        file.write(f"{calendario[i]}\t{timetable[i]}\t{angulos[i]}")
+        file.write(f"{calendario[i]}\t{timetable[i]:1.3g}\t{angulos[i]:1.3g}")
         file.write("\n")
 
-idx = [i for i in range(len(angulos)) if angulos[i] < 65]
+ii = [i for i in range(len(angulos)) if angulos[i] < 65]
 with open(f"../outputs/VEX{year}_menor65.txt", "a") as file:
-    for i in idx:
-        file.write(f"{calendario[i]}\t{timetable[i]}\t{angulos[i]}")
+    for i in ii:
+        file.write(f"{calendario[i]}\t{timetable[i]:1.3g}\t{angulos[i]:1.3g}")
         file.write("\n")

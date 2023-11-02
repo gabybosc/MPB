@@ -5,8 +5,8 @@ from matplotlib.widgets import MultiCursor
 import matplotlib as mpl
 from cycler import cycler
 import sys
-from importar_datos import importar_MAG_pds, importar_ELS_clweb
-from fit_venus import plot_orbita
+from importar_datos import importar_MAG, importar_ELS_clweb
+from _fit_venus import plot_orbita
 
 sys.path.append("..")
 from funciones import datenum, donde, Bpara_Bperp, fechas, tiempos, find_nearest
@@ -21,18 +21,20 @@ puedo o hacer un avg o un downsampling
 
 year, month, day, doy = fechas()
 
-t, B, pos = importar_MAG_pds(year, doy, 0, 24)
 
 # plt.figure()
 # plt.plot(t, B)
 # plt.show()
 
 ti, tf = 0, 24  # tiempos()
-t, B, pos = importar_MAG_pds(year, doy, ti, tf)
+t, B, pos, cl = importar_MAG(year, doy, ti, tf)
+if cl == True:
+    Bpara, Bperp, tpara = Bpara_Bperp(B, t, ti, tf)  # si son datos de clweb 1s
+else:
+    # para datos de PDS filtrados y diezmados
+    Bpara, Bperp, tpara = Bpara_Bperp(B[::32], t[::32], ti, tf)
 Bnorm = np.linalg.norm(B, axis=1)
 pos_RV = pos / 6050
-
-Bpara, Bperp, tpara = Bpara_Bperp(B[::32], t[::32], ti, tf)
 
 t_els, ELS = importar_ELS_clweb(year, month, day, ti, tf)
 energy = ELS[:, 7]
@@ -48,7 +50,7 @@ def tiempos_UTC(yy, mm, dd, t):
 
 
 def altitude(SZA):
-    alt = 0.11 * SZA ** 2 - 0.22 * SZA + 389
+    alt = 0.11 * SZA**2 - 0.22 * SZA + 389
     return alt / 6050
 
 
@@ -119,7 +121,10 @@ while not happy:
                 0
             ]  # no cambiarlo a donde()! Me tiene que dar un array, no un escalar.
             plt.semilogy(
-                t_els[index], JE_total[index], label=f"{energia} eV", linewidth=0.5,
+                t_els[index],
+                JE_total[index],
+                label=f"{energia} eV",
+                linewidth=0.5,
             )
         ax4.set_ylabel("Diff energy flux \n of the SW e- \n (cm⁻² sr⁻¹ s⁻¹)")
         ax4.legend(loc="center right")
@@ -190,7 +195,10 @@ for energia in energias:
         0
     ]  # no cambiarlo a donde()! Me tiene que dar un array, no un escalar.
     plt.semilogy(
-        tiempo_els[index], JE_total[index], label=f"{energia} eV", linewidth=0.5,
+        tiempo_els[index],
+        JE_total[index],
+        label=f"{energia} eV",
+        linewidth=0.5,
     )
 ax4.legend(loc="center right")
 ax4.set_ylabel("Diff energy flux \n of the SW e- \n (cm⁻² sr⁻¹ s⁻¹)")

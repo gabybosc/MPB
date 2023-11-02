@@ -9,16 +9,20 @@ ya que no necesita el nombre exacto del archivo.
 
 import urllib.request
 import shutil
-import numpy as np
+from os import chdir
+import glob
 from socket import gethostname
 
 
-year = 2009
-doy = np.random.choice(366, 60)  # elije 60 días aleatorios del año para descargar
-# doy = range(1, 366)
+year = 2014
+# doy = np.random.choice(366, 60)  # elije 60 días aleatorios del año para descargar
+doy = range(193, 366)
 
 if gethostname() == "magneto2":
     path = f"../../../../../media/gabybosc/datos/VEX/{year}/"
+elif gethostname() == "DESKTOP-2GS0QF2":
+    chdir(f"G:/")
+    path = f"VEX{year}/"
 else:
     path = f"../../../datos/VEX/{year}/"
 
@@ -30,4 +34,6 @@ for dd in doy:
         "wb",
     ) as out_file:
         shutil.copyfileobj(response, out_file)
-    print(f"mag dia {dd} listo")
+
+if gethostname() == "DESKTOP-2GS0QF2":
+    chdir("C:/Users/RainbowRider/Documents/GitHub/MPB/VEX/")
