@@ -51,20 +51,23 @@ def importar_MAG(year, doy, ti, tf):
     if os.path.exists(filt):
         MAG = np.loadtxt(filt)
         t = MAG[0]
-        B = MAG[1:4]
-        pos = MAG[4:]
+        B = MAG[1:4].T
+        pos = MAG[4:].T
+        t_pos = 0
         cl = False
 
     else:
         mag = np.loadtxt(magcl)
-        pos = np.loadtxt(poscl)[-3:]
+        pos = np.loadtxt(poscl)
 
         hh = mag[:, 3]
         mm = mag[:, 4]
         ss = mag[:, 5]
 
         B = mag[:, 6:9]
+        posicion = pos[:, 6:9]
         t = hh + mm / 60 + ss / 3600  # hdec
+        t_pos = pos[:, 3] + pos[:, 4] / 60 + pos[:, 5] / 3600  # hdec
         cl = True
 
     inicio = donde(t, ti)
@@ -72,31 +75,18 @@ def importar_MAG(year, doy, ti, tf):
 
     t_cut = t[inicio:fin]
     B_cut = B[inicio:fin]
-    pos_cut = pos[inicio:fin]
+
+    if type(t_pos) != int:
+        pos_cut = posicion[donde(t_pos, ti) : donde(t_pos, tf)]
+        tpos_cut = t_pos[donde(t_pos, ti) : donde(t_pos, tf)]
+    else:
+        tpos_cut = 0
+        pos_cut = pos[inicio:fin]
 
     if gethostname() == "DESKTOP-2GS0QF2":
         os.chdir("C:/Users/RainbowRider/Documents/GitHub/MPB/VEX/")
 
-    return t_cut, B_cut, pos_cut, cl
-
-
-#    hh = mag[:, 3]
-#     mm = mag[:, 4]
-#     ss = mag[:, 5]
-
-#     B = mag[:, 6:9]
-#     t = hh + mm / 60 + ss / 3600  # hdec
-
-#     inicio = donde(t, ti)
-#     fin = donde(t, tf)
-
-#     t_cut = t[inicio:fin]
-#     B_cut = B[inicio:fin]
-#     pos_cut = pos[inicio:fin]
-
-#     if gethostname() == "DESKTOP-2GS0QF2":
-#         os.chdir("C:/Users/RainbowRider/Documents/GitHub/MPB/VEX/")
-#     return t_cut, B_cut, pos_cut
+    return t_cut, B_cut, pos_cut, cl, tpos_cut
 
 
 def importar_MAG_pds(year, doy, ti, tf):

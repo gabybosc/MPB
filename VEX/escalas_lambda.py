@@ -8,7 +8,7 @@ El mapa de colores me va a dar el valor del cociente.
 import numpy as np
 import time as time
 import os
-from importar_datos import importar_MAG_pds
+from _importar_datos import importar_MAG
 import matplotlib.pyplot as plt
 import matplotlib.dates as md
 from matplotlib.widgets import MultiCursor
@@ -51,7 +51,7 @@ def MVA(t, ti, tf, B):
 
 
 def escalas_lambda(year, doy, ti, tf):
-    t, B, posicion = importar_MAG_pds(year, doy, ti, tf)
+    t, B, posicion, cl, tpos = importar_MAG(year, doy, ti, tf)
 
     tiempo_central = np.zeros(
         int((tf - ti) * 3600)
@@ -110,7 +110,7 @@ ti, tf = importar_titf(year, doy)
 path = f"../outputs/cociente_lambdas_VEX_d{doy}.txt"
 if os.path.isfile(path):
     datos = np.loadtxt(path, skiprows=1)
-    mag, t, B, posicion = importar_MAG_pds(year, doy, ti, tf)
+    t, B, posicion, cl = importar_MAG(year, doy, ti, tf)
 
     periodo_ciclotron = datos[1:, 0]
     tiempo_central = datos[1:, 1]

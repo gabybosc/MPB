@@ -19,16 +19,17 @@ comparar con los datos de 1Hz a ver si están bien calibrados
 puedo o hacer un avg o un downsampling
 """
 
-year = 2008
+year = 2014
 lista = np.loadtxt(f"../outputs/VEX{year}_menor65.txt", dtype=str)
 
 # i = int(input("indice en lista\n")) 13
-for i in range(72, 366):
+for i in range(35):
     print(i)
     l = lista[i]
     year, month, day = l[0].split("-")
     year, doy = day_to_doy(year, month, day)
-    hh = int(l[1].split(":")[0])
+    # hh = int(l[1].split(":")[0])
+    hh = float(l[1])
     ti = hh - 2
     tf = hh + 2
     if ti < 0:
@@ -38,7 +39,7 @@ for i in range(72, 366):
 
     # t, B, pos = importar_MAG_pds(year, doy, ti, tf)
 
-    t, B, pos, cl = importar_MAG(year, doy, ti, tf)
+    t, B, pos, cl, tpos = importar_MAG(year, doy, ti, tf)
     if cl == True:
         Bpara, Bperp, tpara = Bpara_Bperp(B, t, ti, tf)  # si son datos de clweb 1s
     else:

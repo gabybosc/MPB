@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib.widgets import MultiCursor
 from cycler import cycler
-from importar_datos import importar_MAG, importar_fila
+from _importar_datos import importar_MAG, importar_fila
 from _fit_venus import plot_orbita, fit_Xu
 from _multiplot import multi_plot_MAG_only
 from _update_parametros import (
@@ -17,6 +17,7 @@ sys.path.append("..")
 from funciones import (
     donde,
     fechas,
+    tiempos,
     Mij,
     error,
     corrientes,
@@ -92,7 +93,7 @@ def MVA(B, year, month, day):
 
 year, month, day, doy = fechas()
 ti, tf = 0, 24  # tiempos()
-t, B, pos, cl = importar_MAG(year, doy, ti, tf)
+t, B, pos, cl, tpos = importar_MAG(year, doy, ti, tf)
 if cl == True:
     Bpara, Bperp, tpara = Bpara_Bperp(B, t, ti, tf)  # si son datos de clweb 1s
 else:
@@ -101,13 +102,22 @@ else:
 Bnorm = np.linalg.norm(B, axis=1)
 
 
-val = multi_plot_MAG_only(t, tpara, B, Bnorm, Bpara, Bperp, 2)
 nr, hoja_parametros, hoja_mva, hoja_boot, hoja_fit = importar_fila(year, month, day)
 
-inicio_MVA = donde(t, min(val))
-fin_MVA = donde(t, max(val))
+# val = multi_plot_MAG_only(t, tpara, B, Bnorm, Bpara, Bperp, 2)
+# inicio_MVA = donde(t, min(val))
+# fin_MVA = donde(t, max(val))
 
-sza = SZA(pos, inicio_MVA)
+ti_mva, tf_mva = tiempos()
+inicio_MVA = donde(t, ti_mva)
+fin_MVA = donde(t, tf_mva)
+
+if type(tpos) != int:
+    i_pos = donde(tpos, ti_mva)
+else:
+    i_pos = inicio_MVA
+
+sza = SZA(pos, i_pos)
 x3 = MVA(B[inicio_MVA:fin_MVA], year, month, day)
 
 plt.show()
@@ -119,8 +129,8 @@ plt.figure()
 plot_orbita(pos_RV, orbita, xx, yz)
 
 plt.quiver(
-    pos_RV[inicio_MVA, 0],
-    np.sqrt(pos_RV[inicio_MVA, 1] ** 2 + pos_RV[inicio_MVA, 2] ** 2),
+    pos_RV[i_pos, 0],
+    np.sqrt(pos_RV[i_pos, 1] ** 2 + pos_RV[i_pos, 2] ** 2),
     x3[0],
     np.sqrt(x3[1] ** 2 + x3[2] ** 2),
 )
@@ -135,12 +145,19 @@ t3 = times[idx][4]
 t4 = times[idx][5]
 hoja_t1t2t3t4(hoja_parametros, nr, t1, t2, t3, t4)
 
-v_punto = np.zeros((len(B) - 1, 3))
-norma_v = np.zeros(len(B) - 1)
-for i in range(len(v_punto)):
-    v_punto[i, :] = (pos[i + 1, :] - pos[i]) / (1 / 128)
-    # en km/s, tiene resolución de 128Hz
-    norma_v[i] = np.linalg.norm(v_punto[i, :])
+v_punto = np.zeros((len(pos) - 1, 3))
+norma_v = np.zeros(len(pos) - 1)
+if cl == True:
+    for i in range(len(v_punto)):
+        v_punto[i, :] = pos[i + 1, :] - pos[i] / 10
+        # en km/s, tiene resolución de 128Hz
+        norma_v[i] = np.linalg.norm(v_punto[i, :])
+else:
+    for i in range(len(v_punto)):
+        v_punto[i, :] = (pos[i + 1, :] - pos[i]) / (1 / 32)
+        # en km/s, tiene resolución de 128Hz
+        norma_v[i] = np.linalg.norm(v_punto[i, :])
+
 # la velocidad promedio
 v_media = np.mean(v_punto, axis=0)
 

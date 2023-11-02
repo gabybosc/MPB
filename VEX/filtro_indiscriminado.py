@@ -5,7 +5,7 @@ import sys
 from socket import gethostname
 import os
 
-# from _importar_datos import importar_MAG_pds
+from _importar_datos import importar_MAG_pds
 
 sys.path.append("..")
 from funciones import fechas, day_to_doy, donde
@@ -21,52 +21,19 @@ N es el orden del filtro, en general voy a querer que N sea cercano a 10.
 Como es de 128Hz, va a cortarlo a 32Hz tomando un punto de cada cuatro. 
 En este caso entonces, Nyquist pasa a ser 16Hz.
 """
-year = 2008
+year = 2014
 
+# lista = np.loadtxt(f"../outputs/VEX{year}_menor65.txt", dtype=str)
 
-def importar_MAG_pds(year, doy, ti, tf):
-    os.chdir(f"G:/")
-    path = f"VEX2008/fg128HzY{str(year)[2:]}D{doy}.tab"
+# # i = int(input("indice en lista\n"))
+# for i in range(len(lista)):
+#     print(i)
+#     l = lista[i]
+#     year, month, day = l[0].split("-")
+#     year, doy = day_to_doy(year, month, day)
 
-    if os.path.exists(path):
-        B = np.genfromtxt(path, skip_header=1, usecols=[5, 6, 7])
-        pos = np.genfromtxt(path, skip_header=1, usecols=[8, 9, 10])
-        tt = np.genfromtxt(path, skip_header=1, usecols=0, dtype="str")
-
-        hora = np.array([x.split("T")[1] for x in tt])
-        t = np.array(
-            [
-                int(x.split(":")[0])
-                + int(x.split(":")[1]) / 60
-                + float(x.split(":")[2]) / 3600
-                for x in hora
-            ]
-        )  # hdec
-
-        inicio = donde(t, ti)
-        fin = donde(t, tf)
-
-        t_cut = t[inicio:fin]
-        B_cut = B[inicio:fin]
-        pos_cut = pos[inicio:fin]
-    if gethostname() == "DESKTOP-2GS0QF2":
-        os.chdir("C:/Users/RainbowRider/Documents/GitHub/MPB/VEX/")
-
-    return t_cut, B_cut, pos_cut
-
-
-lista = np.loadtxt(f"../outputs/VEX{year}_menor65.txt", dtype=str)
-
-# i = int(input("indice en lista\n"))
-for i in range(len(lista)):
-    print(i)
-    l = lista[i]
-    year, month, day = l[0].split("-")
-    year, doy = day_to_doy(year, month, day)
-
-    # for doy in range(1, 2):
-    #     print(doy)
-    # year, month, day, doy = fechas()
+for doy in range(144, 174):
+    print(doy)
     ti, tf = 0, 24  # tiempos()
     tiempo, campo, posicion = importar_MAG_pds(year, str(doy).zfill(3), ti, tf)
     t = tiempo[::4]
@@ -101,6 +68,6 @@ for i in range(len(lista)):
 
     if gethostname() == "DESKTOP-2GS0QF2":
         os.chdir(f"G:/")
-        filt = f"VEX{year}/VEX_mag_filtrado_{year}{doy}.gz"
+        filt = f"VEX{year}/VEX_mag_filtrado_{year}{str(doy).zfill(3)}.gz"
         np.savetxt(filt, np.vstack((t, B_filtrado.T, pos.T)))
         os.chdir("C:/Users/RainbowRider/Documents/GitHub/MPB/VEX/")
