@@ -73,39 +73,40 @@ def MVA(B):
 
 
 year, month, day, doy = fechas()
-lista = np.loadtxt("../outputs/orbitas_VEX.txt", dtype=str)
+ti, tf = tiempos()
+# lista = np.loadtxt("../outputs/orbitas_VEX.txt", dtype=str)
 
-for l in lista:
-    if l[0] == f"{year}-{month}-{day}":
-        hh = int(l[1].split(":")[0])
-        ti = hh - 2
-        tf = hh + 2
-        if ti < 0:
-            ti = 0
-        if tf > 24:
-            tf = 24
+# for l in lista:
+#     if l[0] == f"{year}-{month}-{day}":
+#         hh = int(l[1].split(":")[0])
+#         ti = hh - 2
+#         tf = hh + 2
+#         if ti < 0:
+#             ti = 0
+#         if tf > 24:
+#             tf = 24
 
-t, B, pos, cl = importar_MAG(year, doy, ti, tf)
-if cl == True:
-    Bpara, Bperp, tpara = Bpara_Bperp(B, t, ti, tf)  # si son datos de clweb 1s
-else:
-    # para datos de PDS filtrados y diezmados
-    Bpara, Bperp, tpara = Bpara_Bperp(B[::32], t[::32], ti, tf)
+t, B, pos, cl, tpos = importar_MAG(year, doy, ti - 1, tf + 1)
+# if cl == True:
+#     Bpara, Bperp, tpara = Bpara_Bperp(B, t, ti, tf)  # si son datos de clweb 1s
+# else:
+#     # para datos de PDS filtrados y diezmados
+#     Bpara, Bperp, tpara = Bpara_Bperp(B[::32], t[::32], ti, tf)
 
 Bnorm = np.linalg.norm(B, axis=1)
 # ti, tf = 2.778339846633605, 2.7804097790334508  # tiempos()
 # inicio_MVA = donde(t, val[0])
 # fin_MVA = donde(t, val[1])
-dd = np.loadtxt("../outputs/VEX_times.txt", usecols=1)
-times = np.loadtxt("../outputs/VEX_times.txt")
-idx = donde(dd, int(doy))
-t1 = times[idx][2]
-t2 = times[idx][3]
-t3 = times[idx][4]
-t4 = times[idx][5]
+# dd = np.loadtxt("../outputs/VEX_times.txt", usecols=1)
+# times = np.loadtxt("../outputs/VEX_times.txt")
+# idx = donde(dd, int(doy))
+# t1 = times[idx][2]
+# t2 = times[idx][3]
+# t3 = times[idx][4]
+# t4 = times[idx][5]
 
-ti = t2
-tf = t3
+# ti = t2
+# tf = t3
 inicio_MVA = donde(t, ti)
 fin_MVA = donde(t, tf)
 
@@ -189,16 +190,22 @@ ax.set_ylabel(r"$(Y²_{VSO} + Z²_{VSO} )^{1/2}$ ($R_V$)", fontsize=14)
 
 v_punto = np.zeros((len(B) - 1, 3))
 norma_v = np.zeros(len(B) - 1)
-for i in range(len(v_punto)):
-    v_punto[i, :] = (pos[i + 1, :] - pos[i]) / (1 / 128)
-    # en km/s, tiene resolución de 128Hz
-    norma_v[i] = np.linalg.norm(v_punto[i, :])
+if cl == True:
+    for i in range(len(v_punto)):
+        v_punto[i, :] = pos[i + 1, :] - pos[i] / 10
+        # en km/s, tiene resolución de 128Hz
+        norma_v[i] = np.linalg.norm(v_punto[i, :])
+else:
+    for i in range(len(v_punto)):
+        v_punto[i, :] = (pos[i + 1, :] - pos[i]) / (1 / 32)
+        # en km/s, tiene resolución de 128Hz
+        norma_v[i] = np.linalg.norm(v_punto[i, :])
 # la velocidad promedio
 v_media = np.mean(v_punto, axis=0)
 
 
-x14, x23 = ancho_mpb(t1, t2, t3, t4, x3, v_media)
-print(f"Ancho MPB hmax = {x14:.3g} km, hmin = {x23:.3g} km")
+# x14, x23 = ancho_mpb(t1, t2, t3, t4, x3, v_media)
+# print(f"Ancho MPB hmax = {x14:.3g} km, hmin = {x23:.3g} km")
 
 # inicio_up = donde(t, t1 - 0.015)
 # fin_up = donde(t, t1)

@@ -47,6 +47,10 @@ def importar_MAG(year, doy, ti, tf):
         filt = f"VEX{year}/VEX_mag_filtrado_{year}{doy}.gz"
         magcl = f"VEX{year}/MAG{year}{month}{day}.asc"
         poscl = f"VEX{year}/pos{year}{month}{day}.asc"
+    if gethostname() == "gabybosc":
+        filt = f"../../../datos/VEX/VEX_mag_filtrado_{year}{doy}.gz"
+        magcl = f"../../../datos/VEX/MAG{year}{month}{day}.asc"
+        poscl = f"../../../datos/VEX/pos{year}{month}{day}.asc"
 
     if os.path.exists(filt):
         MAG = np.loadtxt(filt)
