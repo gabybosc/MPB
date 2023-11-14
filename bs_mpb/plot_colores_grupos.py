@@ -174,33 +174,78 @@ plt.setp(ax2.get_yticklabels(), visible=False)
 # plt.title("discriminacion por beta")
 plt.show()
 
-# con un colormap si no
-# plt.figure()
-# plt.errorbar(
-#     Rsd_MPB,
-#     Rsd_BS,
-#     fmt="o",
-#     xerr=err_mpb,
-#     yerr=err_bs,
-#     c="k",
-#     zorder=0,
-#     # label=lbl,
-# )
-# plt.scatter(
-#     Rsd_MPB,
-#     Rsd_BS,
-#     c=beta,
-#     vmin=min(beta),
-#     vmax=5,
-# )
-# plt.colorbar()
-# plt.grid()
-# plt.gca().set_aspect("equal")
-# plt.xlabel("Standoff Distance MPB (RM)")
-# plt.ylabel("Standoff Distance BS (RM)")
-# plt.title(f"Discriminación por beta (cap en 5)")
-# plt.savefig(path + "Discrimina_beta.png", dpi=300)
-# plt.show()
+
+fig = plt.figure()
+fig.subplots_adjust(
+    top=0.95, bottom=0.1, left=0.05, right=0.95, hspace=0.1, wspace=0.15
+)
+
+fig.suptitle(r"Cruces divididos por $\beta$")
+
+ax1 = plt.subplot2grid((2, 2), (0, 0))
+ax2 = plt.subplot2grid((2, 2), (0, 1), sharex=ax1, sharey=ax1)
+ax3 = plt.subplot2grid((2, 2), (1, 0), sharex=ax1, sharey=ax1)
+ax4 = plt.subplot2grid((2, 2), (1, 1), sharex=ax1, sharey=ax1)
+
+z1 = ax1.scatter(
+    Rsd_MPB[idx_mag],
+    Rsd_BS[idx_mag],
+    c=beta[idx_mag],
+    vmin=0,
+    vmax=1,
+    label=r"$\beta < 1$",
+)
+z2 = ax2.scatter(
+    Rsd_MPB[idx_dyn],
+    Rsd_BS[idx_dyn],
+    c=beta[idx_dyn],
+    vmin=1,
+    vmax=3,
+    label=r"$1 < \beta < 3$",
+)
+z3 = ax3.scatter(
+    Rsd_MPB[idx_dyn2],
+    Rsd_BS[idx_dyn2],
+    c=beta[idx_dyn2],
+    vmin=3,
+    vmax=5,
+    label=r"$3 < \beta < 5$",
+)
+z4 = ax4.scatter(
+    Rsd_MPB[idx_dyn3],
+    Rsd_BS[idx_dyn3],
+    c=beta[idx_dyn3],
+    vmin=5,
+    vmax=10,
+    label=r"$5 < \beta$",
+)
+
+
+for ax in [ax1, ax2, ax3, ax4]:
+    ax.grid()
+    ax.legend()
+
+ax3.set_xlabel("Rsd_MPB (RM)")
+ax4.set_xlabel("Rsd_MPB (RM)")
+ax3.set_ylabel("Rsd_BS (RM)")
+ax1.set_ylabel("Rsd_BS (RM)")
+divider = make_axes_locatable(ax1)
+cax = divider.append_axes("right", size="5%", pad=0.05)
+plt.colorbar(z1, cax=cax)
+divider = make_axes_locatable(ax2)
+cax = divider.append_axes("right", size="5%", pad=0.05)
+plt.colorbar(z2, cax=cax)
+divider = make_axes_locatable(ax3)
+cax = divider.append_axes("right", size="5%", pad=0.05)
+plt.colorbar(z3, cax=cax)
+divider = make_axes_locatable(ax4)
+cax = divider.append_axes("right", size="5%", pad=0.05)
+plt.colorbar(z4, cax=cax)
+plt.setp(ax4.get_yticklabels(), visible=False)
+plt.setp(ax2.get_yticklabels(), visible=False)
+# plt.title("discriminacion por beta")
+plt.show()
+
 
 """
 Discriminación por para/perp
@@ -237,8 +282,34 @@ ax2.set_ylabel("Rsd_BS - Rsd_MPB (RM)")
 ax1.set_ylabel("Rsd_BS - Rsd_MPB (RM)")
 ax2.set_xlabel("cruces")
 
-# plt.title(f"Discriminación por theta")
-# plt.savefig(path + "Discrimina_theta.png", dpi=300)
+plt.show()
+
+
+fig = plt.figure()
+fig.subplots_adjust(
+    top=0.95, bottom=0.1, left=0.05, right=0.95, hspace=0.1, wspace=0.15
+)
+
+fig.suptitle("Cruces quasipara / quasiperp")
+
+ax1 = plt.subplot2grid((2, 1), (0, 0))
+ax2 = plt.subplot2grid((2, 1), (1, 0), sharex=ax1, sharey=ax1)
+
+z1 = ax1.scatter(
+    Rsd_MPB[idx_para], Rsd_BS[idx_para], vmin=0, vmax=90, label=r"$\theta < 30$"
+)
+
+z2 = ax2.scatter(
+    Rsd_MPB[idx_perp], Rsd_BS[idx_perp], vmin=0, vmax=90, label=r"$\theta > 70$"
+)
+
+for ax in [ax1, ax2]:
+    ax.legend()
+    ax.grid()
+ax2.set_ylabel("Rsd_BS (RM)")
+ax1.set_ylabel("Rsd_BS (RM)")
+ax2.set_xlabel("Rsd MPB (RM)")
+
 plt.show()
 
 
@@ -326,4 +397,128 @@ cax = divider.append_axes("right", size="5%", pad=0.05)
 plt.colorbar(z1, cax=cax)
 plt.setp(ax4.get_yticklabels(), visible=False)
 plt.setp(ax2.get_yticklabels(), visible=False)
+plt.show()
+
+
+fig = plt.figure()
+fig.subplots_adjust(
+    top=0.95, bottom=0.1, left=0.05, right=0.95, hspace=0.1, wspace=0.15
+)
+
+fig.suptitle("Plots según SZA BS - el color indica el SZA MPB")
+
+ax1 = plt.subplot2grid((2, 2), (0, 0))
+ax2 = plt.subplot2grid((2, 2), (0, 1), sharex=ax1, sharey=ax1)
+ax3 = plt.subplot2grid((2, 2), (1, 0), sharex=ax1, sharey=ax1)
+ax4 = plt.subplot2grid((2, 2), (1, 1), sharex=ax1, sharey=ax1)
+
+z1 = ax1.scatter(
+    Rsd_MPB[idx_sza1],
+    Rsd_BS[idx_sza1],
+    c=sza_mpb[idx_sza1],
+    vmin=0,
+    vmax=90,
+    label="SZA BS < 20",
+)
+z2 = ax2.scatter(
+    Rsd_MPB[idx_sza2],
+    Rsd_BS[idx_sza2],
+    c=sza_mpb[idx_sza2],
+    vmin=0,
+    vmax=90,
+    label="20 < SZA BS < 40",
+)
+z3 = ax3.scatter(
+    Rsd_MPB[idx_sza3],
+    Rsd_BS[idx_sza3],
+    c=sza_mpb[idx_sza3],
+    vmin=0,
+    vmax=90,
+    label="40 < SZA BS < 60",
+)
+z4 = ax4.scatter(
+    Rsd_MPB[idx_sza4],
+    Rsd_BS[idx_sza4],
+    c=sza_mpb[idx_sza4],
+    vmin=0,
+    vmax=90,
+    label="60 < SZA BS",
+)
+
+
+for ax in [ax1, ax2, ax3, ax4]:
+    ax.grid()
+    ax.legend()
+ax3.set_xlabel("Rsd MPB (RM)")
+ax4.set_xlabel("Rsd MPB (RM)")
+ax3.set_ylabel("Rsd_BS (RM)")
+ax1.set_ylabel("Rsd_BS (RM)")
+divider = make_axes_locatable(ax2)
+cax = divider.append_axes("right", size="5%", pad=0.05)
+plt.colorbar(z1, cax=cax)
+plt.setp(ax4.get_yticklabels(), visible=False)
+plt.setp(ax2.get_yticklabels(), visible=False)
+plt.show()
+
+
+"""
+Hemisferio
+"""
+
+idx_sur = []
+idx_norte = []
+for n, z in enumerate(pos_mpb):
+    if z[2] < 0:
+        idx_sur.append(n)
+    else:
+        idx_norte.append(n)
+
+
+fig = plt.figure()
+fig.subplots_adjust(
+    top=0.95, bottom=0.1, left=0.05, right=0.95, hspace=0.1, wspace=0.15
+)
+
+fig.suptitle("Cruces hemisferio")
+
+ax1 = plt.subplot2grid((2, 1), (0, 0))
+ax2 = plt.subplot2grid((2, 1), (1, 0))
+
+z1 = ax1.scatter(range(len(idx_sur)), ancho_MS[idx_sur], vmin=0, vmax=90, label="Sur")
+
+z2 = ax2.scatter(
+    range(len(idx_norte)), ancho_MS[idx_norte], vmin=0, vmax=90, label="Norte"
+)
+
+for ax in [ax1, ax2]:
+    ax.legend()
+    ax.set_ylim([-0.1, 1])
+    ax.grid()
+ax2.set_ylabel("Rsd_BS - Rsd_MPB (RM)")
+ax1.set_ylabel("Rsd_BS - Rsd_MPB (RM)")
+ax2.set_xlabel("cruces")
+
+plt.show()
+
+fig = plt.figure()
+fig.subplots_adjust(
+    top=0.95, bottom=0.1, left=0.05, right=0.95, hspace=0.1, wspace=0.15
+)
+
+fig.suptitle("Cruces hemisferio")
+
+ax1 = plt.subplot2grid((2, 1), (0, 0))
+ax2 = plt.subplot2grid((2, 1), (1, 0), sharex=ax1, sharey=ax1)
+
+z1 = ax1.scatter(Rsd_MPB[idx_sur], Rsd_BS[idx_sur], vmin=0, vmax=90, label="Sur")
+
+z2 = ax2.scatter(Rsd_MPB[idx_norte], Rsd_BS[idx_norte], vmin=0, vmax=90, label="Norte")
+
+for ax in [ax1, ax2]:
+    ax.legend()
+    ax.grid()
+ax2.set_ylabel("Rsd_BS (RM)")
+ax1.set_ylabel("Rsd_BS (RM)")
+ax2.set_xlabel("Rsd MPB (RM)")
+
 plt.show()
