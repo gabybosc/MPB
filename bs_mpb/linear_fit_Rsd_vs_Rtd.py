@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-
 """
 Necesita antes haber corrido BS_MPB_positions y BS_MPB_Rsd_Rtd
 """
@@ -19,6 +18,8 @@ Rsd_BS = np.load(path + "Rsd_bs.npy")
 Rtd_BS = np.load(path + "Rtd_bs.npy")
 Rsd_MPB = np.load(path + "Rsd_mpb.npy")
 Rtd_MPB = np.load(path + "Rtd_mpb.npy")
+L_MPB = np.load(path + "L_mpb.npy")
+L_BS = np.load(path + "L_bs.npy")
 newdates = np.load(path + "newdates.npy")
 
 
@@ -75,9 +76,33 @@ ax2.scatter(Rsd_BS, Rtd_BS)  # measured data
 #     Rtd_MPB, m_Rtd * Rtd_MPB + b_Rtd, color="red", label=r"$\chi^2=${}".format(chi_Rtd)
 # )  # model
 ax1.set_xlabel(r"standoff distance MPB [$R_M$]")
-ax1.legend(loc=0)
+ax1.set_ylabel(r"terminator distance MPB [$R_M$]")
 ax2.set_ylabel(r"terminator distance BS [$R_M$]")
-ax2.legend(loc=0)
+ax2.set_xlabel(r"standoff distance BS [$R_M$]")
 
+fig = plt.figure(2)
+fig.subplots_adjust(
+    top=0.95, bottom=0.1, left=0.05, right=0.95, hspace=0.1, wspace=0.15
+)
+ax1 = plt.subplot2grid((1, 2), (0, 0))
+ax2 = plt.subplot2grid((1, 2), (0, 1))
+ax1.scatter(L_MPB, Rtd_MPB)  # measured data
+ax2.scatter(L_BS, Rtd_BS)  # measured data
+ax1.set_xlabel(r"L MPB [$R_M$]")
+ax1.set_ylabel(r"terminator distance MPB [$R_M$]")
+ax2.set_ylabel(r"L BS [$R_M$]")
+ax2.set_xlabel(r"standoff distance BS [$R_M$]")
 
+plt.show()
+
+fig = plt.figure(3)
+fig.subplots_adjust(
+    top=0.95, bottom=0.1, left=0.05, right=0.95, hspace=0.1, wspace=0.15
+)
+ax1 = plt.subplot2grid((1, 2), (0, 0))
+ax2 = plt.subplot2grid((1, 2), (0, 1))
+ax1.plot(L_MPB, ".")  # measured data
+ax2.plot(L_BS, ".")  # measured data
+ax1.set_ylabel(r"L MPB [$R_M$]")
+ax2.set_ylabel(r"L BS [$R_M$]")
 plt.show()

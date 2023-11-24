@@ -82,10 +82,12 @@ for i in range(N_events):
     Rtd_MPB[i] = fvig.Rtd(L_MPB[i], 0.78, 0.90)
 
 
-np.save(path + "Rsd_bs.npy", Rsd_BS)
-np.save(path + "Rtd_bs.npy", Rtd_BS)
-np.save(path + "Rsd_mpb.npy", Rsd_MPB)
-np.save(path + "Rtd_mpb.npy", Rtd_MPB)
+# np.save(path + "Rsd_bs.npy", Rsd_BS)
+# np.save(path + "Rtd_bs.npy", Rtd_BS)
+# np.save(path + "Rsd_mpb.npy", Rsd_MPB)
+# np.save(path + "Rtd_mpb.npy", Rtd_MPB)
+# np.save(path + "L_mpb.npy", L_MPB)
+# np.save(path + "L_bs.npy", L_BS)
 
 
 Rsd_BS_f, Rtd_BS_f = Rsd_Rtd(R_BS, Rpolar_BS, 0.64, 1.03)
