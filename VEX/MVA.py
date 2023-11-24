@@ -125,15 +125,15 @@ xx, yz = fit_Xu()
 pos_RV = pos / 6050
 orbita = np.sqrt(pos_RV[:, 1] ** 2 + pos_RV[:, 2] ** 2)
 
-plt.figure()
-plot_orbita(pos_RV, orbita, xx, yz)
+# plt.figure()
+# plot_orbita(pos_RV, orbita, xx, yz)
 
-plt.quiver(
-    pos_RV[i_pos, 0],
-    np.sqrt(pos_RV[i_pos, 1] ** 2 + pos_RV[i_pos, 2] ** 2),
-    x3[0],
-    np.sqrt(x3[1] ** 2 + x3[2] ** 2),
-)
+# plt.quiver(
+#     pos_RV[i_pos, 0],
+#     np.sqrt(pos_RV[i_pos, 1] ** 2 + pos_RV[i_pos, 2] ** 2),
+#     x3[0],
+#     np.sqrt(x3[1] ** 2 + x3[2] ** 2),
+# )
 
 
 dd = np.loadtxt("../outputs/VEX_times.txt", usecols=1)
@@ -160,7 +160,8 @@ else:
 
 # la velocidad promedio
 v_media = np.mean(v_punto, axis=0)
-
+print("v media", v_media)
+print("cl", cl)
 
 x14, x23 = ancho_mpb(t1, t2, t3, t4, x3, v_media)
 print(f"Ancho MPB hmax = {x14:.3g}, hmin = {x23:.3g}")
