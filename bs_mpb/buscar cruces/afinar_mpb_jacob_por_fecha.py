@@ -18,13 +18,11 @@ np.set_printoptions(precision=4)
 
 grupo = 2  # input("grupo\n")
 
-path = f"outs_catalogo_previa/grupo{grupo}/"
-
 dates = fechas()
 time = int(input("hora (HH)\n"))
 d_str = str(dates[0] + "-" + dates[1] + "-" + dates[2])
 
-catalogo = np.genfromtxt(f"../outputs/grupo{grupo}/jacob_dayside.txt", dtype="str")
+catalogo = np.genfromtxt(f"../../outputs/grupo{grupo}/jacob_dayside.txt", dtype="str")
 
 fecha = catalogo[:, 0]
 hora_min = catalogo[:, 1]
@@ -100,7 +98,7 @@ while flag_MPB == None:
     elif flag == "n":
         flag_MPB = 0
 
-filepath = f"../outputs/grupo{grupo}/jacob_dayside_revised.txt"
+filepath = f"../../outputs/grupo{grupo}/jacob_dayside_revised.txt"
 
 if not exists(filepath):
     with open(filepath, "w") as file:

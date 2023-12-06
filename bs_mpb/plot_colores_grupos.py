@@ -7,7 +7,9 @@ from scipy.stats import chisquare
 import matplotlib as mpl
 from cycler import cycler
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+from scipy.stats import norm
 import sys
+
 
 sys.path.append("..")
 from funciones import donde, angulo
@@ -63,6 +65,19 @@ err_mpb = np.array((np.abs(Rsd_MPB_min - Rsd_MPB), np.abs(Rsd_MPB_max - Rsd_MPB)
 # plt.gca().set_aspect("equal")
 # plt.show()
 
+plt.figure()
+n, bins, patches = plt.hist(Rsd_MPB, 20, density=1, alpha=0.5)
+(muB, sigmaB) = norm.fit(Rsd_MPB)
+y = norm.pdf(bins, muB, sigmaB)
+plt.plot(bins, y, label="MPB")
+n, bins, patches = plt.hist(Rsd_BS, 20, density=1, alpha=0.5)
+(muB, sigmaB) = norm.fit(Rsd_BS)
+y = norm.pdf(bins, muB, sigmaB)
+plt.plot(bins, y, label="BS")
+plt.legend()
+plt.xlabel("Standoff Distance (RM)")
+plt.ylabel("Cantidad de eventos")
+plt.show()
 
 plt.errorbar(Rsd_MPB, Rsd_BS, fmt="o", xerr=err_mpb, yerr=err_bs, zorder=0)
 plt.legend()

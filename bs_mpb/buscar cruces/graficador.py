@@ -20,10 +20,10 @@ plt.rcParams["axes.prop_cycle"] = cycler(
 # grupo = input("grupo\n")
 for grupo in [1, 2, 3, 4]:
     lista = np.genfromtxt(
-        f"../outputs/grupo{grupo}/jacob_dayside_bs.txt", skip_header=1, dtype=str
+        f"../../outputs/grupo{grupo}/jacob_dayside_bs.txt", skip_header=1, dtype=str
     )
     # fig_path = f"../../../../Pictures/BS_MPB/grupo{grupo}_Jacob/"  # casa
-    fig_path = f"../../Pictures/BS_MPB/grupo{grupo}_Jacob/"  # iafe
+    fig_path = f"../../../Pictures/BS_MPB/grupo{grupo}_Jacob/"  # iafe
 
     for l in lista:
         flag = l[-3]
