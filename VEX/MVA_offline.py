@@ -228,5 +228,3 @@ v_media = np.mean(v_punto, axis=0)
 # buenas órbitas: SZA no tan alto, el campo en SW no es Bx
 # 21 nov 2007
 # 14 abr 2007
-plt.legend()
-plt.show()
