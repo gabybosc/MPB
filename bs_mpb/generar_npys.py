@@ -108,7 +108,7 @@ def generar_npys(path):
 
 
 def generar_npys_limites(path):
-    lista = np.genfromtxt(path + f"FINAL_ESTA_SI.txt", skip_header=1, dtype=str)
+    lista = np.genfromtxt(path + f"catalogo_final.txt", skip_header=1, dtype=str)
 
     pos_bs_min = []  # la posición min del bs
     pos_bs = []
