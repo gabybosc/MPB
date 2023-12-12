@@ -1,13 +1,7 @@
 import numpy as np
 import func_position as fpos
-from os.path import exists
-
-from func_time import Time as ftm0
-
 import sys
 
-sys.path.append("../")
-from funciones import UTC_to_hdec
 
 """
 busco las posiciones en cartesianas MSO para los tiempos de cruces y después las paso a polares 

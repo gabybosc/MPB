@@ -1,13 +1,8 @@
 import numpy as np
 import func_position as fpos
-from os.path import exists
-
-from func_time import Time as ftm0
-
 import sys
 
-sys.path.append("../")
-from funciones import UTC_to_hdec
+sys.path.append("../../")
 
 """
 busco las posiciones en cartesianas MSO para los tiempos de cruces y después las paso a polares 
@@ -51,11 +46,6 @@ Rpolar_MPB = np.empty_like(pos_mpb)
 
 
 # focus of conic section from Vignes model
-
-r0_BS = np.array([0.64, 0, 0])
-
-r0_MPB = np.array([0.78, 0, 0])
-
 
 for i in range(len(pos_bs)):
     # BS

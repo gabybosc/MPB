@@ -1,9 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import func_position as fpos
+from bs_mpb.ordenar_datos import func_position as fpos, Vignesfit_functions as fvig
 from os.path import exists
-import Vignesfit_functions as fvig
-from generar_npys import generar_npys
+from bs_mpb.ordenar_datos.generar_npys import generar_npys
 
 """
 saca los outliers de la Rsd y Rtd y me los... grafica? pone en una lista? No decidí todavía
@@ -84,7 +83,7 @@ def chired(ydata, ymod, param_fit):
 
 g = input("número de grupo\n")
 
-path = f"../outputs/grupo{g}/"
+path = f"../../outputs/grupo{g}/"
 
 if not exists(path + "pos_bs.npy"):
     generar_npys(path)

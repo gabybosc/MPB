@@ -6,7 +6,7 @@ from os.path import exists
 import Vignesfit_functions as fvig
 import func_position as fpos
 
-sys.path.append("..")
+sys.path.append("../..")
 from importar_datos import importar_mag_1s
 from funciones import UTC_to_hdec, donde
 
@@ -188,6 +188,9 @@ def generar_npys_limites(path):
     np.save(path + "pos_mpb.npy", pos_mpb)
     np.save(path + "pos_mpb_min.npy", pos_mpb_min)
     np.save(path + "pos_mpb_max.npy", pos_mpb_max)
+
+
+
 
 
 def gen_Rsd(path, BS, MPB):

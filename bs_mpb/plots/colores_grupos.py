@@ -1,9 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from os.path import exists
-from generar_npys import generar_npys_limites, gen_Rsd
-from scipy import odr
-from scipy.stats import chisquare
+from bs_mpb.ordenar_datos.generar_npys import gen_Rsd
 import matplotlib as mpl
 from cycler import cycler
 from mpl_toolkits.axes_grid1 import make_axes_locatable
@@ -11,7 +9,7 @@ from scipy.stats import norm
 import sys
 
 
-sys.path.append("..")
+sys.path.append("../..")
 from funciones import donde, angulo
 
 """
@@ -23,7 +21,7 @@ mpl.rcParams["axes.prop_cycle"] = cycler(
     ["#003f5c", "#ffa600", "#de425b", "#68abb8", "#f3babc", "#6cc08b", "#cacaca"],
 )
 
-path = f"../outputs/allgroups/"
+path = f"../../outputs/allgroups/"
 lista = np.load(path + "lista.npy")
 pos_bs = np.load(path + "pos_bs.npy")
 pos_mpb = np.load(path + "pos_mpb.npy")
@@ -334,25 +332,23 @@ Discriminación por SZA
 sza_mpb = np.array([angulo(p, [1, 0, 0]) * 180 / np.pi for p in pos_mpb])
 sza_bs = np.array([angulo(p, [1, 0, 0]) * 180 / np.pi for p in pos_bs])
 
-sza1 = [t for t in sza_bs if t < 20]
-sza2 = [t for t in sza_bs if 20 < t < 40]
-sza3 = [t for t in sza_bs if 40 < t < 60]
-sza4 = [t for t in sza_bs if 60 < t]
 
-idx_sza1 = [donde(sza_bs, p) for p in sza1]
-idx_sza2 = [donde(sza_bs, p) for p in sza2]
-idx_sza3 = [donde(sza_bs, p) for p in sza3]
-idx_sza4 = [donde(sza_bs, p) for p in sza4]
+def indices_sza(sza, minimo, maximo):
+    sza = [t for t in sza if minimo < t < maximo]
+    idx = [donde(sza, p) for p in sza]
+    return idx
 
-sza_mpb1 = [t for t in sza_mpb if t < 20]
-sza_mpb2 = [t for t in sza_mpb if 20 < t < 40]
-sza_mpb3 = [t for t in sza_mpb if 40 < t < 60]
-sza_mpb4 = [t for t in sza_mpb if 60 < t]
 
-idx_sza_mpb1 = [donde(sza_mpb, p) for p in sza_mpb1]
-idx_sza_mpb2 = [donde(sza_mpb, p) for p in sza_mpb2]
-idx_sza_mpb3 = [donde(sza_mpb, p) for p in sza_mpb3]
-idx_sza_mpb4 = [donde(sza_mpb, p) for p in sza_mpb4]
+idx_sza_mpb1 = indices_sza(sza_mpb, 0, 20)
+idx_sza_mpb2 = indices_sza(sza_mpb, 20, 40)
+idx_sza_mpb3 = indices_sza(sza_mpb, 40, 60)
+idx_sza_mpb4 = indices_sza(sza_mpb, 60, 90)
+
+idx_sza_bs1 = indices_sza(sza_bs, 0, 20)
+idx_sza_bs2 = indices_sza(sza_bs, 20, 40)
+idx_sza_bs3 = indices_sza(sza_bs, 40, 60)
+idx_sza_bs4 = indices_sza(sza_bs, 60, 90)
+
 
 fig = plt.figure()
 fig.subplots_adjust(
@@ -367,33 +363,33 @@ ax3 = plt.subplot2grid((2, 2), (1, 0))
 ax4 = plt.subplot2grid((2, 2), (1, 1))
 
 z1 = ax1.scatter(
-    range(len(idx_sza1)),
-    ancho_MS[idx_sza1],
-    c=sza_mpb[idx_sza1],
+    range(len(idx_sza_bs1)),
+    ancho_MS[idx_sza_bs1],
+    c=sza_mpb[idx_sza_bs1],
     vmin=0,
     vmax=90,
     label="SZA BS < 20",
 )
 z2 = ax2.scatter(
-    range(len(idx_sza2)),
-    ancho_MS[idx_sza2],
-    c=sza_mpb[idx_sza2],
+    range(len(idx_sza_bs2)),
+    ancho_MS[idx_sza_bs2],
+    c=sza_mpb[idx_sza_bs2],
     vmin=0,
     vmax=90,
     label="20 < SZA BS < 40",
 )
 z3 = ax3.scatter(
-    range(len(idx_sza3)),
-    ancho_MS[idx_sza3],
-    c=sza_mpb[idx_sza3],
+    range(len(idx_sza_bs3)),
+    ancho_MS[idx_sza_bs3],
+    c=sza_mpb[idx_sza_bs3],
     vmin=0,
     vmax=90,
     label="40 < SZA BS < 60",
 )
 z4 = ax4.scatter(
-    range(len(idx_sza4)),
-    ancho_MS[idx_sza4],
-    c=sza_mpb[idx_sza4],
+    range(len(idx_sza_bs4)),
+    ancho_MS[idx_sza_bs4],
+    c=sza_mpb[idx_sza_bs4],
     vmin=0,
     vmax=90,
     label="60 < SZA BS",
@@ -428,33 +424,33 @@ ax3 = plt.subplot2grid((2, 2), (1, 0), sharex=ax1, sharey=ax1)
 ax4 = plt.subplot2grid((2, 2), (1, 1), sharex=ax1, sharey=ax1)
 
 z1 = ax1.scatter(
-    Rsd_MPB[idx_sza1],
-    Rsd_BS[idx_sza1],
-    c=sza_mpb[idx_sza1],
+    Rsd_MPB[idx_sza_bs1],
+    Rsd_BS[idx_sza_bs1],
+    c=sza_mpb[idx_sza_bs1],
     vmin=0,
     vmax=90,
     label="SZA BS < 20",
 )
 z2 = ax2.scatter(
-    Rsd_MPB[idx_sza2],
-    Rsd_BS[idx_sza2],
-    c=sza_mpb[idx_sza2],
+    Rsd_MPB[idx_sza_bs2],
+    Rsd_BS[idx_sza_bs2],
+    c=sza_mpb[idx_sza_bs2],
     vmin=0,
     vmax=90,
     label="20 < SZA BS < 40",
 )
 z3 = ax3.scatter(
-    Rsd_MPB[idx_sza3],
-    Rsd_BS[idx_sza3],
-    c=sza_mpb[idx_sza3],
+    Rsd_MPB[idx_sza_bs3],
+    Rsd_BS[idx_sza_bs3],
+    c=sza_mpb[idx_sza_bs3],
     vmin=0,
     vmax=90,
     label="40 < SZA BS < 60",
 )
 z4 = ax4.scatter(
-    Rsd_MPB[idx_sza4],
-    Rsd_BS[idx_sza4],
-    c=sza_mpb[idx_sza4],
+    Rsd_MPB[idx_sza_bs4],
+    Rsd_BS[idx_sza_bs4],
+    c=sza_mpb[idx_sza_bs4],
     vmin=0,
     vmax=90,
     label="60 < SZA BS",

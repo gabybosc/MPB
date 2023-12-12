@@ -4,12 +4,12 @@ import sys
 import plotly.express as px
 from os.path import exists
 
-sys.path.append("..")
+sys.path.append("../..")
 from importar_datos import importar_mag_1s
 from funciones import UTC_to_hdec, donde
 
 grupo = input("número de grupo\n")
-path = f"../outputs/grupo{grupo}/"
+path = f"../../outputs/grupo{grupo}/"
 lista = np.genfromtxt(path + f"bs_mpb_final.txt", dtype=str)
 
 if exists(path + "pos_bs.npy"):

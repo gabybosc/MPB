@@ -1,15 +1,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from os.path import exists
-from generar_npys import generar_npys_limites, gen_Rsd
+from bs_mpb.ordenar_datos.generar_npys import generar_npys_limites, gen_Rsd
 from scipy import odr
-from scipy.stats import chisquare
 import matplotlib as mpl
 from cycler import cycler
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import sys
 
-sys.path.append("..")
+sys.path.append("../..")
 from funciones import donde, angulo
 
 """
@@ -40,7 +39,7 @@ def chired(ydata, ymod, param_fit):
 
 g = input("número de grupo\n")
 
-path = f"../outputs/grupo{g}/"
+path = f"../../outputs/grupo{g}/"
 
 if not exists(path + "pos_bs_min.npy"):
     generar_npys_limites(path)

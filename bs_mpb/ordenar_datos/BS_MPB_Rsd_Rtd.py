@@ -14,18 +14,18 @@ def Rsd_Rtd(pos, pos_polar, x0, eps):
     x0, eps son los parámetros de la cónica
     """
 
-    N_events = len(pos)
-    L = np.empty(N_events)
+    n_events = len(pos)
+    L = np.empty(n_events)
 
-    for i in range(N_events):
+    for i in range(n_events):
         L[i] = fvig.fit_L(pos_polar[i, 0], pos_polar[i, 1], eps)
 
     # CALCULATE VIGNES STANDOFF AND TERMINATOR DISTANCE
 
-    Rsd = np.empty(N_events)
-    Rtd = np.empty(N_events)
+    Rsd = np.empty(n_events)
+    Rtd = np.empty(n_events)
 
-    for i in range(N_events):
+    for i in range(n_events):
         Rsd[i] = fvig.Rsd(L[i], x0, eps)
 
         Rtd[i] = fvig.Rtd(L[i], x0, eps)
@@ -92,11 +92,6 @@ for i in range(N_events):
 
 Rsd_BS_f, Rtd_BS_f = Rsd_Rtd(R_BS, Rpolar_BS, 0.64, 1.03)
 Rsd_MPB_f, Rtd_MPB_f = Rsd_Rtd(R_MPB, Rpolar_MPB, 0.78, 0.9)
-
-Rsd_BS_f == Rsd_BS
-Rtd_BS_f == Rtd_BS
-Rsd_MPB_f == Rsd_MPB
-Rtd_MPB_f == Rtd_MPB
 
 # Lf_bs = L_func(R_BS, Rpolar_BS)
 # Lf_mpb = L_func(R_MPB, Rpolar_MPB)
