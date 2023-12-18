@@ -61,7 +61,7 @@ def ajuste_conico(R, x0=0.78, e=0.9):
     Y1 = r1 * np.sin(THETA) * np.cos(PHI)
     Z1 = r1 * np.sin(THETA) * np.sin(PHI)
 
-    return (X1, Y1, Z1, L0, norm_vignes)
+    return X1, Y1, Z1, L0, norm_vignes
 
 
 def ajuste_conico_plot(posicion, index, orbita, x3, x0=0.78, e=0.9):

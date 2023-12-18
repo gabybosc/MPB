@@ -16,7 +16,7 @@ def find_path(instrumento):
     elif gethostname() == "gabybosc":
         path = f"../../datos/{instrumento}/"
     else:
-        path = f"../../../datos/{instrumento}/"
+        path = f"../../datos/{instrumento}/"
 
     return path
 
@@ -382,3 +382,53 @@ def importar_fila(year, month, day, hora):
         print("no encuentro la fila")
 
     return fila, hoja_parametros, hoja_MVA, hoja_Bootstrap, hoja_Ajuste
+
+
+def importar_posiciones(path):
+    """
+    importa los datos de posicion en npy del estudio bs_mpb
+    """
+
+    pos_mpb = np.vstack(
+        (
+            np.load(path + "MPB_x.npy").astype(float),
+            np.load(path + "MPB_y.npy").astype(float),
+            np.load(path + "MPB_z.npy").astype(float),
+        )
+    )
+    pos_min = np.vstack(
+        (
+            np.load(path + "MPB_x_min.npy").astype(float),
+            np.load(path + "MPB_y_min.npy").astype(float),
+            np.load(path + "MPB_z_min.npy").astype(float),
+        )
+    )
+    pos_max = np.vstack(
+        (
+            np.load(path + "MPB_x_max.npy").astype(float),
+            np.load(path + "MPB_y_max.npy").astype(float),
+            np.load(path + "MPB_z_max.npy").astype(float),
+        )
+    )
+
+    return pos_mpb.T, pos_min.T, pos_max.T
+
+
+def importar_tiempos(path):
+    date = np.load(path + "date.npy")
+    t_mpb = np.vstack(
+        (
+            np.load(path + "MPB_t_min.npy"),
+            np.load(path + "MPB_t.npy"),
+            np.load(path + "MPB_t_max.npy"),
+        )
+    )
+    t_bs = np.vstack(
+        (
+            np.load(path + "BS_t_min.npy"),
+            np.load(path + "BS_t.npy"),
+            np.load(path + "BS_t_max.npy"),
+        )
+    )
+
+    return date, t_mpb.T, t_bs.T

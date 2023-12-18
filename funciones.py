@@ -100,12 +100,12 @@ def Bpara_Bperp(B, t, ti, tf):
     return B_para, B_perp_norm, t_plot
 
 
-def corrientes(normal, Bup, Bdown, ancho_mpb):
+def corrientes(normal, Bup, Bdown, ancho):
     """Toma la normal, el campo up/downstream (en nT) y el ancho de la mpb (en km)
     y devuelve j_s y j_v en mA/m y nA/m²"""
     mu = 4 * np.pi * 1e-7  # Henry/m
     js = np.cross(normal, (Bup - Bdown)) / mu  # nA/m
-    jv = js / (1000 * ancho_mpb)  # nA/m²
+    jv = js / (1000 * ancho)  # nA/m²
 
     return js * 1e-6, jv
 
@@ -417,3 +417,82 @@ def array_datenums(year, month, day, t):
         [np.datetime64(datenum(year, month, day, x)) for x in t]
     )  # datenum es una función mía
     return timestamps
+
+
+def long_inercial_iones(density, paso=20):
+    # cada paso son 4 segundos.
+    # calcula la densidad media en ese número de pasos.
+    density_mean = np.zeros(len(density) - paso)  # upstream
+
+    for i in range(paso, len(density)):
+        density_mean[i - paso] = np.mean(
+            density[i - paso : i]
+        )  # toma desde atrás del ti así no se mete en la MPB nunca
+
+    ion_length = 2.28e07 / np.sqrt(np.mean(density_mean)) * 1e-5  # km
+    ion_min = 2.28e07 / np.sqrt(max(density_mean)) * 1e-5  # km
+    ion_max = 2.28e07 / np.sqrt(min(density_mean)) * 1e-5  # km
+
+    return ion_length, ion_min, ion_max
+
+
+def giroradio(B, velocidad):
+    """
+    giroradio: rg = mp * v_perp / (q_e * B)  en la región upstream
+    where vperp is the component of the velocity perpendicular to the
+    direction of the magnetic field and B is the strength of the magnetic field
+    """
+    mp = 1.67e-27  # masa del proton en kg
+    q_e = 1.602e-19  # carga del electrón en C
+
+    B_medio = np.mean(B * 1e-9, axis=0)
+    B_medio_normalizado = B_medio / np.linalg.norm(B_medio)
+
+    # proyecto la velocidad sobre B
+    dot = np.dot(velocidad, B_medio_normalizado)
+    N = np.zeros((len(dot), len(B_medio)))
+
+    for i in range(len(N)):
+        N[i, :] = dot[i] * B_medio_normalizado
+
+    v_perp = np.mean(velocidad - N, axis=0)
+
+    # el giroradio entonces:
+    gf = mp / (q_e * np.linalg.norm(B_medio))  # girofreq
+    rg = gf * np.linalg.norm(v_perp)
+    rg_min = (
+        mp
+        * min(np.linalg.norm(velocidad - N, axis=1))
+        / (q_e * np.linalg.norm(B_medio))
+    )
+    rg_max = (
+        mp
+        * max(np.linalg.norm(velocidad - N, axis=1))
+        / (q_e * np.linalg.norm(B_medio))
+    )
+    return gf, rg, rg_min, rg_max
+
+
+def giroradio_termico(B, temperature):
+    B_avg = np.empty((len(B), 3))
+    B_avg_normalized = np.empty((len(B), 3))
+    temp_para_xyz = np.empty((len(B), 3))
+
+    for i in range(len(B) - 1):
+        B_avg[i, :] = np.mean(B[i : i + 30, :], axis=0) * 1e-5  # lo paso a gauss
+        B_avg_normalized[i, :] = B_avg[i, :] / np.linalg.norm(
+            B_avg[i, :]
+        )  # adimensional
+        temp_para_xyz[i, :] = (
+            np.dot(B_avg_normalized[i, :], temperature[i, :]) * B_avg_normalized[i, :]
+        )  # eV
+
+    temp_perp = np.linalg.norm(temperature - temp_para_xyz, axis=1)  # eV
+
+    thermal_gyroradius = np.empty(len(temperature))
+    for i in range(len(temperature)):
+        thermal_gyroradius[i] = (
+            1.02e02 * np.sqrt(temp_perp[i]) / np.linalg.norm(B_avg[i, :]) * 1e-5
+        )  # km
+
+    return np.nanmean(thermal_gyroradius, axis=0)
