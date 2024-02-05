@@ -8,7 +8,6 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from socket import gethostname
 
-
 sys.path.append("..")
 
 from funciones import donde, next_available_row, doy_to_day
@@ -80,7 +79,7 @@ def importar_MAG(year, doy, ti, tf):
     t_cut = t[inicio:fin]
     B_cut = B[inicio:fin]
 
-    if type(t_pos) != int:
+    if type(t_pos) is not int:
         pos_cut = posicion[donde(t_pos, ti) : donde(t_pos, tf)]
         tpos_cut = t_pos[donde(t_pos, ti) : donde(t_pos, tf)]
     else:
@@ -90,7 +89,7 @@ def importar_MAG(year, doy, ti, tf):
     if gethostname() == "DESKTOP-2GS0QF2":
         os.chdir("C:/Users/RainbowRider/Documents/GitHub/MPB/VEX/")
 
-    return t_cut, B_cut, pos_cut, cl, tpos_cut
+    return t_cut, B_cut, pos_cut, cl, tpos_cut  # pos en RV
 
 
 def importar_MAG_pds(year, doy, ti, tf):

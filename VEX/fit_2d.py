@@ -1,9 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+import datetime as dt
 from cycler import cycler
 from mpl_toolkits.mplot3d import Axes3D
-from importar_datos import importar_MAG
+from _importar_datos import importar_MAG
 import sys
 
 sys.path.append("..")
@@ -123,26 +124,27 @@ def plot_2D(pos_RV, R, n, c):
 
 
 year, doy = 2011, 120  # fechas()
+date_orbit = dt.datetime(year, 1, 1) + dt.timedelta(doy - 1)
+month = date_orbit.strftime("%m")
+day = date_orbit.strftime("%d")
+
 ti_MVA, tf_MVA = 2.778339444, 2.780409722
 t1, t2, t3, t4 = [2.755924008, 2.774626456, 2.785536217, 2.804238665]
-t, B, posicion, cl = importar_MAG(year, doy, t1 - 0.5, t4 + 0.5)
+t, B, posicion, cl, tpos = importar_MAG(year, doy, t1 - 0.5, t4 + 0.5)
 Bnorm = np.linalg.norm(B, axis=1)
 
-inicio_MVA = donde(t, ti_MVA)
-fin_MVA = donde(t, tf_MVA)
+inicio_MVA = donde(tpos, ti_MVA)
+fin_MVA = donde(tpos, tf_MVA)
 pos_MPB = int(0.5 * (fin_MVA + inicio_MVA))
 
-
-R = posicion[pos_MPB, :] / 6050
+R = posicion[pos_MPB, :]
 R_2d = [R[0], np.sqrt(R[1] ** 2 + R[2] ** 2)]
 
-
-alt = np.linalg.norm(posicion[pos_MPB, :]) - 6050
+alt = np.linalg.norm(posicion[pos_MPB, :]) - 1
 sza_rad = SZA(posicion, pos_MPB) / 180 * np.pi
 sza = SZA(posicion, pos_MPB)
 n = normal(sza_rad)
 # n = normal_cartesianas(1 + alt / 6050, sza_rad)
-pos_RV = posicion / 6050
 c = c_parametro(posicion, pos_MPB)
 
 n_mva = [0.391, 0.92]  # [0.391,	-0.129, 0.911]
@@ -150,13 +152,12 @@ n_mva = [0.391, 0.92]  # [0.391,	-0.129, 0.911]
 angulo_mva = np.arccos(np.clip(np.dot(n_mva, n), -1.0, 1.0))
 
 print(
-    f"El ángulo entre las normales 2D de MVA y del fit es {angulo_mva * 180/np.pi:.3g}º"
+    f"El ángulo entre las normales 2D de MVA y del fit es {angulo_mva * 180 / np.pi:.3g}º"
 )
 
-
-plot_2D(pos_RV, R_2d, n, c)
+plot_2D(posicion, R_2d, n, c)
+plt.title(f"{year}-{month}-{day}")
 plt.show()
-
 
 """
 descomentar lo siguiente si quiero chequear qué pasa cambiando diferentes parámetros

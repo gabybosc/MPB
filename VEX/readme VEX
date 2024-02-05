@@ -27,3 +27,4 @@ graficador_MPB.py: Grafica los datos de MAG de VEX marcando la MPB y los guarda.
 plot_todo.py: grafica MAG y ELS para un día particular
 seleccionar_MPB_MAG_only.py: grafica MAG para seleccionar la MPB, llama a multiplot
 seleccionar_MPB.py: grafica MAG y ELS para seleccionar la MPB
+orbita.py: hace el gráfico de la órbita de VEX
