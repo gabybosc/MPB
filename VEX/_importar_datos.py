@@ -80,10 +80,10 @@ def importar_MAG(year, doy, ti, tf):
     B_cut = B[inicio:fin]
 
     if type(t_pos) is not int:
-        pos_cut = posicion[donde(t_pos, ti) : donde(t_pos, tf)]
-        tpos_cut = t_pos[donde(t_pos, ti) : donde(t_pos, tf)]
+        pos_cut = posicion[donde(t_pos, ti): donde(t_pos, tf)]
+        tpos_cut = t_pos[donde(t_pos, ti): donde(t_pos, tf)]
     else:
-        tpos_cut = 0
+        tpos_cut = t_cut
         pos_cut = pos[inicio:fin]
 
     if gethostname() == "DESKTOP-2GS0QF2":
@@ -131,7 +131,7 @@ def importar_MAG_pds(year, doy, ti, tf):
             B_cut = B[inicio:fin]
             pos_cut = pos[inicio:fin]
         if (
-            gethostname() == "DESKTOP-2GS0QF2"
+                gethostname() == "DESKTOP-2GS0QF2"
         ):  # si estoy en la pc tengo que volver al dir original
             os.chdir("C:/Users/RainbowRider/Documents/GitHub/MPB/VEX/")
         else:
@@ -268,7 +268,7 @@ def importar_fila(year, month, day):
     if fila is None:
         fila = next_available_row(hoja_parametros)
         for hojas in [hoja_parametros, hoja_MVA, hoja_Bootstrap, hoja_Ajuste]:
-            poner_fecha(hojas, fila, year, month, day)
+            poner_fecha(hojas, fila, year, str(month), day)
         print("nueva fila")
 
     return fila, hoja_parametros, hoja_MVA, hoja_Bootstrap, hoja_Ajuste

@@ -34,7 +34,7 @@ def fit_R(R, sza):
     yz = y_alt[x_alt >= 0]
     xx = x_alt[x_alt >= 0]
 
-    vect = [0.22 * (sza - 1), -1]
+    vect = np.array([0.22 * (sza - 1), -1])
     norm = vect / np.linalg.norm(vect)
     return xx, yz, norm
 

@@ -2,22 +2,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from cycler import cycler
-from mpl_toolkits.mplot3d import Axes3D
-from importar_datos import importar_MAG_pds, importar_ELS_clweb, importar_fila
+
 import sys
 
 sys.path.append("..")
 from funciones import (
-    donde,
-    fechas,
-    tiempos,
-    Mij,
-    error,
-    corrientes,
-    ancho_mpb,
-    Bpara_Bperp,
-    find_nearest,
-    next_available_row,
     SZA,
 )
 
@@ -32,32 +21,13 @@ mpl.rcParams["axes.prop_cycle"] = cycler(
 Tengo que hacer el fit este que es 2D en 3D para que tenga sentido calcular la normal
 """
 
-"""
-Mail a Fowler
-VEX: datos de ASPERA: usar ELS primero. Después en IMA usar los de Fedorov
-Calcular el c/omega pi y buscar a ver si encuentro alguna referencia
-Ver seis órbitas (copiar lo de Marte)
-"""
-
 
 def altitude(SZA):
     """El SZA tiene que estar en grados!!"""
 
-    alt = 0.11 * SZA**2 - 0.22 * SZA + 389
+    alt = 0.11 * SZA ** 2 - 0.22 * SZA + 389
     # alt es simplemente la altitud *desde la corteza* en km, por eso le sumo 1 RV
     return 1 + alt / 6050
-
-
-def fit_2d():
-    sza = np.linspace(0, np.pi / 2, 100)
-    alt = altitude(sza * 180 / np.pi)
-
-    y_alt = np.array([alt[i] * np.sin(sza[i]) for i in range(len(alt))])
-    x_alt = np.array([alt[i] * np.cos(sza[i]) for i in range(len(alt))])
-
-    yz = y_alt[x_alt >= 0]
-    xx = x_alt[x_alt >= 0]
-    return xx, yz
 
 
 def fit_3d():
@@ -105,9 +75,11 @@ def normal(p):
         a = (p[1] ** 2 + p[2] ** 2) / p[0] ** 2
         # "a" es el parámetro pero cambia punto a punto
     print(p)
-    norm = np.array([2 * p[0], 2 * p[1] / a**2, 2 * p[2] / a**2])
-    norm = norm / np.linalg.norm(norm)
-    return norm
+    if a == 0:
+        norm = np.array([1, 0, 0])
+    else:
+        norm = np.array([2 * p[0], 2 * p[1] / a ** 2, 2 * p[2] / a ** 2])
+    return norm / np.linalg.norm(norm)
 
 
 def punto(theta, phi):
@@ -118,7 +90,7 @@ def punto(theta, phi):
     y = alt * np.sin(theta) * np.cos(phi)
     z = alt * np.sin(theta) * np.sin(phi)
 
-    R = [x, y, z]
+    R = np.array([x, y, z])
     return R
 
 
@@ -146,17 +118,16 @@ def plot_3d(x, y, z, R, norm):
         norm[1],
         norm[2],
         color="k",
-        # length=0.5,
+        length=0.5,
         label="Normal del MVA",
     )
     plt.show()
 
-
-x, y, z = fit_3d()
-R = punto(0, 0)  # theta y phi se cuentan desde el [1, 0, 0]
-norm = normal(R)
-plot_3d(x, y, z, R, norm)
-
+#
+# x, y, z = fit_3d()
+# R = punto(1.2, 0.3)  # theta y phi se cuentan desde el [1, 0, 0]
+# norm = normal(R)
+# plot_3d(x, y, z, R, norm)
 
 # def desparametrizar(a, b, c):
 #     L = b**2 / a

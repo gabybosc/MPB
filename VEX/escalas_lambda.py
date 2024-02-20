@@ -13,7 +13,6 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as md
 from matplotlib.widgets import MultiCursor
 
-
 import sys
 
 sys.path.append("..")
@@ -98,7 +97,7 @@ def escalas_lambda(year, doy, ti, tf):
         )
         for i in range(len(matriz[:, 0])):
             for j in range(len(matriz[0, :])):
-                file.write(f"{matriz[i,j]}\t")
+                file.write(f"{matriz[i, j]}\t")
             file.write("\n")
     # print(f'{l / len(dates) * 100}%')
     return (B, t, escalas, cociente, tiempo_central)
@@ -120,7 +119,6 @@ if os.path.isfile(path):
 else:
     B, t, escalas, cociente, tiempo_central = escalas_lambda(year, doy, ti, tf)
 
-
 Bnorm = np.linalg.norm(B, axis=1)
 
 escalas_plot = escalas * 3600
@@ -141,10 +139,9 @@ fin_MVA = donde(t, tiempo_central[-1])
 B_MVA = Bnorm[inicio_MVA:fin_MVA]
 t_MVA = t[inicio_MVA:fin_MVA]
 
-
 xfmt = md.DateFormatter("%H:%M:%S")
 
-fig = plt.figure(2)
+fig = plt.figure()
 fig.subplots_adjust(
     top=0.93, bottom=0.07, left=0.05, right=0.95, hspace=0.005, wspace=0.15
 )
@@ -159,3 +156,19 @@ ax2 = plt.subplot2grid((1, 2), (0, 1), sharex=ax1)
 imshow_UTC(year, month, day, tiempo_central, cociente, escalas_plot, "inferno", 3)
 multi = MultiCursor(fig.canvas, (ax1, ax2), color="black", lw=1)
 plt.show()
+
+fig = plt.figure()
+fig.set_size_inches(15, 10)  # con este tamaño ocupa toda la pantalla de la laptop
+fig.subplots_adjust(
+    top=0.93, bottom=0.07, left=0.05, right=0.95, hspace=0.005, wspace=0.15
+)
+ax1 = plt.subplot2grid((1, 1), (0, 0))
+imshow_UTC(year, month, day, tiempo_central, cociente, escalas_plot, "inferno", 3)
+ax1.set_title(
+    "Heatmap del cociente de lambdas en distintas escalas temporales\npara el día 28-10-2008"
+)
+ax1.set_ylabel("Radio (s)")
+ax1.set_xlabel("Tiempo en el que está centrado (hh:mm:ss)")
+plt.show()
+
+# 28-oct-2008: central: 08:32:48, radio = 9s

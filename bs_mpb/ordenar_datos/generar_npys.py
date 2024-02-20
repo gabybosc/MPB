@@ -190,9 +190,6 @@ def generar_npys_limites(path):
     np.save(path + "pos_mpb_max.npy", pos_mpb_max)
 
 
-
-
-
 def gen_Rsd(path, BS, MPB):
     pos_bs_min, pos_bs, pos_bs_max = BS
     pos_mpb_min, pos_mpb, pos_mpb_max = MPB
