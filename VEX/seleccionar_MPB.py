@@ -6,7 +6,7 @@ import matplotlib as mpl
 from cycler import cycler
 import sys
 from importar_datos import importar_MAG, importar_ELS_clweb
-from _fit_venus import plot_orbita
+from _old_fit_venus import plot_orbita
 
 sys.path.append("..")
 from funciones import datenum, donde, Bpara_Bperp, fechas, tiempos, find_nearest
@@ -20,7 +20,6 @@ puedo o hacer un avg o un downsampling
 """
 
 year, month, day, doy = fechas()
-
 
 # plt.figure()
 # plt.plot(t, B)
@@ -41,6 +40,7 @@ energy = ELS[:, 7]
 JE_total = ELS[:, -1]
 energias = [25 + i * 25 for i in range(4)]
 
+
 # ############ tiempos UTC
 
 
@@ -50,7 +50,7 @@ def tiempos_UTC(yy, mm, dd, t):
 
 
 def altitude(SZA):
-    alt = 0.11 * SZA**2 - 0.22 * SZA + 389
+    alt = 0.11 * SZA ** 2 - 0.22 * SZA + 389
     return alt / 6050
 
 
@@ -202,7 +202,6 @@ for energia in energias:
     )
 ax4.legend(loc="center right")
 ax4.set_ylabel("Diff energy flux \n of the SW e- \n (cm⁻² sr⁻¹ s⁻¹)")
-
 
 for ax in [ax1, ax2, ax3]:
     plt.setp(ax.get_xticklabels(), visible=False)

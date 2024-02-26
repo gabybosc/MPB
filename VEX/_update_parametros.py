@@ -7,6 +7,12 @@ import numpy as np
 np.set_printoptions(precision=4)
 
 
+def update_varios(hoja, cells, values):
+    for i, cell in enumerate(cells):
+        cell.value = round(values[i], 3)
+    hoja.update_cells(cells)
+
+
 def hoja_MVA_update(hoja, nr, lamb, av, error_normal, B3, delta_B3, B_norm_medio):
     hoja.update_acell(f"I{nr}", f"{lamb[1] / lamb[2]:.3g}")
 
@@ -16,14 +22,10 @@ def hoja_MVA_update(hoja, nr, lamb, av, error_normal, B3, delta_B3, B_norm_medio
     hoja.update_acell(f"V{nr}", f"{abs(round(np.mean(B3) / B_norm_medio, 2))}")
 
     cell_lambda = hoja.range(f"F{nr}:H{nr}")
-    for i, cell in enumerate(cell_lambda):
-        cell.value = round(lamb[i], 2)
-    hoja.update_cells(cell_lambda)
-
     cell_av = hoja.range(f"J{nr}:R{nr}")
-    for i, cell in enumerate(cell_av):
-        cell.value = round(av[i], 3)
-    hoja.update_cells(cell_av)
+
+    update_varios(hoja, cell_lambda, lamb)
+    update_varios(hoja, cell_av, av)
 
 
 def hoja_MVA_analisis(hoja, nr, ti, tf, x14, x23, J_s, J_v, fuerza):
@@ -41,34 +43,23 @@ def hoja_MVA_analisis(hoja, nr, ti, tf, x14, x23, J_s, J_v, fuerza):
     hoja.update_acell(f"AK{nr}", f"{np.linalg.norm(fuerza):.3g}")
 
     cell_Js = hoja.range(f"AC{nr}:AE{nr}")
-    for i, cell in enumerate(cell_Js):
-        cell.value = round(J_s[i] * 1e-6, 3)
-    hoja.update_cells(cell_Js)
-
     cell_Jv = hoja.range(f"AG{nr}:AI{nr}")
-    for i, cell in enumerate(cell_Jv):
-        cell.value = round(J_v[i], 3)
-    hoja.update_cells(cell_Jv)
+    update_varios(hoja, cell_Js, J_s)
+    update_varios(hoja, cell_Jv, J_v)
 
 
 def hoja_param(hoja, nr, sza, v_media, omega, B_upstream, B_downstream):
     hoja.update_acell(f"D{nr}", f"{sza:.3g}")
     hoja.update_acell(f"S{nr}", f"{np.linalg.norm(v_media):.3g}")
     hoja.update_acell(f"Z{nr}", f"{omega * 180 / np.pi:.3g}")
+
     cell_vel = hoja.range(f"P{nr}:R{nr}")
-    for i, cell in enumerate(cell_vel):
-        cell.value = round(v_media[i], 2)
-    hoja.update_cells(cell_vel)
-
     cell_Bup = hoja.range(f"T{nr}:V{nr}")
-    for i, cell in enumerate(cell_Bup):
-        cell.value = round(B_upstream[i], 2)
-    hoja.update_cells(cell_Bup)
-
     cell_Bdown = hoja.range(f"W{nr}:Y{nr}")
-    for i, cell in enumerate(cell_Bdown):
-        cell.value = round(B_downstream[i], 2)
-    hoja.update_cells(cell_Bdown)
+
+    update_varios(hoja, cell_vel, v_media)
+    update_varios(hoja, cell_Bup, B_upstream)
+    update_varios(hoja, cell_Bdown, B_downstream)
 
 
 def hoja_t1t2t3t4(hoja, nr, t1, t2, t3, t4):
@@ -101,19 +92,11 @@ def hoja_bootstrap_p2(
     hoja_boot.update_acell(f"AE{nr}", f"{np.linalg.norm(E_Hall) * 1E3:.3g}")
 
     cell_Js = hoja_boot.range(f"S{nr}:U{nr}")
-    for i, cell in enumerate(cell_Js):
-        cell.value = round(J_s[i], 3)
-    hoja_boot.update_cells(cell_Js)
-
     cell_Jv = hoja_boot.range(f"W{nr}:Y{nr}")
-    for i, cell in enumerate(cell_Jv):
-        cell.value = round(J_v[i], 3)
-    hoja_boot.update_cells(cell_Jv)
-
     cell_EH = hoja_boot.range(f"AB{nr}:AD{nr}")
-    for i, cell in enumerate(cell_EH):
-        cell.value = round(E_Hall[i] * 1e3, 3)
-    hoja_boot.update_cells(cell_EH)
+    update_varios(hoja_boot, cell_Js, J_s)
+    update_varios(hoja_boot, cell_Jv, J_v)
+    update_varios(hoja_boot, cell_EH, E_Hall)
 
 
 def hoja_bootstrap_p1(hoja_boot, nr, M, N, normal, error, B3, B_norm_medio, sigmaB):
@@ -121,11 +104,29 @@ def hoja_bootstrap_p1(hoja_boot, nr, M, N, normal, error, B3, B_norm_medio, sigm
     hoja_boot.update_acell(f"E{nr}", f"{N}")
 
     cell_normal = hoja_boot.range(f"F{nr}:H{nr}")
-    for i, cell in enumerate(cell_normal):
-        cell.value = round(normal[i], 3)
-    hoja_boot.update_cells(cell_normal)
+    update_varios(hoja_boot, cell_normal, normal)
 
     hoja_boot.update_acell(f"I{nr}", f"{error:.3g}")
     hoja_boot.update_acell(f"J{nr}", f"{round(np.mean(B3), 2)}")
     hoja_boot.update_acell(f"K{nr}", f"{round(sigmaB, 2)}")
     hoja_boot.update_acell(f"L{nr}", f"{abs(round(np.mean(B3) / B_norm_medio, 2))}")
+
+
+def hoja_fit(hoja, nr, params, norm, angulo, theta_Bn, theta_v, x14, x23, Js, Jv):
+    hoja.update_acell(f"J{nr}", f"{angulo * 180 / np.pi:.3g}")
+    hoja.update_acell(f"M{nr}", f"{theta_v * 180 / np.pi:.3g}")
+    hoja.update_acell(f"N{nr}", f"{theta_Bn * 180 / np.pi:.3g}")
+    hoja.update_acell(f"O{nr}", f"{x23:.3g}")
+    hoja.update_acell(f"P{nr}", f"{x14:.3g}")
+
+    hoja.update_acell(f"V{nr}", f"{np.linalg.norm(Js) * 1E-6:.3g}")
+    hoja.update_acell(f"Z{nr}", f"{np.linalg.norm(Jv):.3g}")
+
+    cell_Js = hoja.range(f"S{nr}:U{nr}")
+    cell_Jv = hoja.range(f"W{nr}:Y{nr}")
+    cell_params = hoja.range(f"D{nr}:F{nr}")
+    cell_norm = hoja.range(f"G{nr}:I{nr}")
+    update_varios(hoja, cell_Js, Js)
+    update_varios(hoja, cell_Jv, Jv)
+    update_varios(hoja, cell_params, params)
+    update_varios(hoja, cell_norm, norm)

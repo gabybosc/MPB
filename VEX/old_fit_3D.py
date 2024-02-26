@@ -9,6 +9,7 @@ sys.path.append("..")
 from funciones import (
     SZA,
 )
+from funciones_plot import equal_axes
 
 np.set_printoptions(precision=4)
 
@@ -121,6 +122,16 @@ def plot_3d(x, y, z, R, norm):
         length=0.5,
         label="Normal del MVA",
     )
+    u, v = np.mgrid[0: 2 * np.pi: 20j, 0: np.pi: 10j]
+    ax.plot_wireframe(
+        np.cos(u) * np.sin(v),
+        np.sin(u) * np.sin(v),
+        np.cos(v),
+        color="#c1440e",
+        linewidth=0.5,
+    )
+
+    equal_axes(ax, x, y, z)
     plt.show()
 
 #

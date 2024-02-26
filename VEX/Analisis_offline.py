@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 from cycler import cycler
 from _importar_datos import importar_MAG, importar_ELS_clweb
-from _fit_venus import plot_orbita, fit_Xu, fit_R
+from _old_fit_venus import plot_orbita, fit_Xu, fit_R
 import math
 
 import sys

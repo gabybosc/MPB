@@ -4,7 +4,7 @@ import matplotlib as mpl
 from matplotlib.widgets import MultiCursor
 from cycler import cycler
 from _importar_datos import importar_MAG, importar_fila
-from _fit_venus import plot_orbita, fit_Xu
+from _old_fit_venus import plot_orbita, fit_Xu
 from _multiplot import multi_plot_MAG_only
 from _update_parametros import (
     hoja_MVA_update,
@@ -101,7 +101,6 @@ else:
     Bpara, Bperp, tpara = Bpara_Bperp(B[::32], t[::32], ti, tf)
 Bnorm = np.linalg.norm(B, axis=1)
 
-
 nr, hoja_parametros, hoja_mva, hoja_boot, hoja_fit = importar_fila(year, month, day)
 
 # val = multi_plot_MAG_only(t, tpara, B, Bnorm, Bpara, Bperp, 2)
@@ -147,7 +146,7 @@ hoja_t1t2t3t4(hoja_parametros, nr, t1, t2, t3, t4)
 
 v_punto = np.zeros((len(pos) - 1, 3))
 norma_v = np.zeros(len(pos) - 1)
-if cl == True:
+if cl:
     for i in range(len(v_punto)):
         v_punto[i, :] = pos[i + 1, :] - pos[i] / 10
         # en km/s, tiene resolución de 128Hz

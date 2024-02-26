@@ -1,10 +1,21 @@
 import numpy as np
 import matplotlib as mpl
 from cycler import cycler
-from _importar_datos import importar_MAG, importar_fila
+import datetime as dt
 
-# import matplotlib.pyplot as plt
-# from _fit_venus import plot_orbita, fit_Xu, fit_R
+from _importar_datos import importar_MAG, importar_fila
+from _fit import (
+    plot_3d,
+    plot_2D,
+    calcular_normal,
+    hallar_phi,
+    rotacion,
+    fit_3d,
+    c_parametro,
+)
+
+import matplotlib.pyplot as plt
+
 # import math
 from _update_parametros import (
     hoja_param,
@@ -13,6 +24,7 @@ from _update_parametros import (
     hoja_t1t2t3t4,
     hoja_bootstrap_p1,
     hoja_bootstrap_p2,
+    hoja_fit,
 )
 from MVA import MVA
 
@@ -160,7 +172,7 @@ normal_boot = bootstrap_completo(B)
     J_s_boot,
     J_v_boot,
 ) = analisis(normal_boot)
-print("RESULTADOS BOOTSTRAP\n")
+print("\nRESULTADOS BOOTSTRAP\n")
 print(f"normal bootstrap: {normal_boot}")
 print(
     f"ángulo que forma la normal del boostrap respecto a la del MVA: {angulo_vs_mva * 180 / np.pi}º"
@@ -174,16 +186,92 @@ print(
     f"theta_Bn = {angulo_B_boot * 180 / np.pi:.3g}, theta_vn = {angulo_v_boot * 180 / np.pi:.3g}"
 )
 
-nr, hoja_parametros, hoja_mva, hoja_boot, hoja_fit = importar_fila(year, month, day)
-hoja_bootstrap_p2(
-    hoja_boot,
+# nr, hoja_parametros, hoja_mva, hoja_boot, hoja_fit = importar_fila(year, month, day)
+# hoja_bootstrap_p2(
+#     hoja_boot,
+#     nr,
+#     angulo_v_boot,
+#     angulo_B_boot,
+#     x23_boot,
+#     x14_boot,
+#     J_s_boot,
+#     J_v_boot,
+#     0,
+#     [0, 0, 0],
+# )
+
+
+"""
+El fit
+"""
+print("\nRESULTADOS FIT\n")
+
+# year, doy = 2008, 302
+# date_orbit = dt.datetime(year, 1, 1) + dt.timedelta(doy - 1)
+# month = date_orbit.strftime("%m")
+# day = date_orbit.strftime("%d")
+#
+# ti_MVA, tf_MVA = 8.5444425, 8.549442222
+# t1, t2, t3, t4 = [8.541556528, 8.544405851, 8.551476393, 8.556111111]
+# t, B, posicion, cl, tpos = importar_MAG(year, doy, t1 - 0.5, t4 + 0.5)
+# Bnorm = np.linalg.norm(B, axis=1)
+
+i_MVA = donde(tpos, ti)
+f_MVA = donde(tpos, tf)
+pos_MPB = int(0.5 * (f_MVA + i_MVA))
+
+R = pos[pos_MPB, :]
+R_2d = np.array([R[0], np.sqrt(R[1] ** 2 + R[2] ** 2)])
+
+sza_rad = SZA(pos, pos_MPB) / 180 * np.pi
+normal_2d = calcular_normal(sza_rad)
+c = c_parametro(pos, pos_MPB)
+
+n_mva2d = np.array([x3[0], np.sqrt(x3[1] ** 2 + x3[2] ** 2)])
+n_mva = x3
+
+angulo_mva = np.arccos(np.clip(np.dot(n_mva2d, normal_2d), -1.0, 1.0))
+
+print(
+    f"El ángulo entre las normales 2D de MVA y del fit es {angulo_mva * 180 / np.pi:.3g}º"
+)
+
+plot_2D(pos, R_2d / 6050, normal_2d, c)
+plt.title(f"{year}-{month}-{day}")
+plt.show()
+
+"""
+A partir de la normal 2D, la puedo rotar y encontrar la normal 3D
+Para eso, necesito hallar el ángulo phi primero
+"""
+
+phi = hallar_phi(R)[2]
+normal_3d = rotacion(phi, normal_2d)
+x, y, z = fit_3d(c)
+
+plot_3d(x, y, z, R / 6050, normal_3d)
+
+angulo_3d, theta_v, theta_Bn, x14, x23, Js, Jv = analisis(normal_3d)
+
+print(
+    f"El ángulo entre las normales 2D de MVA y del fit es {angulo_3d * 180 / np.pi:.3g}º"
+)
+print(f"Ancho MPB hmax = {x14:.3g}, hmin = {x23:.3g}")
+print(
+    f"Js = {Js} mA/m, |Js| = {np.linalg.norm(Js):.3g} mA/m \nJv = {Jv} nA/m², |Jv| = {np.linalg.norm(Jv):.3g} nA/m²"
+)
+
+nr, hoja_parametros, hoja_mva, hoja_boot, hoja_ajuste = importar_fila(year, month, day)
+hoja_fit(
+    hoja_ajuste,
     nr,
-    angulo_v_boot,
-    angulo_B_boot,
-    x23_boot,
-    x14_boot,
-    J_s_boot,
-    J_v_boot,
-    0,
-    [0, 0, 0],
+    np.array([0.11, -0.22, c]),
+    normal_3d,
+    angulo_3d,
+    theta_Bn,
+    theta_v,
+    x14,
+    x23,
+    Js,
+    Jv,
 )

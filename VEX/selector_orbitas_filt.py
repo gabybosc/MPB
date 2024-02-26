@@ -1,14 +1,13 @@
 import numpy as np
 import glob as glob
 import sys
-from _fit_venus import fit_Xu
+from _old_fit_venus import fit_Xu
 from socket import gethostname
 import os
 import matplotlib.pyplot as plt
 
 sys.path.append("..")
 from funciones import donde, angulo, doy_to_day
-
 
 """
 Agarra los cruces de la MPB de VEX y va a devolverme una lista 
@@ -23,7 +22,6 @@ if gethostname() == "DESKTOP-2GS0QF2":
     # path = "pos20140806.asc"
     # os.chdir("C:/Users/RainbowRider/Documents/GitHub/MPB/VEX/")
 x_Xu, yz_Xu = fit_Xu()
-
 
 # calendario = np.zeros((len(path), 3))
 calendario = []

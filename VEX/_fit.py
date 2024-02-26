@@ -1,19 +1,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-import datetime as dt
 from cycler import cycler
-from mpl_toolkits.mplot3d import Axes3D
-from _importar_datos import importar_MAG
+import datetime as dt
+
 import sys
-from fit_3D import plot_3d
 
 sys.path.append("..")
-from funciones import (
-    donde,
-    UTC_to_hdec,
-    SZA,
-)
+from funciones import SZA
+from funciones_plot import equal_axes
 
 np.set_printoptions(precision=4)
 
@@ -46,7 +41,7 @@ def fit_Xu():
     return xx, yz
 
 
-def normal(sza):
+def calcular_normal(sza):
     """sza en rad"""
     r = 0.0597 * sza ** 2 - 0.002 * sza + 1.12
     dr = 0.1194 * sza - 0.002
@@ -140,50 +135,61 @@ def plot_2D(pos_RV, R, n, c):
     plt.legend()
 
 
-year, doy = 2008, 302
-date_orbit = dt.datetime(year, 1, 1) + dt.timedelta(doy - 1)
-month = date_orbit.strftime("%m")
-day = date_orbit.strftime("%d")
+def plot_3d(x, y, z, R, norm):
+    nmva = [0.517, 0.103, 0.850]
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1, projection="3d")
+    ax.set_xlabel(r"$X_{MSO} (R_m)$")
+    ax.set_ylabel(r"$Y_{MSO} (R_m)$")
+    ax.set_zlabel(r"$Z_{MSO} (R_m)$")
+    ax.plot_surface(
+        x,
+        y,
+        z,
+        rstride=4,
+        cstride=4,
+        alpha=0.5,
+        edgecolor="none",
+        cmap=plt.get_cmap("Blues_r"),
+    )
+    ax.quiver(
+        R[0],
+        R[1],
+        R[2],
+        norm[0],
+        norm[1],
+        norm[2],
+        color="k",
+        length=0.5,
+        label="Normal del fit",
+    )
+    ax.quiver(
+        R[0],
+        R[1],
+        R[2],
+        nmva[0],
+        nmva[1],
+        nmva[2],
+        color="C2",
+        length=0.5,
+        label="Normal del mva",
+    )
+    u, v = np.mgrid[0: 2 * np.pi: 20j, 0: np.pi: 10j]
+    ax.plot_wireframe(
+        np.cos(u) * np.sin(v),
+        np.sin(u) * np.sin(v),
+        np.cos(v),
+        color="#eecb8b",
+        linewidth=0.5,
+    )
 
-ti_MVA, tf_MVA = 8.5444425, 8.549442222
-t1, t2, t3, t4 = [8.541556528, 8.544405851, 8.551476393, 8.556111111]
-t, B, posicion, cl, tpos = importar_MAG(year, doy, t1 - 0.5, t4 + 0.5)
-Bnorm = np.linalg.norm(B, axis=1)
-
-inicio_MVA = donde(tpos, ti_MVA)
-fin_MVA = donde(tpos, tf_MVA)
-pos_MPB = int(0.5 * (fin_MVA + inicio_MVA))
-
-R = posicion[pos_MPB, :]
-R_2d = np.array([R[0], np.sqrt(R[1] ** 2 + R[2] ** 2)])
-
-alt = np.linalg.norm(posicion[pos_MPB, :]) - 1
-sza_rad = SZA(posicion, pos_MPB) / 180 * np.pi
-sza = SZA(posicion, pos_MPB)
-normal_2d = normal(sza_rad)
-# n = normal_cartesianas(1 + alt / 6050, sza_rad)
-c = c_parametro(posicion, pos_MPB)
-
-n_mva = [0.391, 0.856]  # [0.517,0.103,0.850]
-
-angulo_mva = np.arccos(np.clip(np.dot(n_mva, normal_2d), -1.0, 1.0))
-
-print(
-    f"El ángulo entre las normales 2D de MVA y del fit es {angulo_mva * 180 / np.pi:.3g}º"
-)
-
-plot_2D(posicion, R_2d / 6050, normal_2d, c)
-plt.title(f"{year}-{month}-{day}")
-plt.show()
-
-"""
-A partir de la normal 2D, la puedo rotar y encontrar la normal 3D
-Para eso, necesito hallar el ángulo phi primero
-"""
+    equal_axes(ax, x, y, z)
+    plt.legend()
+    plt.show()
 
 
 def rotacion(phi, norm2d):
-    n3 = np.array([norm2d[0], norm2d[1] * np.cos(phi), norm2d[1] * np.sin(phi)])
+    n3 = np.array([norm2d[0], norm2d[1], 0])
     mat = np.array(
         [[1, 0, 0], [0, np.cos(phi), -np.sin(phi)], [0, np.sin(phi), np.cos(phi)]]
     )
@@ -200,18 +206,6 @@ def hallar_phi(R):
 
     return r, theta, phi
 
-
-phi = hallar_phi(R)[2]
-normal_3d = rotacion(phi, normal_2d)
-x, y, z = fit_3d(c)
-
-norm2d = normal_2d
-n3 = np.array([norm2d[0], norm2d[1] * np.cos(phi), norm2d[1] * np.sin(phi)])
-plot_3d(x, y, z, R / 6050, n3)
-mat = np.array(
-    [[1, 0, 0], [0, np.cos(phi), -np.sin(phi)], [0, np.sin(phi), np.cos(phi)]]
-)
-normal_3d = np.dot(mat, n3)
 
 """
 descomentar lo siguiente si quiero chequear qué pasa cambiando diferentes parámetros

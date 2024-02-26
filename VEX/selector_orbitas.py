@@ -1,13 +1,12 @@
 import numpy as np
 import glob as glob
 import sys
-from _fit_venus import fit_Xu
+from _old_fit_venus import fit_Xu
 from socket import gethostname
 import os
 
 sys.path.append("..")
 from funciones import donde, angulo
-
 
 """
 Agarra los cruces de la MPB de VEX y va a devolverme una lista 
@@ -22,7 +21,6 @@ else:
     path = glob.glob(f"../../../datos/VEX/{year}]/*.tab")
 # Ajuste de Xu de la MPB:
 x_Xu, yz_Xu = fit_Xu()
-
 
 # calendario = np.zeros((len(path), 3))
 calendario = []
@@ -70,9 +68,11 @@ for k, j in enumerate(path):
 
         idx = np.linalg.norm(pos - pos_xu, axis=1).argmin()
 
+
         def SZA(posicion, index):
             SZA = angulo(posicion[index, :], [1, 0]) * 180 / np.pi
             return SZA
+
 
         sza_mpb = SZA(pos, idx)
 
