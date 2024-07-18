@@ -20,6 +20,8 @@ def find_path(year, month, day, t_i, t_f):
         path = f"../../../datos/clweb/{year}-{month}-{day}/{t_i}/"
         if not os.path.exists(path):
             path = f"../../../datos/clweb/{year}-{month}-{day}/{t_f}/"
+            if not os.path.exists(path):
+                path = f"../../../datos/clweb/{year}-{month}-{day}/"
 
     return path
 
@@ -42,7 +44,12 @@ def importar_mag(year, month, day, ti, tf):
     t_i, t_f = tiempo_limite(ti, tf)
     path = find_path(year, month, day, t_i, t_f)
 
-    if os.path.isfile(path + "mag_filtrado.txt"):
+    if os.path.isfile(path + "MAG_filtrado.npy"):
+        mag = np.load(path + "MAG_filtrado.npy")
+        B = mag[:, :3]
+        mag = np.loadtxt(path + "MAG.asc")
+
+    elif os.path.isfile(path + "mag_filtrado.txt"):
         mag = np.loadtxt(path + "mag_filtrado.txt", skiprows=2)
         B = mag[:, :3]
         mag = np.loadtxt(path + "MAG.asc")
@@ -302,10 +309,10 @@ def importar_fila(year, month, day, hora):
         dd, mm, yy = fecha[i].split()
         mes = meses[mm]
         if (
-            yy == str(year)
-            and mes == month
-            and int(dd) == int(day)
-            and int(hh[i]) == int(hora)
+                yy == str(year)
+                and mes == month
+                and int(dd) == int(day)
+                and int(hh[i]) == int(hora)
         ):
             fila = i + 4
             break

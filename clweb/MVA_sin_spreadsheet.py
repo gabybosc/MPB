@@ -4,7 +4,7 @@ from importar_datos import importar_mag
 
 sys.path.append("..")
 from funciones import error, find_nearest, Mij, angulo, autovectores, donde
-from funciones_metodos import normal_fit
+from funciones_metodos import ajuste_conico
 from funciones_plot import hodograma
 
 """
@@ -29,7 +29,6 @@ np.set_printoptions(precision=4)
 
 
 def MVA(year, month, day, ti_MVA, tf_MVA):
-
     mag, t, B, posicion = importar_mag(year, month, day, ti_MVA, tf_MVA)
     # ya los importa cortados a los datos, entonces no hace falta que haga el cut yo
 
@@ -63,13 +62,12 @@ def MVA(year, month, day, ti_MVA, tf_MVA):
     hodograma(B1, B2, B3)
 
     # el error
-    phi, delta_B3 = error(lamb, B, x)
+    phi, delta_B3 = error(lamb, B, avec[2])
     print("MVA terminado")
     return avec[2], B, t, posicion
 
 
 def ajuste(year, month, day, doy, ti_MVA, tf_MVA):
-
     datos_tiempo = np.loadtxt("../outputs/t1t2t3t4.txt")
     idx_d = np.where(int(doy) == datos_tiempo[:, 1].astype(int))[0]
     idx_h = np.where(int(ti_MVA) == datos_tiempo[:, 2].astype(int))[0]
@@ -86,7 +84,7 @@ def ajuste(year, month, day, doy, ti_MVA, tf_MVA):
     index = donde(t, t_nave)
     # x0 = 0.78
     # e = 0.9
-    normal_ajuste, L0 = normal_fit(posicion, index)
+    X1, Y1, Z1, L0, normal_ajuste = ajuste_conico(posicion[index])
 
     B3_fit = np.dot(B, normal_ajuste)
 
