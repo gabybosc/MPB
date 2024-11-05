@@ -459,7 +459,11 @@ def giroradio(B, velocidad):
 
     # el giroradio entonces:
     gf = (q_e * np.linalg.norm(B_medio)) / mp  # girofreq angular
+<<<<<<< HEAD
     rg = np.linalg.norm(v_perp) / gf
+=======
+    rg = gf * np.linalg.norm(v_perp)
+>>>>>>> 89a36a6263086cb4f9fe8802bd1da03877917733
     rg_min = (
         mp
         * min(np.linalg.norm(velocidad - N, axis=1))
