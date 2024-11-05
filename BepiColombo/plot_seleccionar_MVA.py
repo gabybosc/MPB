@@ -1,9 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import MultiCursor
-import matplotlib.dates as md
-from leer_datos import importar_bepi
-from mpl_toolkits.axes_grid1 import make_axes_locatable
+from Titan.leer_datos import importar_bepi
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import sys
@@ -19,7 +17,6 @@ Para eso, grafica |B|, BxByBz, swea, swia y lpw.
 """
 
 np.set_printoptions(precision=4)
-
 
 ti = 13.5
 tf = ti + 1
@@ -136,7 +133,6 @@ hoja_Bootstrap.update_acell(f"A{nr}", f"{int(day)} {mes} {int(year)}")
 hoja_Bootstrap.update_acell(f"B{nr}", f"{int(float(outs[0]))}")
 hoja_Ajuste.update_acell(f"A{nr}", f"{int(day)} {mes} {int(year)}")
 hoja_Ajuste.update_acell(f"B{nr}", f"{int(float(outs[0]))}")
-
 
 # 18.9111
 # 18.92222

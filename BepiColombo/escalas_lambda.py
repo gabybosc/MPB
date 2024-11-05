@@ -6,12 +6,11 @@ El mapa de colores me va a dar el valor del cociente.
 """
 
 import numpy as np
-import time as time
 import os
 import matplotlib.pyplot as plt
 import matplotlib.dates as md
 from matplotlib.widgets import MultiCursor
-from leer_datos import importar_bepi
+from Titan.leer_datos import importar_bepi
 
 import sys
 
@@ -24,7 +23,7 @@ def MVA(t, ti, tf, B):
     inicio = donde(t, ti)
     fin = donde(t, tf)
 
-    B_cut = B[inicio : fin + 1, :]
+    B_cut = B[inicio: fin + 1, :]
 
     M_ij = Mij(B_cut)
 
@@ -48,7 +47,7 @@ def escalas_lambda(t, B):
     tiempo_central[0] = ti
     for i in range(len(tiempo_central) - 1):
         tiempo_central[i + 1] = (
-            tiempo_central[i] + 1 / 3600
+                tiempo_central[i] + 1 / 3600
         )  # el tiempo central se va barriendo cada 5 segundos
 
     escalas = np.zeros(60)
@@ -67,7 +66,7 @@ def escalas_lambda(t, B):
     m = 1.67e-27  # kg
     q = 1.6e-19  # C
     periodo_ciclotron = (
-        2 * np.pi * m / (q * np.linalg.norm(B_cut, axis=1)) * 1e9
+            2 * np.pi * m / (q * np.linalg.norm(B_cut, axis=1)) * 1e9
     )  # en s
     periodo_diezmado = np.zeros(len(tiempo_central))
     k = len(periodo_ciclotron) / len(tiempo_central)
@@ -87,7 +86,7 @@ def escalas_lambda(t, B):
         )
         for i in range(len(matriz[:, 0])):
             for j in range(len(matriz[0, :])):
-                file.write(f"{matriz[i,j]}\t")
+                file.write(f"{matriz[i, j]}\t")
             file.write("\n")
     # print(f'{l / len(dates) * 100}%')
     return (B, t, escalas, cociente, tiempo_central)
@@ -107,7 +106,6 @@ if os.path.isfile(path):
 
 else:
     B, t, escalas, cociente, tiempo_central = escalas_lambda(t, B)
-
 
 Bnorm = np.linalg.norm(B, axis=1)
 
@@ -129,7 +127,6 @@ fin_MVA = donde(t, tiempo_central[-1])
 B_MVA = Bnorm[inicio_MVA:fin_MVA]
 t_MVA = t[inicio_MVA:fin_MVA]
 
-
 xfmt = md.DateFormatter("%H:%M:%S")
 
 fig = plt.figure()
@@ -147,6 +144,5 @@ ax2 = plt.subplot2grid((1, 2), (0, 1), sharex=ax1)
 imshow_UTC("2021", "08", "10", tiempo_central, cociente, escalas_plot, "inferno", 3)
 multi = MultiCursor(fig.canvas, (ax1, ax2), color="c", lw=1)
 plt.show()
-
 
 # 13:55:00 +- 20seg

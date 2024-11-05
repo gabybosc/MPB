@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.dates as md
-from leer_datos import importar_bepi
+from Titan.leer_datos import importar_bepi
 from funciones_bepi import tiempos_UTC
 import sys
 
@@ -18,7 +18,6 @@ puedo o hacer un avg o un downsampling
 t, B, pos = importar_bepi(13.5, 14.1)
 Bnorm = np.linalg.norm(B, axis=1)
 pos_RV = pos / 6050
-
 
 Bpara, Bperp, tpara = Bpara_Bperp(B, t, 13.5, 14.1)
 
@@ -64,7 +63,6 @@ ax3.set_ylabel("Relative variation \n of B")
 ax3.set_xlabel("Tiempo (UTC)")
 ax3.set_ylim([-0.1, 1])
 
-
 for ax in [ax2, ax3]:
     ax.legend(loc="upper left")
 for ax in [ax1, ax2]:
@@ -75,6 +73,5 @@ for ax in [ax1, ax2, ax3]:
     ax.axvspan(xmin=MPB[2], xmax=MPB[3], facecolor="#cdcdcd", alpha=0.7)
     # en un radio de 10 min de la MPB
     ax.set_xlim([MPB[0] - np.timedelta64(10, "m"), MPB[-1] + np.timedelta64(10, "m")])
-
 
 plt.show()

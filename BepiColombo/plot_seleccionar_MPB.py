@@ -1,10 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.dates as md
 from matplotlib.widgets import MultiCursor
 import matplotlib as mpl
 from cycler import cycler
-from leer_datos import importar_bepi
+from Titan.leer_datos import importar_bepi
 from funciones_bepi import tiempos_UTC
 import sys
 
@@ -23,15 +22,12 @@ t, B, pos = importar_bepi(13.5, 14.1)
 Bnorm = np.linalg.norm(B, axis=1)
 pos_RV = pos / 6050
 
-
 Bpara, Bperp, tpara = Bpara_Bperp(B, t, 13.5, 14.1)
-
 
 mpl.rcParams["axes.prop_cycle"] = cycler(
     "color",
     ["#003f5c", "#ffa600", "#de425b", "#68abb8", "#f3babc", "#6cc08b", "#cacaca"],
 )
-
 
 yy = 2021
 mm = 8

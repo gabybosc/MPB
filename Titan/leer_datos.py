@@ -4,12 +4,19 @@ import sys
 from matplotlib.widgets import MultiCursor
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-sys.path.append("..")
+sys.path.append("../..")
 from funciones_plot import onpick1, hodograma
-from funciones import (donde, Bpara_Bperp, Mij, autovectores, error, find_nearest, angulo,
-                       ancho_mpb,
-                       corrientes,
-                       )
+from funciones import (
+    donde,
+    Bpara_Bperp,
+    Mij,
+    autovectores,
+    error,
+    find_nearest,
+    angulo,
+    ancho_mpb,
+    corrientes,
+)
 
 """
 tdec, Bx, By, Bz, modulo B,pos x, pos y, pos z, distancia km
@@ -75,6 +82,7 @@ B_para, B_perp_norm, t_plot = Bpara_Bperp(B, t, t[0] + 0.2, t[-1] - 0.2)
 #     happy = plt.waitforbuttonpress()
 t1, t2, t3, t4 = 24.54175182, 24.55058123, 24.57651763, 24.58203602
 
+
 def MVA(t, B, posicion):
     M = len(t)
 
@@ -133,14 +141,13 @@ omega = angulo(B_upstream, B_downstream)
 v_punto = np.zeros((len(posicion_cut) - 1, 3))
 norma_v = np.zeros(len(posicion_cut) - 1)
 for i in range(len(v_punto)):
-    v_punto[i, :] = (posicion_cut[i + 1, :] - posicion_cut[i])
+    v_punto[i, :] = posicion_cut[i + 1, :] - posicion_cut[i]
     # en km/s, tiene resolución de 1Hz
     norma_v[i] = np.linalg.norm(v_punto[i, :])
 
 # la velocidad promedio
 v_media = np.mean(v_punto, axis=0)
 print("v media", v_media)
-
 
 x14, x23 = ancho_mpb(t1, t2, t3, t4, x3, v_media)
 

@@ -2,22 +2,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from cycler import cycler
-from mpl_toolkits.mplot3d import Axes3D
-from leer_datos import importar_bepi
+from Titan.leer_datos import importar_bepi
 import sys
 
 sys.path.append("..")
 from funciones import (
     donde,
-    fechas,
-    tiempos,
-    Mij,
-    error,
-    corrientes,
-    ancho_mpb,
     Bpara_Bperp,
-    find_nearest,
-    next_available_row,
     SZA,
 )
 
@@ -36,7 +27,7 @@ Tengo que hacer el fit este que es 2D en 3D para que tenga sentido calcular la n
 def altitude(SZA):
     """El SZA tiene que estar en grados!!"""
 
-    alt = 0.11 * SZA**2 - 0.22 * SZA + 389
+    alt = 0.11 * SZA ** 2 - 0.22 * SZA + 389
     # alt es simplemente la altitud *desde la corteza* en km, por eso le sumo 1 RV
     return 1 + alt / 6050
 
@@ -98,7 +89,7 @@ def normal(p):
         a = (p[1] ** 2 + p[2] ** 2) / p[0] ** 2
         # "a" es el parámetro pero cambia punto a punto
     print(p)
-    norm = np.array([2 * p[0], 2 * p[1] / a**2, 2 * p[2] / a**2])
+    norm = np.array([2 * p[0], 2 * p[1] / a ** 2, 2 * p[2] / a ** 2])
     norm = norm / np.linalg.norm(norm)
     return norm
 
@@ -122,7 +113,7 @@ def plot_3d(x, y, z, R, norm):
     ax.set_ylabel(r"$Y_{MSO} (R_m)$")
     ax.set_zlabel(r"$Z_{MSO} (R_m)$")
 
-    u, v = np.mgrid[0 : 2 * np.pi : 20j, 0 : np.pi : 10j]
+    u, v = np.mgrid[0: 2 * np.pi: 20j, 0: np.pi: 10j]
     ax.plot_wireframe(
         np.cos(u) * np.sin(v),
         np.sin(u) * np.sin(v),
@@ -183,7 +174,6 @@ fin_MVA = donde(t, tf_MVA)
 R = posicion[inicio_MVA, :] / 6050
 norm = normal(R)
 plot_3d(x, y, z, R, norm)
-
 
 # xx, yz = fit()
 # pos_RV = pos / 6050

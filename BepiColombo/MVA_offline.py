@@ -1,9 +1,7 @@
 import numpy as np
-import matplotlib.pyplot as plt
 import matplotlib as mpl
 from cycler import cycler
-from leer_datos import importar_bepi
-
+from Titan.leer_datos import importar_bepi
 
 import sys
 
@@ -15,7 +13,6 @@ from funciones import (
     ancho_mpb,
     Bpara_Bperp,
     SZA,
-    UTC_to_hdec,
 )
 from funciones_plot import hodograma
 
@@ -93,7 +90,6 @@ for i in range(len(v_punto)):
     norma_v[i] = np.linalg.norm(v_punto[i, :])
 # la velocidad promedio
 v_media = np.mean(v_punto, axis=0)
-
 
 x14, x23 = ancho_mpb(t1, t2, t3, t4, x3, v_media)
 print(f"Ancho MPB hmax = {x14:.3g} km, hmin = {x23:.3g} km")

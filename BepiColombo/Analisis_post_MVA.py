@@ -1,7 +1,6 @@
 import numpy as np
-import matplotlib.pyplot as plt
 from MVA import MVA
-from leer_datos import importar_bepi
+from Titan.leer_datos import importar_bepi
 
 import sys
 
@@ -10,8 +9,6 @@ from funciones import (
     donde,
     corrientes,
     angulo,
-    fechas,
-    tiempos,
 )
 
 """
@@ -53,16 +50,15 @@ t, B, posicion = importar_bepi(ti_MVA - 1, tf_MVA + 1)
 angulo_mva = angulo(normal_fit, x3)
 angulo_boot = angulo(normal_boot, x3)
 
-
 ##############
 # Calculo la velocidad de la nave
 v_punto = np.zeros((fin - inicio, 3))
 norma_v = np.zeros(fin - inicio)
-posicion_cut = posicion[inicio : fin + 1, :]
-t_cut = t[inicio : fin + 1] * 3600  # en segundos
+posicion_cut = posicion[inicio: fin + 1, :]
+t_cut = t[inicio: fin + 1] * 3600  # en segundos
 for i in range(fin - inicio):
     v_punto[i, :] = (posicion[inicio + 1, :] - posicion[inicio]) / (
-        t_cut[i + 1] - t_cut[i]
+            t_cut[i + 1] - t_cut[i]
     )  # en km/s
     norma_v[i] = np.linalg.norm(v_punto[i, :])
 # veamos que no cambia mucho punto a punto, usemos la norma
@@ -124,7 +120,6 @@ inicio_down = donde(t, t4)  # las 18:14:51
 fin_down = donde(t, t4 + 0.015)  # las 18:15:52
 B_downstream = np.mean(B[inicio_down:fin_down, :], axis=0)  # nT
 
-
 omega = np.arccos(
     np.dot(B_upstream, B_downstream)
     / (np.linalg.norm(B_upstream) * np.linalg.norm(B_downstream))
@@ -140,11 +135,9 @@ J_s_boot, J_v_boot = corrientes(
     normal_boot, B_upstream, B_downstream, np.linalg.norm(x_23_boot)
 )
 
-
 fuerza_mva = np.cross(J_v_MVA * 1e-9, B[inicio_down, :] * 1e-9)  # N/m^3 #en t4
 fuerza_fit = np.cross(J_v_fit * 1e-9, B[inicio_down, :] * 1e-9)  # N/m^3 #en t4
 fuerza_boot = np.cross(J_v_boot * 1e-9, B[inicio_down, :] * 1e-9)  # N/m^3
-
 
 ti_lpw = donde(t_lpw, t2)
 tf_lpw = donde(t_lpw, t3)
@@ -159,7 +152,6 @@ E_Hall = np.cross(J_v_MVA * 1e-9, B[inicio_down, :] * 1e-9) / (q_e * n_e)  # V/m
 E_Hall_fit = np.cross(J_v_fit * 1e-9, B[inicio_down, :] * 1e-9) / (q_e * n_e)  # V/m
 E_Hall_boot = np.cross(J_v_boot * 1e-9, B[inicio_down, :] * 1e-9) / (q_e * n_e)  # V/m
 
-
 #
 # plot_FLorentz(X1, Y1, Z1, R, J_v, B_upstream, B_downstream, fuerza_mva, x3)
 #
@@ -171,7 +163,6 @@ E_Hall_boot = np.cross(J_v_boot * 1e-9, B[inicio_down, :] * 1e-9) / (q_e * n_e) 
 # plt.ylabel('Fuerza (N/m^3)')
 #
 plt.show(block=False)
-
 
 ###########
 # Ahora guardamos todo en la spreadsheet

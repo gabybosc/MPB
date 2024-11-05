@@ -1,41 +1,29 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.dates as md
-from leer_datos import importar_bepi
-from funciones_bepi import tiempos_UTC
-from mpl_toolkits.axes_grid1 import make_axes_locatable
-from matplotlib.colors import LogNorm
+from Titan.leer_datos import importar_bepi
 import sys
 
 sys.path.append("../")
 
 from funciones import (
-    SZA,
-    error,
     donde,
     Mij,
-    Bpara_Bperp,
-    SZA,
 )
 
 # from funciones_metodos import (
 #     plot_bootstrap,
 #     bootstrap,
 # )
-from funciones_plot import hodograma
 
 
 """
 Hace el MVA y nada más. Es para correr rápido buscando la hoja de corriente.
 """
 
-
 np.set_printoptions(precision=4)
 
 year, month, day = 2021, "08", 10  # fechas()
 ti_MVA, tf_MVA = 13.911111, 13.922222
 t1, t2, t3, t4 = [13.8974, 13.9078, 13.9283, 13.9469]
-
 
 t, B, posicion = importar_bepi(t1 - 0.5, t4 + 0.5)
 
@@ -74,7 +62,6 @@ if any(np.cross(x1, x2) - x3) > 0.01:
 B1 = np.dot(B_cut, x1)
 B2 = np.dot(B_cut, x2)
 B3 = np.dot(B_cut, x3)
-
 
 # el B medio
 B_medio_vectorial = np.mean(B_cut, axis=0)
@@ -118,12 +105,11 @@ n_fit = np.array([0.8938, 0.4485])
 n = np.array([x3[0], np.sqrt(x3[1] ** 2 + x3[2] ** 2)])
 angulo_mva = np.arccos(np.clip(np.dot(n_fit, n), -1.0, 1.0))
 
-
 print(f"SZA = {SZAngle:.3g}º y altitud = {int(altitud)}km")
 print(f"MVA entre los tiempos {ti_MVA} y {tf_MVA}")
-print(f"Cociente de lambdas = {lamb[1]/lamb[2]:.4g}")
+print(f"Cociente de lambdas = {lamb[1] / lamb[2]:.4g}")
 print(
-    f"El ángulo entre las normales 2D de MVA y del fit es {angulo_mva * 180/np.pi:.3g}º"
+    f"El ángulo entre las normales 2D de MVA y del fit es {angulo_mva * 180 / np.pi:.3g}º"
 )
 
 ti = t1 - 0.15
@@ -134,7 +120,6 @@ B_para, B_perp_norm, t_plot = Bpara_Bperp(B, t, ti, tf)
 t, B, pos = importar_bepi(13.5, 14.1)
 Bnorm = np.linalg.norm(B, axis=1)
 pos_RV = pos / 6050
-
 
 Bpara, Bperp, tpara = Bpara_Bperp(B, t, 13.5, 14.1)
 
@@ -180,7 +165,6 @@ ax3.set_ylabel("Relative variation \n of B")
 ax3.set_xlabel("Tiempo (UTC)")
 ax3.set_ylim([-0.1, 1])
 
-
 for ax in [ax2, ax3]:
     ax.legend(loc="upper left")
 for ax in [ax1, ax2]:
@@ -193,6 +177,5 @@ for ax in [ax1, ax2, ax3]:
     plt.axvline(x=tf_MVA, color="r", linewidth=1)
     # en un radio de 10 min de la MPB
     ax.set_xlim([MPB[0] - np.timedelta64(10, "m"), MPB[-1] + np.timedelta64(10, "m")])
-
 
 plt.show()

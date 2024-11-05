@@ -2,8 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from cycler import cycler
-from mpl_toolkits.mplot3d import Axes3D
-from leer_datos import importar_bepi
+from Titan.leer_datos import importar_bepi
 import sys
 
 sys.path.append("..")
@@ -27,14 +26,14 @@ Ahora quiero que el fit sea considerando el punto por el que cruza
 
 def altitude(sza, a=0.11, b=-0.22, c=389):
     """El SZA en grados!!"""
-    alt = a * sza**2 + b * sza + c
+    alt = a * sza ** 2 + b * sza + c
     # alt es la altitud, en realidad yo quiero que la función me devuelva la coord r medida desde el (0,0) en RV
     return 1 + alt / 6050
 
 
 def normal(sza):
     """sza en rad"""
-    r = 0.0597 * sza**2 - 0.002 * sza + 1.12
+    r = 0.0597 * sza ** 2 - 0.002 * sza + 1.12
     dr = 0.1194 * sza - 0.002
     dx = dr * np.cos(sza) - r * np.sin(sza)
     dy = dr * np.sin(sza) + r * np.cos(sza)
@@ -61,7 +60,7 @@ def fit_Xu():
 def c_parametro(posicion, pos_MPB):
     r = np.linalg.norm(posicion[pos_MPB, :]) - 6050  # para convertirla en altitud
     theta = SZA(posicion, pos_MPB)
-    c = r - 0.11 * theta**2 + 0.22 * theta
+    c = r - 0.11 * theta ** 2 + 0.22 * theta
 
     return c
 
@@ -69,7 +68,7 @@ def c_parametro(posicion, pos_MPB):
 def b_parametro(posicion, pos_MPB):
     r = np.linalg.norm(posicion[pos_MPB, :]) - 6050
     theta = SZA(posicion, pos_MPB)
-    b = (r - 0.11 * theta**2 - 389) / theta
+    b = (r - 0.11 * theta ** 2 - 389) / theta
 
     return b
 
@@ -78,7 +77,7 @@ def a_parametro(posicion, pos_MPB):
     """theta tiene que estar en grados"""
     r = np.linalg.norm(posicion[pos_MPB, :]) - 6050
     theta = SZA(posicion, pos_MPB)
-    a = (r + 0.22 * theta - 389) / theta**2
+    a = (r + 0.22 * theta - 389) / theta ** 2
     return a
 
 
@@ -134,10 +133,8 @@ pos_MPB = int(0.5 * (fin_MVA + inicio_MVA))
 bs = donde(t, 14)
 mpr = donde(t, UTC_to_hdec("13:50:00"))
 
-
 R = posicion[pos_MPB, :] / 6050
 R_2d = [R[0], np.sqrt(R[1] ** 2 + R[2] ** 2)]
-
 
 alt = np.linalg.norm(posicion[pos_MPB, :]) - 6050
 sza_rad = SZA(posicion, pos_MPB) / 180 * np.pi
@@ -149,7 +146,6 @@ c = c_parametro(posicion, pos_MPB)
 
 plot_2D(pos_RV, R_2d, n, c)
 plt.show()
-
 
 """
 descomentar lo siguiente si quiero chequear qué pasa cambiando diferentes parámetros
