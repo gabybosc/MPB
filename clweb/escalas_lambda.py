@@ -31,7 +31,7 @@ hora = input("Hora en HH\n")
 tt = importar_t1t2t3t4(year, month, day, int(hora))
 
 """
-Si ya tengo el escalas_lambda, no lo hace de nuevo, sino que lo abre.
+Si ya tengo el escalas_lambda.py, no lo hace de nuevo, sino que lo abre.
 Si no, corre la función
 """
 if os.path.isfile(f"../outputs/cociente_lambdas_d{doy}_t{hora}.txt"):
@@ -49,7 +49,7 @@ else:
     )
 
 """
-Plotea los archivos que devuelve escalas_lambda.py
+Plotea los archivos que devuelve escalas_lambda.py.py
 """
 
 timestamps = array_datenums(year, month, day, tt)  # lo convierto a datenum

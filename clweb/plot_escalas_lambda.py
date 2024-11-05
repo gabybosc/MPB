@@ -1,5 +1,5 @@
 """
-Plotea los archivos que devuelve escalas_lambda.py
+Plotea los archivos que devuelve escalas_lambda.py.py
 """
 
 import matplotlib.pyplot as plt
@@ -50,7 +50,6 @@ else:
     B = mag[:, 6:9]
     Bnorm = np.linalg.norm(B, axis=1)
 
-
 datos = np.loadtxt(f"../outputs/cociente_lambdas_d{doy}_t{hora}.txt", skiprows=1)
 
 periodo_ciclotron = datos[1:, 0]
@@ -61,7 +60,6 @@ cociente = np.transpose(datos[1:, 2:])
 ti = tiempo_central[0] - 0.5
 tf = tiempo_central[-1] + 0.5
 n = int(ti * 32 * 3600)
-
 
 hh = mag[:, 3]
 mm = mag[:, 4]
@@ -82,7 +80,6 @@ fin_MVA = np.where(t == find_nearest(t, tiempo_central[-1]))[0][0]
 B_MVA = Bnorm[inicio_MVA:fin_MVA]
 t_MVA = t[inicio_MVA:fin_MVA]
 
-
 xfmt = md.DateFormatter("%H:%M:%S")
 
 plt.figure(1)
@@ -95,7 +92,6 @@ plt.title(
 )
 plt.xlabel("Tiempo en el que está centrado (hh:mm:ss)")
 plt.ylabel("Radio (s) \n |B| (nT)")
-
 
 plt.figure(2)
 plot_datetime(year, month, day, t_cut, B_cut, "red", "-", 1, 1)
@@ -115,7 +111,6 @@ ax1.set_ylabel(r"|$\Delta B$|/ B")
 
 ax2 = plt.subplot2grid((1, 2), (0, 1), sharex=ax1)
 imshow_UTC(year, month, day, tiempo_central, cociente, escalas, "inferno", 3)
-
 
 for ax in [ax1, ax2]:
     ax.set_xlim(timestamps[0], timestamps[-1])
