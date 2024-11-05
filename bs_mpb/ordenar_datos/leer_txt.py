@@ -36,13 +36,11 @@ rmpb_4 = np.load("../../outputs/grupo4/Rsd_mpb.npy")
 rbs = np.hstack((rbs_1, rbs_2, rbs_3, rbs_4))
 rmpb = np.hstack((rmpb_1, rmpb_2, rmpb_3, rmpb_4))
 
-
 rbslow = np.hstack((rbs_3, rbs_4))
 rmpblow = np.hstack((rmpb_3, rmpb_4))
 
 rbsh = np.hstack((rbs_1, rbs_2))
 rmpbh = np.hstack((rmpb_1, rmpb_2))
-
 
 np.save("../../outputs/allgroups/Rsd_bs_high.npy", rbsh)
 np.save("../../outputs/allgroups/Rsd_mpb_high.npy", rmpbh)
@@ -51,7 +49,7 @@ np.save("../../outputs/allgroups/Rsd_mpb_high.npy", rmpbh)
 Ahora jacob
 """
 
-jacob = pd.read_csv("../../outputs/allgroups/Jacob_catalogue_grupos.csv")
+jacob = pd.read_csv("../../outputs/allgroups/Jacob_catalogue_grupos.csv", decimal=",")
 
 date = [fecha[:10] for fecha in jacob["TIME"]]
 time = [fecha[11:] for fecha in jacob["TIME"]]
@@ -59,7 +57,8 @@ x = jacob["XMSO [km]"]
 y = jacob["YMSO [km]"]
 z = jacob["ZMSO [km]"]
 theta = jacob["thetaBN [deg]"]
-beta = jacob["beta"]
+beta = jacob["beta_p"]
+np.save(path + "beta_p.npy", np.array(beta), allow_pickle=True)
 np.save(path + "date.npy", date)
 np.save(path + "time.npy", time)
 np.save(path + "vup.npy", np.array(jacob["|Vupfine| [km/s]"]))

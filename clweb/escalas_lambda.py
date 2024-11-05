@@ -30,7 +30,6 @@ hora = input("Hora en HH\n")
 
 tt = importar_t1t2t3t4(year, month, day, int(hora))
 
-
 """
 Si ya tengo el escalas_lambda, no lo hace de nuevo, sino que lo abre.
 Si no, corre la función
@@ -75,7 +74,6 @@ fin_MVA = donde(t, tiempo_central[-1])
 B_MVA = Bnorm[inicio_MVA:fin_MVA]
 t_MVA = t[inicio_MVA:fin_MVA]
 
-
 xfmt = md.DateFormatter("%H:%M:%S")
 
 # plt.figure(1)
@@ -104,7 +102,6 @@ ax1.set_ylabel(r"|$\Delta B$|/ B")
 ax2 = plt.subplot2grid((1, 2), (0, 1), sharex=ax1)
 imshow_UTC(year, month, day, tiempo_central, cociente, escalas_plot, "inferno", 3)
 
-
 for ax in [ax1, ax2]:
     ax.set_xlim(timestamps[0], timestamps[-1])
     ax.xaxis.set_major_formatter(xfmt)
@@ -121,6 +118,8 @@ Hace el MVA para hacer el hodograma entre los tiempos que diga
 """
 t_c = UTC_to_hdec(input("tiempo central HH:MM:SS\n"))
 t_pm = int(input("radio de t\n")) / 3600
+print(t_c - t_pm, t_c + t_pm)
+
 ratio, B1, B2, B3, B_cut = MVA(t, t_c - t_pm, t_c + t_pm, B)
 
 hodograma(B1, B2, B3)

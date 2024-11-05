@@ -19,9 +19,11 @@ Comentado está otro filtro más fuerte.
 
 year, month, day, doy = fechas()
 # year, month, day, doy = 2016, "03", 16, 76
-hora = input("hora\n")
+# hora = input("hora\n")
 
-path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/{hora}/"  # path a los datos desde la laptop
+# path = f"../../../../../media/gabybosc/datos/clweb/{year}-{month}-{day}/"  # {hora}/"  # path a los datos desde la laptop
+path = f"../../../datos/clweb/{year}-{month}-{day}/"  # desde la desktop
+
 mag = np.loadtxt(path + "MAG.asc")
 
 t = t_clweb(mag)
@@ -36,7 +38,6 @@ Bnorm = mag[:, -1]
 
 
 def filtro(Tseg):
-
     fs = 1 / Tseg / 16  # f normalizada, da lo mismo si es omega o frec
     fp = 0.3 * fs  # fp < fs para que sea pasabajos
     N, Wn = signal.buttord(fp, fs, 3, 50)
@@ -69,14 +70,13 @@ while not happy:
 
     happy = input("If happy enter any key\n")
 
-print("sfas")
 with open(path + "mag_filtrado.txt", "w") as file:
     file.write(
-        f"Los datos de MAG filtrados para frecuencia fp = {fp*16:.3g}, fs = {fs*16:.3g}.\n"
+        f"Los datos de MAG filtrados para frecuencia fp = {fp * 16:.3g}, fs = {fs * 16:.3g}.\n"
     )
     file.write(f"Bx  By  Bz  B.\n")
     for i in range(M):
         file.write(
-            f"{B_filtrado[i, 0]}\t{B_filtrado[i, 1]}\t{B_filtrado[i, 2]}\t{np.linalg.norm(B_filtrado,axis=1)[i]}\t"
+            f"{B_filtrado[i, 0]}\t{B_filtrado[i, 1]}\t{B_filtrado[i, 2]}\t{np.linalg.norm(B_filtrado, axis=1)[i]}\t"
         )
         file.write("\n")

@@ -14,17 +14,14 @@ import gspread
 from cycler import cycler
 from oauth2client.service_account import ServiceAccountCredentials
 
-
 sys.path.append("..")
 from funciones import find_nearest, fechas, tiempos, donde, next_available_row
 from funciones_plot import onpick1
-
 
 """
 Le paso los datos de clweb y elijo los tiempos t1t2t3t4
 Usa los datos de baja resolución para calcular el B_para y B_perp
 """
-
 
 np.set_printoptions(precision=4)
 
@@ -33,7 +30,6 @@ ti, tf = tiempos()
 
 mag, t, B, posicion = importar_mag(year, month, day, ti, tf)
 Bnorm = np.linalg.norm(B, axis=1)
-
 
 # ###################################################################SWEA
 
@@ -44,7 +40,7 @@ swea, t_swea, JE = importar_swea(year, month, day, ti, tf)
 swia, t_swia, density, vel, vel_norm = importar_swia(year, month, day, ti, tf)
 
 # ######################################################################### LPW
-lpw, t_lpw, e_density = importar_lpw(year, month, day, ti, tf)
+# lpw, t_lpw, e_density = importar_lpw(year, month, day, ti, tf)
 
 # ####################################################################### STATIC
 # static, t_static, mass, counts = importar_static(year, month, day, ti, tf)
@@ -88,7 +84,7 @@ while not happy:
         ax3.set_ylabel("|B| (nT)")
         ax3.set_xlabel("Tiempo (hdec)")
 
-        ax4 = plt.subplot2grid((5, 1), (3, 0), sharex=ax1)
+        ax4 = plt.subplot2grid((3, 2), (0, 1), sharex=ax1)
         ax4.set_ylabel("Diff energy flux \n of the SW e- \n (cm⁻² sr⁻¹ s⁻¹)")
         plt.semilogy(t_swea, JE)
         ax4.legend(["50", "100", "150"])
@@ -130,63 +126,63 @@ while not happy:
 
 plt.show(block=False)
 
-# tm = donde(t, np.mean(outs))
-#
-# # with open('../outputs/t1t2t3t4.txt','a') as file:
-# #     file.write('\n')
-# #     file.write(f'{year}\t{doy}\t')
-# #     for k in outs:
-# #         file.write('{0:1.7}\t'.format(k))
-#
-# meses = {
-#     1: "Jan",
-#     2: "Feb",
-#     3: "Mar",
-#     4: "Apr",
-#     5: "May",
-#     6: "Jun",
-#     7: "Jul",
-#     8: "Aug",
-#     9: "Sep",
-#     10: "Oct",
-#     11: "Nov",
-#     12: "Dec",
-# }
-#
-# scope = [
-#     "https://spreadsheets.google.com/feeds",
-#     "https://www.googleapis.com/auth/spreadsheets",
-#     "https://www.googleapis.com/auth/drive.file",
-#     "https://www.googleapis.com/auth/drive",
-# ]
-#
-# creds = ServiceAccountCredentials.from_json_keyfile_name("../mpb_api.json", scope)
-#
-# client = gspread.authorize(creds)
-#
-# hoja_parametros = client.open("MPB").worksheet("Parametros")
-# hoja_MVA = client.open("MPB").worksheet("MVA")
-# hoja_Bootstrap = client.open("MPB").worksheet("Bootstrap")
-# hoja_Ajuste = client.open("MPB").worksheet("Ajuste")
-#
-# nr = next_available_row(hoja_parametros)
-#
-# mes = meses[int(month)]
-# hoja_parametros.update_acell(f"A{nr}", f"{int(day)} {mes} {int(year)}")
-# hoja_parametros.update_acell(f"B{nr}", f"{int(float(outs[0]))}")
-#
-# hoja_parametros.update_acell(f"AB{nr}", f"{int(posicion[tm, 0])}")
-# hoja_parametros.update_acell(f"AC{nr}", f"{int(posicion[tm, 1])}")
-# hoja_parametros.update_acell(f"AD{nr}", f"{int(posicion[tm, 2])}")
-#
-# cell_times = hoja_parametros.range(f"F{nr}:I{nr}")
-# for i, cell in enumerate(cell_times):
-#     cell.value = round(float(outs[i]), 4)
-# hoja_parametros.update_cells(cell_times)
-#
-# hoja_MVA.update_acell(f"A{nr}", f"{int(day)} {mes} {int(year)}")
-# hoja_MVA.update_acell(f"B{nr}", f"{int(float(outs[0]))}")
-# hoja_Bootstrap.update_acell(f"A{nr}", f"{int(day)} {mes} {int(year)}")
-# hoja_Bootstrap.update_acell(f"B{nr}", f"{int(float(outs[0]))}")
-# hoja_Ajuste.update_acell(f"A{nr}", f"{int(day)} {mes} {int(year)}")
-# hoja_Ajuste.update_acell(f"B{nr}", f"{int(float(outs[0]))}")
+tm = donde(t, np.mean(outs))
+
+with open("../outputs/t1t2t3t4.txt", "a") as file:
+    file.write("\n")
+    file.write(f"{year}\t{doy}\t")
+    for k in outs:
+        file.write("{0:1.7}\t".format(k))
+
+meses = {
+    1: "Jan",
+    2: "Feb",
+    3: "Mar",
+    4: "Apr",
+    5: "May",
+    6: "Jun",
+    7: "Jul",
+    8: "Aug",
+    9: "Sep",
+    10: "Oct",
+    11: "Nov",
+    12: "Dec",
+}
+
+scope = [
+    "https://spreadsheets.google.com/feeds",
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive.file",
+    "https://www.googleapis.com/auth/drive",
+]
+
+creds = ServiceAccountCredentials.from_json_keyfile_name("../mpb_api.json", scope)
+
+client = gspread.authorize(creds)
+
+hoja_parametros = client.open("MPB").worksheet("Parametros")
+hoja_MVA = client.open("MPB").worksheet("MVA")
+hoja_Bootstrap = client.open("MPB").worksheet("Bootstrap")
+hoja_Ajuste = client.open("MPB").worksheet("Ajuste")
+
+nr = next_available_row(hoja_parametros)
+
+mes = meses[int(month)]
+hoja_parametros.update_acell(f"A{nr}", f"{int(day)} {mes} {int(year)}")
+hoja_parametros.update_acell(f"B{nr}", f"{int(float(outs[0]))}")
+
+hoja_parametros.update_acell(f"AB{nr}", f"{int(posicion[tm, 0])}")
+hoja_parametros.update_acell(f"AC{nr}", f"{int(posicion[tm, 1])}")
+hoja_parametros.update_acell(f"AD{nr}", f"{int(posicion[tm, 2])}")
+
+cell_times = hoja_parametros.range(f"F{nr}:I{nr}")
+for i, cell in enumerate(cell_times):
+    cell.value = round(float(outs[i]), 4)
+hoja_parametros.update_cells(cell_times)
+
+hoja_MVA.update_acell(f"A{nr}", f"{int(day)} {mes} {int(year)}")
+hoja_MVA.update_acell(f"B{nr}", f"{int(float(outs[0]))}")
+hoja_Bootstrap.update_acell(f"A{nr}", f"{int(day)} {mes} {int(year)}")
+hoja_Bootstrap.update_acell(f"B{nr}", f"{int(float(outs[0]))}")
+hoja_Ajuste.update_acell(f"A{nr}", f"{int(day)} {mes} {int(year)}")
+hoja_Ajuste.update_acell(f"B{nr}", f"{int(float(outs[0]))}")

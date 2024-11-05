@@ -458,8 +458,8 @@ def giroradio(B, velocidad):
     v_perp = np.mean(velocidad - N, axis=0)
 
     # el giroradio entonces:
-    gf = mp / (q_e * np.linalg.norm(B_medio))  # girofreq
-    rg = gf * np.linalg.norm(v_perp)
+    gf = (q_e * np.linalg.norm(B_medio)) / mp  # girofreq angular
+    rg = np.linalg.norm(v_perp) / gf
     rg_min = (
         mp
         * min(np.linalg.norm(velocidad - N, axis=1))

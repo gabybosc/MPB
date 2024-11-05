@@ -28,7 +28,7 @@ ti_MVA, tf_MVA = tiempos("Intervalo del MVA")
 ti, tf = ti_MVA - 0.5, tf_MVA + 0.5  # tiempos("Región de análisis (no MVA)")
 
 mag, t, B, posicion = importar_mag(year, month, day, ti, tf)
-lpw, t_lpw, e_density, flag = importar_lpw(year, month, day, ti, tf)
+# lpw, t_lpw, e_density, flag = importar_lpw(year, month, day, ti, tf)
 x3, B_cut, t_cut, posicion_cut = MVA(year, month, day, ti_MVA, tf_MVA)
 normal_ajuste, t1, t2, t3, t4 = ajuste(year, month, day, doy, ti_MVA, tf_MVA)
 
@@ -108,17 +108,16 @@ fuerza_mva = fuerza(J_v_MVA, B[inicio_down, :])
 fuerza_fit = fuerza(J_v_fit, B[inicio_down, :])
 fuerza_boot = fuerza(J_v_boot, B[inicio_down, :])
 
-
-e_density = lpw[:, -1]
-t_lpw = lpw[:, 3] + lpw[:, 4] / 60 + lpw[:, 5] / 3600
-
-n_e = corte(t_lpw, t2, t3, e_density)
-n_e = n_e * 1e6  # m⁻³
-if np.isnan(n_e):
-    n_e = 1e7
-    print("LPW no tiene datos de densidad, asumí n_e = 1E7")
-q_e = 1.6e-19  # carga electron #C
-
-E_Hall = fuerza_mva / (q_e * n_e)  # V/m
-E_Hall_fit = fuerza_fit / (q_e * n_e)  # V/m
-E_Hall_boot = fuerza_boot / (q_e * n_e)  # V/m
+# e_density = lpw[:, -1]
+# t_lpw = lpw[:, 3] + lpw[:, 4] / 60 + lpw[:, 5] / 3600
+#
+# n_e = corte(t_lpw, t2, t3, e_density)
+# n_e = n_e * 1e6  # m⁻³
+# if np.isnan(n_e):
+#     n_e = 1e7
+#     print("LPW no tiene datos de densidad, asumí n_e = 1E7")
+# q_e = 1.6e-19  # carga electron #C
+#
+# E_Hall = fuerza_mva / (q_e * n_e)  # V/m
+# E_Hall_fit = fuerza_fit / (q_e * n_e)  # V/m
+# E_Hall_boot = fuerza_boot / (q_e * n_e)  # V/m

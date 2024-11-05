@@ -5,14 +5,12 @@ from funciones_plot import plot_datetime
 from importar_datos import importar_mag
 
 """
-Plotea sólo los datos de MAG de alta resolución
+Plotea sólo los datos de MAG de alta resolución 
 """
 
 np.set_printoptions(precision=4)
 
-
 year, month, day, doy = fechas()
-
 ti, tf = tiempos()
 
 mag, t, B, posicion = importar_mag(year, month, day, ti, tf)

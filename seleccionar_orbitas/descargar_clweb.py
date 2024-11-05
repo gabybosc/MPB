@@ -21,10 +21,10 @@ SWIFA = "http://clweb.irap.omp.eu/cl/boscoboinik/work/obj5.asc"
 SWEA = (
     "http://clweb.irap.omp.eu/cl/boscoboinik/work/obj6_Panel01_MAVEN_SWEA_P12_SC1.asc"
 )
-LPW = "http://clweb.irap.omp.eu/cl/boscoboinik/work/obj7.asc"
-STATIC = (
-    "http://clweb.irap.omp.eu/cl/boscoboinik/work/obj8_Panel01_MAVEN_STATIC_P12_SC1.asc"
-)
+# LPW = "http://clweb.irap.omp.eu/cl/boscoboinik/work/obj7.asc"
+# STATIC = (
+#     "http://clweb.irap.omp.eu/cl/boscoboinik/work/obj8_Panel01_MAVEN_STATIC_P12_SC1.asc"
+# )
 
 path = f"../../../datos/clweb/{year}-{month}-{day}/{hour}/"
 
@@ -32,7 +32,7 @@ if not os.path.exists(path):  # crea el directorio si no existe
     os.makedirs(path)
 
 names = ["MAG", "SWICA", "SWIFA", "SWEA", "LPW", "STATIC"]
-lst = [MAG, SWICA, SWIFA, SWEA, LPW, STATIC]
+lst = [MAG, SWICA, SWIFA, SWEA]  # , LPW, STATIC]
 for i, site_url in enumerate(lst):
     s = requests.Session()
     print("request")

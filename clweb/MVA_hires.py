@@ -13,9 +13,8 @@ from funciones import (
     autovectores,
     donde,
 )
-from funciones_metodos import normal_fit, bootstrap, plot_bootstrap
+from funciones_metodos import bootstrap, plot_bootstrap, ajuste_conico
 from funciones_plot import hodograma
-
 
 """
 
@@ -67,7 +66,6 @@ def poner_fecha(hoja, nr, fecha, hora):
 
 
 def MVA(year, month, day, ti_MVA, tf_MVA):
-
     mag, t, B, posicion = importar_mag(year, month, day, ti_MVA, tf_MVA)
 
     M = len(t)
@@ -100,7 +98,7 @@ def MVA(year, month, day, ti_MVA, tf_MVA):
     hodograma(B1, B2, B3)
 
     # el error
-    phi, delta_B3 = error(lamb, B, x)
+    phi, delta_B3 = error(lamb, B, avec[2])
     if phi[2, 1] > phi[2, 0]:
         error_normal = phi[2, 1] * 180 / np.pi
     else:
@@ -116,32 +114,32 @@ def MVA(year, month, day, ti_MVA, tf_MVA):
 
     hoja_parametros.update_acell(f"D{nr}", f"{SZA:.3g}")
     hoja_parametros.update_acell(f"E{nr}", f"{int(altitud_media)}")
-    hoja_parametros.update_acell(f"O{nr}", f"{round(B_norm_medio,2)}")
+    hoja_parametros.update_acell(f"O{nr}", f"{B_norm_medio}")
 
     cell_B = hoja_parametros.range(f"L{nr}:N{nr}")
     for i, cell in enumerate(cell_B):
-        cell.value = round(B_medio_vectorial[i], 2)
+        cell.value = B_medio_vectorial[i]
     hoja_parametros.update_cells(cell_B)
 
     # #######update la hoja de MVA
     hoja_mva.update_acell(f"D{nr}", f"{ti_MVA}")
     hoja_mva.update_acell(f"E{nr}", f"{tf_MVA}")
-    hoja_mva.update_acell(f"I{nr}", f"{lamb[1]/lamb[2]:.3g}")
+    hoja_mva.update_acell(f"I{nr}", f"{lamb[1] / lamb[2]:.3g}")
 
     hoja_mva.update_acell(f"S{nr}", f"{error_normal:.3g}")
-    hoja_mva.update_acell(f"T{nr}", f"{round(np.mean(B3),2)}")
-    hoja_mva.update_acell(f"U{nr}", f"{round(delta_B3,2)}")
-    hoja_mva.update_acell(f"V{nr}", f"{abs(round(np.mean(B3)/B_norm_medio,2))}")
+    hoja_mva.update_acell(f"T{nr}", f"{np.mean(B3)}")
+    hoja_mva.update_acell(f"U{nr}", f"{delta_B3}")
+    hoja_mva.update_acell(f"V{nr}", f"{abs(np.mean(B3) / B_norm_medio)}")
 
     cell_lambda = hoja_mva.range(f"F{nr}:H{nr}")
     for i, cell in enumerate(cell_lambda):
-        cell.value = round(lamb[i], 2)
+        cell.value = lamb[i]
     hoja_mva.update_cells(cell_lambda)
 
-    cell_av = hoja_mva.range(f"J{nr}:R{nr}")
-    for i, cell in enumerate(cell_av):
-        cell.value = round(avec[i], 3)
-    hoja_mva.update_cells(cell_av)
+    # cell_av = hoja_mva.range(f"J{nr}:R{nr}")
+    # for i, cell in enumerate(cell_av):
+    #     cell.value = avec[i]
+    hoja_mva.update_acell(f"P{nr}", f"{avec[2]}")
     print("Escribió la spreadsheet del MVA.")
     return avec[2], B, t, posicion, nr
 
@@ -164,7 +162,7 @@ def ajuste(year, month, day, doy, ti_MVA, tf_MVA, nr):
     index = donde(t, t_nave)
     x0 = 0.78
     e = 0.9
-    normal_ajuste, L0 = normal_fit(posicion, index)
+    X1, Y1, Z1, L0, normal_ajuste = ajuste_conico(posicion[index])
 
     B3_fit = np.dot(B, normal_ajuste)
     print("Fin del ajuste. ")
@@ -184,10 +182,10 @@ def ajuste(year, month, day, doy, ti_MVA, tf_MVA, nr):
 
     cell_normal = hoja_fit.range(f"G{nr}:I{nr}")
     for i, cell in enumerate(cell_normal):
-        cell.value = round(normal_ajuste[i], 3)
+        cell.value = normal_ajuste[i]
     hoja_fit.update_cells(cell_normal)
 
-    hoja_fit.update_acell(f"K{nr}", f"{round(np.mean(B3_fit),2)}")
+    hoja_fit.update_acell(f"K{nr}", f"{np.mean(B3_fit)}")
     print("Escribió la spreadsheet del ajuste.")
 
     return normal_ajuste, t1, t2, t3, t4
@@ -224,13 +222,13 @@ def bootstrap_completo(B, M, nr, N=1000):
 
     cell_normal = hoja_boot.range(f"F{nr}:H{nr}")
     for i, cell in enumerate(cell_normal):
-        cell.value = round(normal_boot[i], 3)
+        cell.value = normal_boot[i]
     hoja_boot.update_cells(cell_normal)
 
     hoja_boot.update_acell(f"I{nr}", f"{error_boot:.3g}")
-    hoja_boot.update_acell(f"J{nr}", f"{round(np.mean(B3_boot),2)}")
-    hoja_boot.update_acell(f"K{nr}", f"{round(sigmaB,2)}")
-    hoja_boot.update_acell(f"L{nr}", f"{abs(round(np.mean(B3_boot)/B_norm_medio,2))}")
+    hoja_boot.update_acell(f"J{nr}", f"{np.mean(B3_boot)}")
+    hoja_boot.update_acell(f"K{nr}", f"{sigmaB}")
+    hoja_boot.update_acell(f"L{nr}", f"{abs(np.mean(B3_boot) / B_norm_medio)}")
     print("Escribió la spreadsheet del bootstrap.")
 
     return normal_boot

@@ -35,7 +35,7 @@ def importar_posiciones(path):
 
 
 def importar_params(path):
-    beta = np.load(path + "beta_p.npy").astype(float)
+    beta = np.load(path + "beta_p.npy", allow_pickle=True).astype(float)
     cone_angle = np.load(path + "cone_angle.npy").astype(float)
     Mfms = np.load(path + "Mfms.npy")
     Ls = np.load(path + "Ls.npy")

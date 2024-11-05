@@ -10,7 +10,7 @@ Plotea sólo los datos de MAG de baja resolución
 np.set_printoptions(precision=4)
 
 year = 2014
-for doy in range(340, 366):
+for doy in range(352, 366):
     print(doy)
     date_orbit = dt.datetime(year, 1, 1) + dt.timedelta(doy - 1)
 
@@ -34,7 +34,7 @@ for doy in range(340, 366):
     ax1.set_ylabel("|B| (nT)")
     ax1.set_title(f"MAVEN MAG {year}-{month}-{day}")
     # ax1.set_ylim([3, 8])
-    ax1.set_xlim([4, 4.2])
+    # ax1.set_xlim([4, 4.2])
     ax1.grid()
 
     ax2 = plt.subplot2grid((4, 1), (1, 0), sharex=ax1)

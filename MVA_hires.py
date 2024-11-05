@@ -4,7 +4,6 @@ from funciones_metodos import ajuste_conico, plot_bootstrap, bootstrap
 from funciones_plot import hodograma
 from importar_datos import importar_fila
 
-
 """
 
 Para datos de mag de alta resolución. Para que tarde menos en cargar, skipea las primeras t1*32*3600 rows,
@@ -25,7 +24,6 @@ np.set_printoptions(precision=4)
 
 
 def MVA(year, month, day, doy, ti_MVA, tf_MVA, t, B, posicion):
-
     fila, hoja_parametros, hoja_MVA, hoja_Bootstrap, hoja_fit = importar_fila(
         year, month, day, doy, ti_MVA
     )
@@ -208,3 +206,7 @@ def MVA(year, month, day, doy, ti_MVA, tf_MVA, t, B, posicion):
         hoja_Bootstrap,
         hoja_fit,
     )
+
+
+def ajuste():
+    return None
