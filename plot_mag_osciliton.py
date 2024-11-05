@@ -10,7 +10,8 @@ Plotea sólo los datos de MAG de baja resolución
 np.set_printoptions(precision=4)
 
 year = 2014
-for doy in range(340, 366):
+# for doy in range(340, 366):
+for doy in range(315, 316):
     print(doy)
     date_orbit = dt.datetime(year, 1, 1) + dt.timedelta(doy - 1)
 
@@ -33,25 +34,27 @@ for doy in range(340, 366):
     ax1.plot(t, B_norm, c="k")
     ax1.set_ylabel("|B| (nT)")
     ax1.set_title(f"MAVEN MAG {year}-{month}-{day}")
-    # ax1.set_ylim([3, 8])
-    ax1.set_xlim([4, 4.2])
+    ax1.set_ylim([3, 8])
     ax1.grid()
 
     ax2 = plt.subplot2grid((4, 1), (1, 0), sharex=ax1)
     ax2.plot(t, B[:, 0], c="C0", label="Bx MSO")
     ax2.set_ylabel("Bx (nT)")
+    ax2.set_ylim([1, 6])
 
     ax3 = plt.subplot2grid((4, 1), (2, 0), sharex=ax1)
     ax3.set_ylabel("By (nT)")
     ax3.plot(t, B[:, 1], c="C1", label="By MSO")
+    ax3.set_ylim([-5, 0])
 
     ax4 = plt.subplot2grid((4, 1), (3, 0), sharex=ax1)
     ax4.set_ylabel("Bz (nT)")
     ax4.plot(t, B[:, 2], c="C2", label="Bz MSO")
     ax4.set_xlabel("Tiempo (hdec)")
+    ax4.set_ylim([-3, 2])
 
     for ax in [ax2, ax3, ax4]:
-        ax.set_ylim([-10, 10])
+        ax.set_xlim([4, 4.2])
         ax.grid()
 
     plt.show()
