@@ -4,7 +4,7 @@ import sys
 from matplotlib.widgets import MultiCursor
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-sys.path.append("../..")
+sys.path.append("..")
 from funciones_plot import onpick1, hodograma
 from funciones import (
     donde,
