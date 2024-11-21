@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib.widgets import MultiCursor
 import matplotlib as mpl
 from cycler import cycler
-from Titan.leer_datos import importar_bepi
+from Titan.Analisis import importar_bepi
 from funciones_bepi import tiempos_UTC
 import sys
 

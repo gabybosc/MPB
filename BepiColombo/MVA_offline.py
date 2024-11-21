@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib as mpl
 from cycler import cycler
-from Titan.leer_datos import importar_bepi
+from Titan.Analisis import importar_bepi
 
 import sys
 

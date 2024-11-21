@@ -11,7 +11,6 @@ from scipy.stats import multivariate_normal
 import seaborn as sns
 import numpy.ma as ma
 
-
 register_matplotlib_converters()
 
 """
@@ -60,7 +59,7 @@ def hodograma(B1, B2, B3):
 def imshow_UTC(
     year, month, day, t, heatmap, eje_y, colormap="inferno", minimo=0, maximo=20
 ):
-    """ Le das una fecha en np.datetime64 (UTC) y te grafica el imshow.    """
+    """Le das una fecha en np.datetime64 (UTC) y te grafica el imshow."""
     timestamps = array_datenums(year, month, day, t)
     t_graph = md.date2num(timestamps)
 
@@ -91,7 +90,7 @@ def line_select_callback(eclick, erelease):
 
 
 def make_colormap(vmin, vmax, *args):
-    """    args = list of colors, in order from vmin to vmax    """
+    """args = list of colors, in order from vmin to vmax"""
     colors_map_default = [
         "black",
         "darkblue",
@@ -168,6 +167,71 @@ def plot_datetime(
     )
 
 
+def regiones(
+    ax,
+    tiempo_mag,
+    region1_i,
+    region1_f,
+    region2_i,
+    region2_f,
+    region3_i,
+    region3_f,
+    label_yn="no",
+    label_r1="MPB",
+    label_r2="Magnetofunda",
+    label_r3="MPR",
+    color_r1="#79B953",
+    color_r2="#FE6779",
+    color_r3="#428AE0",
+):
+    if label_yn == "no" or "n":
+        ax.axvspan(
+            xmin=tiempo_mag[
+                region1_i
+            ],  # puede que necesite un [0] después dependiendo de los datos....
+            xmax=tiempo_mag[region1_f],
+            facecolor=color_r1,
+            alpha=0.6,
+        )
+        ax.axvspan(
+            xmin=tiempo_mag[region2_i],
+            xmax=tiempo_mag[region2_f],
+            facecolor=color_r2,
+            alpha=0.6,
+        )
+        ax.axvspan(
+            xmin=tiempo_mag[region3_i],
+            xmax=tiempo_mag[region3_f],
+            facecolor=color_r3,
+            alpha=0.5,
+        )
+
+    elif label_yn == "yes" or "y":
+        ax.axvspan(
+            xmin=tiempo_mag[
+                region1_i
+            ],  # puede que necesite un [0] después dependiendo de los datos....
+            xmax=tiempo_mag[region1_f],
+            facecolor=color_r1,
+            alpha=0.6,
+            label=label_r1,
+        )
+        ax.axvspan(
+            xmin=tiempo_mag[region2_i],
+            xmax=tiempo_mag[region2_f],
+            facecolor=color_r2,
+            alpha=0.6,
+            label=label_r2,
+        )
+        ax.axvspan(
+            xmin=tiempo_mag[region3_i],
+            xmax=tiempo_mag[region3_f],
+            facecolor=color_r3,
+            alpha=0.5,
+            label=label_r3,
+        )
+
+
 def plot_rect(x, y):
     fig, current_ax = plt.subplots()
     plt.plot(x, y)
@@ -203,7 +267,15 @@ def plot_select(x, y, E):
 
 
 def scatter_datetime(
-    year, month, day, t, y, colour="C0", marcador="o", tamanio=1, transparencia=1,
+    year,
+    month,
+    day,
+    t,
+    y,
+    colour="C0",
+    marcador="o",
+    tamanio=1,
+    transparencia=1,
 ):
     timestamps = array_datenums(year, month, day, t)
     t_graph = md.date2num(timestamps)

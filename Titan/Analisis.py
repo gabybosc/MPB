@@ -16,6 +16,9 @@ from funciones import (
     angulo,
     ancho_mpb,
     corrientes,
+    UTC_to_hdec,
+    SZA,
+    altitude,
 )
 
 """
@@ -25,7 +28,7 @@ tdec, Bx, By, Bz, modulo B,pos x, pos y, pos z, distancia km
 path = "../../../datos/Titan/t96_tswis_1s.ascii"
 datos = np.loadtxt(path)
 tiempo = datos[:, 0]
-i = donde(tiempo, 22)
+i = donde(tiempo, 23)
 f = donde(tiempo, 26)
 
 t, B, Bnorm, posicion = datos[i:f, 0], datos[i:f, 1:4], datos[i:f, 4], datos[i:f, 5:8]
@@ -107,11 +110,21 @@ def MVA(t, B, posicion):
     SZA = angulo(posicion[n_p, :], [1, 0, 0]) * 180 / np.pi
     print(f"altitud = {altitud_media}, SZA = {SZA}")
 
+    print(f"l1 = {lamb[0]}, l2 = {lamb[1]}, l3 = {lamb[2]}")
     print("cociente de lambdas = ", lamb[1] / lamb[2])
     B_norm_medio = np.linalg.norm(B_medio_vectorial)
 
-    print(f"El B medio es {B_norm_medio}")
+    print(f"El B medio es {B_medio_vectorial}, su norma es {B_norm_medio}\n")
+    print(f"La componente normal media del B es {np.mean(B3)}\n")
+    print(
+        r"El cociente <B_3>/|<B>|$ es",
+        f"{np.mean(B3) / B_norm_medio}",
+    )
     hodograma(B1, B2, B3)
+
+    print(
+        f"El ángulo entre el vector de campo magnético medio y la normal es {angulo(B_medio_vectorial, avec[2]) * 180 / np.pi} "
+    )
 
     # el error
     phi, delta_B3 = error(lamb, B, avec[2])
@@ -129,14 +142,17 @@ def corte(t, ti, tf, vector):
     return vector_cut
 
 
-ti = donde(t, 24.5516666666)
-tf = donde(t, 24.56111111)
+# 30-nov-2013: central: 24:33:15, radio = 10s
+
+ti = donde(t, UTC_to_hdec("24:33:05"))
+tf = donde(t, UTC_to_hdec("24:33:25"))
 x3, B_cut, t_cut, posicion_cut = MVA(t[ti:tf], B[ti:tf], posicion[ti:tf])
 
 B_upstream = corte(t, t1 - 0.015, t1, B)
 B_downstream = corte(t, t4, t4 + 0.015, B)
 
 omega = angulo(B_upstream, B_downstream)
+print(f"omega = {omega * 180 / np.pi}")
 
 v_punto = np.zeros((len(posicion_cut) - 1, 3))
 norma_v = np.zeros(len(posicion_cut) - 1)
@@ -148,11 +164,20 @@ for i in range(len(v_punto)):
 # la velocidad promedio
 v_media = np.mean(v_punto, axis=0)
 print("v media", v_media)
+print(f"El ángulo entre v media y la normal es {angulo(v_media, x3) * 180 / np.pi}")
 
 x14, x23 = ancho_mpb(t1, t2, t3, t4, x3, v_media)
+print(f"El ancho x14 es {x14}km y el ancho x23={x23} km")
 
 J_s_MVA, J_v_MVA = corrientes(x3, B_upstream, B_downstream, x23)
 
-print(f"J sup = {np.linalg.norm(J_s_MVA)}, J vol = {np.linalg.norm(J_v_MVA)}")
+print(
+    f"J sup = {J_s_MVA}, |Js| = {np.linalg.norm(J_s_MVA)}, J vol {J_v_MVA}, |Jv| = {np.linalg.norm(J_v_MVA)}"
+)
 inicio_down = donde(t, t1 - 0.015)
 # fuerza_mva = fuerza(J_v_MVA, B[inicio_down, :])
+
+# altitude(posicion, 2574)
+print("SZA para t1, t2, t3, t4:\n")
+for ts in [t1, t2, t3, t4]:
+    print(ts, SZA(posicion, donde(t, ts)))

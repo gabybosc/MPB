@@ -10,7 +10,7 @@ import os
 import matplotlib.pyplot as plt
 import matplotlib.dates as md
 from matplotlib.widgets import MultiCursor
-from Titan.leer_datos import importar_bepi
+from Titan.Analisis import importar_bepi
 
 import sys
 
@@ -23,7 +23,7 @@ def MVA(t, ti, tf, B):
     inicio = donde(t, ti)
     fin = donde(t, tf)
 
-    B_cut = B[inicio: fin + 1, :]
+    B_cut = B[inicio : fin + 1, :]
 
     M_ij = Mij(B_cut)
 
@@ -47,7 +47,7 @@ def escalas_lambda(t, B):
     tiempo_central[0] = ti
     for i in range(len(tiempo_central) - 1):
         tiempo_central[i + 1] = (
-                tiempo_central[i] + 1 / 3600
+            tiempo_central[i] + 1 / 3600
         )  # el tiempo central se va barriendo cada 5 segundos
 
     escalas = np.zeros(60)
@@ -66,7 +66,7 @@ def escalas_lambda(t, B):
     m = 1.67e-27  # kg
     q = 1.6e-19  # C
     periodo_ciclotron = (
-            2 * np.pi * m / (q * np.linalg.norm(B_cut, axis=1)) * 1e9
+        2 * np.pi * m / (q * np.linalg.norm(B_cut, axis=1)) * 1e9
     )  # en s
     periodo_diezmado = np.zeros(len(tiempo_central))
     k = len(periodo_ciclotron) / len(tiempo_central)

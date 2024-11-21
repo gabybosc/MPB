@@ -23,6 +23,7 @@ from funciones import (
     UTC_to_hdec,
     proyecciones,
 )
+from funciones_plot import regiones
 
 np.set_printoptions(precision=4)
 
@@ -59,7 +60,6 @@ Blow = np.zeros((Mlow, 3))
 for i in range(7, 10):
     Blow[:, i - 7] = mag_low[:, i]
 
-
 B_para, B_perp_norm, t_plot = Bpara_Bperp(Blow, tlow, t[0], t[-1])
 
 # ######### SWEA
@@ -68,7 +68,6 @@ B_para, B_perp_norm, t_plot = Bpara_Bperp(Blow, tlow, t[0], t[-1])
 # inicio_swea = np.where(t_swea == find_nearest(t_swea, t1 - 0.075))[0][0]
 # fin_swea = np.where(t_swea == find_nearest(t_swea, t4 + 0.075))[0][0]
 swea, t_swea, JE_cut = importar_swea(year, month, day, ti, tf)
-
 
 # ####### densidad SWIA
 
@@ -188,22 +187,6 @@ mpl.rcParams["axes.prop_cycle"] = cycler(
 # plt.show(block=False)
 
 
-# ##### funciones para el plot que se repiten
-def regiones(ax, tiempo_mag, tm1, tm4, tm_up, tm_down, tbs, tmpr):
-    ax.axvspan(
-        xmin=tiempo_mag[tbs][0], xmax=tiempo_mag[tm1][0], facecolor="#FE6779", alpha=0.6
-    )  # Magnetosheath
-    ax.axvspan(
-        xmin=tiempo_mag[tm1][0], xmax=tiempo_mag[tm4][0], facecolor="#79B953", alpha=0.6
-    )  # MPB
-    ax.axvspan(
-        xmin=tiempo_mag[tm4][0],
-        xmax=tiempo_mag[tmpr][0],
-        facecolor="#428AE0",
-        alpha=0.5,
-    )  # MPR
-
-
 #  ####### La fig de la tesis pero sin LPW
 fig = plt.figure(
     2, figsize=(8, 30)
@@ -262,35 +245,14 @@ ax5.set_xticklabels(
     minor=False,
 )
 
-
 for ax in [ax1, ax3, ax4]:
-    regiones(ax, tiempo_mag, tm1, tm4, tm_up, tm_down, tbs, tmpr)
+    regiones(ax, tiempo_mag, tm1, tm4, tbs, tmpr)
     plt.setp(ax.get_xticklabels(), visible=False)
 
 plt.setp(ax2.get_xticklabels(), visible=False)
-ax2.axvspan(
-    xmin=tiempo_mag[tbs][0],
-    xmax=tiempo_mag[tm1][0],
-    facecolor="#FE6779",
-    alpha=0.6,
-    label="Magnetosheath",
-)
-ax2.axvspan(
-    xmin=tiempo_mag[tm1][0],
-    xmax=tiempo_mag[tm4][0],
-    facecolor="#79B953",
-    alpha=0.6,
-    label="MPB",
-)
-ax2.axvspan(
-    xmin=tiempo_mag[tm4][0],
-    xmax=tiempo_mag[tmpr][0],
-    facecolor="#428AE0",
-    alpha=0.5,
-    label="MPR",
-)
-regiones(ax5, tiempo_mag, tm1, tm4, tm_up, tm_down, tbs, tmpr)
 
+regiones(ax2, tiempo_mag, tm1, tm4, tbs, tmpr, "yes")
+regiones(ax5, tiempo_mag, tm1, tm4, tbs, tmpr)
 
 for ax in [ax1, ax2, ax3, ax4, ax5]:
     ax.set_xlim(tiempo_mag[0], tiempo_mag[-1])

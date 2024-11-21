@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import MultiCursor
-from Titan.leer_datos import importar_bepi
+from Titan.Analisis import importar_bepi
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import sys

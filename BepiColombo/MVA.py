@@ -1,5 +1,5 @@
 import numpy as np
-from Titan.leer_datos import importar_bepi
+from Titan.Analisis import importar_bepi
 import sys
 
 sys.path.append("../")

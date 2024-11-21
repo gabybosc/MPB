@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.dates as md
-from Titan.leer_datos import importar_bepi
+from Titan.Analisis import importar_bepi
 from funciones_bepi import tiempos_UTC
 import sys
 

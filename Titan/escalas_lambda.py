@@ -13,7 +13,7 @@ import sys
 from matplotlib.widgets import MultiCursor
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-sys.path.append("../..")
+sys.path.append("..")
 from funciones_plot import imshow_UTC, plot_datetime, hodograma
 
 from funciones import donde, Mij, autovectores, error, array_datenums
@@ -25,8 +25,8 @@ tdec, Bx, By, Bz, modulo B,pos x, pos y, pos z, distancia km
 path = "../../../datos/Titan/t96_tswis_1s.ascii"
 datos = np.loadtxt(path)
 tiempo = datos[:, 0]
-i = donde(tiempo, 24.5)
-f = donde(tiempo, 24.6)
+i = donde(tiempo, 24.54)
+f = donde(tiempo, 24.582)
 
 t, B, B_norm, posicion = datos[i:f, 0], datos[i:f, 1:4], datos[i:f, 4], datos[i:f, 5:8]
 
@@ -35,7 +35,7 @@ def MVA(t, ti, tf, B):
     inicio = donde(t, ti)
     fin = donde(t, tf)
 
-    B_cut = B[inicio: fin + 1, :]
+    B_cut = B[inicio : fin + 1, :]
 
     M_ij = Mij(B_cut)
 
@@ -59,7 +59,7 @@ def escalas_lambda(t, B):
     tiempo_central[0] = ti
     for i in range(len(tiempo_central) - 1):
         tiempo_central[i + 1] = (
-                tiempo_central[i] + 1 / 3600
+            tiempo_central[i] + 1 / 3600
         )  # el tiempo central se va barriendo cada 5 segundos
 
     escalas = np.zeros(60)
@@ -78,7 +78,7 @@ def escalas_lambda(t, B):
     m = 1.67e-27  # kg
     q = 1.6e-19  # C
     periodo_ciclotron = (
-            2 * np.pi * m / (q * np.linalg.norm(B_cut, axis=1)) * 1e9
+        2 * np.pi * m / (q * np.linalg.norm(B_cut, axis=1)) * 1e9
     )  # en s
     periodo_diezmado = np.zeros(len(tiempo_central))
     k = len(periodo_ciclotron) / len(tiempo_central)
@@ -151,11 +151,13 @@ fig.subplots_adjust(
 )
 ax1 = plt.subplot2grid((1, 1), (0, 0))
 imshow_UTC(2013, 11, 30, tiempo_central, cociente, escalas_plot, "inferno", 3)
+# ax1.axvline(x="24:33:15")
+ax1.axhline(y=10)
 ax1.set_title(
-    "Heatmap del cociente de lambdas en distintas escalas temporales\npara el día 28-10-2008"
+    "Heatmap del cociente de lambdas en distintas escalas temporales\npara el día 30-11-2013"
 )
 ax1.set_ylabel("Radio (s)")
 ax1.set_xlabel("Tiempo en el que está centrado (hh:mm:ss)")
 plt.show()
 
-# 28-oct-2008: central: 08:32:48, radio = 9s
+# 01-dic-2013: central: 24:33:15, radio = 10s

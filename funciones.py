@@ -10,6 +10,10 @@ También están las del análisis de la MPB.
 """
 
 
+def altitude(position, planet_radius):
+    return np.mean(np.linalg.norm(position, axis=1) - planet_radius, axis=1)
+
+
 def angulo(v1, v2):
     """Calcula el ángulo (en radianes) entre dos vectores, si no están normalizados los normaliza"""
     v1_norm = v1 / np.linalg.norm(v1)
@@ -426,7 +430,7 @@ def long_inercial_iones(density, paso=20):
 
     for i in range(paso, len(density)):
         density_mean[i - paso] = np.mean(
-            density[i - paso: i]
+            density[i - paso : i]
         )  # toma desde atrás del ti así no se mete en la MPB nunca
 
     ion_length = 2.28e07 / np.sqrt(np.mean(density_mean)) * 1e-5  # km
@@ -472,12 +476,12 @@ def giroradio_termico(B, temperature):
     temp_para_xyz = np.empty((len(B), 3))
 
     for i in range(len(B) - 1):
-        B_avg[i, :] = np.mean(B[i: i + 30, :], axis=0) * 1e-5  # lo paso a gauss
+        B_avg[i, :] = np.mean(B[i : i + 30, :], axis=0) * 1e-5  # lo paso a gauss
         B_avg_normalized[i, :] = B_avg[i, :] / np.linalg.norm(
             B_avg[i, :]
         )  # adimensional
         temp_para_xyz[i, :] = (
-                np.dot(B_avg_normalized[i, :], temperature[i, :]) * B_avg_normalized[i, :]
+            np.dot(B_avg_normalized[i, :], temperature[i, :]) * B_avg_normalized[i, :]
         )  # eV
 
     temp_perp = np.linalg.norm(temperature - temp_para_xyz, axis=1)  # eV
@@ -485,7 +489,7 @@ def giroradio_termico(B, temperature):
     thermal_gyroradius = np.empty(len(temperature))
     for i in range(len(temperature)):
         thermal_gyroradius[i] = (
-                1.02e02 * np.sqrt(temp_perp[i]) / np.linalg.norm(B_avg[i, :]) * 1e-5
+            1.02e02 * np.sqrt(temp_perp[i]) / np.linalg.norm(B_avg[i, :]) * 1e-5
         )  # km
 
     return np.nanmean(thermal_gyroradius, axis=0)

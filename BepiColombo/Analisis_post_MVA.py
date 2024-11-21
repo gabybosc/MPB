@@ -1,6 +1,6 @@
 import numpy as np
 from MVA import MVA
-from Titan.leer_datos import importar_bepi
+from Titan.Analisis import importar_bepi
 
 import sys
 
@@ -54,11 +54,11 @@ angulo_boot = angulo(normal_boot, x3)
 # Calculo la velocidad de la nave
 v_punto = np.zeros((fin - inicio, 3))
 norma_v = np.zeros(fin - inicio)
-posicion_cut = posicion[inicio: fin + 1, :]
-t_cut = t[inicio: fin + 1] * 3600  # en segundos
+posicion_cut = posicion[inicio : fin + 1, :]
+t_cut = t[inicio : fin + 1] * 3600  # en segundos
 for i in range(fin - inicio):
     v_punto[i, :] = (posicion[inicio + 1, :] - posicion[inicio]) / (
-            t_cut[i + 1] - t_cut[i]
+        t_cut[i + 1] - t_cut[i]
     )  # en km/s
     norma_v[i] = np.linalg.norm(v_punto[i, :])
 # veamos que no cambia mucho punto a punto, usemos la norma

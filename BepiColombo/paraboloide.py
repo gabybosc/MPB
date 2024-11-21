@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from cycler import cycler
-from Titan.leer_datos import importar_bepi
+from Titan.Analisis import importar_bepi
 import sys
 
 sys.path.append("..")
@@ -26,7 +26,7 @@ Tengo que hacer el fit este que es 2D en 3D para que tenga sentido calcular la n
 
 def altitude(sza, a=0.11, b=-0.22, c=389):
     """El SZA en grados!!"""
-    alt = a * sza ** 2 + b * sza + c
+    alt = a * sza**2 + b * sza + c
     # alt es la altitud, en realidad yo quiero que la función me devuelva la coord r medida desde el (0,0) en RV
     return 1 + alt / 6050
 
@@ -34,7 +34,7 @@ def altitude(sza, a=0.11, b=-0.22, c=389):
 def c_parametro(posicion, pos_MPB):
     r = np.linalg.norm(posicion[pos_MPB, :]) - 6050  # para convertirla en altitud
     theta = SZA(posicion, pos_MPB)
-    c = r - 0.11 * theta ** 2 + 0.22 * theta
+    c = r - 0.11 * theta**2 + 0.22 * theta
 
     return c
 
