@@ -28,7 +28,7 @@ def hoja_MVA_update(hoja, nr, lamb, av, error_normal, B3, delta_B3, B_norm_medio
     update_varios(hoja, cell_av, av)
 
 
-def hoja_MVA_analisis(hoja, nr, ti, tf, x14, x23, J_s, J_v, fuerza):
+def hoja_MVA_analisis(hoja, nr, ti, tf, x14, x23, J_s, J_v, fuerza=0):
     hoja.update_acell(f"D{nr}", f"{ti}")
     hoja.update_acell(f"E{nr}", f"{tf}")
     # hoja.update_acell(f"W{nr}", f"{angulo_v_mva * 180/np.pi:.3g}")
@@ -70,16 +70,16 @@ def hoja_t1t2t3t4(hoja, nr, t1, t2, t3, t4):
 
 
 def hoja_bootstrap_p2(
-        hoja_boot,
-        nr,
-        angulo_v,
-        angulo_B,
-        x_23,
-        x_14,
-        J_s,
-        J_v,
-        fuerza,
-        E_Hall,
+    hoja_boot,
+    nr,
+    angulo_v,
+    angulo_B,
+    x_23,
+    x_14,
+    J_s,
+    J_v,
+    fuerza,
+    E_Hall,
 ):
     hoja_boot.update_acell(f"M{nr}", f"{angulo_v * 180 / np.pi:.3g}")
     hoja_boot.update_acell(f"N{nr}", f"{angulo_B * 180 / np.pi:.3g}")

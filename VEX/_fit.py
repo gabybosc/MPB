@@ -24,7 +24,7 @@ Fit 2D hardcodeado para el 28 de octubre
 
 def altitude(sza, a=0.11, b=-0.22, c=389):
     """El SZA en grados!!"""
-    alt = a * sza ** 2 + b * sza + c
+    alt = a * sza**2 + b * sza + c
     # alt es la altitud, en realidad yo quiero que la función me devuelva la coord r medida desde el (0,0) en RV
     return 1 + alt / 6050
 
@@ -43,7 +43,7 @@ def fit_Xu():
 
 def calcular_normal(sza):
     """sza en rad"""
-    r = 0.0597 * sza ** 2 - 0.002 * sza + 1.12
+    r = 0.0597 * sza**2 - 0.002 * sza + 1.12
     dr = 0.1194 * sza - 0.002
     dx = dr * np.cos(sza) - r * np.sin(sza)
     dy = dr * np.sin(sza) + r * np.cos(sza)
@@ -58,7 +58,7 @@ def calcular_normal(sza):
 def c_parametro(posicion, pos_MPB):
     r = np.linalg.norm(posicion[pos_MPB, :]) - 6050  # para convertirla en altitud
     theta = SZA(posicion, pos_MPB)
-    c = r - 0.11 * theta ** 2 + 0.22 * theta
+    c = r - 0.11 * theta**2 + 0.22 * theta
 
     return c
 
@@ -66,7 +66,7 @@ def c_parametro(posicion, pos_MPB):
 def b_parametro(posicion, pos_MPB):
     r = np.linalg.norm(posicion[pos_MPB, :]) - 6050
     theta = SZA(posicion, pos_MPB)
-    b = (r - 0.11 * theta ** 2 - 389) / theta
+    b = (r - 0.11 * theta**2 - 389) / theta
 
     return b
 
@@ -75,7 +75,7 @@ def a_parametro(posicion, pos_MPB):
     """theta tiene que estar en grados"""
     r = np.linalg.norm(posicion[pos_MPB, :]) - 6050
     theta = SZA(posicion, pos_MPB)
-    a = (r + 0.22 * theta - 389) / theta ** 2
+    a = (r + 0.22 * theta - 389) / theta**2
     return a
 
 
@@ -135,8 +135,8 @@ def plot_2D(pos_RV, R, n, c):
     plt.legend()
 
 
-def plot_3d(x, y, z, R, norm):
-    nmva = [0.517, 0.103, 0.850]
+def plot_3d(x, y, z, R, norm, nmva):
+    # nmva = [0.517, 0.103, 0.850]
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1, projection="3d")
     ax.set_xlabel(r"$X_{MSO} (R_m)$")
@@ -174,7 +174,7 @@ def plot_3d(x, y, z, R, norm):
         length=0.5,
         label="Normal del mva",
     )
-    u, v = np.mgrid[0: 2 * np.pi: 20j, 0: np.pi: 10j]
+    u, v = np.mgrid[0 : 2 * np.pi : 20j, 0 : np.pi : 10j]
     ax.plot_wireframe(
         np.cos(u) * np.sin(v),
         np.sin(u) * np.sin(v),
@@ -200,9 +200,9 @@ def rotacion(phi, norm2d):
 
 def hallar_phi(R):
     x, y, z = R[0], R[1], R[2]
-    r = np.sqrt(x ** 2 + y ** 2 + z ** 2)
+    r = np.sqrt(x**2 + y**2 + z**2)
     theta = np.arccos(x / r)
-    phi = np.sign(z) * np.arccos(y / np.sqrt(y ** 2 + z ** 2))
+    phi = np.sign(z) * np.arccos(y / np.sqrt(y**2 + z**2))
 
     return r, theta, phi
 

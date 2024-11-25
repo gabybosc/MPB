@@ -272,3 +272,27 @@ def importar_fila(year, month, day):
         print("nueva fila")
 
     return fila, hoja_parametros, hoja_MVA, hoja_Bootstrap, hoja_Ajuste
+
+
+def importar_t1t2t3t4(year, month, day):
+    fila, hoja_parametros, hoja_MVA, hoja_Bootstrap, hoja_Ajuste = importar_fila(
+        year, month, day
+    )
+    # hoja_parametros, hoja_MVA, hoja_Bootstrap, hoja_Ajuste = importar_gdocs()
+    t1 = float(hoja_parametros.cell(fila, 6).value)  # ojo que cuenta desde 1 no desde 0
+    t2 = float(hoja_parametros.cell(fila, 7).value)
+    t3 = float(hoja_parametros.cell(fila, 8).value)
+    t4 = float(hoja_parametros.cell(fila, 9).value)
+
+    return t1, t2, t3, t4
+
+
+def importar_tMVA(year, month, day):
+    fila, hoja_parametros, hoja_MVA, hoja_Bootstrap, hoja_Ajuste = importar_fila(
+        year, month, day
+    )
+    # hoja_parametros, hoja_MVA, hoja_Bootstrap, hoja_Ajuste = importar_gdocs()
+    ti = float(hoja_MVA.cell(fila, 4).value)  # ojo que cuenta desde 1 no desde 0
+    tf = float(hoja_MVA.cell(fila, 5).value)
+
+    return ti, tf

@@ -32,7 +32,7 @@ year = 2014
 #     year, month, day = l[0].split("-")
 #     year, doy = day_to_doy(year, month, day)
 
-for doy in range(144, 174):
+for doy in [91, 99, 109, 116]:
     print(doy)
     ti, tf = 0, 24  # tiempos()
     tiempo, campo, posicion = importar_MAG_pds(year, str(doy).zfill(3), ti, tf)
