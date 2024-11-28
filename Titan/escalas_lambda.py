@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import sys
 from matplotlib.widgets import MultiCursor
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+from datetime import datetime, timedelta
 
 sys.path.append("..")
 from funciones_plot import imshow_UTC, plot_datetime, hodograma
@@ -35,7 +36,7 @@ def MVA(t, ti, tf, B):
     inicio = donde(t, ti)
     fin = donde(t, tf)
 
-    B_cut = B[inicio : fin + 1, :]
+    B_cut = B[inicio: fin + 1, :]
 
     M_ij = Mij(B_cut)
 
@@ -59,7 +60,7 @@ def escalas_lambda(t, B):
     tiempo_central[0] = ti
     for i in range(len(tiempo_central) - 1):
         tiempo_central[i + 1] = (
-            tiempo_central[i] + 1 / 3600
+                tiempo_central[i] + 1 / 3600
         )  # el tiempo central se va barriendo cada 5 segundos
 
     escalas = np.zeros(60)
@@ -78,7 +79,7 @@ def escalas_lambda(t, B):
     m = 1.67e-27  # kg
     q = 1.6e-19  # C
     periodo_ciclotron = (
-        2 * np.pi * m / (q * np.linalg.norm(B_cut, axis=1)) * 1e9
+            2 * np.pi * m / (q * np.linalg.norm(B_cut, axis=1)) * 1e9
     )  # en s
     periodo_diezmado = np.zeros(len(tiempo_central))
     k = len(periodo_ciclotron) / len(tiempo_central)
@@ -142,22 +143,39 @@ ax1.set_ylabel(r"|$\Delta B$|/ B")
 ax2 = plt.subplot2grid((1, 2), (0, 1), sharex=ax1)
 imshow_UTC(2013, 11, 30, tiempo_central, cociente, escalas_plot, "inferno", 3)
 multi = MultiCursor(fig.canvas, (ax1, ax2), color="black", lw=1)
+
+print("Click to select time: ")
+val = np.asarray(plt.ginput(1))
+timestamps = array_datenums(2013, 11, 30, tiempo_central)
+t_graph = md.date2num(timestamps)
+idx = donde(t_graph, val[0][0])
+
+selected_time = timestamps[idx].astype("M8[s]").astype(datetime)
+# Formatea el tiempo para que solo muestre HH:MM:SS
+formatted_time = selected_time.strftime("%H:%M:%S")
+
+time_minus = (selected_time - timedelta(seconds=float(val[0][1]))).strftime("%H:%M:%S")
+time_plus = (selected_time + timedelta(seconds=float(val[0][1]))).strftime("%H:%M:%S")
+
+print("Selected values: ", formatted_time, val[0][1])
+print(f"Selected time - 27s: {time_minus}")
+print(f"Selected time + 27s: {time_plus}")
 plt.show()
 
-fig = plt.figure()
-fig.set_size_inches(15, 10)  # con este tamaño ocupa toda la pantalla de la laptop
-fig.subplots_adjust(
-    top=0.93, bottom=0.07, left=0.05, right=0.95, hspace=0.005, wspace=0.15
-)
-ax1 = plt.subplot2grid((1, 1), (0, 0))
-imshow_UTC(2013, 11, 30, tiempo_central, cociente, escalas_plot, "inferno", 3)
-# ax1.axvline(x="24:33:15")
-ax1.axhline(y=10)
-ax1.set_title(
-    "Heatmap del cociente de lambdas en distintas escalas temporales\npara el día 30-11-2013"
-)
-ax1.set_ylabel("Radio (s)")
-ax1.set_xlabel("Tiempo en el que está centrado (hh:mm:ss)")
-plt.show()
-
-# 01-dic-2013: central: 24:33:15, radio = 10s
+# fig = plt.figure()
+# fig.set_size_inches(15, 10)  # con este tamaño ocupa toda la pantalla de la laptop
+# fig.subplots_adjust(
+#     top=0.93, bottom=0.07, left=0.05, right=0.95, hspace=0.005, wspace=0.15
+# )
+# ax1 = plt.subplot2grid((1, 1), (0, 0))
+# imshow_UTC(2013, 11, 30, tiempo_central, cociente, escalas_plot, "inferno", 3)
+# # ax1.axvline(x="24:33:15")
+# ax1.axhline(y=10)
+# ax1.set_title(
+#     "Heatmap del cociente de lambdas en distintas escalas temporales\npara el día 30-11-2013"
+# )
+# ax1.set_ylabel("Radio (s)")
+# ax1.set_xlabel("Tiempo en el que está centrado (hh:mm:ss)")
+# plt.show()
+#
+# # 01-dic-2013: central: 24:33:15, radio = 10s

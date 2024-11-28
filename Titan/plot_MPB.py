@@ -29,8 +29,8 @@ mpl.rcParams["axes.prop_cycle"] = cycler(
 path = "../../../datos/Titan/t96_tswis_1s.ascii"
 datos = np.loadtxt(path)
 tiempo = datos[:, 0]
-i = donde(tiempo, 23)
-f = donde(tiempo, 26)
+i = donde(tiempo, 24)
+f = donde(tiempo, 25)
 t1, t2, t3, t4 = 24.54175182, 24.55058123, 24.57651763, 24.58203602
 
 t, B, Bnorm, posicion = datos[i:f, 0], datos[i:f, 1:4], datos[i:f, 4], datos[i:f, 5:8]
@@ -163,4 +163,71 @@ regiones(
     color_r3="#C70039",
 )
 ax1.legend()
+plt.show()
+
+pos_RT = posicion / 2575
+orbita = np.sqrt(pos_RT[:, 1] ** 2 + pos_RT[:, 2] ** 2)
+nmva = np.array([0.81616256, 0.47551288, -0.32827759])
+nmva_2d = np.array([0.81616256, np.sqrt(0.47551288**2 + -(0.32827759**2))])
+R = np.array(
+    [
+        pos_RT[donde(t_plot, t1), 0],
+        np.sqrt(pos_RT[donde(t_plot, t1), 1] ** 2 + pos_RT[donde(t_plot, t1), 2] ** 2),
+    ]
+)
+
+# fig, ax = plt.subplots()
+# ax.plot(pos_RT[:, 0], orbita)
+# ax.scatter(
+#     pos_RT[0, 0], orbita[0], s=50, zorder=2, marker="o", color="r", label="start"
+# )
+# ax.scatter(
+#     pos_RT[-1, 0], orbita[-1], s=50, zorder=2, marker="x", color="k", label="end"
+# )
+# ax.quiver(R[0], R[1], nmva[0], nmva[1], color="C2", scale=10, label="MVA")
+# ax.scatter(R[0], R[1])
+# ax.axis("equal")
+# ax.set_xlim(0, 2.5)
+# ax.set_ylim(0, 2.5)
+# circle = plt.Circle((0, 0), 1, color="#eecb8b", clip_on=True)
+# ax.add_artist(circle)
+# ax.set_title("Titan TSWIS coordinates", fontsize=16)
+# ax.set_xlabel(r"$X_{TSWIS}$ ($R_T$)", fontsize=14)
+# ax.set_ylabel(r"$(Y²_{TSWIS} + Z²_{TSWIS} )^{1/2}$ ($R_T$)", fontsize=14)
+# plt.legend()
+
+fig = plt.figure()
+fig.subplots_adjust(
+    top=0.95, bottom=0.1, left=0.05, right=0.95, hspace=0.005, wspace=0.15
+)
+circle = plt.Circle((0, 0), 1, color="#eecb8b", clip_on=True)
+
+ax1 = plt.subplot2grid((3, 1), (0, 0))
+ax1.plot(pos_RT[:, 0], pos_RT[:, 1])
+ax1.add_artist(circle)
+ax1.set_title("Titan TSWIS coordinates", fontsize=16)
+ax1.set_xlabel(r"$X_{TSWIS}$ ($R_T$)", fontsize=14)
+ax1.set_ylabel(r"$Y_{TSWIS}$ ($R_T$)", fontsize=14)
+
+circle = plt.Circle((0, 0), 1, color="#eecb8b", clip_on=True)
+ax2 = plt.subplot2grid((3, 1), (1, 0))
+ax2.plot(pos_RT[:, 0], pos_RT[:, 2])
+ax2.add_artist(circle)
+ax2.set_title("Titan TSWIS coordinates", fontsize=16)
+ax2.set_xlabel(r"$X_{TSWIS}$ ($R_T$)", fontsize=14)
+ax2.set_ylabel(r"$Z_{TSWIS}$ ($R_T$)", fontsize=14)
+
+circle = plt.Circle((0, 0), 1, color="#eecb8b", clip_on=True)
+ax3 = plt.subplot2grid((3, 1), (2, 0))
+ax3.plot(pos_RT[:, 1], pos_RT[:, 2])
+ax3.add_artist(circle)
+ax3.set_title("Titan TSWIS coordinates", fontsize=16)
+ax3.set_xlabel(r"$Y_{TSWIS}$ ($R_T$)", fontsize=14)
+ax3.set_ylabel(r"$Z_{TSWIS}$ ($R_T$)", fontsize=14)
+for ax in [ax1, ax2, ax3]:
+    ax.set_ylim(-5, 5)
+    ax.set_xlim(-5, 5)
+    ax.axis("equal")
+    # ax.legend()
+
 plt.show()

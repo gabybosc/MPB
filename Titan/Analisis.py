@@ -25,14 +25,30 @@ from funciones import (
 tdec, Bx, By, Bz, modulo B,pos x, pos y, pos z, distancia km
 """
 
+"""
+Uso los datos de 1s para la posición porque están en TSWIS
+"""
 path = "../../../datos/Titan/t96_tswis_1s.ascii"
 datos = np.loadtxt(path)
 tiempo = datos[:, 0]
 i = donde(tiempo, 23)
 f = donde(tiempo, 26)
+t_low, posicion = datos[i:f, 0], datos[i:f, 5:8]
 
-t, B, Bnorm, posicion = datos[i:f, 0], datos[i:f, 1:4], datos[i:f, 4], datos[i:f, 5:8]
-B_para, B_perp_norm, t_plot = Bpara_Bperp(B, t, t[0] + 0.2, t[-1] - 0.2)
+"""
+Uso los datos de alta resolución para el MVA, pero están en KSO
+"""
+path_t_hires = "../../../datos/Titan/t96_kso_hires.txt"  # solo para el tiempo
+path_B_hires = "../../../datos/Titan/t96_kso_hires_filt.gz"  # filtrado, para B
+tiempo = np.genfromtxt(path_t_hires, skip_header=1, dtype="str", usecols=[1])
+t_hires = np.array([UTC_to_hdec(x) for x in tiempo])
+
+B = np.loadtxt(path_B_hires)
+Bnorm = np.linalg.norm(B, axis=1)
+
+B_para, B_perp_norm, t_plot = Bpara_Bperp(
+    B, t_hires, t_hires[0] + 0.2, t_hires[-1] - 0.2
+)
 
 # happy = False
 # while not happy:
@@ -83,14 +99,10 @@ B_para, B_perp_norm, t_plot = Bpara_Bperp(B, t, t[0] + 0.2, t[-1] - 0.2)
 #
 #     print("Happy? Keyboard click for yes, mouse click for no.")
 #     happy = plt.waitforbuttonpress()
-t1, t2, t3, t4 = 24.54175182, 24.55058123, 24.57651763, 24.58203602
+t1, t2, t3, t4 = 0.54175182, 0.55058123, 0.57651763, 0.58203602
 
 
 def MVA(t, B, posicion):
-    M = len(t)
-
-    n_p = int(M / 2)
-
     M_ij = Mij(B)
 
     avec, lamb = autovectores(M_ij)
@@ -101,13 +113,12 @@ def MVA(t, B, posicion):
     B1 = np.dot(B, avec[0])
     B2 = np.dot(B, avec[1])
     B3 = np.dot(B, avec[2])
-
     # el B medio
     B_medio_vectorial = np.mean(B, axis=0)
-    altitud = np.linalg.norm(posicion, axis=1) - 3390  # km
+    altitud = np.linalg.norm(posicion, axis=1) - 2570  # km
     altitud_media = np.mean(altitud)
 
-    SZA = angulo(posicion[n_p, :], [1, 0, 0]) * 180 / np.pi
+    SZA = angulo(posicion[int(len(posicion) / 2), :], [1, 0, 0]) * 180 / np.pi
     print(f"altitud = {altitud_media}, SZA = {SZA}")
 
     print(f"l1 = {lamb[0]}, l2 = {lamb[1]}, l3 = {lamb[2]}")
@@ -144,12 +155,21 @@ def corte(t, ti, tf, vector):
 
 # 30-nov-2013: central: 24:33:15, radio = 10s
 
-ti = donde(t, UTC_to_hdec("24:33:05"))
-tf = donde(t, UTC_to_hdec("24:33:25"))
-x3, B_cut, t_cut, posicion_cut = MVA(t[ti:tf], B[ti:tf], posicion[ti:tf])
+# ti = donde(t, UTC_to_hdec("24:33:05"))
+# tf = donde(t, UTC_to_hdec("24:33:25"))
+ti, ti_hires = donde(t_low, UTC_to_hdec("24:32:50")), donde(
+    t_hires, UTC_to_hdec("00:32:50")
+)
+tf, tf_hires = donde(t_low, UTC_to_hdec("24:33:45")), donde(
+    t_hires, UTC_to_hdec("00:33:45")
+)
 
-B_upstream = corte(t, t1 - 0.015, t1, B)
-B_downstream = corte(t, t4, t4 + 0.015, B)
+x3, B_cut, t_cut, posicion_cut = MVA(
+    t_hires[ti_hires:tf_hires], B[ti_hires:tf_hires], posicion[ti:tf]
+)
+
+B_upstream = corte(t_hires, t1 - 0.015, t1, B)
+B_downstream = corte(t_hires, t4, t4 + 0.015, B)
 
 omega = angulo(B_upstream, B_downstream)
 print(f"omega = {omega * 180 / np.pi}")
@@ -174,10 +194,10 @@ J_s_MVA, J_v_MVA = corrientes(x3, B_upstream, B_downstream, x23)
 print(
     f"J sup = {J_s_MVA}, |Js| = {np.linalg.norm(J_s_MVA)}, J vol {J_v_MVA}, |Jv| = {np.linalg.norm(J_v_MVA)}"
 )
-inicio_down = donde(t, t1 - 0.015)
+inicio_down = donde(t_hires, t1 - 0.015)
 # fuerza_mva = fuerza(J_v_MVA, B[inicio_down, :])
 
 # altitude(posicion, 2574)
 print("SZA para t1, t2, t3, t4:\n")
 for ts in [t1, t2, t3, t4]:
-    print(ts, SZA(posicion, donde(t, ts)))
+    print(ts, SZA(posicion, donde(t_low, ts)))
