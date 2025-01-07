@@ -141,6 +141,27 @@ def importar_swea(year, month, day, ti, tf):
     return swea, t_cut, JE_cut
 
 
+###############
+
+
+def importar_swea_heatmap(year, month, day, ti, tf):
+    t_i, t_f = tiempo_limite(ti, tf)
+    path = find_path(year, month, day, t_i, t_f)
+
+    swea = np.loadtxt(path + "SWEA.asc")
+
+    t = t_clweb(swea)
+
+    inicio = donde(t, ti)
+    fin = donde(t, tf)
+
+    t_cut = t[inicio:fin]
+    energy = swea[inicio:fin, 7]
+    counts = swea[inicio:fin, -1]
+
+    return swea, t_cut, energy, counts
+
+
 # #########################################################################SWIA
 
 

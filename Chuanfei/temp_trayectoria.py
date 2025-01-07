@@ -13,10 +13,9 @@ sys.path.append("..")
 from funciones_plot import equal_axes, onpick1
 from funciones import donde, datenum
 
-
 if gethostname() == "magneto2":
     path = f"../../../../../media/gabybosc/datos/Chuanfei/"
-elif gethostname() == "gabybosc":
+else:  # gethostname() == "gabybosc":
     path = "../../../datos/simulacion_chuanfei/"
 
 datos_enteros = np.loadtxt(path + "sat_HallOn_2022_highRes.sat", skiprows=2)
@@ -75,7 +74,6 @@ velocidad = {
     "e-": datos[:, 39:42],
 }  # km/s
 
-
 # Datos de MAVEN
 mag, t, B_mag, posicion = importar_mag(2016, "03", 16, 17.7, 18.5)
 # STATIC, t_static, H_density, O_density, O2_density, CO2_density = importar_STATIC(
@@ -87,7 +85,6 @@ R = [1.082, -0.064, 0.515]
 normal = [0.920, -0.302, 0.251]
 j_maven = 282  # nA/m²
 v_x = -13000  # km/h la velocidad de MAVEN en x
-
 
 t1, t2, t3, t4 = 18.2167, 18.2204, 18.235, 18.2476
 t_up = t1 - 0.015
@@ -103,7 +100,6 @@ posicion_cut = posicion[zi:zf]
 t_cut = t[zi:zf]
 B_cut = B_mag[zi:zf]
 t_simu = np.linspace(t_cut[0], t_cut[-1], len(r_simu))
-
 
 # los valores estos los elegi mirando los gráficos de la función ancho
 ti_simu = t_simu[donde(x, 1.14)]
@@ -139,7 +135,6 @@ posicion_cut = posicion[zi:zf]
 t_cut = t[zi:zf]
 B_cut = B_mag[zi:zf]
 t_simu = np.linspace(t_cut[0], t_cut[-1], len(r_simu))
-
 
 tt = donde(t_cut, t1)
 ff = donde(t_cut, t4)
@@ -264,7 +259,6 @@ for ax in [ax1, ax2, ax3, ax4]:
 
 plt.show()
 
-
 """
 plot de Corrientes, sólo simu
 """
@@ -308,7 +302,6 @@ Ehall = np.array(
 EH_medio = np.mean(np.linalg.norm(Ehall[ii:jj], axis=1)) * 1e3
 print(f"EHall medio = {EH_medio:.3g} mV/m")
 
-
 plt.figure()
 ax4 = plt.subplot2grid((2, 1), (0, 0))
 ax5 = plt.subplot2grid((2, 1), (1, 0))
@@ -330,9 +323,7 @@ for ax in [ax4, ax5]:
 ax5.set_xlabel("x (RM)")
 ax5.legend(["x", "y", "z", "MPB"])
 
-
 plt.show()
-
 
 fig = plt.figure()
 fig.subplots_adjust(

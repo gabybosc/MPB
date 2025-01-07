@@ -1,8 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
-from matplotlib.widgets import MultiCursor
-from mpl_toolkits.axes_grid1 import make_axes_locatable
+
+# from matplotlib.widgets import MultiCursor
+# from mpl_toolkits.axes_grid1 import make_axes_locatable
 import matplotlib as mpl
 from cycler import cycler
 
@@ -12,19 +13,25 @@ from funciones import (
     donde,
     Bpara_Bperp,
     datenum,
-    Mij,
-    autovectores,
-    error,
-    find_nearest,
-    angulo,
-    ancho_mpb,
-    corrientes,
+    # Mij,
+    # autovectores,
+    # error,
+    # find_nearest,
+    # angulo,
+    # ancho_mpb,
+    # corrientes,
     UTC_to_hdec,
 )
 
 mpl.rcParams["axes.prop_cycle"] = cycler(
     "color", ["#5F021F", "#336699", "#C70039", "#00270F"]
 )
+
+"""
+Plotea la serie temporal grande
+Plotea la versión zoom
+Plotea la órbita de cassini
+"""
 
 path = "../../../datos/Titan/t96_tswis_1s.ascii"
 datos = np.loadtxt(path)
@@ -44,8 +51,10 @@ tm3 = donde(t, t3)
 tm4 = donde(t, t4)
 t_bs = donde(t, 24 + UTC_to_hdec("00:24:20"))
 t_mpr = donde(t, 24 + UTC_to_hdec("00:40:30"))
-tmva_i = donde(t, UTC_to_hdec("24:33:05"))
-tmva_f = donde(t, UTC_to_hdec("24:33:25"))
+tmva_i = donde(t, UTC_to_hdec("24:33:04"))
+tmva_f = donde(t, UTC_to_hdec("24:33:45"))
+
+""" timeseries """
 
 fig = plt.figure(
     1, constrained_layout=True
@@ -99,6 +108,8 @@ regiones(
 )
 ax1.legend()
 plt.show()
+
+""" zoomed in """
 
 fig = plt.figure(
     1, constrained_layout=True
@@ -165,10 +176,14 @@ regiones(
 ax1.legend()
 plt.show()
 
+"""
+órbita cassini
+"""
+
 pos_RT = posicion / 2575
 orbita = np.sqrt(pos_RT[:, 1] ** 2 + pos_RT[:, 2] ** 2)
 nmva = np.array([0.81616256, 0.47551288, -0.32827759])
-nmva_2d = np.array([0.81616256, np.sqrt(0.47551288**2 + -(0.32827759**2))])
+nmva_2d = np.array([0.81616256, np.sqrt(0.47551288 ** 2 + -(0.32827759 ** 2))])
 R = np.array(
     [
         pos_RT[donde(t_plot, t1), 0],

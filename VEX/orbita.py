@@ -29,14 +29,14 @@ Ahora quiero que el fit sea considerando el punto por el que cruza
 
 def altitude(sza, a=0.11, b=-0.22, c=389):
     """El SZA en grados!!"""
-    alt = a * sza**2 + b * sza + c
+    alt = a * sza ** 2 + b * sza + c
     # alt es la altitud, en realidad yo quiero que la función me devuelva la coord r medida desde el (0,0) en RV
     return 1 + alt / 6050
 
 
 def normal(sza):
     """sza en rad"""
-    r = 0.0597 * sza**2 - 0.002 * sza + 1.12
+    r = 0.0597 * sza ** 2 - 0.002 * sza + 1.12
     dr = 0.1194 * sza - 0.002
     dx = dr * np.cos(sza) - r * np.sin(sza)
     dy = dr * np.sin(sza) + r * np.cos(sza)
@@ -83,16 +83,16 @@ def plot_2D(pos_RV, idx):
     ax.plot(pos_RV[:, 0], orbita)
     ax.plot(xx, yz, color="#5647b4", linestyle="-.")
     ax.scatter(
-        pos_RV[i1, 0], np.sqrt(pos_RV[i1, 1] ** 2 + pos_RV[i1, 2] ** 2), label="08:00"
+        pos_RV[i1, 0], np.sqrt(pos_RV[i1, 1] ** 2 + pos_RV[i1, 2] ** 2), label="02:00"
     )
     ax.scatter(
-        pos_RV[i2, 0], np.sqrt(pos_RV[i2, 1] ** 2 + pos_RV[i2, 2] ** 2), label="08:20"
+        pos_RV[i2, 0], np.sqrt(pos_RV[i2, 1] ** 2 + pos_RV[i2, 2] ** 2), label="02:20"
     )
     ax.scatter(
-        pos_RV[i3, 0], np.sqrt(pos_RV[i3, 1] ** 2 + pos_RV[i3, 2] ** 2), label="08:30"
+        pos_RV[i3, 0], np.sqrt(pos_RV[i3, 1] ** 2 + pos_RV[i3, 2] ** 2), label="02:30"
     )
     ax.scatter(
-        pos_RV[i4, 0], np.sqrt(pos_RV[i4, 1] ** 2 + pos_RV[i4, 2] ** 2), label="08:40"
+        pos_RV[i4, 0], np.sqrt(pos_RV[i4, 1] ** 2 + pos_RV[i4, 2] ** 2), label="02:40"
     )
     # ax.scatter(pos_RV[i5, 0], np.sqrt(pos_RV[i5, 1] ** 2 + pos_RV[i5, 2] ** 2))
 
@@ -108,25 +108,33 @@ def plot_2D(pos_RV, idx):
 
 
 # year, doy = 2011, 120  # fechas()
-year, doy = 2008, 301
+# year, doy = 2008, 301
+year, doy = 2014, 116
 date_orbit = dt.datetime(year, 1, 1) + dt.timedelta(doy - 1)
 month = date_orbit.strftime("%m")
 day = date_orbit.strftime("%d")
 
 # t1, t2, t3, t4 = [2.755924008, 2.774626456, 2.785536217, 2.804238665]
-t1, t2, t3, t4 = (
-    8.541556527954604,
-    8.544405851015947,
-    8.551476393427427,
-    8.556111111111111,
-)
+# t1, t2, t3, t4 = (
+#     8.541556527954604,
+#     8.544405851015947,
+#     8.551476393427427,
+#     8.556111111111111,
+# )
+
+t1, t2, t3, t4 = [
+    2.314023652,
+    2.31986403,
+    2.331544785,
+    2.337131233,
+]
 
 t, B, posicion, cl, tpos = importar_MAG(year, doy, t1 - 0.5, t4 + 0.5)
 Bnorm = np.linalg.norm(B, axis=1)
 
 plot_2D(
     posicion / 6050,
-    [donde(tpos, 8), donde(tpos, 8.33), donde(tpos, 8.5), donde(tpos, 8.66)],
+    [donde(tpos, 2), donde(tpos, 2.33), donde(tpos, 2.5), donde(tpos, 2.66)],
 )
-plt.title(f"VEX 2008-10-28")
+plt.title(f"VEX {year}-{month}-{day}")
 plt.show()

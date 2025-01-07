@@ -77,7 +77,8 @@ def imshow_UTC(
         vmin=minimo,
         vmax=maximo,
     )
-    plt.colorbar()
+    clb = plt.colorbar()
+    clb.ax.set_title(r"$\lambda_2/\lambda_3$")
 
 
 def line_select_callback(eclick, erelease):

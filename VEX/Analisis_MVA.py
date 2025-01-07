@@ -57,7 +57,7 @@ def MVA(t, B, posicion):
 
     # el B medio
     B_medio_vectorial = np.mean(B, axis=0)
-    altitud = np.linalg.norm(posicion, axis=1) - 3390  # km
+    altitud = np.linalg.norm(posicion, axis=1) - 6050  # km
     altitud_media = np.mean(altitud)
 
     SZA = angulo(posicion[n_p, :], [1, 0, 0]) * 180 / np.pi

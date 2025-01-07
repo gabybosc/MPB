@@ -50,6 +50,9 @@ B_para, B_perp_norm, t_plot = Bpara_Bperp(
     B, t_hires, t_hires[0] + 0.2, t_hires[-1] - 0.2
 )
 
+t_mva_i = "00:33:01"
+t_mva_f = "00:33:42"
+
 # happy = False
 # while not happy:
 #     val = []
@@ -103,42 +106,51 @@ t1, t2, t3, t4 = 0.54175182, 0.55058123, 0.57651763, 0.58203602
 
 
 def MVA(t, B, posicion):
-    M_ij = Mij(B)
-
+    # Calcular la matriz de covarianza de B
+    M_ij = np.cov(B.T)
     avec, lamb = autovectores(M_ij)
 
-    print("la normal del MVA es ", avec[2])
+    print("La normal del MVA es:", avec[2])
 
-    # las proyecciones
-    B1 = np.dot(B, avec[0])
-    B2 = np.dot(B, avec[1])
-    B3 = np.dot(B, avec[2])
-    # el B medio
+    # Calcular las proyecciones
+    B1, B2, B3 = [np.dot(B, avec[i]) for i in range(3)]
+
+    # Calcular el campo medio y la altitud
     B_medio_vectorial = np.mean(B, axis=0)
     altitud = np.linalg.norm(posicion, axis=1) - 2570  # km
     altitud_media = np.mean(altitud)
 
-    SZA = angulo(posicion[int(len(posicion) / 2), :], [1, 0, 0]) * 180 / np.pi
-    print(f"altitud = {altitud_media}, SZA = {SZA}")
-
-    print(f"l1 = {lamb[0]}, l2 = {lamb[1]}, l3 = {lamb[2]}")
-    print("cociente de lambdas = ", lamb[1] / lamb[2])
-    B_norm_medio = np.linalg.norm(B_medio_vectorial)
-
-    print(f"El B medio es {B_medio_vectorial}, su norma es {B_norm_medio}\n")
-    print(f"La componente normal media del B es {np.mean(B3)}\n")
+    # Ángulo solar cenital y altitud
     print(
-        r"El cociente <B_3>/|<B>|$ es",
-        f"{np.mean(B3) / B_norm_medio}",
+        f"Altitud media = {altitud_media} km, SZA = {SZA(posicion, len(posicion) // 2) - 90}°"
     )
+
+    # Mostrar eigenvalores y cociente
+    print(f"l1 = {lamb[0]}, l2 = {lamb[1]}, l3 = {lamb[2]}")
+    print("Cociente de lambdas:", lamb[1] / lamb[2])
+
+    # Calcular la norma de B y la componente normal
+    B_norm_medio = np.linalg.norm(B_medio_vectorial)
+    print(
+        f"El campo magnético medio es {B_medio_vectorial}, su norma es {B_norm_medio:.2f}"
+    )
+    print(f"La componente normal media de B es {np.mean(B3):.2f}")
+
+    # Cociente entre la componente normal y la norma del campo
+    print(f"Cociente <B_3>/|<B>| es {np.mean(B3) / B_norm_medio:.2f}")
+
+    # Graficar el hodograma
     hodograma(B1, B2, B3)
 
+    # Calcular el ángulo entre el campo medio y la normal
+    angulo_normal = angulo(B_medio_vectorial, avec[2]) * 180 / np.pi
     print(
-        f"El ángulo entre el vector de campo magnético medio y la normal es {angulo(B_medio_vectorial, avec[2]) * 180 / np.pi} "
+        f"El ángulo entre el vector de campo magnético medio y la normal es {angulo_normal:.2f}°"
     )
 
-    # el error
+    # Calcular el error
     phi, delta_B3 = error(lamb, B, avec[2])
+
     print("MVA terminado")
     return avec[2], B, t, posicion
 
@@ -157,12 +169,18 @@ def corte(t, ti, tf, vector):
 
 # ti = donde(t, UTC_to_hdec("24:33:05"))
 # tf = donde(t, UTC_to_hdec("24:33:25"))
-ti, ti_hires = donde(t_low, UTC_to_hdec("24:32:50")), donde(
-    t_hires, UTC_to_hdec("00:32:50")
+ti, ti_hires = donde(t_low, 24 + UTC_to_hdec(t_mva_i)), donde(
+    t_hires, UTC_to_hdec(t_mva_i)
 )
-tf, tf_hires = donde(t_low, UTC_to_hdec("24:33:45")), donde(
-    t_hires, UTC_to_hdec("00:33:45")
+tf, tf_hires = donde(t_low, 24 + UTC_to_hdec(t_mva_f)), donde(
+    t_hires, UTC_to_hdec(t_mva_f)
 )
+
+alt_i = np.linalg.norm(posicion[donde(t_low, 24 + UTC_to_hdec(t_mva_i)), :]) - 2570
+alt_f = np.linalg.norm(posicion[donde(t_low, 24 + UTC_to_hdec(t_mva_f)), :]) - 2570
+print(f"Altitud al inicio y fin del MVA: inicio = {alt_i}, fin = {alt_f}")
+print("SZA inicio", SZA(posicion, donde(t_low, 24 + UTC_to_hdec(t_mva_i))) - 90)
+print("SZA fin", SZA(posicion, donde(t_low, 24 + UTC_to_hdec(t_mva_f))) - 90)
 
 x3, B_cut, t_cut, posicion_cut = MVA(
     t_hires[ti_hires:tf_hires], B[ti_hires:tf_hires], posicion[ti:tf]
@@ -172,7 +190,7 @@ B_upstream = corte(t_hires, t1 - 0.015, t1, B)
 B_downstream = corte(t_hires, t4, t4 + 0.015, B)
 
 omega = angulo(B_upstream, B_downstream)
-print(f"omega = {omega * 180 / np.pi}")
+print(f"omega = {omega * 180 / np.pi}º")
 
 v_punto = np.zeros((len(posicion_cut) - 1, 3))
 norma_v = np.zeros(len(posicion_cut) - 1)
