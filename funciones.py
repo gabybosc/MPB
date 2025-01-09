@@ -52,9 +52,9 @@ def autovectores(M_ij):
         x3 = -x3
     if any(np.cross(x1, x2) - x3) > 0.01:
         # print("Cambio el signo de x1 para que los av formen terna derecha")
-        print(x1, np.cross(x1, x2) - x3)
+        # print(x1, np.cross(x1, x2) - x3)
         x1 = -x1
-        print(x1)
+        # print(x1)
 
     avec = [x1, x2, x3]
     aval = lamb

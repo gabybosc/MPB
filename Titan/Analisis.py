@@ -3,6 +3,9 @@ import matplotlib.pyplot as plt
 import sys
 from matplotlib.widgets import MultiCursor
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+from _update_parametros import hoja_MVA_update, hoja_MVA_analisis, hoja_param
 
 sys.path.append("..")
 from funciones_plot import onpick1, hodograma
@@ -28,30 +31,47 @@ tdec, Bx, By, Bz, modulo B,pos x, pos y, pos z, distancia km
 """
 Uso los datos de 1s para la posición porque están en TSWIS
 """
-path = "../../../datos/Titan/t96_tswis_1s.ascii"
-datos = np.loadtxt(path)
-tiempo = datos[:, 0]
-i = donde(tiempo, 23)
-f = donde(tiempo, 26)
-t_low, posicion = datos[i:f, 0], datos[i:f, 5:8]
-
+# path = "../../../datos/Titan/t96_tswis_1s.ascii"
+# datos = np.loadtxt(path)
+# tiempo = datos[:, 0]
+# i = donde(tiempo, 23)
+# f = donde(tiempo, 26)
+# t_low, posicion = datos[i:f, 0], datos[i:f, 5:8]
 """
 Uso los datos de alta resolución para el MVA, pero están en KSO
 """
-path_t_hires = "../../../datos/Titan/t96_kso_hires.txt"  # solo para el tiempo
-path_B_hires = "../../../datos/Titan/t96_kso_hires_filt.gz"  # filtrado, para B
-tiempo = np.genfromtxt(path_t_hires, skip_header=1, dtype="str", usecols=[1])
-t_hires = np.array([UTC_to_hdec(x) for x in tiempo])
+# path_t_hires = "../../../datos/Titan/t96_kso_hires.txt"  # solo para el tiempo
+# path_B_hires = "../../../datos/Titan/t96_kso_hires_filt.gz"  # filtrado, para B
+# tiempo = np.genfromtxt(path_t_hires, skip_header=1, dtype="str", usecols=[1])
+# t_hires = np.array([UTC_to_hdec(x) for x in tiempo])
+#
+# B = np.loadtxt(path_B_hires)
+# Bnorm = np.linalg.norm(B, axis=1)
+# B_para, B_perp_norm, t_plot = Bpara_Bperp(
+#     B, t_hires, t_hires[0] + 0.2, t_hires[-1] - 0.2
+# )
 
-B = np.loadtxt(path_B_hires)
-Bnorm = np.linalg.norm(B, axis=1)
+# np.save("../../../datos/Titan/t_low.npy", t_low)
+# np.save("../../../datos/Titan/posicion.npy", posicion)
+# np.save("../../../datos/Titan/tiempo.npy", tiempo)
+# np.save("../../../datos/Titan/t_hires.npy", t_hires)
+# np.save("../../../datos/Titan/B.npy", B)
+# np.save("../../../datos/Titan/Bnorm.npy", Bnorm)
+# np.save("../../../datos/Titan/B_para.npy", B_para)
+# np.save("../../../datos/Titan/B_perp_norm.npy", B_perp_norm)
+# np.save("../../../datos/Titan/t_plot.npy", t_plot)
+t_low = np.load("../../../datos/Titan/t_low.npy")
+tiempo = np.load("../../../datos/Titan/tiempo.npy")
+t_hires = np.load("../../../datos/Titan/t_hires.npy")
+t_plot = np.load("../../../datos/Titan/t_plot.npy")
+posicion = np.load("../../../datos/Titan/posicion.npy")
+B = np.load("../../../datos/Titan/B.npy")
+Bnorm = np.load("../../../datos/Titan/Bnorm.npy")
+B_para = np.load("../../../datos/Titan/B_para.npy")
+B_perp_norm = np.load("../../../datos/Titan/B_perp_norm.npy")
 
-B_para, B_perp_norm, t_plot = Bpara_Bperp(
-    B, t_hires, t_hires[0] + 0.2, t_hires[-1] - 0.2
-)
-
-t_mva_i = "00:33:01"
-t_mva_f = "00:33:42"
+t_mva_i = "00:33:05"  # 33:01
+t_mva_f = "00:33:26"  # 33:42
 
 # happy = False
 # while not happy:
@@ -105,10 +125,48 @@ t_mva_f = "00:33:42"
 t1, t2, t3, t4 = 0.54175182, 0.55058123, 0.57651763, 0.58203602
 
 
+def importar_gdocs():
+    scope = [
+        "https://spreadsheets.google.com/feeds",
+        "https://www.googleapis.com/auth/spreadsheets",
+        "https://www.googleapis.com/auth/drive.file",
+        "https://www.googleapis.com/auth/drive",
+    ]
+
+    creds = ServiceAccountCredentials.from_json_keyfile_name("../mpb_api.json", scope)
+
+    client = gspread.authorize(creds)
+
+    hoja_parametros = client.open("MPB").worksheet("Parametros")
+    hoja_MVA = client.open("MPB").worksheet("MVA")
+
+    return hoja_parametros, hoja_MVA
+
+
 def MVA(t, B, posicion):
     # Calcular la matriz de covarianza de B
     M_ij = np.cov(B.T)
-    avec, lamb = autovectores(M_ij)
+    # avec, lamb = autovectores(M_ij)
+    lamb, x = np.linalg.eigh(M_ij)  # uso eigh porque es simetrica
+
+    # Los ordeno de mayor a menor
+    idx = lamb.argsort()[::-1]
+    lamb = lamb[idx]
+    x = x[:, idx]
+    # ojo que me da las columnas en vez de las filas como autovectores: el av x1 = x[:,0]
+    x1 = x[:, 0]
+    x2 = x[:, 1]
+    x3 = x[:, 2]
+
+    if x3[0] > 0:  # si la normal aputna para afuera me la da vuelta xq estoy en TSWIS
+        x3 = -x3
+    if any(np.cross(x1, x2) - x3) > 0.01:
+        # print("Cambio el signo de x1 para que los av formen terna derecha")
+        print(x1, np.cross(x1, x2) - x3)
+        x1 = -x1
+        print(x1)
+
+    avec = [x1, x2, x3]
 
     print("La normal del MVA es:", avec[2])
 
@@ -143,14 +201,22 @@ def MVA(t, B, posicion):
     hodograma(B1, B2, B3)
 
     # Calcular el ángulo entre el campo medio y la normal
-    angulo_normal = angulo(B_medio_vectorial, avec[2]) * 180 / np.pi
+    angulo_B = angulo(B_medio_vectorial, avec[2]) * 180 / np.pi
     print(
-        f"El ángulo entre el vector de campo magnético medio y la normal es {angulo_normal:.2f}°"
+        f"El ángulo entre el vector de campo magnético medio y la normal es {angulo_B:.2f}°"
     )
 
     # Calcular el error
     phi, delta_B3 = error(lamb, B, avec[2])
-
+    if phi[2, 1] > phi[2, 0]:
+        error_normal = phi[2, 1] * 180 / np.pi
+    else:
+        error_normal = phi[2, 0] * 180 / np.pi
+    hoja_parametros, hoja_mva = importar_gdocs()
+    nr = 70
+    hoja_MVA_update(
+        hoja_mva, nr, t, lamb, avec, error_normal, B3, delta_B3, B_norm_medio, angulo_B
+    )
     print("MVA terminado")
     return avec[2], B, t, posicion
 
@@ -201,16 +267,17 @@ for i in range(len(v_punto)):
 
 # la velocidad promedio
 v_media = np.mean(v_punto, axis=0)
+angulo_v = angulo(v_media, x3) * 180 / np.pi
 print("v media", v_media)
-print(f"El ángulo entre v media y la normal es {angulo(v_media, x3) * 180 / np.pi}")
+print(f"El ángulo entre v media y la normal es {angulo_v}")
 
 x14, x23 = ancho_mpb(t1, t2, t3, t4, x3, v_media)
 print(f"El ancho x14 es {x14}km y el ancho x23={x23} km")
 
-J_s_MVA, J_v_MVA = corrientes(x3, B_upstream, B_downstream, x23)
+J_s, J_v = corrientes(x3, B_upstream, B_downstream, x23)
 
 print(
-    f"J sup = {J_s_MVA}, |Js| = {np.linalg.norm(J_s_MVA)}, J vol {J_v_MVA}, |Jv| = {np.linalg.norm(J_v_MVA)}"
+    f"J sup = {J_s}, |Js| = {np.linalg.norm(J_s)}, J vol {J_v}, |Jv| = {np.linalg.norm(J_v)}"
 )
 inicio_down = donde(t_hires, t1 - 0.015)
 # fuerza_mva = fuerza(J_v_MVA, B[inicio_down, :])
@@ -219,3 +286,18 @@ inicio_down = donde(t_hires, t1 - 0.015)
 print("SZA para t1, t2, t3, t4:\n")
 for ts in [t1, t2, t3, t4]:
     print(ts, SZA(posicion, donde(t_low, ts)))
+
+hoja_parametros, hoja_mva = importar_gdocs()
+nr = 70
+
+hoja_param(
+    hoja_parametros,
+    nr,
+    [t1, t2, t3, t4],
+    SZA(posicion, donde(t_low, t2)),
+    v_media,
+    omega,
+    B_upstream,
+    B_downstream,
+)
+hoja_MVA_analisis(hoja_mva, nr, x14, x23, J_s, J_v, fuerza=0)
