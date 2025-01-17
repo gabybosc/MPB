@@ -42,7 +42,7 @@ def importar_MAG(year, doy, ti, tf):
     year, month, day = doy_to_day(year, doy)
 
     if gethostname() == "DESKTOP-2GS0QF2":
-        os.chdir(f"G:/")
+        os.chdir(f"F:/")
         filt = f"VEX{year}/VEX_mag_filtrado_{year}{doy}.gz"
         magcl = f"VEX{year}/MAG{year}{month}{day}.asc"
         poscl = f"VEX{year}/pos{year}{month}{day}.asc"
@@ -80,8 +80,8 @@ def importar_MAG(year, doy, ti, tf):
     B_cut = B[inicio:fin]
 
     if type(t_pos) is not int:
-        pos_cut = posicion[donde(t_pos, ti) : donde(t_pos, tf)]
-        tpos_cut = t_pos[donde(t_pos, ti) : donde(t_pos, tf)]
+        pos_cut = posicion[donde(t_pos, ti): donde(t_pos, tf)]
+        tpos_cut = t_pos[donde(t_pos, ti): donde(t_pos, tf)]
     else:
         tpos_cut = t_cut
         pos_cut = pos[inicio:fin]
@@ -131,7 +131,7 @@ def importar_MAG_pds(year, doy, ti, tf):
             B_cut = B[inicio:fin]
             pos_cut = pos[inicio:fin]
         if (
-            gethostname() == "DESKTOP-2GS0QF2"
+                gethostname() == "DESKTOP-2GS0QF2"
         ):  # si estoy en la pc tengo que volver al dir original
             os.chdir("C:/Users/RainbowRider/Documents/GitHub/MPB/VEX/")
         else:

@@ -60,6 +60,18 @@ def fit_Xu():
     return xx, yz
 
 
+def fit_bs():  # zhang 2008
+    sza = np.linspace(0, np.pi * 0.5, 100)
+    r = 2.14 / (1 + 0.621 * np.cos(sza))
+    y_alt = np.array([r[i] * np.sin(sza[i]) for i in range(len(r))])
+    x_alt = np.array([r[i] * np.cos(sza[i]) for i in range(len(r))])
+
+    yz = y_alt[x_alt >= 0]
+    xx = x_alt[x_alt >= 0]
+
+    return xx, yz
+
+
 def fit_2d(a=0.11, b=-0.22, c=389):
     sza = np.linspace(0, np.pi / 2, 100)
     alt = altitude(sza * 180 / np.pi, a, b, c)
@@ -73,28 +85,26 @@ def fit_2d(a=0.11, b=-0.22, c=389):
 
 
 def plot_2D(pos_RV, idx):
-    i1, i2, i3, i4 = idx[0], idx[1], idx[2], idx[3]
+    i1, i2, i3 = idx[0], idx[1], idx[2]
     # i5 = donde(tpos, 3)
 
     xx, yz = fit_2d()
+    xbs, yzbs = fit_bs()
     orbita = np.sqrt(pos_RV[:, 1] ** 2 + pos_RV[:, 2] ** 2)
 
     fig, ax = plt.subplots()
     ax.plot(pos_RV[:, 0], orbita)
-    ax.plot(xx, yz, color="#5647b4", linestyle="-.")
+    ax.plot(xx, yz, color="#79B953", linestyle="-.")
+    ax.plot(xbs, yzbs, color="#FF1493", linestyle="-.")
     ax.scatter(
-        pos_RV[i1, 0], np.sqrt(pos_RV[i1, 1] ** 2 + pos_RV[i1, 2] ** 2), label="02:00"
+        pos_RV[i1, 0], np.sqrt(pos_RV[i1, 1] ** 2 + pos_RV[i1, 2] ** 2), label="08:00"
     )
     ax.scatter(
-        pos_RV[i2, 0], np.sqrt(pos_RV[i2, 1] ** 2 + pos_RV[i2, 2] ** 2), label="02:20"
+        pos_RV[i2, 0], np.sqrt(pos_RV[i2, 1] ** 2 + pos_RV[i2, 2] ** 2), label="08:20"
     )
     ax.scatter(
-        pos_RV[i3, 0], np.sqrt(pos_RV[i3, 1] ** 2 + pos_RV[i3, 2] ** 2), label="02:30"
+        pos_RV[i3, 0], np.sqrt(pos_RV[i3, 1] ** 2 + pos_RV[i3, 2] ** 2), label="08:30"
     )
-    ax.scatter(
-        pos_RV[i4, 0], np.sqrt(pos_RV[i4, 1] ** 2 + pos_RV[i4, 2] ** 2), label="02:40"
-    )
-    # ax.scatter(pos_RV[i5, 0], np.sqrt(pos_RV[i5, 1] ** 2 + pos_RV[i5, 2] ** 2))
 
     ax.axis("equal")
     ax.set_xlim(0, 2)
@@ -108,33 +118,33 @@ def plot_2D(pos_RV, idx):
 
 
 # year, doy = 2011, 120  # fechas()
-# year, doy = 2008, 301
-year, doy = 2014, 116
+year, doy = 2008, 301
+# year, doy = 2014, 116
 date_orbit = dt.datetime(year, 1, 1) + dt.timedelta(doy - 1)
 month = date_orbit.strftime("%m")
 day = date_orbit.strftime("%d")
 
 # t1, t2, t3, t4 = [2.755924008, 2.774626456, 2.785536217, 2.804238665]
-# t1, t2, t3, t4 = (
-#     8.541556527954604,
-#     8.544405851015947,
-#     8.551476393427427,
-#     8.556111111111111,
-# )
+t1, t2, t3, t4 = (
+    8.541556527954604,
+    8.544405851015947,
+    8.551476393427427,
+    8.556111111111111,
+)
 
-t1, t2, t3, t4 = [
-    2.314023652,
-    2.31986403,
-    2.331544785,
-    2.337131233,
-]
+# t1, t2, t3, t4 = [
+#     2.314023652,
+#     2.31986403,
+#     2.331544785,
+#     2.337131233,
+# ]
 
 t, B, posicion, cl, tpos = importar_MAG(year, doy, t1 - 0.5, t4 + 0.5)
 Bnorm = np.linalg.norm(B, axis=1)
 
 plot_2D(
     posicion / 6050,
-    [donde(tpos, 2), donde(tpos, 2.33), donde(tpos, 2.5), donde(tpos, 2.66)],
+    [donde(tpos, 8), donde(tpos, 8.33), donde(tpos, 8.5)],
 )
 plt.title(f"VEX {year}-{month}-{day}")
 plt.show()

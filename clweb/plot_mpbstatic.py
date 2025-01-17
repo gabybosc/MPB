@@ -160,11 +160,27 @@ ax4 = plt.subplot2grid((4, 1), (3, 0), sharex=ax1)
 ax4.xaxis.set_major_formatter(xfmt)
 ax4.plot(tiempo_swia, density)
 ax4.set_ylabel("Densidad de \n protones (cm⁻³)")
-ax4.set_xlabel("Tiempo (UTC)")
 divider4 = make_axes_locatable(ax4)
 cax4 = divider4.append_axes("right", size="3%", pad=0.5)
 cax4.axis("off")
 # ax4.xaxis.set_label_coords(-0.05, -0.05)
+
+ax4.set_xlabel("Tiempo (UTC) \nSZA (º)\nDistancia (RM)")
+ax4.xaxis.set_label_coords(-0.05, -0.05)
+ax4.set_xticklabels(
+    [
+        "17:40\n40\n1.96",
+        "17:50\n27\n1.74",
+        "18:00\n10\n1.51",
+        "18:10\n15\n1.28",
+        "18:20\n46\n1.10",
+        "18:30\n85\n1.05",
+        "18:40\n123\n1.15",
+        "18:50\n152\n1.35",
+    ],
+    fontdict=None,
+    minor=False,
+)
 
 for ax in [ax1, ax2, ax3]:
     # regiones(ax, tiempo_mag, tm1, tm4, tm_up, tm_down, tbs, tmpr)
@@ -181,3 +197,9 @@ for ax in [ax1, ax2, ax3, ax4]:
 
 plt.tight_layout()
 plt.show()
+
+# from funciones import SZA
+#
+# for t_utc in ["17:40", "17:50", "18:20", "18:30", "18:40", "18:50"]:
+#     idx = donde(t, UTC_to_hdec(t_utc))
+#     print(t_utc, SZA(posicion, idx), np.linalg.norm(posicion[idx]) / 3390)

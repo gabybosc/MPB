@@ -45,7 +45,7 @@ def escalas_lambda(t, B):
         for tc in tiempo_central:
             inicio = donde(t, tc - esc)
             fin = donde(t, tc + esc)
-            B_cuts[(tc, esc)] = B[inicio : fin + 1, :]
+            B_cuts[(tc, esc)] = B[inicio: fin + 1, :]
 
     # Hago el MVA para cada combinación de tiempo central y escalas
     cociente = np.zeros((len(tiempo_central), len(escalas)))
@@ -59,7 +59,7 @@ def escalas_lambda(t, B):
     # Calcular períodos de ciclotrón y diezmar
     m, q = 1.67e-27, 1.6e-19  # kg, C
     periodo_ciclotron = (
-        2 * np.pi * m / (q * np.linalg.norm(B_cut, axis=1)) * 1e9
+            2 * np.pi * m / (q * np.linalg.norm(B_cut, axis=1)) * 1e9
     )  # en s
     periodo_diezmado = np.interp(
         np.linspace(0, len(periodo_ciclotron) - 1, len(tiempo_central)),
@@ -157,8 +157,13 @@ fin_MVA = donde(t, tiempo_central[-1])
 B_MVA = Bnorm[inicio_MVA:fin_MVA]
 t_MVA = t[inicio_MVA:fin_MVA]
 
-t1, t2, t3, t4 = 0.54175182, 0.55058123, 0.57651763, 0.58203602
-timestamps = array_datenums(2013, 11, 30, np.array([t1, t2, t3, t4]))
+t1, t2, t3, t4 = (
+    8.541556527954604,
+    8.544405851015947,
+    8.551476393427427,
+    8.556111111111111,
+)
+timestamps = array_datenums(2008, 10, 28, np.array([t1, t2, t3, t4]))
 # xfmt = md.DateFormatter("%H:%M:%S")
 
 fig = plt.figure()
@@ -170,11 +175,11 @@ fig.set_size_inches(15, 10)  # con este tamaño ocupa toda la pantalla de la lap
 ax1 = plt.subplot2grid((1, 2), (0, 0))
 for vert in timestamps:
     ax1.axvline(x=vert, color="k")
-plot_datetime(2013, 11, 30, t_cut, B_cut, "red", "-", 1, 1)
+plot_datetime(2008, 10, 28, t_cut, B_cut, "red", "-", 1, 1)
 ax1.set_ylabel(r"|$\Delta B$|/ B")
 
 ax2 = plt.subplot2grid((1, 2), (0, 1), sharex=ax1)
-imshow_UTC(2013, 11, 30, tiempo_central, cociente, escalas_plot, "inferno", 3)
+imshow_UTC(2008, 10, 28, tiempo_central, cociente, escalas_plot, "inferno", 3)
 for vert in timestamps:
     ax2.axvline(x=vert, color="k")
 multi = MultiCursor(fig.canvas, (ax1, ax2), color="black", lw=1)
@@ -182,7 +187,7 @@ plt.show(block=False)
 
 print("Click to select time: ")
 val = np.asarray(plt.ginput(1))
-timestamps = array_datenums(2013, 11, 30, tiempo_central)
+timestamps = array_datenums(2008, 10, 28, tiempo_central)
 t_graph = md.date2num(timestamps)
 idx = donde(t_graph, val[0][0])
 
@@ -203,11 +208,11 @@ fig.subplots_adjust(
     top=0.93, bottom=0.07, left=0.05, right=0.95, hspace=0.005, wspace=0.15
 )
 ax1 = plt.subplot2grid((1, 1), (0, 0))
-imshow_UTC(2013, 11, 30, tiempo_central, cociente, escalas_plot, "inferno", 3)
+imshow_UTC(2008, 10, 28, tiempo_central, cociente, escalas_plot, "inferno", 3)
 ax1.axvline(x=md.date2num(selected_time))
-ax1.axhline(y=20)
+ax1.axhline(y=9)
 ax1.set_title(
-    f"Heatmap del cociente de lambdas en distintas escalas temporales\npara el día {year}-{month}-{day}"
+    f"Mapa de calor del cociente de lambdas en distintas escalas temporales\npara el día {year}-{month}-{day}"
 )
 ax1.set_ylabel("Radio (s)")
 ax1.set_xlabel("Tiempo en el que está centrado (hh:mm:ss)")

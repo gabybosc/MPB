@@ -11,14 +11,14 @@ from funciones import Bpara_Bperp, UTC_to_hdec, datenum, donde, SZA
 """
 Plotea la fig del 28-10-2008 - la que uso en la tesis
 """
-# plt.rcParams["axes.prop_cycle"] = cycler(
-#     "color",
-#     ["#003f5c", "#ffa600", "#de425b", "#68abb8", "#f3babc", "#6cc08b", "#cacaca"],
-# )
-
 plt.rcParams["axes.prop_cycle"] = cycler(
-    "color", ["#5F021F", "#336699", "#C70039", "#00270F"]
+    "color",
+    ["#003f5c", "#ffa600", "#de425b", "#68abb8", "#f3babc", "#6cc08b", "#cacaca"],
 )
+
+# plt.rcParams["axes.prop_cycle"] = cycler(
+#     "color", ["#5F021F", "#336699", "#C70039", "#00270F"]
+# )
 
 lista = np.loadtxt("../outputs/VEX_times.txt")
 year, month, day, doy = (2008, 10, 28, 302)
@@ -46,11 +46,16 @@ else:
     Bpara, Bperp, tpara = Bpara_Bperp(B[::32], t[::32], ti, tf)
 Bnorm = np.linalg.norm(B, axis=1)
 
-IMA = np.genfromtxt("densidad_20081028.txt", dtype=str)
-t_dens = [
-    (UTC_to_hdec(IMA[i, 0]) + UTC_to_hdec(IMA[i, 1])) / 2 for i in range(len(IMA))
-]
-dens = [float(IMA[i, -1]) for i in range(len(IMA))]
+# IMA = np.genfromtxt(
+#     "dens_20081028-futaana.txt", dtype=str, skip_header=1
+# )  # estos son los de futaana pero no me gustan
+# t_dens = [
+#     (UTC_to_hdec(IMA[i, 0]) + UTC_to_hdec(IMA[i, 1])) / 2 for i in range(len(IMA))
+# ]
+# dens = [float(IMA[i, 2]) for i in range(len(IMA))]
+IMA = np.loadtxt("densidad_20081028-clweb.txt", skiprows=1)  # estos son los del clweb
+t_dens = np.array(IMA[:, 0] + IMA[:, 1] / 60 + IMA[:, 2] / 3600)  # hdec
+dens = IMA[:, -1]
 
 tiempo_mag = np.array([np.datetime64(datenum(year, month, day, x)) for x in t])
 tiempo_para = np.array([np.datetime64(datenum(year, month, day, x)) for x in tpara])
@@ -71,7 +76,12 @@ def lineas_t1t2t3t4(ax, tiempo_mag, t):
     ax.axvline(x=tiempo_mag[donde(t, t2)], color="k", linewidth=1.5)
     ax.axvline(x=tiempo_mag[donde(t, t3)], color="k", linewidth=1.5)
     ax.axvline(x=tiempo_mag[donde(t, t4)], color="k", linewidth=1.5)
+    ax.axvline(x=tiempo_mag[donde(t, tbs)], color="#FF1493", linewidth=1.5)
 
+
+"""
+fig 1
+"""
 
 plt.clf()
 fig = plt.figure(1, constrained_layout=True)
@@ -93,13 +103,14 @@ for ax in [ax1, ax2, ax3, ax4]:
 
 ax1.plot(tiempo_mag, Bnorm, linewidth=1)
 ax1.set_ylabel("|B| (nT)")
+ax1.legend(["MPB", "MS", "MPR"])
 ax1.set_title(f"VEX MAG IMA {year}-{month}-{day}")
 
 ax2.plot(tiempo_mag, B[:, 0], label="Bx VSO", linewidth=1)
 ax2.plot(tiempo_mag, B[:, 1], label="By VSO", linewidth=1)
 ax2.plot(tiempo_mag, B[:, 2], label="Bz VSO", linewidth=1)
 ax2.set_ylabel("Componentes de B (nT)")
-ax2.legend(loc="upper left")
+ax2.legend(loc="upper right")
 
 ax3.plot(tiempo_para, Bpara, linewidth=1, label=r"|$\Delta B \parallel$| / |B|")
 ax3.plot(tiempo_para, Bperp, linewidth=1, label=r"|$\Delta B \perp$| / |B|")
@@ -107,12 +118,24 @@ ax3.set_ylabel("Variación relativa de B")
 ax3.set_xlabel("Tiempo (hdec)")
 if max(Bpara) > 1 or max(Bperp) > 1:
     ax3.set_ylim([-0.1, 1])
-ax3.legend(loc="upper left")
+ax3.legend(loc="upper right")
 
 ax4.scatter(tiempo_dens, dens, c="#003f5c")
-ax4.set_ylabel("Densidad de \nprotones" + r"(cm$^{-3}$)")
-ax4.set_xlabel("Tiempo (hdec)")
-ax4.set_xlim(tiempo_mag[donde(t, 8.4)], tiempo_mag[donde(t, 8.7)])
+ax4.set_ylabel("Densidad de \nprotones del SW" + r"(cm$^{-3}$)")
+ax4.set_xlim(tiempo_mag[donde(t, 8.4)], tiempo_mag[donde(t, 8.67)])
+
+ax4.set_xlabel("Tiempo (UTC) \nSZA (º)\nDistancia (RM)")
+ax4.xaxis.set_label_coords(-0.05, -0.05)
+ax4.set_xticklabels(
+    [
+        "08:25\n33\n1.37",
+        "08:30\n49\n1.19",
+        "08:35\n70\n1.07",
+        "08:40\n95\n1.04",
+    ],
+    fontdict=None,
+    minor=False,
+)
 
 for ax in [ax1, ax2, ax3]:
     plt.setp(ax.get_xticklabels(), visible=False)
@@ -127,6 +150,10 @@ plt.show()
 tmva = 8.549442222
 for tc in [t1, t2, t3, t4, tmva]:
     print(SZA(pos, donde(t, tc)))
+
+"""
+fig 2
+"""
 
 fig2 = plt.figure(2, constrained_layout=True)
 fig2.subplots_adjust(
@@ -159,12 +186,33 @@ axz2.plot(tiempo_mag, B[:, 0], label="Bx VSO")
 axz2.plot(tiempo_mag, B[:, 1], label="By VSO")
 axz2.plot(tiempo_mag, B[:, 2], label="Bz VSO")
 axz2.set_ylabel("Componentes de B (nT)")
-axz2.set_xlabel("Tiempo (UTC")
+axz2.set_xlabel("Tiempo (UTC)")
 axz2.set_xlim(tiempo_mag[donde(t, 8.5)], tiempo_mag[donde(t, 8.6)])
 axz2.legend(loc="upper left")
-
+axz2.set_xticklabels(
+    [
+        "08:31",
+        "08:32",
+        "08:33",
+        "08:34",
+        "08:35",
+        "08:36",
+    ],
+    fontdict=None,
+    minor=False,
+)
 # figure = plt.gcf()  # get current figure
 # figure.set_size_inches(8, 9)
 # # when saving, specify the DPI
 # plt.savefig(f"{year}-{month}-{day}.png", dpi=150)
 plt.show()
+
+from funciones import SZA, hdec_to_UTC
+
+for t_utc in ["08:25", "08:30", "08:35", "08:40"]:
+    idx = donde(t, UTC_to_hdec(t_utc))
+    print(t_utc, SZA(pos, idx), np.linalg.norm(pos[idx]) / 6050)
+
+for t1234 in [t1, t2, t3, t4, tmva]:
+    idx = donde(t, t1234)
+    print(hdec_to_UTC(t1234), SZA(pos, idx), np.linalg.norm(pos[idx]) - 6050)
