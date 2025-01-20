@@ -70,8 +70,8 @@ Bnorm = np.load("../../../datos/Titan/Bnorm.npy")
 B_para = np.load("../../../datos/Titan/B_para.npy")
 B_perp_norm = np.load("../../../datos/Titan/B_perp_norm.npy")
 
-t_mva_i = "00:33:05"  # 33:01
-t_mva_f = "00:33:26"  # 33:42
+t_mva_i = "24:47:42"
+t_mva_f = "24:52:41"
 
 # happy = False
 # while not happy:
@@ -122,12 +122,12 @@ t_mva_f = "00:33:26"  # 33:42
 #
 #     print("Happy? Keyboard click for yes, mouse click for no.")
 #     happy = plt.waitforbuttonpress()
-# t1, t2, t3, t4 = 0.54175182, 0.55058123, 0.57651763, 0.58203602  # inbound
+# # t1, t2, t3, t4 = 0.54175182, 0.55058123, 0.57651763, 0.58203602  # inbound
 t1, t2, t3, t4 = (
-    0.7371487623411579,
-    0.7811189855693299,
-    0.9116972242469316,
-    0.9383458443852176,
+    24.7371487623411579,
+    24.7811189855693299,
+    24.9116972242469316,
+    24.9383458443852176,
 )  # outbound
 
 
@@ -239,27 +239,26 @@ def corte(t, ti, tf, vector):
 
 # 30-nov-2013: central: 24:33:15, radio = 10s
 
-# ti = donde(t, UTC_to_hdec("24:33:05"))
-# tf = donde(t, UTC_to_hdec("24:33:25"))
-ti, ti_hires = donde(t_low, 24 + UTC_to_hdec(t_mva_i)), donde(
-    t_hires, UTC_to_hdec(t_mva_i)
+
+ti, ti_hires = donde(t_low, UTC_to_hdec(t_mva_i)), donde(
+    t_hires + 24, UTC_to_hdec(t_mva_i)
 )
-tf, tf_hires = donde(t_low, 24 + UTC_to_hdec(t_mva_f)), donde(
-    t_hires, UTC_to_hdec(t_mva_f)
+tf, tf_hires = donde(t_low, UTC_to_hdec(t_mva_f)), donde(
+    t_hires + 24, UTC_to_hdec(t_mva_f)
 )
 
-alt_i = np.linalg.norm(posicion[donde(t_low, 24 + UTC_to_hdec(t_mva_i)), :]) - 2570
-alt_f = np.linalg.norm(posicion[donde(t_low, 24 + UTC_to_hdec(t_mva_f)), :]) - 2570
+alt_i = np.linalg.norm(posicion[donde(t_low, UTC_to_hdec(t_mva_i)), :]) - 2570
+alt_f = np.linalg.norm(posicion[donde(t_low, UTC_to_hdec(t_mva_f)), :]) - 2570
 print(f"Altitud al inicio y fin del MVA: inicio = {alt_i}, fin = {alt_f}")
-print("SZA inicio", SZA(posicion, donde(t_low, 24 + UTC_to_hdec(t_mva_i))) - 90)
-print("SZA fin", SZA(posicion, donde(t_low, 24 + UTC_to_hdec(t_mva_f))) - 90)
+print("SZA inicio", SZA(posicion, donde(t_low, UTC_to_hdec(t_mva_i))) - 90)
+print("SZA fin", SZA(posicion, donde(t_low, UTC_to_hdec(t_mva_f))) - 90)
 
 x3, B_cut, t_cut, posicion_cut = MVA(
     t_hires[ti_hires:tf_hires], B[ti_hires:tf_hires], posicion[ti:tf]
 )
 
-B_upstream = corte(t_hires, t1 - 0.015, t1, B)
-B_downstream = corte(t_hires, t4, t4 + 0.015, B)
+B_upstream = corte(24 + t_hires, t1 - 0.06, t1, B)
+B_downstream = corte(24 + t_hires, t4, t4 + 0.06, B)
 
 omega = angulo(B_upstream, B_downstream)
 print(f"omega = {omega * 180 / np.pi}º")
@@ -294,7 +293,7 @@ for ts in [t1, t2, t3, t4]:
     print(ts, SZA(posicion, donde(t_low, ts)))
 
 hoja_parametros, hoja_mva = importar_gdocs()
-nr = 70
+nr = 71
 
 hoja_param(
     hoja_parametros,

@@ -8,7 +8,7 @@ from loader import importar_tiempos
 from importar_datos import importar_mag_1s, importar_swea, importar_swia
 
 sys.path.append("../..")
-from funciones import Bpara_Bperp, UTC_to_hdec, donde, datenum
+from funciones import Bpara_Bperp, UTC_to_hdec, donde, datenum, SZA
 
 plt.rcParams["axes.prop_cycle"] = cycler(
     "color",
@@ -19,7 +19,8 @@ path = "../../../../datos/bs_mpb/"
 
 date, t_BS, t_MPB = importar_tiempos(path)
 
-g = 35
+g = 32
+# g = int(input("g="))
 year, month, day = date[g].split("-")
 t_mpb = []
 t_bs = []
@@ -91,13 +92,13 @@ ax1.set_xlim([tiempo_paraperp[0], tiempo_paraperp[-1]])
 if max(Bpara) > 1:
     ax1.set_ylim([-0.1, 1])
 ax1.grid()
-ax1.legend()
+ax1.legend(loc="upper right")
 ax1.set_title(f"MAVEN MAG SWEA SWIA {year}-{month}-{day}")
 
 ax2.plot(tiempo_mag, B)
 plt.setp(ax2.get_xticklabels(), visible=False)
 ax2.set_ylabel(r"$\mathbf{B}_{MSO}$ [nT]")
-ax2.legend(["Bx", "By", "Bz"])
+ax2.legend([r"$B_x$", r"$B_y$", r"$B_z$"])
 ax2.grid()
 
 ax3.plot(tiempo_mag, Bnorm)
@@ -116,7 +117,9 @@ ax3.set_ylabel(r"$|\mathbf{B}_{MSO}|$ [nT]")
 
 plt.setp(ax4.get_xticklabels(), visible=False)
 ax4.semilogy(tiempo_swea, JE_pds)
-ax4.legend(energias, loc="upper right")
+ax4.legend(
+    ["50 eV", "75 eV", "100 eV", "125 eV", "150 eV", "175 eV"], loc="upper right"
+)
 ax4.grid()
 ax4.set_ylabel("Elec. diff. en. flux \n" + r"[(cm$^{2}$srkeVs)$^{-1}$]")
 
@@ -126,29 +129,52 @@ if type(i_density) is not int:
     if max(i_density) > 30 and i_density[donde(t_swia, t_mpb[1])] < 20:
         ax5.set_ylim([-0.1, 20])
 ax5.grid()
-ax5.set_xlabel("Time UTC")
+ax5.set_xlim(
+    tiempo_mag[donde(t, UTC_to_hdec("01:15:01"))],
+    tiempo_mag[donde(t, UTC_to_hdec("01:39:59"))],
+)
+ax5.set_xlabel(r"Tiempo (UTC) " "\n" r" SZA ($^\circ$) " "\n" r" Distancia (R$_M$)")
+ax5.xaxis.set_label_coords(0, -0.03)
+ax5.set_xticklabels(
+    [
+        "01:20\n57\n1.19",
+        "01:25\n42\n1.29",
+        "01:30\n30\n1.40",
+        "01:35\n19\n1.52",
+    ],
+    fontdict=None,
+    minor=False,
+)
 
 for ax in [ax1, ax2, ax3, ax4, ax5]:
-    ax.axvline(x=tiempo_mag[donde(t, t_mpb[1])], c="#FF1493", label="MPB")
-    ax.axvline(x=tiempo_mag[donde(t, t_bs[1])], c="#07aec7", label="BS")
+    ax.axvline(x=tiempo_mag[donde(t, t_mpb[1])], c="#79B953", label="MPB")
+    ax.axvline(x=tiempo_mag[donde(t, t_bs[1])], c="#FE6779", label="BS")
     ax.axvspan(
         xmin=tiempo_mag[donde(t, t_mpb[0])],
         xmax=tiempo_mag[donde(t, t_mpb[2])],
-        facecolor="#FF1493",
+        facecolor="#79B953",
         alpha=0.3,
     )
     ax.axvspan(
         xmin=tiempo_mag[donde(t, t_bs[0])],
         xmax=tiempo_mag[donde(t, t_bs[2])],
-        facecolor="#07aec7",
+        facecolor="#FE6779",
         alpha=0.3,
     )
 ax5.legend()
 
 figure = plt.gcf()  # get current figure
-figure.set_size_inches(16, 8)
+figure.set_size_inches(8, 9)
 plt.show()
 
-np.savetxt("t.txt", tpara)
-np.savetxt("Bpara.txt", Bpara)
-np.savetxt("Bperp.txt", Bperp)
+# np.savetxt("t.txt", tpara)
+# np.savetxt("Bpara.txt", Bpara)
+# np.savetxt("Bperp.txt", Bperp)
+# for t_utc in [
+#     "01:20",
+#     "01:25",
+#     "01:30",
+#     "01:35",
+# ]:
+#     idx = donde(t, UTC_to_hdec(t_utc))
+#     print(t_utc, SZA(posicion, idx), np.linalg.norm(posicion[idx]) / 3390)

@@ -207,12 +207,12 @@ axz2.set_xticklabels(
 # plt.savefig(f"{year}-{month}-{day}.png", dpi=150)
 plt.show()
 
-from funciones import SZA, hdec_to_UTC
-
-for t_utc in ["08:25", "08:30", "08:35", "08:40"]:
-    idx = donde(t, UTC_to_hdec(t_utc))
-    print(t_utc, SZA(pos, idx), np.linalg.norm(pos[idx]) / 6050)
-
-for t1234 in [t1, t2, t3, t4, tmva]:
-    idx = donde(t, t1234)
-    print(hdec_to_UTC(t1234), SZA(pos, idx), np.linalg.norm(pos[idx]) - 6050)
+# from funciones import SZA, hdec_to_UTC
+#
+# for t_utc in ["08:25", "08:30", "08:35", "08:40"]:
+#     idx = donde(t, UTC_to_hdec(t_utc))
+#     print(t_utc, SZA(pos, idx), np.linalg.norm(pos[idx]) / 6050)
+#
+# for t1234 in [t1, t2, t3, t4, tmva]:
+#     idx = donde(t, t1234)
+#     print(hdec_to_UTC(t1234), SZA(pos, idx), np.linalg.norm(pos[idx]) - 6050)

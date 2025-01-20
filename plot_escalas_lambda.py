@@ -1,5 +1,5 @@
 """
-Plotea los archivos que devuelve escalas_lambda.py
+Plotea los archivos que devuelve escalas_lambda_inbound.py
 """
 
 import matplotlib.pyplot as plt

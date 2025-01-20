@@ -42,10 +42,10 @@ Calcula n mva, n fit, x14, x23, long in, rg, j para poner en una tabla.
 calcula las normales de bootstrap y del fit, nada más.
 """
 
-lista = np.genfromtxt("lista-fechas.txt", dtype="str", skip_header=16)
+lista = np.genfromtxt("lista-fechas.txt", dtype="str", skip_header=0, skip_footer=12)
 
 for i in range(len(lista)):
-    sleep(30)  # cada cinco descansa
+    sleep(30)
     year = lista[i, 2]
     month = lista[i, 1]
     day = lista[i, 0]
@@ -67,7 +67,7 @@ for i in range(len(lista)):
 
     n_mva, ang, delta_B3, out, out_phi = bootstrap(1000, B_cut)
 
-    print("la normal del bootstrap es ", n_mva)
+    # print("la normal del bootstrap es ", n_mva)
 
     pos_MPB = int(0.5 * (donde(tpos, ti) + donde(tpos, tf)))
 
@@ -85,21 +85,22 @@ for i in range(len(lista)):
     phi = hallar_phi(R)[2]
     n_fit = rotacion(phi, normal_2d)
 
-    print("la normal del fit es ", n_fit)
+    # print("la normal del fit es ", n_fit)
 
     angulo_mva = np.arccos(np.clip(np.dot(n_mva, n_fit), -1.0, 1.0))
 
-    print(
-        f"El ángulo entre las normales 3D de MVA y del fit es {angulo_mva * 180 / np.pi:.3g}º"
-    )
+    # print(
+    #     f"El ángulo entre las normales 3D de MVA y del fit es {angulo_mva * 180 / np.pi:.3g}º"
+    # )
 
-    B_mpb = B[donde(t, t1) : donde(t, t4)]
-    B_mva = B[donde(t, ti) : donde(t, tf)]  # el mva es entre t2 y tmva
+    B_mpb = B[donde(t, t1): donde(t, t4)]
+    B_mva = B[donde(t, ti): donde(t, tf)]  # el mva es entre t2 y tmva
 
     B_medio_mpb = np.mean(B_mpb, axis=0)
 
     B3_mva = np.dot(B_mpb, n_mva)
     B3_fit = np.dot(B_mpb, n_fit)
+
 
     def velocidad(posicion_cut, tpos):
         M = len(posicion_cut)
@@ -109,11 +110,12 @@ for i in range(len(lista)):
             posicion_cut = posicion_cut * 6050
         for i in range(len(v_punto)):
             deltat[i] = (tpos[i + 1] - tpos[i]) * 3600  # delta t en segundos
-            v_punto[i] = (posicion_cut[i + 1, :] - posicion_cut[i]) / deltat[i]
+            v_punto[i] = (posicion_cut[i + 1, :] - posicion_cut[i, :]) / deltat[i]
             # en km/s
         # la velocidad promedio
         v_media = np.mean(v_punto, axis=0)
         return v_media
+
 
     posi = donde(tpos, ti)
     posf = donde(tpos, tf)
@@ -130,8 +132,8 @@ for i in range(len(lista)):
     x14_mva, x23_mva = ancho_mpb(t1, t2, t3, t4, n_mva, np.linalg.norm(vel_VEX))
     x14_fit, x23_fit = ancho_mpb(t1, t2, t3, t4, n_fit, np.linalg.norm(vel_VEX))
 
-    Bup = np.mean(B[donde(t, t1 - 0.015) : donde(t, t1), :], axis=0)
-    Bdown = np.mean(B[donde(t, t4) : donde(t, t4 + 0.015), :], axis=0)
+    Bup = np.mean(B[donde(t, t1 - 0.015): donde(t, t1), :], axis=0)
+    Bdown = np.mean(B[donde(t, t4): donde(t, t4 + 0.015), :], axis=0)
 
     js_mva, jv_mva = corrientes(n_mva, Bup, Bdown, x23_mva)
     js_fit, jv_fit = corrientes(n_fit, Bup, Bdown, x23_fit)
@@ -139,6 +141,7 @@ for i in range(len(lista)):
     fuerza_mva = np.cross(
         jv_mva * 1e-9, B[donde(t, t4 + 0.015), :] * 1e-9
     )  # N/m^3 #en t4
+    # print(f"la fuerza para el día {year}-{month}-{day} es {fuerza_mva}")
 
     # """
     # Longitud inercial
@@ -154,7 +157,8 @@ for i in range(len(lista)):
         year, month, day
     )
 
-    # hoja = hoja_parametros
+    hoja = hoja_parametros
+    hoja.update_acell(f"D{nr}", f"{SZA(posicion, pos_MPB):.3g}")
     # hoja.update_acell(f"S{nr}", f"{np.linalg.norm(vel_VEX):.3g}")
     #
     # cell_vel = hoja.range(f"P{nr}:R{nr}")
@@ -165,7 +169,7 @@ for i in range(len(lista)):
     # update_varios(hoja, cell_Bup, Bup)
     # update_varios(hoja, cell_Bdown, Bdown)
     #
-    hoja = hoja_MVA
+    # hoja = hoja_MVA
     # hoja.update_acell(f"T{nr}", f"{round(np.mean(B3_mva), 2)}")
     # hoja.update_acell(
     #     f"V{nr}",
@@ -177,15 +181,15 @@ for i in range(len(lista)):
     # hoja.update_acell(f"Z{nr}", f"{np.linalg.norm(x14_mva):.3g}")
     # hoja.update_acell(f'AA{nr}', f'{:.3g}')  # long inercial
     # hoja.update_acell(f'AC{nr}', f'{:.3g}')  # giroradio
-
-    hoja.update_acell(f"AG{nr}", f"{np.linalg.norm(js_mva):.3g}")
-    hoja.update_acell(f"AK{nr}", f"{np.linalg.norm(jv_mva):.3g}")
-    hoja.update_acell(f"AL{nr}", f"{np.linalg.norm(fuerza_mva):.3g}")
-
-    cell_Js = hoja.range(f"AD{nr}:AF{nr}")
-    cell_Jv = hoja.range(f"AH{nr}:AJ{nr}")
-    update_varios(hoja, cell_Js, js_mva)
-    update_varios(hoja, cell_Jv, jv_mva)
+    #
+    # hoja.update_acell(f"AG{nr}", f"{np.linalg.norm(js_mva):.3g}")
+    # hoja.update_acell(f"AK{nr}", f"{np.linalg.norm(jv_mva):.3g}")
+    # hoja.update_acell(f"AL{nr}", f"{np.linalg.norm(fuerza_mva):.3g}")
+    #
+    # cell_Js = hoja.range(f"AD{nr}:AF{nr}")
+    # cell_Jv = hoja.range(f"AH{nr}:AJ{nr}")
+    # update_varios(hoja, cell_Js, js_mva)
+    # update_varios(hoja, cell_Jv, jv_mva)
 
 # hoja = hoja_Ajuste
 # hoja.update_acell(f"J{nr}", f"{angulo_mva * 180 / np.pi:.3g}")

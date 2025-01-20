@@ -31,7 +31,7 @@ hora = input("Hora en HH\n")
 tt = importar_t1t2t3t4(year, month, day, int(hora))
 
 """
-Si ya tengo el escalas_lambda.py, no lo hace de nuevo, sino que lo abre.
+Si ya tengo el escalas_lambda_inbound.py, no lo hace de nuevo, sino que lo abre.
 Si no, corre la función
 """
 if os.path.isfile(f"../outputs/cociente_lambdas_d{doy}_t{hora}.txt"):
@@ -49,7 +49,7 @@ else:
     )
 
 """
-Plotea los archivos que devuelve escalas_lambda.py.py
+Plotea los archivos que devuelve escalas_lambda_inbound.py.py
 """
 
 timestamps = array_datenums(year, month, day, tt)  # lo convierto a datenum
@@ -100,7 +100,7 @@ plot_datetime(year, month, day, t_cut, B_cut, "red", "-", 1, 1)
 ax1.set_ylabel(r"|$\Delta B$|/ B")
 
 ax2 = plt.subplot2grid((1, 2), (0, 1), sharex=ax1)
-imshow_UTC(year, month, day, tiempo_central, cociente, escalas_plot, "inferno", 3)
+imshow_UTC(year, month, day, tiempo_central, cociente, escalas_plot, "viridis", 3)
 
 for ax in [ax1, ax2]:
     ax.set_xlim(timestamps[0], timestamps[-1])
@@ -109,7 +109,7 @@ for ax in [ax1, ax2]:
     for tt in timestamps:
         ax.axvline(x=tt, color="g")  # plotea los tiempos t1t2t3t4
 
-multi = MultiCursor(fig.canvas, (ax1, ax2), color="c", lw=1)
+multi = MultiCursor(fig.canvas, [ax1, ax2], color="c", lw=1)
 
 plt.show()
 
