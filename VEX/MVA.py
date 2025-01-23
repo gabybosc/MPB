@@ -11,6 +11,7 @@ from _importar_datos import (
     importar_fila,
     importar_t1t2t3t4,
     importar_tMVA,
+    importar_BupBdown,
 )
 
 from _fit import (
@@ -66,13 +67,27 @@ hardcodeado para el 28 de octubre y que calcule todo lo que quiero
 """
 
 
-def analisis(normal, B_medio_vectorial):
+def velocidad(posicion_cut, tpos):
+    M = len(posicion_cut)
+    v_punto = np.zeros((M - 1, 3))
+    deltat = np.zeros(M - 1)
+    if np.mean(posicion_cut) < 10:  # es decir, pos está en RV en vez de km
+        posicion_cut = posicion_cut * 6050
+    for i in range(len(v_punto)):
+        deltat[i] = (tpos[i + 1] - tpos[i]) * 3600  # delta t en segundos
+        v_punto[i] = (posicion_cut[i + 1, :] - posicion_cut[i, :]) / deltat[i]
+        # en km/s
+    # la velocidad promedio
+    v_media = np.mean(v_punto, axis=0)
+    return v_media
+
+
+def analisis(normal, B_medio_vectorial, v_media):
     angulo_vs_mva = angulo(normal, x3)
     B_medio_normalizado = B_medio_vectorial / np.linalg.norm(
         B_medio_vectorial
     )  # la normalizo por cuestion de cuentas nomas
-    v_media_norm = v_media / np.linalg.norm(v_media)
-    angulo_v = angulo(normal, v_media_norm)
+    angulo_v = angulo(normal, np.linalg.norm(v_media))
     angulo_B = angulo(normal, B_medio_normalizado)
     x_14, x_23 = ancho_mpb(t1, t2, t3, t4, normal, v_media)
     J_s, J_v = corrientes(normal, B_upstream, B_downstream, x_23)
@@ -118,8 +133,8 @@ def MVA(t, B, posicion):
     altitud = np.linalg.norm(posicion, axis=1) - 3390  # km
     altitud_media = np.mean(altitud)
 
-    SZA = angulo(posicion[n_p, :], [1, 0, 0]) * 180 / np.pi
-    print(f"altitud = {altitud_media}, SZA = {SZA}")
+    # SZA = angulo(posicion[n_p, :], [1, 0, 0]) * 180 / np.pi
+    # print(f"altitud = {altitud_media}, SZA = {SZA}")
 
     print(f"l1 = {lamb[0]}, l2 = {lamb[1]}, l3 = {lamb[2]}")
     print("cociente de lambdas = ", lamb[1] / lamb[2])
@@ -139,7 +154,9 @@ def MVA(t, B, posicion):
 
     # el error
     phi, delta_B3 = error(lamb, B, avec[2])
-    hoja_MVA_update(hoja_mva, nr, lamb, avec, phi, B3, delta_B3, B_norm_medio)
+    phi = 0
+    delta_B3 = 0
+    hoja_MVA_update(hoja_mva, nr, lamb, avec[2], phi, B3, delta_B3, B_norm_medio)
     print("MVA terminado")
     return avec[2], B, B_medio_vectorial
 
@@ -179,19 +196,15 @@ Bnorm = np.linalg.norm(B, axis=1)
 inicio_MVA = donde(t, ti)
 fin_MVA = donde(t, tf)
 
-sza = SZA(posicion, inicio_MVA)
+# sza = SZA(posicion, inicio_MVA)
 x3, B_cut, B_medio_vectorial = MVA(
     t[inicio_MVA:fin_MVA], B[inicio_MVA:fin_MVA], posicion[inicio_MVA:fin_MVA]
 )
-v_media = vmedia(posicion)
+v_media = velocidad(
+    posicion[donde(tpos, ti): donde(tpos, tf)], tpos[donde(tpos, ti): donde(tpos, tf)]
+)
 
-inicio_up = donde(t, t1 - 0.015)
-fin_up = donde(t, t1)
-B_upstream = np.mean(B[inicio_up:fin_up, :], axis=0)  # nT
-
-inicio_down = donde(t, t4)
-fin_down = donde(t, t4 + 0.015)
-B_downstream = np.mean(B[inicio_down:fin_down, :], axis=0)  # nT
+B_upstream, B_downstream = importar_BupBdown(year, month, day)
 
 omega = np.arccos(
     np.dot(B_upstream, B_downstream)
@@ -203,7 +216,7 @@ MVA
 """
 
 angulo_cero, angulo_v_mva, angulo_B_mva, x14, x23, J_s_MVA, J_v_MVA = analisis(
-    x3, B_medio_vectorial
+    x3, B_medio_vectorial, v_media
 )
 print("RESULTADOS MVA\n")
 print(f"Ancho MPB hmax = {x14:.3g} km, hmin = {x23:.3g} km")

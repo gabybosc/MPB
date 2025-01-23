@@ -296,3 +296,20 @@ def importar_tMVA(year, month, day):
     tf = float(hoja_MVA.cell(fila, 5).value)
 
     return ti, tf
+
+
+def importar_BupBdown(year, month, day):
+    fila, hoja_parametros, hoja_MVA, hoja_Bootstrap, hoja_Ajuste = importar_fila(
+        year, month, day
+    )
+    # hoja_parametros, hoja_MVA, hoja_Bootstrap, hoja_Ajuste = importar_gdocs()
+    Bup_x = float(
+        hoja_parametros.cell(fila, 20).value
+    )  # ojo que cuenta desde 1 no desde 0
+    Bup_y = float(hoja_parametros.cell(fila, 21).value)
+    Bup_z = float(hoja_parametros.cell(fila, 22).value)
+    Bd_x = float(hoja_parametros.cell(fila, 23).value)
+    Bd_y = float(hoja_parametros.cell(fila, 24).value)
+    Bd_z = float(hoja_parametros.cell(fila, 25).value)
+
+    return np.array([Bup_x, Bup_y, Bup_z]), np.array([Bd_x, Bd_y, Bd_z])

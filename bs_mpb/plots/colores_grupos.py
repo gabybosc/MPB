@@ -1,13 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from os.path import exists
-from bs_mpb.ordenar_datos.generar_npys import gen_Rsd
+
+# from bs_mpb.ordenar_datos.generar_npys import gen_Rsd
 import matplotlib as mpl
 from cycler import cycler
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from scipy.stats import norm
 import sys
-
 
 sys.path.append("../..")
 from funciones import donde, angulo
@@ -34,11 +34,10 @@ pos_mpb_max = np.load(path + "pos_mpb_max.npy")
 beta = np.array([float(l) for l in lista[:, -1]])
 theta = np.array([float(l) for l in lista[:, -2]])
 
-
-if not exists(path + "pos_polar_bs_min.npy"):
-    BS = [pos_bs_min, pos_bs, pos_bs_max]
-    MPB = [pos_mpb_min, pos_mpb, pos_mpb_max]
-    gen_Rsd(path, BS, MPB)
+# if not exists(path + "pos_polar_bs_min.npy"):
+#     BS = [pos_bs_min, pos_bs, pos_bs_max]
+#     MPB = [pos_mpb_min, pos_mpb, pos_mpb_max]
+#     gen_Rsd(path, BS, MPB)
 
 Rsd_MPB_min = np.load(path + "Rsd_mpb_min.npy")
 Rsd_MPB_max = np.load(path + "Rsd_mpb_max.npy")
@@ -53,7 +52,6 @@ Rtd_MPB = np.load(path + "Rtd_mpb.npy")
 Rtd_BS_min = np.load(path + "Rtd_bs_min.npy")
 Rtd_BS_max = np.load(path + "Rtd_bs_max.npy")
 Rtd_BS = np.load(path + "Rtd_bs.npy")
-
 
 # ojo, los errores son el tamaño, no la posición, entonces tengo que restarlo
 # de la posición media
@@ -103,7 +101,6 @@ ancho_MS = Rsd_BS - Rsd_MPB
 Discriminación por beta
 """
 
-
 mag = [b for b in beta if b < 1]
 dyn = [b for b in beta if 1 < b < 3]
 dyn2 = [b for b in beta if 3 < b < 5]
@@ -112,7 +109,6 @@ idx_mag = [donde(beta, m) for m in mag]
 idx_dyn = [donde(beta, m) for m in dyn]
 idx_dyn2 = [donde(beta, m) for m in dyn2]
 idx_dyn3 = [donde(beta, m) for m in dyn3]
-
 
 fig = plt.figure()
 fig.subplots_adjust(
@@ -159,7 +155,6 @@ z4 = ax4.scatter(
     label=r"$5 < \beta$",
 )
 
-
 for ax in [ax1, ax2, ax3, ax4]:
     ax.grid()
     # ax.set_aspect("equal", "box")
@@ -186,7 +181,6 @@ plt.setp(ax4.get_yticklabels(), visible=False)
 plt.setp(ax2.get_yticklabels(), visible=False)
 # plt.title("discriminacion por beta")
 plt.show()
-
 
 fig = plt.figure()
 fig.subplots_adjust(
@@ -233,7 +227,6 @@ z4 = ax4.scatter(
     label=r"$5 < \beta$",
 )
 
-
 for ax in [ax1, ax2, ax3, ax4]:
     ax.grid()
     ax.legend()
@@ -258,7 +251,6 @@ plt.setp(ax4.get_yticklabels(), visible=False)
 plt.setp(ax2.get_yticklabels(), visible=False)
 # plt.title("discriminacion por beta")
 plt.show()
-
 
 """
 Discriminación por para/perp
@@ -297,7 +289,6 @@ ax2.set_xlabel("cruces")
 
 plt.show()
 
-
 fig = plt.figure()
 fig.subplots_adjust(
     top=0.95, bottom=0.1, left=0.05, right=0.95, hspace=0.1, wspace=0.15
@@ -325,7 +316,6 @@ ax2.set_xlabel("Rsd MPB (RM)")
 
 plt.show()
 
-
 """
 Discriminación por SZA
 """
@@ -348,7 +338,6 @@ idx_sza_bs1 = indices_sza(sza_bs, 0, 20)
 idx_sza_bs2 = indices_sza(sza_bs, 20, 40)
 idx_sza_bs3 = indices_sza(sza_bs, 40, 60)
 idx_sza_bs4 = indices_sza(sza_bs, 60, 90)
-
 
 fig = plt.figure()
 fig.subplots_adjust(
@@ -395,7 +384,6 @@ z4 = ax4.scatter(
     label="60 < SZA BS",
 )
 
-
 for ax in [ax1, ax2, ax3, ax4]:
     ax.grid()
     ax.set_ylim([-0.1, 1])
@@ -409,7 +397,6 @@ plt.colorbar(z1, cax=cax)
 plt.setp(ax4.get_yticklabels(), visible=False)
 plt.setp(ax2.get_yticklabels(), visible=False)
 plt.show()
-
 
 fig = plt.figure()
 fig.subplots_adjust(
@@ -456,7 +443,6 @@ z4 = ax4.scatter(
     label="60 < SZA BS",
 )
 
-
 for ax in [ax1, ax2, ax3, ax4]:
     ax.grid()
     ax.legend()
@@ -471,7 +457,6 @@ plt.setp(ax4.get_yticklabels(), visible=False)
 plt.setp(ax2.get_yticklabels(), visible=False)
 plt.show()
 
-
 """
 Hemisferio
 """
@@ -483,7 +468,6 @@ for n, z in enumerate(pos_mpb):
         idx_sur.append(n)
     else:
         idx_norte.append(n)
-
 
 fig = plt.figure()
 fig.subplots_adjust(

@@ -8,7 +8,7 @@ El mapa de colores me va a dar el valor del cociente.
 import numpy as np
 import time as time
 import os
-from _importar_datos import importar_MAG
+from _importar_datos import importar_MAG, importar_t1t2t3t4
 import matplotlib.pyplot as plt
 import matplotlib.dates as md
 from matplotlib.widgets import MultiCursor
@@ -85,12 +85,12 @@ def escalas_lambda(t, B):
 
 
 year, month, day, doy = fechas()
-ti, tf = importar_titf(year, doy)
+t1, t2, t3, t4 = importar_t1t2t3t4(year, month, day)
 
 path = f"../outputs/cociente_lambdas_VEX_d{doy}.txt"
 if os.path.isfile(path):
     datos = np.loadtxt(path, skiprows=1)
-    t, B, posicion, cl, tpos = importar_MAG(year, doy, ti, tf)
+    t, B, posicion, cl, tpos = importar_MAG(year, doy, t1, t4)
 
     periodo_ciclotron = datos[1:, 0]
     tiempo_central = datos[1:, 1]
@@ -98,7 +98,8 @@ if os.path.isfile(path):
     cociente = datos[1:, 2:]
 
 else:
-    B, t, escalas, cociente, tiempo_central = escalas_lambda(year, doy, ti, tf)
+    t, B, posicion, cl, tpos = importar_MAG(year, doy, t1, t4)
+    B, t, escalas, cociente, tiempo_central = escalas_lambda(t, B)
 
 Bnorm = np.linalg.norm(B, axis=1)
 #
@@ -157,13 +158,13 @@ fin_MVA = donde(t, tiempo_central[-1])
 B_MVA = Bnorm[inicio_MVA:fin_MVA]
 t_MVA = t[inicio_MVA:fin_MVA]
 
-t1, t2, t3, t4 = (
-    8.541556527954604,
-    8.544405851015947,
-    8.551476393427427,
-    8.556111111111111,
-)
-timestamps = array_datenums(2008, 10, 28, np.array([t1, t2, t3, t4]))
+#     (
+#     8.541556527954604,
+#     8.544405851015947,
+#     8.551476393427427,
+#     8.556111111111111,
+# )
+timestamps = array_datenums(year, month, day, np.array([t1, t2, t3, t4]))
 # xfmt = md.DateFormatter("%H:%M:%S")
 
 fig = plt.figure()
@@ -175,19 +176,19 @@ fig.set_size_inches(15, 10)  # con este tamaño ocupa toda la pantalla de la lap
 ax1 = plt.subplot2grid((1, 2), (0, 0))
 for vert in timestamps:
     ax1.axvline(x=vert, color="k")
-plot_datetime(2008, 10, 28, t_cut, B_cut, "red", "-", 1, 1)
+plot_datetime(year, month, day, t_cut, B_cut, "red", "-", 1, 1)
 ax1.set_ylabel(r"|$\Delta B$|/ B")
 
 ax2 = plt.subplot2grid((1, 2), (0, 1), sharex=ax1)
-imshow_UTC(2008, 10, 28, tiempo_central, cociente, escalas_plot, "inferno", 3)
+imshow_UTC(year, month, day, tiempo_central, cociente, escalas_plot, "viridis", 3)
 for vert in timestamps:
     ax2.axvline(x=vert, color="k")
-multi = MultiCursor(fig.canvas, (ax1, ax2), color="black", lw=1)
+multi = MultiCursor(fig.canvas, [ax1, ax2], color="black", lw=1)
 plt.show(block=False)
 
 print("Click to select time: ")
 val = np.asarray(plt.ginput(1))
-timestamps = array_datenums(2008, 10, 28, tiempo_central)
+timestamps = array_datenums(year, month, day, tiempo_central)
 t_graph = md.date2num(timestamps)
 idx = donde(t_graph, val[0][0])
 
@@ -208,7 +209,7 @@ fig.subplots_adjust(
     top=0.93, bottom=0.07, left=0.05, right=0.95, hspace=0.005, wspace=0.15
 )
 ax1 = plt.subplot2grid((1, 1), (0, 0))
-imshow_UTC(2008, 10, 28, tiempo_central, cociente, escalas_plot, "viridis", 3)
+imshow_UTC(year, month, day, tiempo_central, cociente, escalas_plot, "viridis", 3)
 ax1.axvline(x=md.date2num(selected_time), c="k")
 ax1.axhline(y=timedelta(seconds=float(val[0][1])).total_seconds(), c="k")
 ax1.set_title(

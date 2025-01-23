@@ -5,7 +5,7 @@ from matplotlib.widgets import MultiCursor
 import matplotlib as mpl
 from cycler import cycler
 import sys
-from importar_datos import importar_MAG, importar_ELS_clweb
+from _importar_datos import importar_MAG, importar_ELS_clweb
 from _old_fit_venus import plot_orbita
 
 sys.path.append("..")
@@ -26,7 +26,7 @@ year, month, day, doy = fechas()
 # plt.show()
 
 ti, tf = 0, 24  # tiempos()
-t, B, pos, cl = importar_MAG(year, doy, ti, tf)
+t, B, pos, cl, tpos = importar_MAG(year, doy, ti, tf)
 if cl == True:
     Bpara, Bperp, tpara = Bpara_Bperp(B, t, ti, tf)  # si son datos de clweb 1s
 else:
@@ -35,7 +35,7 @@ else:
 Bnorm = np.linalg.norm(B, axis=1)
 pos_RV = pos / 6050
 
-t_els, ELS = importar_ELS_clweb(year, month, day, ti, tf)
+t_els, ELS = importar_ELS_clweb(year, doy, ti, tf)
 energy = ELS[:, 7]
 JE_total = ELS[:, -1]
 energias = [25 + i * 25 for i in range(4)]
@@ -50,7 +50,7 @@ def tiempos_UTC(yy, mm, dd, t):
 
 
 def altitude(SZA):
-    alt = 0.11 * SZA ** 2 - 0.22 * SZA + 389
+    alt = 0.11 * SZA**2 - 0.22 * SZA + 389
     return alt / 6050
 
 
@@ -131,7 +131,7 @@ while not happy:
         ax4.grid()
 
         fig.canvas.mpl_connect("pick_event", onpick1)
-        multi = MultiCursor(fig.canvas, (ax1, ax2, ax3, ax4), color="black", lw=1)
+        multi = MultiCursor(fig.canvas, [ax1, ax2, ax3, ax4], color="black", lw=1)
 
         zoom_ok = False
         print("\nSpacebar when ready to click:\n")
@@ -168,8 +168,6 @@ for ax in [ax1, ax2, ax3]:
     ax.set_xlim(tiempo_mag[0], tiempo_mag[-1])
     ax.grid()
     ax.legend(loc="upper left")
-
-ax1 = plt.gca()
 
 ax1 = plt.subplot2grid((4, 1), (0, 0))
 ax1.plot(tiempo_mag, Bnorm, linewidth=0.5)
